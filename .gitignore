@@ -1,0 +1,10 @@
+# Local builds and generated artifacts
+/build/
+/dist/
+*.o
+*.gpu
+
+# Local environment
+.env
+.env.*
+!.env.example
