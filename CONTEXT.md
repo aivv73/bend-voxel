@@ -1,35 +1,35 @@
-# Мир разрушаемых вокселей
+# Destructible Voxel World
 
-Словарь предлагаемой модели игрового движка. Мир состоит из материала, который можно разрушать и разделять на движущиеся части.
+Glossary for the proposed game engine model. The world consists of material that can be destroyed and separated into moving parts.
 
 ## Language
 
-**Воксель**:
-Наименьшая ячейка материала в локальной решётке мира или отдельного тела. Пустая ячейка обозначает отсутствие материала.
-_Avoid_: блок Minecraft, физическое тело.
+**Voxel**:
+The smallest material cell in the local grid of the world or an individual body. An empty cell represents the absence of material.
+_Avoid_: Minecraft block, physical body.
 
-**Материал**:
-Вид вещества с визуальными и физическими свойствами, например камень, дерево или металл.
+**Material**:
+A substance with visual and physical properties, such as stone, wood, or metal.
 
-**Статический мир**:
-Неподвижная часть окружения, связанная с опорами уровня.
+**Static world**:
+The stationary part of the environment connected to the level's anchors.
 
-**Опора**:
-Область, которую правила уровня считают закреплённой. Связанный с опорой материал остаётся частью статического мира.
+**Anchor**:
+A region that the level rules define as fixed. Material connected to an anchor remains part of the static world.
 
-**Воксельное тело**:
-Связная часть материала со своей локальной решёткой и положением в пространстве. Тело может двигаться и вращаться целиком.
+**Voxel body**:
+A connected piece of material with its own local grid and position in space. The body can move and rotate as a whole.
 
-**Обломок**:
-Воксельное тело, отделившееся при разрушении мира или другого тела.
-_Avoid_: частица, чанк.
+**Fragment**:
+A voxel body detached by destruction of the world or another body.
+_Avoid_: particle, chunk.
 
-**Разрушение**:
-Изменение материала, которое может удалить воксели и разорвать связи между оставшимися частями.
+**Destruction**:
+A change to material that can remove voxels and sever connections between the remaining parts.
 
-**Повреждение**:
-Накопленное воздействие на материал до его удаления. Разрушение без накопления повреждения также допустимо.
+**Damage**:
+Accumulated impact on material before its removal. Destruction without accumulated damage is also allowed.
 
-**Частица**:
-Визуальный эффект пыли или мелкой крошки, не являющийся частью твёрдого мира.
-_Avoid_: обломок.
+**Particle**:
+A visual dust or small debris effect that is not part of the solid world.
+_Avoid_: fragment.

@@ -1,0 +1,521 @@
+{
+  "metadata": {
+    "date": "2026-09-22T19:54:24+0400",
+    "bend": "bend 2.0.25",
+    "git_revision": "043b4f4fb67229aa8c1e32d7ad01da6dcb428571",
+    "working_tree_dirty": true,
+    "resolution": [
+      640,
+      360
+    ],
+    "backend": "forced CUDA (--gpu on)",
+    "warmup_seconds": 5,
+    "measured_seconds": 60,
+    "gpu": "NVIDIA GeForce GTX 1660, 610.57.04, 6144 MiB",
+    "source_sha256": {
+      "src/demo.bend": "6921c78ee2fa24a4b3001265a559867928fe35d4ac82732386a00d8bc323ed22",
+      "src/input.bend": "218beac2fc4d526c69750fd0ecf014de3276b4f54eb4f82784fd0b92627e9308",
+      "src/platform/micros.c": "02d9b16f7bda3cd99d27305d2dfda210e16c357defc4e6bb8ec671db07795d4a",
+      "src/platform/micros.js": "a71a462f96ad6184bf93827f5749ba70ca3af3f9bc70d2f4a0ff4e6cbf9d3302",
+      "src/platform/present.c": "41797bd213551f8b99a4ee6e6fcbc79f1bca8fc667d97459fbddb3a3f450f7dc",
+      "src/platform/present.js": "f4f47b5aeb0f9c58c784fa7daa54deb3fe4c66bca98039c0ff38a6d11a8651de",
+      "src/platform.bend": "7844b3791f0a134cff2169d962a9afaa1e7efb48f658c2eed5f0866d720dc6c2",
+      "src/probe.bend": "3e14973e7519316f834aca82aca72402a1de992edf55eee3fdaaf061098617a5",
+      "src/render.bend": "41ffe93c7e3213ab0303fdfa29db5eb4df13f0e8174265d13b3fa795dedb5ca7",
+      "src/snapshot.bend": "4a7a3750e88728abe3cc33e5e4ecd97fad3d9bc96b9c15d47971eb204ef88abe",
+      "src/vendor/LICENSE": "0beb288abd3d067e231f3fbe7df1f8ee37344061fc67f22018150a19e4b26c35",
+      "src/vendor/NOTICE.md": "10ad3fe640d9df9e2999e7a87d9c7db0c2858efe75245948daf77b6b24d26182",
+      "src/vendor/bend3d.bend": "166202415b6253382d0cdfd5ccb2184880540075bde6117809a5fbacd4adb3ad",
+      "src/world.bend": "50520b2dec39234acbf45bf5c1247a974449f55a158f393a66e11161e0476c8a",
+      "scripts/benchmark.py": "b37557811398868c6f3dbdfd2ad63beec4218f1af3bf7309b37bdb78dde355f5",
+      "scripts/build.sh": "eb89ac1ead2ef036fdc76594b9ec29eb6bccfa3296984a5ebcb9cedc78f44cdb",
+      "scripts/run.sh": "f914067992ca8a8cf10c313ef32bb36e1cc182d6c87bf9171114337e1d4e8a2d",
+      "scripts/test.sh": "ad9f6209884b37e66cf779068a04e5647113fdbada138df800302d2dbf8111b6",
+      "tests/input-render.bend": "f7f0605ab49467d49a8098e239bb60cbd77727a6133a7be8ef7d1688ef5a2849",
+      "tests/world.bend": "174f43a18d6b6f638a499e4790847c0f51299aa9b2958331b0c58891b73534b3"
+    },
+    "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           43 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  12\nOn-line CPU(s) list:                     0-11\nVendor ID:                               AuthenticAMD\nModel name:                              AMD Ryzen 5 1600 Six-Core Processor\nCPU family:                              23\nModel:                                   1\nThread(s) per core:                      2\nCore(s) per socket:                      6\nSocket(s):                               1\nStepping:                                1\nMicrocode version:                       0x8001139\nFrequency boost:                         enabled\nCPU(s) scaling MHz:                      76%\nCPU max MHz:                             3700.0000\nCPU min MHz:                             1550.0000\nBogoMIPS:                                6399.63\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb hw_pstate ssbd ibpb vmmcall fsgsbase bmi1 avx2 smep bmi2 rdseed adx smap clflushopt sha_ni xsaveopt xsavec xgetbv1 clzero xsaveerptr arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif overflow_recov succor smca sev\nVirtualization:                          AMD-V\nL1d cache:                               192 KiB (6 instances)\nL1i cache:                               384 KiB (6 instances)\nL2 cache:                                3 MiB (6 instances)\nL3 cache:                                16 MiB (2 instances)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-11\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Mitigation; untrained return thunk; SMT vulnerable\nVulnerability Spec rstack overflow:      Mitigation; Safe RET\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Mitigation; IBPB before exit to userspace\n",
+    "cuda": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Tue_Jun_09_02:43:40_PM_PDT_2026\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\n"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "raw_frame_samples": 1981,
+      "warmup_frame_samples": 274,
+      "frames": {
+        "samples": 1707,
+        "p50_ms": 33.577,
+        "p95_ms": 44.305,
+        "p99_ms": 103.851,
+        "max_ms": 145.674,
+        "mean_ms": 35.151349736379615,
+        "total_ms": 60003.354
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 114.926,
+        "p95_ms": 161.015,
+        "p99_ms": 168.317,
+        "max_ms": 168.317,
+        "mean_ms": 119.7069393939394,
+        "total_ms": 3950.329
+      },
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 60.136,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 46.808,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 45.102,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 44.965,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 84.15,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 71.894,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "max_bodies": 1,
+      "stages": {
+        "carving": {
+          "samples": 1707,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 27.891,
+          "max_ms": 40.778,
+          "mean_ms": 0.5393878148799063,
+          "total_ms": 920.735
+        },
+        "connectivity_meshing": {
+          "samples": 1707,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 35.96,
+          "max_ms": 46.122,
+          "mean_ms": 0.7095172817809021,
+          "total_ms": 1211.146
+        },
+        "update_other": {
+          "samples": 1707,
+          "p50_ms": 0.123,
+          "p95_ms": 0.217,
+          "p99_ms": 0.289,
+          "max_ms": 57.568,
+          "mean_ms": 0.22615289982425307,
+          "total_ms": 386.043
+        },
+        "scene_preparation": {
+          "samples": 1707,
+          "p50_ms": 6.195,
+          "p95_ms": 9.693,
+          "p99_ms": 11.127,
+          "max_ms": 12.434,
+          "mean_ms": 6.733725248974809,
+          "total_ms": 11494.469
+        },
+        "cuda_rendering": {
+          "samples": 1707,
+          "p50_ms": 15.307,
+          "p95_ms": 22.095,
+          "p99_ms": 30.043,
+          "max_ms": 76.239,
+          "mean_ms": 15.060505565319273,
+          "total_ms": 25708.283
+        },
+        "cell_disposal": {
+          "samples": 1707,
+          "p50_ms": 7.18,
+          "p95_ms": 9.459,
+          "p99_ms": 10.449,
+          "max_ms": 11.821,
+          "mean_ms": 7.289527240773286,
+          "total_ms": 12443.223
+        },
+        "presentation": {
+          "samples": 1707,
+          "p50_ms": 4.385,
+          "p95_ms": 5.643,
+          "p99_ms": 6.308,
+          "max_ms": 7.53,
+          "mean_ms": 4.488919156414763,
+          "total_ms": 7662.585
+        },
+        "overhead": {
+          "samples": 1707,
+          "p50_ms": 0.097,
+          "p95_ms": 0.175,
+          "p99_ms": 0.222,
+          "max_ms": 0.463,
+          "mean_ms": 0.10361452841241946,
+          "total_ms": 176.87
+        }
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 28.279,
+          "p95_ms": 31.683,
+          "p99_ms": 40.778,
+          "max_ms": 40.778,
+          "mean_ms": 27.901060606060607,
+          "total_ms": 920.735
+        },
+        "connectivity_meshing": {
+          "samples": 33,
+          "p50_ms": 36.121,
+          "p95_ms": 43.542,
+          "p99_ms": 46.122,
+          "max_ms": 46.122,
+          "mean_ms": 36.70139393939394,
+          "total_ms": 1211.146
+        }
+      },
+      "instrumentation_pass": true,
+      "instrumentation_errors": [],
+      "attempts_pass": true,
+      "workload_pass": true,
+      "performance_pass": false,
+      "pass": false
+    },
+    {
+      "run": 2,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "raw_frame_samples": 1923,
+      "warmup_frame_samples": 279,
+      "frames": {
+        "samples": 1644,
+        "p50_ms": 35.602,
+        "p95_ms": 43.769,
+        "p99_ms": 105.527,
+        "max_ms": 147.489,
+        "mean_ms": 36.52132542579076,
+        "total_ms": 60041.059
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 123.955,
+        "p95_ms": 157.242,
+        "p99_ms": 168.58,
+        "max_ms": 168.58,
+        "mean_ms": 122.07769696969696,
+        "total_ms": 4028.564
+      },
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 52.018,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 62.986,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 45.335,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 42.932,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 61.574,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 67.34,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "max_bodies": 1,
+      "stages": {
+        "carving": {
+          "samples": 1644,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 25.341,
+          "max_ms": 30.79,
+          "mean_ms": 0.521470802919708,
+          "total_ms": 857.298
+        },
+        "connectivity_meshing": {
+          "samples": 1644,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 36.15,
+          "max_ms": 43.587,
+          "mean_ms": 0.7344890510948905,
+          "total_ms": 1207.5
+        },
+        "update_other": {
+          "samples": 1644,
+          "p50_ms": 0.122,
+          "p95_ms": 0.229,
+          "p99_ms": 0.338,
+          "max_ms": 59.066,
+          "mean_ms": 0.2311551094890511,
+          "total_ms": 380.019
+        },
+        "scene_preparation": {
+          "samples": 1644,
+          "p50_ms": 7.426,
+          "p95_ms": 9.438,
+          "p99_ms": 9.996,
+          "max_ms": 11.327,
+          "mean_ms": 7.26454805352798,
+          "total_ms": 11942.917
+        },
+        "cuda_rendering": {
+          "samples": 1644,
+          "p50_ms": 16.254,
+          "p95_ms": 22.678,
+          "p99_ms": 32.803,
+          "max_ms": 61.352,
+          "mean_ms": 16.088274330900244,
+          "total_ms": 26449.123
+        },
+        "cell_disposal": {
+          "samples": 1644,
+          "p50_ms": 7.156,
+          "p95_ms": 9.395,
+          "p99_ms": 10.143,
+          "max_ms": 13.409,
+          "mean_ms": 7.248032846715328,
+          "total_ms": 11915.766
+        },
+        "presentation": {
+          "samples": 1644,
+          "p50_ms": 4.236,
+          "p95_ms": 5.397,
+          "p99_ms": 5.973,
+          "max_ms": 7.585,
+          "mean_ms": 4.326695863746958,
+          "total_ms": 7113.088
+        },
+        "overhead": {
+          "samples": 1644,
+          "p50_ms": 0.099,
+          "p95_ms": 0.182,
+          "p99_ms": 0.226,
+          "max_ms": 0.809,
+          "mean_ms": 0.10665936739659368,
+          "total_ms": 175.348
+        }
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 25.341,
+          "p95_ms": 29.255,
+          "p99_ms": 30.79,
+          "max_ms": 30.79,
+          "mean_ms": 25.978727272727273,
+          "total_ms": 857.298
+        },
+        "connectivity_meshing": {
+          "samples": 33,
+          "p50_ms": 36.15,
+          "p95_ms": 43.484,
+          "p99_ms": 43.587,
+          "max_ms": 43.587,
+          "mean_ms": 36.59090909090909,
+          "total_ms": 1207.5
+        }
+      },
+      "instrumentation_pass": true,
+      "instrumentation_errors": [],
+      "attempts_pass": true,
+      "workload_pass": true,
+      "performance_pass": false,
+      "pass": false
+    },
+    {
+      "run": 3,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "raw_frame_samples": 1899,
+      "warmup_frame_samples": 277,
+      "frames": {
+        "samples": 1622,
+        "p50_ms": 35.786,
+        "p95_ms": 45.337,
+        "p99_ms": 111.075,
+        "max_ms": 135.732,
+        "mean_ms": 37.00934093711467,
+        "total_ms": 60029.151
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 118.811,
+        "p95_ms": 149.561,
+        "p99_ms": 160.756,
+        "max_ms": 160.756,
+        "mean_ms": 123.48,
+        "total_ms": 4074.84
+      },
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 35.123,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 36.605,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 61.208,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 60.367,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 62.084,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 54.842,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "max_bodies": 1,
+      "stages": {
+        "carving": {
+          "samples": 1622,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 25.908,
+          "max_ms": 30.493,
+          "mean_ms": 0.542847718865598,
+          "total_ms": 880.499
+        },
+        "connectivity_meshing": {
+          "samples": 1622,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 34.941,
+          "max_ms": 44.741,
+          "mean_ms": 0.7193859432799014,
+          "total_ms": 1166.844
+        },
+        "update_other": {
+          "samples": 1622,
+          "p50_ms": 0.129,
+          "p95_ms": 0.212,
+          "p99_ms": 0.279,
+          "max_ms": 56.807,
+          "mean_ms": 0.2298736128236745,
+          "total_ms": 372.855
+        },
+        "scene_preparation": {
+          "samples": 1622,
+          "p50_ms": 7.569,
+          "p95_ms": 8.902,
+          "p99_ms": 9.862,
+          "max_ms": 11.764,
+          "mean_ms": 7.14056473489519,
+          "total_ms": 11581.996
+        },
+        "cuda_rendering": {
+          "samples": 1622,
+          "p50_ms": 16.32,
+          "p95_ms": 23.678,
+          "p99_ms": 37.535,
+          "max_ms": 58.161,
+          "mean_ms": 16.499639950678176,
+          "total_ms": 26762.416
+        },
+        "cell_disposal": {
+          "samples": 1622,
+          "p50_ms": 7.102,
+          "p95_ms": 9.324,
+          "p99_ms": 10.158,
+          "max_ms": 15.921,
+          "mean_ms": 7.22287176325524,
+          "total_ms": 11715.498
+        },
+        "presentation": {
+          "samples": 1622,
+          "p50_ms": 4.452,
+          "p95_ms": 5.696,
+          "p99_ms": 6.244,
+          "max_ms": 7.701,
+          "mean_ms": 4.5537065351418,
+          "total_ms": 7386.112
+        },
+        "overhead": {
+          "samples": 1622,
+          "p50_ms": 0.094,
+          "p95_ms": 0.169,
+          "p99_ms": 0.227,
+          "max_ms": 0.338,
+          "mean_ms": 0.10045067817509248,
+          "total_ms": 162.931
+        }
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 25.908,
+          "p95_ms": 30.304,
+          "p99_ms": 30.493,
+          "max_ms": 30.493,
+          "mean_ms": 26.68178787878788,
+          "total_ms": 880.499
+        },
+        "connectivity_meshing": {
+          "samples": 33,
+          "p50_ms": 34.941,
+          "p95_ms": 37.762,
+          "p99_ms": 44.741,
+          "max_ms": 44.741,
+          "mean_ms": 35.358909090909094,
+          "total_ms": 1166.844
+        }
+      },
+      "instrumentation_pass": true,
+      "instrumentation_errors": [],
+      "attempts_pass": true,
+      "workload_pass": true,
+      "performance_pass": false,
+      "pass": false
+    }
+  ],
+  "acceptance_pass": false,
+  "note": "Desktop visual/input and correctness checks are separate requirements."
+}

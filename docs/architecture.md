@@ -1,184 +1,184 @@
-# Архитектура voxel-движка на Bend 2
+# Voxel Engine Architecture in Bend 2
 
-Статус: предложение для первого технического прототипа; реализации и замеров движка пока нет.
+Status: a proposal for the first technical prototype; the engine has not been implemented or benchmarked.
 
-Подтверждённая цель: мелкие разрушаемые воксели, сначала архитектура, первый запуск на текущем Linux-компьютере. Масштаб уровня, художественный стиль и сложность физики ещё не заданы. Ниже предлагается ограниченная арена с твёрдыми непрозрачными материалами и отделяющимися обломками.
+Confirmed goal: small, destructible voxels, architecture first, with the initial build running on the current Linux PC. Level scale, art style, and physics complexity remain unspecified. This proposal starts with a bounded arena, solid opaque materials, and detachable fragments.
 
-## 1. Главный выбор
+## 1. Core decision
 
-Предлагается собственное ядро на Bend: разреженный воксельный мир, команды изменения, поиск связности, физические тела, построение поверхности и независимый интерфейс отрисовки. Первым backend служит адаптированный Bend3D. Пригодность его растеризатора для нужной плотности геометрии проверяется отдельно.
+Build a custom core in Bend: a sparse voxel world, edit commands, connectivity analysis, physical bodies, surface generation, and an independent rendering interface. An adapted Bend3D serves as the first backend. Its suitability for the required geometry density must be measured separately.
 
-Хранение вокселей — источник истины. Меш, ускорители запросов, граф связности и данные отрисовки — производные представления с версиями. Игровая логика не зависит от устройства Bend3D.
+Voxel storage is the source of truth. Meshes, query acceleration structures, the connectivity graph, and rendering data are versioned derived representations. Game logic does not depend on Bend3D internals.
 
-Не обещаем производительность Teardown или большого открытого мира: сначала измеряем редактирование, перестроение поверхности, связность и кадр на конкретном ПК.
+Do not promise Teardown-level performance or a large open world. First measure editing, surface rebuilding, connectivity, and frame time on the target PC.
 
 ```mermaid
 flowchart TD
-  Input[Ввод и команды] --> Sim[Фиксированный шаг симуляции]
-  Sim --> Vox[Воксели мира и тел]
-  Vox --> Change[Изменённые области и версии]
-  Change --> Connect[Связность и отделение обломков]
-  Connect --> Bodies[Тела и физика]
+  Input[Input and commands] --> Sim[Fixed simulation step]
+  Sim --> Vox[World and body voxels]
+  Vox --> Change[Changed regions and versions]
+  Change --> Connect[Connectivity and fragment separation]
+  Connect --> Bodies[Bodies and physics]
   Bodies --> Sim
-  Change --> Mesh[Поверхность изменённых областей]
-  Mesh --> Cache[Кеш локальной геометрии]
-  Bodies --> View[Снимок сцены]
+  Change --> Mesh[Surfaces of changed regions]
+  Mesh --> Cache[Local geometry cache]
+  Bodies --> View[Scene snapshot]
   Cache --> View
-  View --> Renderer[Адаптер Bend3D]
-  Renderer --> Window[Изображение и окно]
+  View --> Renderer[Bend3D adapter]
+  Renderer --> Window[Image and window]
 ```
 
-## 2. Проверенная база и ограничения
+## 2. Verified foundation and limitations
 
-Исходники исследованы на коммите `a49524265bdfa5753a4bf38e25f0574a705dd868`, а не на плавающем `main`. Установленный компилятор: `bend 2.0.16`. Совместимость всего демо с ним не проверялась; обновление не выполнялось. Подробности языка и среды: [bend-feasibility.md](bend-feasibility.md).
+Sources were inspected at commit `a49524265bdfa5753a4bf38e25f0574a705dd868`, rather than the moving `main` branch. The initial compiler was `bend 2.0.16`; the current project pin is `bend 2.0.25`. See [demo validation](demo-validation.md) for executable checks and compiler-specific measurements. Language and environment details are in [bend-feasibility.md](bend-feasibility.md).
 
-В [Bend3D](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/bend3d.bend) есть векторы, камера, материалы, освещение, проекция треугольников и растеризация по экранным ячейкам. `Frame.show` вызывает `Frame.node!`; корневой размер в этом пути — 2048, ячейки — 64 пикселя. `Mesh.raster` отбрасывает треугольник, если хотя бы одна вершина не прошла ближнюю плоскость. Это растеризатор, а не система хранения и разрушения вокселей.
+[Bend3D](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/bend3d.bend) provides vectors, a camera, materials, lighting, triangle projection, and rasterization through screen cells. `Frame.show` calls `Frame.node!`; this path has a root size of 2048 and 64-pixel cells. `Mesh.raster` discards a triangle if any vertex fails the near-plane test. It is a rasterizer, not a voxel storage or destruction system.
 
-[Демо](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/main.bend) использует `Window.open`/`Window.frame`; `Play.loop` разделяет построение сцены и GPU-вызов границей IO. Этот порядок стоит сохранить до проверки runtime. Воксельную поверхность подаём треугольниками, обходя параметрические `Surf` и их тесселяцию.
+The [demo](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/main.bend) uses `Window.open`/`Window.frame`; `Play.loop` separates scene construction and the GPU call with an IO boundary. Preserve this ordering until the runtime has been verified. Submit voxel surfaces as triangles, bypassing parametric `Surf` objects and their tessellation.
 
-## 3. Целевая машина и стартовые бюджеты
+## 3. Target machine and initial budgets
 
-Локальная проверка: Linux x86_64, Ryzen 5 1600 (6 ядер / 12 потоков), около 32 ГБ RAM, NVIDIA GTX 1660 (6144 MiB VRAM), драйвер 610.57.04, CUDA toolkit 13.3. Наличие CUDA само по себе не доказывает работу GPU-пути Bend.
+Local inspection: Linux x86_64, Ryzen 5 1600 (6 cores / 12 threads), approximately 32 GB RAM, NVIDIA GTX 1660 (6144 MiB VRAM), driver 610.57.04, CUDA toolkit 13.3. Having CUDA installed does not by itself prove that Bend's GPU path works.
 
-Минимальная программа с `pow2!(16n)` успешно собрана через `CUDA_HOME=/opt/cuda bend ... -o ...` и запущена с `--gpu on`, результат — 65536. Без этой переменной проба собиралась без GPU-модуля. Значит, базовый CUDA-путь здесь работает; производительность движка и совместимость полного Bend3D ещё предстоит проверить.
+A minimal program using `pow2!(16n)` was successfully built with `CUDA_HOME=/opt/cuda bend ... -o ...` and run with `--gpu on`, producing 65536. Without that variable, the probe was built without a GPU module. The basic CUDA path therefore works here; engine performance and compatibility of the full Bend3D code remain to be checked.
 
-Предлагаемые значения для эксперимента, не ограничения формата:
+Proposed experimental values, not file-format limits:
 
-| Параметр | Начальная гипотеза |
+| Parameter | Initial hypothesis |
 |---|---|
-| Размер вокселя | 0,1 м, конфигурируемый единый масштаб |
-| Тестовая арена | 12,8 × 6,4 × 12,8 м |
-| Brick, плотная область | 8 × 8 × 8 ячеек |
-| Chunk, область управления | 32 × 32 × 32 ячейки, 4³ bricks |
-| Внутренний кадр | 640 × 360, затем 960 × 540 |
-| Шаг симуляции | 60 Гц; сначала целевой рендер 30 FPS |
-| Активные обломки | Начальный предел 128, уточнить замерами |
+| Voxel size | 0.1 m, a configurable uniform scale |
+| Test arena | 12.8 × 6.4 × 12.8 m |
+| Brick, dense storage region | 8 × 8 × 8 cells |
+| Chunk, management region | 32 × 32 × 32 cells, 4³ bricks |
+| Internal frame | 640 × 360, then 960 × 540 |
+| Simulation step | 60 Hz; initially target 30 FPS rendering |
+| Active fragments | Initial cap of 128, subject to measurement |
 
-При упаковке по 16 бит на ячейку один плотный brick содержит 1024 байта полезных данных; плотный chunk — 64 KiB. Для арены 128 × 64 × 128 это 2 MiB полезных данных. Это не оценка всей памяти: структуры Bend, версии, геометрия, временные результаты и изображение добавляют расходы. Упаковка должна быть подтверждена доступным API и замерами; обычная запись с двумя полями не гарантирует 16-битное представление.
+At 16 packed bits per cell, a dense brick contains 1024 bytes of payload and a dense chunk contains 64 KiB. A 128 × 64 × 128 arena contains 2 MiB of payload. This is not a total memory estimate: Bend structures, versions, geometry, temporary results, and the image add overhead. Packing must be verified against the available API and measurements; an ordinary record with two fields does not guarantee a 16-bit representation.
 
-## 4. Данные и владение
+## 4. Data and ownership
 
-### Статический мир
+### Static world
 
-`ChunkCoord -> Chunk` — разреженный пространственный индекс; конкретный контейнер выбирается после проверки локальной Base и микробенчмарка. Линейный список всех вокселей не подходит как основной индекс. Для ограниченной тестовой арены допустима простая таблица занятых chunk-слотов.
+`ChunkCoord -> Chunk` is a sparse spatial index; choose the concrete container after inspecting the local Base library and running a microbenchmark. A linear list of all voxels is unsuitable as the primary index. A simple table of occupied chunk slots is acceptable for the bounded test arena.
 
-Chunk содержит 64 brick-слота. Brick бывает `Empty`, `Uniform(material)` или `Dense(cells)`. У полностью пустых областей нет плотного массива. Первый формат хранит material ID; прочность берётся из таблицы материалов. Накопленное повреждение добавляется отдельным необязательным слоем только при необходимости.
+A chunk contains 64 brick slots. A brick is `Empty`, `Uniform(material)`, or `Dense(cells)`. Completely empty regions have no dense array. The first format stores a material ID; strength comes from the material table. Add accumulated damage as a separate optional layer only when needed.
 
-Координаты мира и chunk — знаковые целые. Для отрицательных координат требуются деление с округлением вниз и неотрицательный остаток: ячейка -1 принадлежит chunk -1 с локальной координатой 31. Геометрия тел хранится в целой локальной решётке, преобразование в мировое пространство выполняется отдельно.
+World and chunk coordinates are signed integers. Negative coordinates require floor division and a nonnegative remainder: cell -1 belongs to chunk -1 with local coordinate 31. Body geometry lives in an integer local grid; conversion to world space is separate.
 
-### Воксельное тело
+### Voxel body
 
-`Body` содержит устойчивый ID, собственное воксельное хранилище, положение, ориентацию, линейную и угловую скорость, массу, центр масс, тензор инерции и состояние сна. Масса и инерция зависят от материала и геометрии.
+`Body` contains a stable ID, its own voxel storage, position, orientation, linear and angular velocity, mass, center of mass, inertia tensor, and sleep state. Mass and inertia depend on material and geometry.
 
-Вращение тела меняет transform; перезаписывать его в статическую сетку каждый кадр не нужно. Уснувшее тело остаётся телом. Обратное слияние с миром — отдельная операция с правилами потери точности, за пределами первой версии.
+Rotating a body changes its transform; it does not require rewriting it into the static grid every frame. A sleeping body remains a body. Merging it back into the world is a separate operation with explicit precision-loss rules, outside the first version.
 
-### Владение и кеши
+### Ownership and caches
 
-Симуляция владеет изменяемым состоянием. Этап обработки получает область во владение и возвращает новое состояние с изменениями. Нельзя предполагать, что большой `Array` можно бесплатно копировать, разделять или читать параллельно: контракт зависит от версии Bend.
+The simulation owns mutable state. A processing stage takes ownership of a region and returns its updated state and changes. Do not assume a large `Array` can be copied, shared, or read in parallel for free: the contract depends on the Bend version.
 
-Начальный конвейер последовательный между фазами, с параллельной обработкой независимых областей внутри подходящих фаз. Render snapshot — явный пакет геометрии и преобразований, без произвольного доступа к живому миру. Сначала разрешён один кадр в работе; перекрытие CPU/GPU добавляется только после замеров и определения времени жизни данных.
+The initial pipeline is sequential between phases, with parallel processing of independent regions within suitable phases. A render snapshot is an explicit package of geometry and transforms, with no arbitrary access to the live world. Allow one frame in flight initially; add CPU/GPU overlap only after measurement and explicit data lifetime management.
 
-У задания перестроения есть ID области и версия её содержимого, а также версии границ соседей. Результат публикуется только при совпадении зависимостей; старые результаты отбрасываются. Для первого синхронного прототипа это простой контракт, для будущего фонового построения — защита от устаревшего кеша.
+A rebuild job carries the region ID, its content version, and versions of neighboring boundaries. Publish the result only if its dependencies still match; discard stale results. This is a simple contract for the first synchronous prototype and protection against stale caches for future background construction.
 
-## 5. Разрушение и связность
+## 5. Destruction and connectivity
 
-Команды: удалить сферу, вырезать область, нанести удар по результату лучевого запроса. Для первого эксперимента достаточно удаления сферы. Вход каждой команды фиксируется на тике вместе с последовательным номером; повтор зависит от того же начального мира и порядка команд.
+Commands: remove a sphere, cut out a region, or apply an impact at a ray-query hit. Sphere removal is enough for the first experiment. Record each command's input at its tick with a sequence number; replay depends on the same initial world and command order.
 
-1. Найти затронутые chunks и тела по ограничивающим объёмам.
-2. Для тела перевести воздействие в его локальную систему; масштаб тел в первой версии единичный.
-3. Изменить только пересекающиеся bricks; сохранить список действительно изменённых ячеек и границ.
-4. Обновить версии геометрии, коллизий и связности. На границе brick инвалидировать соответствующего соседа; на границе chunk — соседний chunk.
-5. Определить оставшиеся связные компоненты и их связь с опорами.
-6. Атомарно перенести отделившиеся компоненты в новые тела и удалить их из прежнего владельца.
+1. Find affected chunks and bodies using bounding volumes.
+2. For a body, transform the impact into its local coordinate system; body scale is one in the first version.
+3. Edit only intersecting bricks; retain the list of cells and boundaries that actually changed.
+4. Update geometry, collision, and connectivity versions. At a brick boundary, invalidate the corresponding neighbor; at a chunk boundary, invalidate the neighboring chunk.
+5. Identify remaining connected components and their connections to anchors.
+6. Atomically transfer detached components into new bodies and remove them from their previous owner.
 
-Связность определяется шестью соседями по граням. Касание ребром или углом не удерживает конструкцию. Для статического мира явно задаются закреплённые области уровня; нижний слой не становится опорой автоматически. Компонента без пути к опоре превращается в тело. Для уже динамического тела после разрыва каждая компонента получает отдельное тело.
+Connectivity uses six face neighbors. Edge or corner contact does not support a structure. Fixed level regions are explicitly designated for the static world; the bottom layer is not automatically an anchor. A component with no path to an anchor becomes a body. When an existing dynamic body breaks, each component becomes a separate body.
 
-Ключевой случай: выбита маленькая перемычка, а падает большая стена в нескольких chunks. Локальный flood fill внутри области взрыва даст неверный ответ. Для первого небольшого уровня допустим полный обход затронутой прежней компоненты. Для масштабирования: локальные компоненты bricks плюс граф связей через их границы. После удаления граф тоже надо проверять на раскол; одного union-find, умеющего только объединять, недостаточно.
+Critical case: a small bridge is removed, causing a large wall spanning multiple chunks to fall. A local flood fill confined to the explosion region gives an incorrect answer. For the first small level, traversing the entire affected former component is acceptable. To scale: use local brick components plus a graph of connections across their boundaries. After deletion, the graph must also be checked for splits; union-find that only merges components is insufficient.
 
-Проверку большой компоненты можно разбить на порции работы. Пока классификация не завершена, удалённые ячейки уже пусты, а оставшаяся конструкция временно сохраняет прежнее физическое состояние. Результат связности применим только к проверенной версии. Это измеримое ограничение задержки разрушения, а не мгновенное физически точное разрушение.
+Checking a large component can be divided into work batches. Until classification completes, removed cells are already empty while the remaining structure temporarily retains its previous physical state. Connectivity results apply only to the version checked. This creates a measurable destruction latency limitation rather than instantaneous, physically exact destruction.
 
-Передача обломков сохраняет материал: каждый оставшийся твёрдый воксель имеет ровно одного владельца. При разделении движущегося тела начальная скорость компоненты учитывает `v + ω × (c_new - c_old)`; импульс удара применяется отдельно. Выбор удаляемой пыли или исчезновения микрофрагментов должен быть явным правилом, а не случайной потерей материала.
+Fragment transfer conserves material: each remaining solid voxel has exactly one owner. When splitting a moving body, a component's initial velocity accounts for `v + ω × (c_new - c_old)`; the impact impulse is applied separately. Removing dust or discarding tiny fragments must be an explicit rule, not accidental material loss.
 
-Если лимит тел исчерпан, сохраняем массу в спящих/упрощённых телах либо откладываем активацию по документированному правилу. Лимит частиц можно применять отдельно: частицы не участвуют в балансе твёрдых вокселей.
+If the body cap is reached, preserve mass in sleeping or simplified bodies, or defer activation according to a documented rule. Particle limits can be applied separately: particles do not participate in solid voxel accounting.
 
-## 6. Поверхность и рендер
+## 6. Surfaces and rendering
 
-Первый mesher выпускает только грани между твёрдой ячейкой и воздухом; соседей читает и через границы хранения. Следующий шаг — объединение соседних граней одного материала на одной плоскости (greedy meshing). Начать с brick, затем сравнить с chunk: маленькая область дешевле перестраивается, большая даёт больше возможностей объединения.
+The first mesher emits only faces between a solid cell and air, reading neighbors across storage boundaries as well. Next, merge adjacent coplanar faces of the same material (greedy meshing). Start at brick granularity, then compare with chunks: a smaller region is cheaper to rebuild; a larger one offers more opportunities to merge.
 
-Меш хранится в локальных координатах. Движение камеры или тела не запускает meshing. Ключи кеша зависят от геометрии, соседних границ и параметров построения. Направление нормали и материал входят в условия объединения; если добавляется запечённое затенение, оно также должно быть совместимо на объединённой грани.
+Store meshes in local coordinates. Camera or body motion does not trigger meshing. Cache keys depend on geometry, neighboring boundaries, and construction parameters. Normal direction and material are part of the merge criteria; if baked shading is added, it must also be compatible across the merged face.
 
-Путь кадра:
+Frame path:
 
-`кеш поверхности -> отсечение невидимых областей -> transform -> clipping -> проекция/свет -> экранные Cells -> Frame.show -> Window.frame`.
+`surface cache -> region visibility culling -> transform -> clipping -> projection/lighting -> screen Cells -> Frame.show -> Window.frame`.
 
-Для адаптации Bend3D нужны отсечение треугольников по near plane до проекции, проверка winding граней, отдельные счётчики построения экранных ячеек и растеризации. Экранные `Cells` зависят от камеры: кеширование поверхности не отменяет их перестроение при изменении вида. Для первой версии сохраняем кадр меньше 2048 по обеим осям; обобщение дерева — отдельная задача.
+Adapting Bend3D requires clipping triangles against the near plane before projection, checking face winding, and separate timing counters for screen-cell construction and rasterization. Screen `Cells` depend on the camera: caching surfaces does not eliminate their rebuild when the view changes. Keep both frame dimensions below 2048 in the first version; generalizing the tree is a separate task.
 
-Первый свет — окружающий плюс направленный, плоские непрозрачные материалы. Тени, прозрачность, GI и LOD добавляются после базовых замеров. Особенно важен неблагоприятный тест: чередование пустых и твёрдых вокселей создаёт множество граней и почти не сжимается mesher.
+Initial lighting is ambient plus directional, with flat opaque materials. Add shadows, transparency, GI, and LOD after baseline measurements. An important worst-case test alternates empty and solid voxels, generating many faces with little opportunity for mesher compression.
 
-### Почему начать с мешей
+### Why start with meshes
 
-Это позволяет проверить предложенный пользователем Bend3D и отделить стоимость разрушения от стоимости изображения. Альтернатива — лучи по разреженным bricks: потенциально лучше для очень мелкой геометрии, но потребует собственного traversal, ускорения, света и пути передачи данных. Полное sparse voxel octree также усложняет редактирование и разделение тел.
+This tests the user-proposed Bend3D and separates destruction cost from image generation cost. An alternative is ray traversal through sparse bricks: potentially better for very fine geometry, but requiring custom traversal, acceleration, lighting, and data transfer. A full sparse voxel octree also complicates editing and body separation.
 
-Backend скрывается за контрактом получения сцены и возврата изображения/метрик. Если проекция, распределение треугольников или растеризация не укладываются в бюджет на GTX 1660, отдельно сравниваем brick raycasting и внешний графический backend. Готовность Vulkan/FFI для этого не предполагается; это отдельный технический эксперимент, а не уже доступная возможность движка.
+Hide the backend behind a contract that accepts a scene and returns an image and metrics. If projection, triangle distribution, or rasterization exceeds the budget on the GTX 1660, separately compare brick raycasting and an external graphics backend. Do not assume Vulkan/FFI support is ready for this; it is a separate technical experiment, not an existing engine capability.
 
-## 7. Физика и запросы
+## 7. Physics and queries
 
-Для первого этапа: движение камеры, лучевой выбор вокселя, разрушение неподвижной сцены. Следом — игрок-капсула и падение одного обломка, затем взаимодействие тел.
+First stage: camera motion, voxel selection by ray, and destruction of a stationary scene. Next: a capsule player and one falling fragment, followed by body interactions.
 
-Первое управление камерой — клавиатура и вращение при перетаскивании мышью. В исследованной Base есть абсолютные движения мыши, но публичный relative mouse / pointer lock не найден; непрерывный FPS mouse-look потребует отдельного platform effect. Это ограничение первого интерфейса, а не данных мира.
+Initial camera controls use the keyboard and mouse dragging for rotation. The inspected Base library exposes absolute mouse movement, but no public relative mouse / pointer lock operation was found. Continuous FPS mouse-look needs a separate platform effect. This limits the first interface, not world data.
 
-Лучевой запрос проходит пространственные области и воксели алгоритмом DDA; для тел луч преобразуется в локальные координаты. Возвращает владельца, координату ячейки, нормаль и расстояние в общей мировой метрике. Отдельно определить попадание при старте луча внутри материала и равных пересечениях границ.
+A ray query traverses spatial regions and voxels using DDA; for bodies, transform the ray into local coordinates. Return the owner, cell coordinate, normal, and distance in a shared world-space metric. Explicitly define hits when the ray starts inside material and when boundary intersections tie.
 
-Broad phase использует мировые AABB тел и статических областей. Узкая фаза сначала может быть грубой и явно ограниченной: несколько объёмов на тело. Точная коллизия voxel–voxel и стабильное складывание вращающихся обломков — самостоятельный большой этап. Произвольный визуальный меш не считается автоматически хорошим коллайдером.
+The broad phase uses world-space AABBs of bodies and static regions. The initial narrow phase may be coarse and explicitly limited: a few volumes per body. Accurate voxel–voxel collision and stable stacking of rotating fragments are a substantial independent stage. An arbitrary visual mesh is not automatically a suitable collider.
 
-Фиксированный шаг с ограничением количества догоняющих тиков предотвращает бесконечное отставание. Высокие скорости требуют подшагов или swept-проверок. Идентичный порядок команд полезен для повторяемых тестов, но не гарантирует побитовую детерминированность F32-физики между CPU и GPU.
+A fixed step with a cap on catch-up ticks prevents unbounded lag. High velocities require substeps or swept checks. Identical command ordering is useful for reproducible tests but does not guarantee bitwise deterministic F32 physics across CPU and GPU.
 
-## 8. Границы модулей
+## 8. Module boundaries
 
-Предлагаемая структура, пока без создания пустых исходников:
+Proposed structure; no empty source files have been created:
 
-| Модуль | Ответственность |
+| Module | Responsibility |
 |---|---|
-| `core` | Координаты, ID, геометрические операции |
-| `voxel` | Материалы, bricks, chunks, доступ и изменения |
-| `world` | Пространственный индекс, опоры, владельцы, версии |
-| `destruction` | Команды, связность, разделение тел |
-| `physics` | Масса, движение, контакты, сон |
-| `meshing` | Открытые грани и их объединение |
-| `render` | Контракт сцены и адаптер Bend3D |
-| `platform` | Окно, ввод, время, файлы |
-| `sandbox` | Тестовая арена и инструменты разрушения |
+| `core` | Coordinates, IDs, geometric operations |
+| `voxel` | Materials, bricks, chunks, access, and edits |
+| `world` | Spatial index, anchors, owners, versions |
+| `destruction` | Commands, connectivity, body separation |
+| `physics` | Mass, motion, contacts, sleep |
+| `meshing` | Exposed faces and face merging |
+| `render` | Scene contract and Bend3D adapter |
+| `platform` | Window, input, time, files |
+| `sandbox` | Test arena and destruction tools |
 
-Симуляция запускается без окна. Renderer не меняет материал; physics не получает доступ к экранным треугольникам; platform не определяет правила разрушения.
+The simulation runs without a window. The renderer does not change material; physics does not access screen triangles; platform code does not define destruction rules.
 
-Сохранение: версия формата, масштаб ячейки, палитра материалов, статические chunks, опоры, тела и их transforms. Кеши геометрии не сохраняются как обязательная часть мира. Журнал команд нужен для воспроизводимых испытаний; полноценная система undo и сетевой протокол пока вне задачи.
+Persistence stores the format version, cell scale, material palette, static chunks, anchors, bodies, and their transforms. Geometry caches are not a required part of the saved world. A command log supports reproducible experiments; a full undo system and network protocol are outside the current scope.
 
-## 9. Проверки и доказательства
+## 9. Checks and proofs
 
-Кандидаты для `LAWS.bend`/`PROOF.bend`, вводимые вместе с реализацией и без `@unsafe` внутри доказываемого ядра:
+Candidates for `LAWS.bend`/`PROOF.bend`, introduced alongside implementation with no `@unsafe` inside the verified core:
 
-- Чтение после записи возвращает записанный материал; остальные координаты не меняются.
-- Преобразование мировой координаты в chunk/local и обратно сохраняет значение, включая отрицательные координаты.
-- Удаление не создаёт твёрдый материал; повторное удаление той же области без промежуточных изменений ничего не меняет.
-- Разделение на тела не дублирует и не теряет оставшиеся воксели.
+- Reading after writing returns the written material; other coordinates remain unchanged.
+- Converting world coordinates to chunk/local coordinates and back preserves the value, including negative coordinates.
+- Removal creates no solid material; repeating removal of the same region without intervening edits changes nothing.
+- Splitting into bodies neither duplicates nor loses remaining voxels.
 
-Это желаемые законы, не уже существующие доказательства. Представление данных определит трудоёмкость формализации. Простые свойства координат и доступа — первые кандидаты; корректность всего графа связности существенно сложнее.
+These are desired laws, not existing proofs. Data representation will determine formalization effort. Simple coordinate and access properties are the first candidates; correctness of the entire connectivity graph is substantially harder.
 
-Практические тесты дополняют доказательства: взрыв на границе четырёх chunks, разрыв перемычки вдали от опоры, разрушение вращающегося обломка, повтор команды, устаревший meshing result, проход камеры через near plane, большой checkerboard-меш. Сравниваем оптимизированный mesher и связность с простыми эталонными алгоритмами на малых объёмах.
+Practical tests complement proofs: an explosion at a four-chunk boundary, severing a bridge far from an anchor, destroying a rotating fragment, repeating a command, a stale meshing result, moving the camera through the near plane, and a large checkerboard mesh. Compare optimized meshing and connectivity with simple reference algorithms on small volumes.
 
-## 10. Порядок реализации и критерии продолжения
+## 10. Implementation sequence and continuation criteria
 
-1. **Совместимость.** Зафиксировать компилятор и renderer-коммит; собрать минимальное окно и проверить реальный GPU-путь. Без этого не делать выводов о FPS.
-2. **Хранилище и эталон.** Координаты, материалы, чтение/запись, тесты границ и headless-сцена. Измерить память и стоимость локального изменения.
-3. **Неподвижная сцена.** Открытые грани, адаптер Bend3D, clipping, свободная камера. Сначала 640 × 360, отдельно времена meshing, подготовки кадра, GPU и показа.
-4. **Разрушение.** Удаление сферы, корректное обновление границ, очередь работ с версиями. Измерять задержку от команды до видимого результата.
-5. **Обломки.** Опоры, полная эталонная связность, отделение одного тела, масса и падение; затем раскол динамического тела.
-6. **Масштабирование.** Greedy meshing, граф компонентов, сон, лимиты и профилирование плотных/фрагментированных сцен. Только здесь решать, остаётся ли Bend3D основным backend.
+1. **Compatibility.** Pin the compiler and renderer commit; build a minimal window and verify actual GPU execution. Do not draw FPS conclusions before this.
+2. **Storage and reference implementation.** Coordinates, materials, reads/writes, boundary tests, and a headless scene. Measure memory and local edit cost.
+3. **Stationary scene.** Exposed faces, Bend3D adapter, clipping, and a free camera. Start at 640 × 360 and separately time meshing, frame preparation, GPU execution, and presentation.
+4. **Destruction.** Sphere removal, correct boundary updates, and a versioned work queue. Measure command-to-visible-result latency.
+5. **Fragments.** Anchors, complete reference connectivity, separation of one body, mass, and falling; then splitting a dynamic body.
+6. **Scaling.** Greedy meshing, component graph, sleep, limits, and profiling of dense and fragmented scenes. Only then decide whether Bend3D remains the primary backend.
 
-Стартовый критерий рендера: p95 кадра ≤33,3 мс в воспроизводимой сцене при 640 × 360. Это целевой порог, не полученный результат. Кроме FPS записывать число твёрдых ячеек, граней/треугольников, видимых chunks, активных тел, RAM/VRAM, p50/p95/p99 времени кадра, backlog и задержку разрушения. Сцены и последовательности команд должны быть фиксированы; бюджет сложного разрушения согласуется после первых измерений.
+Initial rendering criterion: p95 frame time ≤33.3 ms in a reproducible scene at 640 × 360. This is a target, not a measured result. Alongside FPS, record solid cell count, face/triangle count, visible chunks, active bodies, RAM/VRAM, p50/p95/p99 frame times, backlog, and destruction latency. Fix scenes and command sequences; agree on a complex-destruction budget after initial measurements.
 
-## 11. Открытые решения
+## 11. Open decisions
 
-Далее потребуют выбора: насколько детальны воксели вблизи, нужен ли полностью разрушаемый уровень, должны ли обломки создавать устойчивые завалы, целевые размеры мира и обязательность 60 FPS. Предлагаемая архитектура позволяет начать без преждевременного обещания этих свойств.
+Further choices: close-up voxel detail, whether the entire level must be destructible, whether fragments must form stable piles, target world dimensions, and whether 60 FPS is mandatory. The proposed architecture allows work to begin without prematurely promising these properties.
 
-При переносе исходников Bend3D сохранить сведения об источнике и применимые уведомления [лицензии репозитория](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/LICENSE). Исходники демо пока не добавлены в проект.
+When importing Bend3D sources, preserve attribution and applicable notices from the [repository license](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/LICENSE). Demo sources have not yet been added to this project.

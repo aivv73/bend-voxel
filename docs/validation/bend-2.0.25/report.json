@@ -1,0 +1,207 @@
+{
+  "metadata": {
+    "date": "2026-09-22T19:34:31+0400",
+    "bend": "bend 2.0.25",
+    "git_revision": "043b4f4fb67229aa8c1e32d7ad01da6dcb428571",
+    "working_tree_dirty": true,
+    "resolution": [
+      640,
+      360
+    ],
+    "backend": "forced CUDA (--gpu on)",
+    "warmup_seconds": 5,
+    "measured_seconds": 60,
+    "gpu": "NVIDIA GeForce GTX 1660, 610.57.04, 6144 MiB",
+    "source_sha256": {
+      "src/demo.bend": "2f6b557f0208fbe4da73cdced6682ec5e70b67f209207dda7d829d04267a84c5",
+      "src/input.bend": "218beac2fc4d526c69750fd0ecf014de3276b4f54eb4f82784fd0b92627e9308",
+      "src/platform/micros.c": "02d9b16f7bda3cd99d27305d2dfda210e16c357defc4e6bb8ec671db07795d4a",
+      "src/platform/micros.js": "a71a462f96ad6184bf93827f5749ba70ca3af3f9bc70d2f4a0ff4e6cbf9d3302",
+      "src/platform/present.c": "41797bd213551f8b99a4ee6e6fcbc79f1bca8fc667d97459fbddb3a3f450f7dc",
+      "src/platform/present.js": "f4f47b5aeb0f9c58c784fa7daa54deb3fe4c66bca98039c0ff38a6d11a8651de",
+      "src/platform.bend": "7844b3791f0a134cff2169d962a9afaa1e7efb48f658c2eed5f0866d720dc6c2",
+      "src/render.bend": "41ffe93c7e3213ab0303fdfa29db5eb4df13f0e8174265d13b3fa795dedb5ca7",
+      "src/vendor/LICENSE": "0beb288abd3d067e231f3fbe7df1f8ee37344061fc67f22018150a19e4b26c35",
+      "src/vendor/NOTICE.md": "10ad3fe640d9df9e2999e7a87d9c7db0c2858efe75245948daf77b6b24d26182",
+      "src/vendor/bend3d.bend": "166202415b6253382d0cdfd5ccb2184880540075bde6117809a5fbacd4adb3ad",
+      "src/world.bend": "3dadfe98904a1281bae4fb610d861a750e9672043bb5456231f0276fe808a87c",
+      "scripts/benchmark.py": "94dec032b3853a3a1bba73487648cebb8efe2cd55a2cc44d429aac8d1de8dab5",
+      "scripts/build.sh": "6cc23a82406c141a653fc004d2b26b7cd1cbe0cd9e2ce8e29f995486a26c153e",
+      "scripts/run.sh": "f914067992ca8a8cf10c313ef32bb36e1cc182d6c87bf9171114337e1d4e8a2d",
+      "scripts/test.sh": "ad9f6209884b37e66cf779068a04e5647113fdbada138df800302d2dbf8111b6",
+      "tests/input-render.bend": "f7f0605ab49467d49a8098e239bb60cbd77727a6133a7be8ef7d1688ef5a2849",
+      "tests/world.bend": "174f43a18d6b6f638a499e4790847c0f51299aa9b2958331b0c58891b73534b3"
+    },
+    "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           43 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  12\nOn-line CPU(s) list:                     0-11\nVendor ID:                               AuthenticAMD\nModel name:                              AMD Ryzen 5 1600 Six-Core Processor\nCPU family:                              23\nModel:                                   1\nThread(s) per core:                      2\nCore(s) per socket:                      6\nSocket(s):                               1\nStepping:                                1\nMicrocode version:                       0x8001139\nFrequency boost:                         enabled\nCPU(s) scaling MHz:                      89%\nCPU max MHz:                             3700.0000\nCPU min MHz:                             1550.0000\nBogoMIPS:                                6399.63\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb hw_pstate ssbd ibpb vmmcall fsgsbase bmi1 avx2 smep bmi2 rdseed adx smap clflushopt sha_ni xsaveopt xsavec xgetbv1 clzero xsaveerptr arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif overflow_recov succor smca sev\nVirtualization:                          AMD-V\nL1d cache:                               192 KiB (6 instances)\nL1i cache:                               384 KiB (6 instances)\nL2 cache:                                3 MiB (6 instances)\nL3 cache:                                16 MiB (2 instances)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-11\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Mitigation; untrained return thunk; SMT vulnerable\nVulnerability Spec rstack overflow:      Mitigation; Safe RET\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Mitigation; IBPB before exit to userspace\n",
+    "cuda": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Tue_Jun_09_02:43:40_PM_PDT_2026\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\n"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "frames": {
+        "samples": 1600,
+        "p50_ms": 36.653,
+        "p95_ms": 45.829,
+        "p99_ms": 109.262,
+        "max_ms": 147.764
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 122.655,
+        "p95_ms": 170.322,
+        "p99_ms": 190.079,
+        "max_ms": 190.079
+      },
+      "max_bodies": 1,
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 68.059,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 52.953,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 50.721,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 37.03,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 49.748,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 49.523,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "attempts_pass": true,
+      "pass": false
+    },
+    {
+      "run": 2,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "frames": {
+        "samples": 1739,
+        "p50_ms": 32.361,
+        "p95_ms": 44.407,
+        "p99_ms": 102.83,
+        "max_ms": 152.12
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 120.109,
+        "p95_ms": 157.459,
+        "p99_ms": 179.814,
+        "max_ms": 179.814
+      },
+      "max_bodies": 1,
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 52.093,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 52.703,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 76.959,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 58.872,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 63.273,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 67.819,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "attempts_pass": true,
+      "pass": false
+    },
+    {
+      "run": 3,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "frames": {
+        "samples": 1657,
+        "p50_ms": 35.075,
+        "p95_ms": 43.672,
+        "p99_ms": 107.21,
+        "max_ms": 139.668
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 124.859,
+        "p95_ms": 153.217,
+        "p99_ms": 156.298,
+        "max_ms": 156.298
+      },
+      "max_bodies": 1,
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 52.615,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 45.552,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 52.729,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 52.985,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 42.507,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 45.449,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "attempts_pass": true,
+      "pass": false
+    }
+  ],
+  "acceptance_pass": false,
+  "note": "Desktop visual/input and correctness checks are separate requirements."
+}

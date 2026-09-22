@@ -1,0 +1,56 @@
+{
+  "tick": 1140,
+  "fixed_step_seconds": 0.016666666666666666,
+  "resolution": [
+    640,
+    360
+  ],
+  "root_size": 2048,
+  "state": {
+    "solids": 4374,
+    "bodies": 1,
+    "removed": 0,
+    "status": 2
+  },
+  "bodies": [
+    {
+      "id": 1,
+      "offset": 0.0,
+      "speed": 0.0,
+      "bottom": 0.0
+    },
+    {
+      "id": 1,
+      "offset": 0.0,
+      "speed": 0.0,
+      "bottom": 0.0
+    },
+    {
+      "id": 2,
+      "offset": -1.2,
+      "speed": 0.0,
+      "bottom": 1.2
+    }
+  ],
+  "hud": "BEND VOXEL / FIRST DEMO\nVOXELS 4374  BODIES 1/64  REMOVED 0\nFRAME 0 MS  CUT 0 MS\nCARVE / 20 CM\nNO REMOVABLE TARGET\nWASD MOVE  QE UP/DOWN  RMB LOOK  LMB CUT  R RESET  ESC RELEASE",
+  "hud_in_image": false,
+  "pixel_sha256": "1a0c13b6d1c2c2da48348ffb3d877f6f1a4c97484df7abb7e4022d72a0bb5018",
+  "backend": "on",
+  "bend": "bend 2.0.25",
+  "source_sha256": {
+    "src/demo.bend": "6921c78ee2fa24a4b3001265a559867928fe35d4ac82732386a00d8bc323ed22",
+    "src/input.bend": "218beac2fc4d526c69750fd0ecf014de3276b4f54eb4f82784fd0b92627e9308",
+    "src/platform/micros.c": "02d9b16f7bda3cd99d27305d2dfda210e16c357defc4e6bb8ec671db07795d4a",
+    "src/platform/micros.js": "a71a462f96ad6184bf93827f5749ba70ca3af3f9bc70d2f4a0ff4e6cbf9d3302",
+    "src/platform/present.c": "41797bd213551f8b99a4ee6e6fcbc79f1bca8fc667d97459fbddb3a3f450f7dc",
+    "src/platform/present.js": "f4f47b5aeb0f9c58c784fa7daa54deb3fe4c66bca98039c0ff38a6d11a8651de",
+    "src/platform.bend": "7844b3791f0a134cff2169d962a9afaa1e7efb48f658c2eed5f0866d720dc6c2",
+    "src/probe.bend": "3e14973e7519316f834aca82aca72402a1de992edf55eee3fdaaf061098617a5",
+    "src/render.bend": "41ffe93c7e3213ab0303fdfa29db5eb4df13f0e8174265d13b3fa795dedb5ca7",
+    "src/snapshot.bend": "ac4618c28aa7049d9faf69f33714fd2bf4fc7cffdcd17cc97f81bfe98b9ba32c",
+    "src/vendor/LICENSE": "0beb288abd3d067e231f3fbe7df1f8ee37344061fc67f22018150a19e4b26c35",
+    "src/vendor/NOTICE.md": "10ad3fe640d9df9e2999e7a87d9c7db0c2858efe75245948daf77b6b24d26182",
+    "src/vendor/bend3d.bend": "166202415b6253382d0cdfd5ccb2184880540075bde6117809a5fbacd4adb3ad",
+    "src/world.bend": "50520b2dec39234acbf45bf5c1247a974449f55a158f393a66e11161e0476c8a"
+  }
+}

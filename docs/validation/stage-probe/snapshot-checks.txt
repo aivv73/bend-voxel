@@ -1,0 +1,11 @@
+PASS snapshot tick 0: expected world state
+PASS snapshot tick 60: expected world state
+PASS snapshot tick 216: expected world state
+PASS snapshot tick 396: expected world state
+PASS snapshot tick 408: expected world state
+PASS snapshot tick 540: expected world state
+PASS snapshot tick 1140: expected world state
+PASS repeat tick 0: identical PNG, full dump and metadata
+PASS repeat tick 408: identical PNG, full dump and metadata
+PASS repeat tick 540: identical PNG, full dump and metadata
+PASS CUDA snapshots with DISPLAY unset; moving and orbit PNGs visually inspected
