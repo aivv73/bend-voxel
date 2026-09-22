@@ -14,3 +14,8 @@ clean:
 snapshots:
 	./scripts/build.sh snapshot
 	python3 scripts/snapshot.py
+
+.PHONY: compare-backends
+compare-backends: build
+	./scripts/build.sh snapshot
+	python3 scripts/compare_backends.py $(COMPARE_ARGS)

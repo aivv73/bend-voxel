@@ -12,14 +12,18 @@ Requires **Bend 2.0.25**, CUDA (`/opt/cuda` by default), an NVIDIA GPU, Python 3
 make run
 ```
 
-This builds and launches at **640 × 360 with CUDA forced on**. To build or launch separately:
+This builds and launches at **640 × 360 on the CPU by default**. To build or launch separately:
 
 ```sh
 make build
 ./scripts/run.sh
+# Opt into CUDA for an interactive run:
+./scripts/run.sh --gpu on
 ```
 
 Set `CUDA_HOME` if CUDA is installed elsewhere. The build checks the compiler version and CUDA module; it does not update Bend automatically. The tested machine is a GTX 1660 / Ryzen 5 1600 Linux desktop.
+
+The interactive CPU default follows the [controlled CPU/CUDA comparison](docs/research/controlled-cpu-cuda.md). Worker count uses the runtime default. `make benchmark` still forces CUDA for acceptance, and `make snapshots` still defaults to CUDA. Launching `build/voxel-demo` directly bypasses the script's CPU default; pass `--gpu off` explicitly for CPU execution.
 
 ## Controls
 
@@ -48,11 +52,13 @@ The benchmark takes about 3¼ minutes and opens the native window. It runs the a
 
 Stage timings retain every end-to-end sample, including warm-up. Run `make snapshots` for deterministic CUDA-rendered PNGs and world-state dumps. See the [profiling guide](docs/profiling.md) for timing boundaries, CSV fields and snapshot commands.
 
+Run `make compare-backends` for a diagnostic CPU/CUDA thread-count sweep with fixed-clock pixel/state checks and interleaved windowed runs (about 22 minutes). Results go to `build/backend-comparison/`; use a new output directory for each experiment. This does not replace `make benchmark` for forced-CUDA acceptance.
+
 
 ## Implementation
 
 - `src/world.bend`: voxel ownership, carving, connectivity, atomic cap enforcement, vertical motion, cached surface rectangles and rows.
-- `src/render.bend`: camera, face picking, clipping, mesh and preview construction; Bend3D CUDA rasterization.
+- `src/render.bend`: camera, face picking, clipping, mesh and preview construction; Bend3D CPU/CUDA rasterization.
 - `src/input.bend`: controls, movement and focus handling.
 - `src/demo.bend`: application loop, HUD content and timed replay.
 - `src/platform/`: native clock/window adapter and text presentation.

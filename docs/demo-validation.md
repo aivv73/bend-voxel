@@ -79,6 +79,8 @@ The earlier diagnostic reports under `build/*-pilot` are not acceptance evidence
 
 ## Stage probe and snapshot validation
 
+For the subsequent Bend 2.0.25 CPU/CUDA diagnostic, see [controlled comparisons and thread-count sweep](research/controlled-cpu-cuda.md): 70 matching snapshot probes, 20 valid interleaved runs at five worker counts, and unchanged source/binary hashes. CUDA performance acceptance remains open; CPU numerical passes do not substitute for the forced-CUDA protocol.
+
 The [profiling guide](profiling.md) documents the instrumentation modeled on the official Slash Boss probe. The [stage report](validation/stage-probe/report.json) retains the original acceptance gates and separates instrumentation, workload and performance results. Complete raw samples, including warm-up and every slow frame, are preserved as [run 1](validation/stage-probe/run-1.csv.gz), [run 2](validation/stage-probe/run-2.csv.gz), and [run 3](validation/stage-probe/run-3.csv.gz).
 
 | Run | Raw frames (including warm-up) | Frame p95 | Cut p95 | Accounting / workload |
