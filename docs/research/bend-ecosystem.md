@@ -111,7 +111,7 @@ These are checker results, not native/CUDA execution or performance results. The
 ## Recommended next work
 
 1. Model stage instrumentation and snapshot output on the official Slash Boss probe. Add timings for carving, connectivity/meshing, scene preparation, CUDA rendering and presentation; retain the complete end-to-end samples.
-2. Use portal-bend's controlled comparison method: same replay, same pixels/state checks, interleaved runs, thread-count sweep. CPU runs are diagnostic, not substitutes for CUDA acceptance.
+2. Use portal-bend's controlled comparison method: same replay, same pixels/state checks, interleaved runs, thread-count sweep. CPU runs are diagnostic, not substitutes for CUDA acceptance. **Completed initial sweep on 2026-09-22 with Bend 2.0.25:** [controlled CPU/CUDA results](controlled-cpu-cuda.md) record 70 matching fixed-clock probes and 20 interleaved windowed runs at 1/2/4/6/12 workers. CUDA still misses frame/cut p95; no unique thread-count optimum was established. Windowed physics uses elapsed time, so fixed-clock equivalence is checked separately.
 3. Audit eager recursive selectors and repeated owner lookups using Bolt's documented rules; measure one change at a time.
 4. Add deterministic generated edit sequences and image snapshots. Consider the small PRNG or selected proof lemmas only when those tests/laws need them.
 5. Defer new containers, Godot integration and packaging changes until a measured requirement justifies them.

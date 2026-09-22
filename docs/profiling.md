@@ -61,3 +61,21 @@ Each tick writes:
 The tree format is the official probe's preorder protocol: `Q` followed by top-left, top-right, bottom-left and bottom-right children; a decimal RGB value fills a leaf square. The decoder rejects malformed, truncated, over-deep and surplus data. PNG output uses Python's standard library.
 
 Native X11 HUD text is recorded in JSON and the dump, but is not painted into the snapshot PNG. HUD frame/cut times are zero on the fixed-clock path. Compare pixel hashes and state at the same tick/backend to check repeatability; cross-backend or cross-driver floating-point equivalence is not assumed.
+
+## Controlled CPU/CUDA comparison
+
+```sh
+make compare-backends
+# Customize the sweep and preserve an earlier experiment:
+make compare-backends COMPARE_ARGS='--threads 1 2 4 6 12 --rounds 2 --output build/comparison-next'
+```
+
+The runner builds each executable once and uses those same binaries with explicit `--gpu off/on` and `--threads N`. Default counts cover one worker, intermediate counts, six physical cores and twelve logical CPUs on the validation machine. Choose counts appropriate to another host. It sanitizes inherited `VOXEL_*` overrides and records hardware, CPU affinity, display, compiler, source and binary hashes. The output directory must be empty to avoid overwriting evidence.
+
+Before timing, all seven fixed-clock snapshots run at every backend/thread configuration, with `DISPLAY` unset. Decoded RGB hashes, HUD text, voxel/body counts and recorded body transforms/velocities must exactly match the first CPU configuration at the same tick. Dumps, PNGs and metadata are retained. A mismatch or failed snapshot prevents timing. This is bounded regression evidence, not proof of complete world-state equivalence; the snapshots do not serialize every voxel.
+
+Each measured process uses the existing five-second warm-up and sixty-second native-window replay. Adjacent CPU/CUDA pairs use the same thread count. Round 1 traverses counts forward with CPU first; round 2 reverses counts and runs CUDA first. Further rounds alternate these orders; an even number balances first/last positions. Runs execute serially, after all builds and snapshot work. Keep other workloads idle and avoid interacting with the benchmark window. GPU telemetry before each run and host load afterward provide context but do not remove desktop, clock, thermal or scheduling noise. The script does not lock clocks or reserve the machine.
+
+`report.json` is checkpointed after each probe and run. Raw CSV/stderr and individual percentiles remain available; the summary lists each run's frame/cut p95 and the median of frame-p95 values, without pooling frames across runs. `diagnostic_pass` requires matching snapshots, valid workloads/instrumentation and unchanged source/binary hashes. Performance misses remain visible but do not fail this diagnostic command. Timeout/failed runs remain in the report and invalidate the diagnostic result. The legacy stage key `cuda_rendering` refers to CPU rendering in CPU runs.
+
+The event schedule, viewport and code are shared, but the native benchmark advances physics with real elapsed time: backends do not render identical frame-by-frame states. Fixed-clock checks are a separate correctness control. Interpret windowed results as end-to-end behavior under the same scheduled workload, not isolated renderer or compiler speedup. Two rounds are an initial ordering-controlled diagnostic, not a confidence interval. Use more balanced rounds to establish small differences. CPU results and a tuned CUDA thread count do not replace the agreed three-run forced-CUDA acceptance test.
