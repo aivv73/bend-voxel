@@ -8,3 +8,7 @@
 .env
 .env.*
 !.env.example
+
+# Python tooling caches
+__pycache__/
+*.pyc
