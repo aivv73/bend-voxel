@@ -1,0 +1,214 @@
+{
+  "samples": [
+    {
+      "round": 1,
+      "variant": "before",
+      "milliseconds": 245.778687
+    },
+    {
+      "round": 1,
+      "variant": "after",
+      "milliseconds": 238.884286
+    },
+    {
+      "round": 2,
+      "variant": "after",
+      "milliseconds": 248.221616
+    },
+    {
+      "round": 2,
+      "variant": "before",
+      "milliseconds": 238.842099
+    },
+    {
+      "round": 3,
+      "variant": "before",
+      "milliseconds": 235.474106
+    },
+    {
+      "round": 3,
+      "variant": "after",
+      "milliseconds": 242.874484
+    },
+    {
+      "round": 4,
+      "variant": "after",
+      "milliseconds": 235.893961
+    },
+    {
+      "round": 4,
+      "variant": "before",
+      "milliseconds": 233.000026
+    },
+    {
+      "round": 5,
+      "variant": "before",
+      "milliseconds": 238.913134
+    },
+    {
+      "round": 5,
+      "variant": "after",
+      "milliseconds": 255.820222
+    },
+    {
+      "round": 6,
+      "variant": "after",
+      "milliseconds": 233.322723
+    },
+    {
+      "round": 6,
+      "variant": "before",
+      "milliseconds": 269.89959
+    },
+    {
+      "round": 7,
+      "variant": "before",
+      "milliseconds": 244.926544
+    },
+    {
+      "round": 7,
+      "variant": "after",
+      "milliseconds": 249.569679
+    },
+    {
+      "round": 8,
+      "variant": "after",
+      "milliseconds": 235.100909
+    },
+    {
+      "round": 8,
+      "variant": "before",
+      "milliseconds": 233.362466
+    },
+    {
+      "round": 9,
+      "variant": "before",
+      "milliseconds": 243.717618
+    },
+    {
+      "round": 9,
+      "variant": "after",
+      "milliseconds": 245.568725
+    },
+    {
+      "round": 10,
+      "variant": "after",
+      "milliseconds": 236.938117
+    },
+    {
+      "round": 10,
+      "variant": "before",
+      "milliseconds": 260.7468
+    },
+    {
+      "round": 11,
+      "variant": "before",
+      "milliseconds": 238.053796
+    },
+    {
+      "round": 11,
+      "variant": "after",
+      "milliseconds": 244.833786
+    },
+    {
+      "round": 12,
+      "variant": "after",
+      "milliseconds": 251.721691
+    },
+    {
+      "round": 12,
+      "variant": "before",
+      "milliseconds": 234.551067
+    },
+    {
+      "round": 13,
+      "variant": "before",
+      "milliseconds": 235.41746
+    },
+    {
+      "round": 13,
+      "variant": "after",
+      "milliseconds": 250.530227
+    },
+    {
+      "round": 14,
+      "variant": "after",
+      "milliseconds": 234.017848
+    },
+    {
+      "round": 14,
+      "variant": "before",
+      "milliseconds": 240.32462
+    },
+    {
+      "round": 15,
+      "variant": "before",
+      "milliseconds": 233.425469
+    },
+    {
+      "round": 15,
+      "variant": "after",
+      "milliseconds": 248.419495
+    },
+    {
+      "round": 16,
+      "variant": "after",
+      "milliseconds": 239.882622
+    },
+    {
+      "round": 16,
+      "variant": "before",
+      "milliseconds": 241.409077
+    },
+    {
+      "round": 17,
+      "variant": "before",
+      "milliseconds": 245.812355
+    },
+    {
+      "round": 17,
+      "variant": "after",
+      "milliseconds": 257.203699
+    },
+    {
+      "round": 18,
+      "variant": "after",
+      "milliseconds": 233.407448
+    },
+    {
+      "round": 18,
+      "variant": "before",
+      "milliseconds": 236.662288
+    },
+    {
+      "round": 19,
+      "variant": "before",
+      "milliseconds": 242.519658
+    },
+    {
+      "round": 19,
+      "variant": "after",
+      "milliseconds": 240.385527
+    },
+    {
+      "round": 20,
+      "variant": "after",
+      "milliseconds": 254.566245
+    },
+    {
+      "round": 20,
+      "variant": "before",
+      "milliseconds": 240.984682
+    }
+  ],
+  "median_ms": {
+    "before": 239.618877,
+    "after": 243.85413499999999
+  },
+  "change_percent": 1.7674976416820476,
+  "stdout": "PASS empty body lookup returns zero\nPASS body lookup preserves first match\nPASS middle body lookup preserves all fields\nPASS later body lookup preserves all fields\nPASS missing body lookup returns zero\nPASS initial scene\nPASS partial cut\nPASS one support remains\nPASS last support detaches\nPASS floor clamp and zero velocity\nPASS all protected anchors remain\nPASS merged mesh preserves exposed voxel-face area\nPASS merged mesh preserves exposed voxel-face area\nPASS face connectivity\nPASS edge contact is not connectivity\nPASS different owners do not merge\nPASS 64 body fixture\nPASS over-cap cut rolls back\nPASS removing body frees slot\nPASS split at cap commits\nPASS split moving body preserves velocity\nPASS removing landed body's bottom resumes fall\nPASS empty cut changes nothing\nALL WORLD CHECKS PASSED\n",
+  "binary_sha256": {
+    "before": "e05aeaac13ad00b9ef9bfb720b244c6cb99a931ee2bb2a4ddfe8a905cccf3fd8",
+    "after": "c6d1a766a5b01f4e0fb860ea7ae9aaaede48131e763fff54cbdad7887d3b6530"
+  }
+}

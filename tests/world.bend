@@ -92,8 +92,20 @@ def verify.inherit(w: W.World) -> IO(Unit):
 def verify.resume(w: W.World) -> IO(Unit):
   W.World{_, bs, _, _, _, _} = w
   check(Bool.not(landed(bs)), "removing landed body's bottom resumes fall")
+def verify.lookup(bs: List<&2,W.Body>, id: U32, +expected: F32, label: String) -> IO(Unit):
+  W.vec(IO(Unit),W.body.find(bs,id),x => y => z =>
+    check((F32.is_eq(x,expected) && F32.is_eq(y,(expected * 2.0 : F32)) && F32.is_eq(z,(expected * 3.0 : F32))),label))
+def verify.lookups() -> IO(Unit):
+  +bs = {[W.Body{7,1.0,2.0,3.0,Nil{}},W.Body{2,2.0,4.0,6.0,Nil{}},W.Body{9,3.0,6.0,9.0,Nil{}},W.Body{7,4.0,8.0,12.0,Nil{}}] : List<&2,W.Body>}
+  do IO<Unit>:
+    Unit <- verify.lookup(Nil{},7,0.0,"empty body lookup returns zero")
+    Unit <- verify.lookup(bs,7,1.0,"body lookup preserves first match")
+    Unit <- verify.lookup(bs,2,2.0,"middle body lookup preserves all fields")
+    Unit <- verify.lookup(bs,9,3.0,"later body lookup preserves all fields")
+    verify.lookup(bs,0,0.0,"missing body lookup returns zero")
 def main() -> IO(Unit):
   do IO<Unit>:
+    Unit <- verify.lookups()
     w : W.World <- inspect(W.initial(),4640,0,1,"initial scene")
     w : W.World <- inspect(W.carve(w,R.Vec{(0.0 - 1.0 : F32),1.05,0.3}),4622,0,1,"partial cut")
     w : W.World <- inspect(sever(w,(0.0 - 1.0 : F32)),4524,0,1,"one support remains")

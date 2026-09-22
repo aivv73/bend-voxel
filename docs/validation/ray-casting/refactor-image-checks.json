@@ -1,0 +1,66 @@
+[
+  {
+    "image": "64-fragments-cpu-dda.png",
+    "identical": true
+  },
+  {
+    "image": "64-fragments-cpu-raster.png",
+    "identical": true
+  },
+  {
+    "image": "64-fragments-cuda-dda.png",
+    "identical": true
+  },
+  {
+    "image": "64-fragments-cuda-raster.png",
+    "identical": true
+  },
+  {
+    "image": "falling-cpu-dda.png",
+    "identical": true
+  },
+  {
+    "image": "falling-cpu-raster.png",
+    "identical": true
+  },
+  {
+    "image": "falling-cuda-dda.png",
+    "identical": true
+  },
+  {
+    "image": "falling-cuda-raster.png",
+    "identical": true
+  },
+  {
+    "image": "initial-cpu-dda.png",
+    "identical": true
+  },
+  {
+    "image": "initial-cpu-raster.png",
+    "identical": true
+  },
+  {
+    "image": "initial-cuda-dda.png",
+    "identical": true
+  },
+  {
+    "image": "initial-cuda-raster.png",
+    "identical": true
+  },
+  {
+    "image": "landed-cpu-dda.png",
+    "identical": true
+  },
+  {
+    "image": "landed-cpu-raster.png",
+    "identical": true
+  },
+  {
+    "image": "landed-cuda-dda.png",
+    "identical": true
+  },
+  {
+    "image": "landed-cuda-raster.png",
+    "identical": true
+  }
+]

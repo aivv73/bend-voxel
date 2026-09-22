@@ -1,0 +1,26 @@
+[
+  {
+    "scene": "initial",
+    "exit_code": 1,
+    "output": "pixel_ray_mismatches,2\n",
+    "stderr": "FAIL 230400 pixel rays match nearest face distance\n"
+  },
+  {
+    "scene": "falling",
+    "exit_code": 0,
+    "output": "pixel_ray_mismatches,0\nPASS 230400 pixel rays match nearest face distance\n",
+    "stderr": ""
+  },
+  {
+    "scene": "64-fragments",
+    "exit_code": 0,
+    "output": "pixel_ray_mismatches,0\nPASS 230400 pixel rays match nearest face distance\n",
+    "stderr": ""
+  },
+  {
+    "scene": "landed",
+    "exit_code": 0,
+    "output": "pixel_ray_mismatches,0\nPASS 230400 pixel rays match nearest face distance\n",
+    "stderr": ""
+  }
+]

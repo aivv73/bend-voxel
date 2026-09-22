@@ -1,0 +1,542 @@
+{
+  "bend": "bend 2.0.25",
+  "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+  "backend": "CPU",
+  "threads": 1,
+  "lookups_per_case": 19200,
+  "warmup_processes_per_binary": 1,
+  "binary_sha256": {
+    "before": "c9cf33b9781a9b305353c40e0a9f521e5c4d6bbc8b3f6b98f631c85dac07ab8c",
+    "after": "4c01a5bf89d2a4e9fcfd207e285c1b821e48baabb42a5e5c7260cb2bfb97e0cd"
+  },
+  "checksums": {
+    "empty": 0,
+    "single": 115200,
+    "head": 115200,
+    "middle": 729600,
+    "tail": 1344000,
+    "missing": 0
+  },
+  "samples": [
+    {
+      "round": 1,
+      "variant": "before",
+      "microseconds": {
+        "empty": 563,
+        "single": 591,
+        "head": 5362,
+        "middle": 5910,
+        "tail": 5750,
+        "missing": 5826
+      }
+    },
+    {
+      "round": 1,
+      "variant": "after",
+      "microseconds": {
+        "empty": 1431,
+        "single": 1546,
+        "head": 1594,
+        "middle": 6063,
+        "tail": 6708,
+        "missing": 3663
+      }
+    },
+    {
+      "round": 2,
+      "variant": "after",
+      "microseconds": {
+        "empty": 546,
+        "single": 554,
+        "head": 594,
+        "middle": 2238,
+        "tail": 3887,
+        "missing": 3820
+      }
+    },
+    {
+      "round": 2,
+      "variant": "before",
+      "microseconds": {
+        "empty": 708,
+        "single": 598,
+        "head": 5988,
+        "middle": 9076,
+        "tail": 7697,
+        "missing": 9468
+      }
+    },
+    {
+      "round": 3,
+      "variant": "before",
+      "microseconds": {
+        "empty": 1332,
+        "single": 1852,
+        "head": 17692,
+        "middle": 12980,
+        "tail": 11743,
+        "missing": 12248
+      }
+    },
+    {
+      "round": 3,
+      "variant": "after",
+      "microseconds": {
+        "empty": 544,
+        "single": 567,
+        "head": 631,
+        "middle": 2264,
+        "tail": 3999,
+        "missing": 6638
+      }
+    },
+    {
+      "round": 4,
+      "variant": "after",
+      "microseconds": {
+        "empty": 672,
+        "single": 708,
+        "head": 731,
+        "middle": 2898,
+        "tail": 4749,
+        "missing": 4192
+      }
+    },
+    {
+      "round": 4,
+      "variant": "before",
+      "microseconds": {
+        "empty": 632,
+        "single": 720,
+        "head": 6027,
+        "middle": 5926,
+        "tail": 6362,
+        "missing": 6153
+      }
+    },
+    {
+      "round": 5,
+      "variant": "before",
+      "microseconds": {
+        "empty": 1467,
+        "single": 1140,
+        "head": 6302,
+        "middle": 5993,
+        "tail": 5869,
+        "missing": 5763
+      }
+    },
+    {
+      "round": 5,
+      "variant": "after",
+      "microseconds": {
+        "empty": 560,
+        "single": 578,
+        "head": 574,
+        "middle": 2272,
+        "tail": 3757,
+        "missing": 4009
+      }
+    },
+    {
+      "round": 6,
+      "variant": "after",
+      "microseconds": {
+        "empty": 526,
+        "single": 588,
+        "head": 570,
+        "middle": 2294,
+        "tail": 4030,
+        "missing": 5029
+      }
+    },
+    {
+      "round": 6,
+      "variant": "before",
+      "microseconds": {
+        "empty": 855,
+        "single": 1056,
+        "head": 6705,
+        "middle": 8469,
+        "tail": 10349,
+        "missing": 5643
+      }
+    },
+    {
+      "round": 7,
+      "variant": "before",
+      "microseconds": {
+        "empty": 598,
+        "single": 707,
+        "head": 5492,
+        "middle": 6691,
+        "tail": 5927,
+        "missing": 6549
+      }
+    },
+    {
+      "round": 7,
+      "variant": "after",
+      "microseconds": {
+        "empty": 535,
+        "single": 629,
+        "head": 612,
+        "middle": 2331,
+        "tail": 3847,
+        "missing": 3842
+      }
+    },
+    {
+      "round": 8,
+      "variant": "after",
+      "microseconds": {
+        "empty": 725,
+        "single": 688,
+        "head": 733,
+        "middle": 2355,
+        "tail": 3860,
+        "missing": 3772
+      }
+    },
+    {
+      "round": 8,
+      "variant": "before",
+      "microseconds": {
+        "empty": 753,
+        "single": 761,
+        "head": 5380,
+        "middle": 5906,
+        "tail": 5698,
+        "missing": 5723
+      }
+    },
+    {
+      "round": 9,
+      "variant": "before",
+      "microseconds": {
+        "empty": 569,
+        "single": 619,
+        "head": 5408,
+        "middle": 5935,
+        "tail": 5698,
+        "missing": 5819
+      }
+    },
+    {
+      "round": 9,
+      "variant": "after",
+      "microseconds": {
+        "empty": 1338,
+        "single": 1405,
+        "head": 1514,
+        "middle": 5923,
+        "tail": 9037,
+        "missing": 3954
+      }
+    },
+    {
+      "round": 10,
+      "variant": "after",
+      "microseconds": {
+        "empty": 573,
+        "single": 567,
+        "head": 581,
+        "middle": 2263,
+        "tail": 3866,
+        "missing": 3709
+      }
+    },
+    {
+      "round": 10,
+      "variant": "before",
+      "microseconds": {
+        "empty": 1366,
+        "single": 1854,
+        "head": 12178,
+        "middle": 5918,
+        "tail": 5702,
+        "missing": 5710
+      }
+    },
+    {
+      "round": 11,
+      "variant": "before",
+      "microseconds": {
+        "empty": 539,
+        "single": 714,
+        "head": 5401,
+        "middle": 5835,
+        "tail": 5730,
+        "missing": 5743
+      }
+    },
+    {
+      "round": 11,
+      "variant": "after",
+      "microseconds": {
+        "empty": 1370,
+        "single": 1421,
+        "head": 1448,
+        "middle": 5679,
+        "tail": 10064,
+        "missing": 4984
+      }
+    },
+    {
+      "round": 12,
+      "variant": "after",
+      "microseconds": {
+        "empty": 656,
+        "single": 702,
+        "head": 748,
+        "middle": 2934,
+        "tail": 4774,
+        "missing": 4646
+      }
+    },
+    {
+      "round": 12,
+      "variant": "before",
+      "microseconds": {
+        "empty": 872,
+        "single": 1170,
+        "head": 7079,
+        "middle": 5956,
+        "tail": 5968,
+        "missing": 5941
+      }
+    },
+    {
+      "round": 13,
+      "variant": "before",
+      "microseconds": {
+        "empty": 1465,
+        "single": 1535,
+        "head": 9189,
+        "middle": 5964,
+        "tail": 5709,
+        "missing": 5745
+      }
+    },
+    {
+      "round": 13,
+      "variant": "after",
+      "microseconds": {
+        "empty": 1392,
+        "single": 1401,
+        "head": 1431,
+        "middle": 5725,
+        "tail": 5270,
+        "missing": 3877
+      }
+    },
+    {
+      "round": 14,
+      "variant": "after",
+      "microseconds": {
+        "empty": 1349,
+        "single": 1435,
+        "head": 1484,
+        "middle": 5844,
+        "tail": 9587,
+        "missing": 7298
+      }
+    },
+    {
+      "round": 14,
+      "variant": "before",
+      "microseconds": {
+        "empty": 708,
+        "single": 793,
+        "head": 5348,
+        "middle": 5826,
+        "tail": 5758,
+        "missing": 5752
+      }
+    },
+    {
+      "round": 15,
+      "variant": "before",
+      "microseconds": {
+        "empty": 695,
+        "single": 919,
+        "head": 6843,
+        "middle": 5968,
+        "tail": 5767,
+        "missing": 5745
+      }
+    },
+    {
+      "round": 15,
+      "variant": "after",
+      "microseconds": {
+        "empty": 543,
+        "single": 564,
+        "head": 597,
+        "middle": 2269,
+        "tail": 3899,
+        "missing": 3839
+      }
+    },
+    {
+      "round": 16,
+      "variant": "after",
+      "microseconds": {
+        "empty": 1343,
+        "single": 1404,
+        "head": 1462,
+        "middle": 5680,
+        "tail": 9484,
+        "missing": 6819
+      }
+    },
+    {
+      "round": 16,
+      "variant": "before",
+      "microseconds": {
+        "empty": 667,
+        "single": 730,
+        "head": 6961,
+        "middle": 7023,
+        "tail": 5903,
+        "missing": 5847
+      }
+    },
+    {
+      "round": 17,
+      "variant": "before",
+      "microseconds": {
+        "empty": 649,
+        "single": 796,
+        "head": 5868,
+        "middle": 5923,
+        "tail": 5949,
+        "missing": 5767
+      }
+    },
+    {
+      "round": 17,
+      "variant": "after",
+      "microseconds": {
+        "empty": 687,
+        "single": 697,
+        "head": 592,
+        "middle": 2312,
+        "tail": 3841,
+        "missing": 3788
+      }
+    },
+    {
+      "round": 18,
+      "variant": "after",
+      "microseconds": {
+        "empty": 527,
+        "single": 566,
+        "head": 593,
+        "middle": 2313,
+        "tail": 4092,
+        "missing": 3797
+      }
+    },
+    {
+      "round": 18,
+      "variant": "before",
+      "microseconds": {
+        "empty": 698,
+        "single": 777,
+        "head": 9053,
+        "middle": 7158,
+        "tail": 5815,
+        "missing": 5823
+      }
+    },
+    {
+      "round": 19,
+      "variant": "before",
+      "microseconds": {
+        "empty": 704,
+        "single": 1285,
+        "head": 9516,
+        "middle": 7241,
+        "tail": 5742,
+        "missing": 6018
+      }
+    },
+    {
+      "round": 19,
+      "variant": "after",
+      "microseconds": {
+        "empty": 1381,
+        "single": 1372,
+        "head": 1625,
+        "middle": 5735,
+        "tail": 7501,
+        "missing": 3936
+      }
+    },
+    {
+      "round": 20,
+      "variant": "after",
+      "microseconds": {
+        "empty": 1354,
+        "single": 1391,
+        "head": 1440,
+        "middle": 5805,
+        "tail": 5099,
+        "missing": 4057
+      }
+    },
+    {
+      "round": 20,
+      "variant": "before",
+      "microseconds": {
+        "empty": 576,
+        "single": 793,
+        "head": 5551,
+        "middle": 5950,
+        "tail": 5792,
+        "missing": 5831
+      }
+    }
+  ],
+  "median_microseconds": {
+    "empty": {
+      "before": 701.0,
+      "after": 679.5,
+      "change_percent": -3.0670470756062773
+    },
+    "single": {
+      "before": 793.0,
+      "after": 699.5,
+      "change_percent": -11.790668348045397
+    },
+    "head": {
+      "before": 6164.5,
+      "after": 732.0,
+      "change_percent": -88.1255576283559
+    },
+    "middle": {
+      "before": 5960.0,
+      "after": 2626.5,
+      "change_percent": -55.93120805369127
+    },
+    "tail": {
+      "before": 5803.5,
+      "after": 4420.5,
+      "change_percent": -23.83044714396485
+    },
+    "missing": {
+      "before": 5821.0,
+      "after": 3945.0,
+      "change_percent": -32.22813949493214
+    }
+  },
+  "baseline_revision": "65d7197ad17551390ef2b71c0e3e54dc019dfdf5",
+  "cpu": "AMD Ryzen 5 1600 Six-Core Processor",
+  "source_sha256": {
+    "build/lookup-audit/world-before.bend": "50520b2dec39234acbf45bf5c1247a974449f55a158f393a66e11161e0476c8a",
+    "src/world.bend": "881e62bb237650630a09074cbf98ed64736fd4f1c05a4c23bfaff4b4b9706d16",
+    "scripts/lookup-bench.bend": "cd3b613233d9253bb0a8d2cd4ac4c275d2ee921ea07744574fac7983981d77aa",
+    "scripts/benchmark_lookups.py": "211a7fa1eb7e47f0730ca8fe20176605f052d569842abc4ec4d4dcb950f7bd21"
+  }
+}
