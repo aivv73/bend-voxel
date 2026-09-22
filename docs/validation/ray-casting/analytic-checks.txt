@@ -1,0 +1,14 @@
+nearest body independent of list order,1,2,0
+negative X,0.4,2,1
+translated top,1.25,2,3
+translated bottom,1.65,2,2
+positive Z,1,2,4
+negative Z,0.9,2,5
+parallel ray outside slab,1000000,0,0
+grazing miss,1000000,0,0
+occupied cell of another owner is skipped,1000000,0,0
+simultaneous slab entry,1.4142135,2,0
+origin inside occupied cell,0,2,0
+finite floor miss,1000000,0,0
+finite floor hit,2,4294967295,3
+PASS 13 analytic ray checks

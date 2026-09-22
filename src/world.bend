@@ -164,19 +164,19 @@ def assign(ids: List<&2, U32>, +owner: U32, a: Array<U32>) -> Array<U32>:
     case i <> rest:
       assign(rest, owner, Array.set(U32, a, i, owner))
 
-def vec.choose(on: Bool, a: R.Vec, b: R.Vec) -> R.Vec:
-  match on:
-    case True{}:
-      a
-    case False{}:
-      b
-
-def body.find(bs: List<&2, Body>, +id: U32) -> R.Vec:
-  match bs:
-    case Nil{}:
+# Carry the comparison into the next call so matching can stop the search
+# without evaluating a recursive selector argument or allocating a closure.
+def body.find.go(bs: List<&2, Body>, +id: U32, found: Bool, value: R.Vec) -> R.Vec:
+  match bs found:
+    case _ True{}:
+      value
+    case Nil{} False{}:
       R.Vec{0.0, 0.0, 0.0}
-    case Body{i, offset, speed, bottom, _} <> rest:
-      vec.choose(U32.is_eq(i, id), R.Vec{offset, speed, bottom}, body.find(rest, id))
+    case Body{i, offset, speed, bottom, _} <> rest False{}:
+      body.find.go(rest, id, U32.is_eq(i, id), R.Vec{offset, speed, bottom})
+
+def body.find(bs: List<&2, Body>, id: U32) -> R.Vec:
+  body.find.go(bs, id, False{}, R.Vec{0.0, 0.0, 0.0})
 
 type Rebuild is Type:
   Rebuild{source: Array<U32>, seen: Array<U32>, output: Array<U32>, bodies: List<&2, Body>, next: U32}

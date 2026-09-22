@@ -1,0 +1,23 @@
+{
+  "src/demo.bend": true,
+  "src/input.bend": true,
+  "src/platform.bend": true,
+  "src/probe.bend": true,
+  "src/render.bend": true,
+  "src/snapshot.bend": true,
+  "src/world.bend": true,
+  "src/platform/micros.c": true,
+  "src/platform/micros.js": true,
+  "src/platform/present.c": true,
+  "src/platform/present.js": true,
+  "src/vendor/LICENSE": true,
+  "src/vendor/bend3d.bend": true,
+  "src/prototype/voxel-ray.bend": true,
+  "src/prototype/ray-bench.bend": true,
+  "src/prototype/ray-checks.bend": true,
+  "src/prototype/ray-full-check.bend": true,
+  "src/prototype/ray-edge-check.bend": true,
+  "scripts/prototype_ray_compare.py": true,
+  "build/ray-bench": true,
+  "build/ray-bench.gpu": true
+}
