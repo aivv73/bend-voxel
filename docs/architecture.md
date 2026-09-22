@@ -1,5 +1,7 @@
 # Voxel Engine Architecture in Bend 2
 
+This is the historical destruction-engine proposal. The active demo now explores terrain stored in a sparse voxel octree; see [terrain demo](terrain-demo.md). The proposal below does not describe the current terrain implementation.
+
 Status: a proposal for the first technical prototype; the engine has not been implemented or benchmarked.
 
 Confirmed goal: small, destructible voxels, architecture first, with the initial build running on the current Linux PC. Level scale, art style, and physics complexity remain unspecified. This proposal starts with a bounded arena, solid opaque materials, and detachable fragments.

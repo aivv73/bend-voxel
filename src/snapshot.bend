@@ -1,5 +1,5 @@
 import Base
-import ./demo.bend as D
+import ./table-demo.bend as D
 import ./render.bend as V
 import ./world.bend as W
 import ./vendor/bend3d.bend as R

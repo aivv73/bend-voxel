@@ -95,7 +95,7 @@ def main():
         print(f'CUDA benchmark {run}/{args.runs}: 5 s warm-up + 60 s measured', flush=True)
         log = out / f'run-{run}.csv'
         with log.open('w') as stream:
-            proc = subprocess.run([str(root / 'build/voxel-demo'), '--gpu', 'on'], cwd=root, env={**os.environ, 'VOXEL_BENCH': '1'}, stdout=stream, stderr=subprocess.PIPE, text=True, timeout=180)
+            proc = subprocess.run([str(root / 'build/voxel-table-demo'), '--gpu', 'on'], cwd=root, env={**os.environ, 'VOXEL_BENCH': '1'}, stdout=stream, stderr=subprocess.PIPE, text=True, timeout=180)
         (out / f'run-{run}.stderr').write_text(proc.stderr)
         with log.open() as stream:
             result = {'run': run, **parse_run(stream, proc.returncode)}

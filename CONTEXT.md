@@ -1,6 +1,6 @@
-# Destructible Voxel World
+# Voxel World
 
-Glossary for the proposed game engine model. The world consists of material that can be destroyed and separated into moving parts.
+Glossary for the voxel world and terrain exploration. Destruction and moving-body terms describe the earlier prototype.
 
 ## Language
 
@@ -10,6 +10,9 @@ _Avoid_: Minecraft block, physical body.
 
 **Material**:
 A substance with visual and physical properties, such as stone, wood, or metal.
+
+**Terrain**:
+The stationary ground of the world, including hills, valleys, and exposed layers of material.
 
 **Static world**:
 The stationary part of the environment connected to the level's anchors.

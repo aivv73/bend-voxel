@@ -37,7 +37,7 @@ def capture(cmd):
 def fingerprints():
     paths = [p for folder in ('src', 'scripts', 'tests') for p in (ROOT/folder).rglob('*')
              if p.is_file() and '__pycache__' not in p.parts]
-    paths += [ROOT/'build'/name for name in ('voxel-demo', 'voxel-demo.gpu', 'voxel-snapshot', 'voxel-snapshot.gpu')]
+    paths += [ROOT/'build'/name for name in ('voxel-table-demo', 'voxel-table-demo.gpu', 'voxel-snapshot', 'voxel-snapshot.gpu')]
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}
 
 
@@ -135,7 +135,7 @@ def main():
         base = out/f"run-{index:02d}-{config['backend']}-t{config['threads']}"
         log = base.with_suffix('.csv')
         telemetry = capture(['nvidia-smi', '--query-gpu=temperature.gpu,power.draw,utilization.gpu,clocks.sm', '--format=csv'])
-        result = run_logged(command('voxel-demo', config), {**env, 'VOXEL_BENCH': '1'}, log, 180)
+        result = run_logged(command('voxel-table-demo', config), {**env, 'VOXEL_BENCH': '1'}, log, 180)
         with log.open() as stream:
             parsed = parse_run(stream, result['exit_code'])
         result.update(parsed, **config, sequence=index, gpu_before=telemetry,

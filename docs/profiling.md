@@ -1,5 +1,7 @@
 # Stage probe and deterministic snapshots
 
+This guide applies to the legacy table workload in `src/table-demo.bend`. `make benchmark`, `make snapshots`, and `make compare-backends` continue to use that workload; they do not measure the default terrain demo.
+
 The probe follows the official [Slash Boss timing and image-tree dump pattern](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/main.bend): complete an operation through `IO.pure`, then read the clock. It uses the voxel demo's existing workload and presentation path. This is diagnostic instrumentation, not a change to the acceptance thresholds.
 
 ## Timings

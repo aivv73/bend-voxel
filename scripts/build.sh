@@ -8,6 +8,6 @@ fi
 export CUDA_HOME="${CUDA_HOME:-/opt/cuda}"
 mkdir -p build
 target="${1:-demo}"
-case "$target" in demo|snapshot) ;; *) echo "Unknown target: $target" >&2; exit 1;; esac
+case "$target" in demo|table-demo|snapshot) ;; *) echo "Unknown target: $target" >&2; exit 1;; esac
 bend "src/$target.bend" -o "build/voxel-$target"
 [[ -f build/voxel-$target.gpu ]] || { echo 'CUDA module missing; check CUDA_HOME.' >&2; exit 1; }

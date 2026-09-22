@@ -1,5 +1,7 @@
 # First demo validation
 
+These results describe the legacy table demo in `src/table-demo.bend`. They are not terrain performance results. See [terrain demo](terrain-demo.md) for the current default.
+
 ## Scope
 
 The demo implements the scene and interaction decisions from GitHub issues #2–#6 in `aivv73/bend-voxel`. Planning completion is separate from executable acceptance.
