@@ -1,85 +1,36 @@
-# Stage probe and deterministic snapshots
+# Vulkan replay profiling
 
-The probe follows the official [Slash Boss timing and image-tree dump pattern](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/main.bend): complete an operation through `IO.pure`, then read the clock. It uses the voxel demo's existing workload and presentation path. This is diagnostic instrumentation, not a change to the acceptance thresholds.
+Run `make benchmark` after installing the dependencies listed in the [README](../README.md). The native window uses a 640 × 360 logical viewport. Each of three runs records five seconds of warm-up and sixty seconds of measured work. A single diagnostic run can be requested with `python3 scripts/benchmark.py --runs 1 --output build/pilot` after `make build`; three passing runs are required for acceptance.
 
-## Timings
+Every duration is a wall-clock microsecond interval. The Vulkan frame effect includes Bend heap traversal, native scene and HUD geometry preparation, upload, draw submission, presentation, event handling, and X11 synchronization. The frame interval includes gameplay, scene preparation, and the effect. X11 synchronization confirms server processing rather than physical display scanout.
 
-Run `make benchmark`. Bend 2.0.26 and the CUDA backend are required. The native window uses the existing 640 × 360 viewport. Each of three runs records five seconds of warm-up and sixty seconds of measured work.
-
-Every duration is a wall-clock microsecond interval. CUDA rendering includes the invocation's host/device work and synchronization; it is not a kernel-only GPU timer. Presentation ends after X11 `XSync`, which confirms server processing rather than physical display scanout.
-
-The raw CSV contains these rows (without a header):
+The raw CSV contains these rows without a header:
 
 ```text
 frame,elapsed_us,frame_us,solids,bodies
-stage,elapsed_us,carve_us,connectivity_us,surface_us,finalize_us,update_other_us,scene_us,render_us,dispose_us,present_us,overhead_us
+stage,elapsed_us,carve_us,connectivity_us,surface_us,finalize_us,update_other_us,scene_us,vulkan_frame_us,overhead_us
 cut,scheduled_absolute_us,latency_us,status,kind
 attempt,scheduled_absolute_us,latency_us,status,kind
 edit,frame_elapsed_us,scheduled_absolute_us,kind,status,carve_us,connectivity_us,surface_us,finalize_us
 ```
 
-`frame_us` remains the entire interval between completed presentations. The first frame starts at the benchmark epoch. Cut/attempt latency still starts at the scheduled command time and ends at completed presentation, including queueing. Absolute timestamps are wrapping U32 microseconds; durations use modular subtraction in Bend. No slow samples are removed. The final frame crossing the 65-second boundary is retained.
+`frame_us` is the entire interval between completed presentations. The first frame starts at the benchmark epoch. Cut and attempt latency starts at the scheduled command time and ends after presentation, including queueing. Absolute timestamps are wrapping U32 microseconds; durations use modular subtraction in Bend. No slow samples are removed. The final frame crossing the 65-second boundary is retained.
 
-The ten exclusive stage components add up exactly to each frame's end-to-end duration:
+The eight exclusive stage components add up to each frame's interval:
 
 | Stage | Boundary |
 | --- | --- |
 | Carving | Clone the candidate voxel array and remove eligible cells. |
-| Connectivity | Full-grid scan, six-face flood fill, component classification and body ID assignment. |
+| Connectivity | Full-grid scan, six-face flood fill, component classification, and body ID assignment. |
 | Surface generation | Build cached, merged exposed-face rectangles for classified bodies. |
-| Edit finalization | Commit the candidate or roll back at the body cap; a no-op transaction also finalizes here. |
-| Other update | Physics, command lookup/validation, reset, camera update, and surrounding timing/control work. |
-| Scene preparation | Picking, body transforms, clipping, render-cell construction, brush preview and HUD preparation. |
-| CUDA rendering | `V.frame`, including its completed CUDA invocation and image result. |
-| Cell disposal | Dispose of the render cells returned with the image. |
-| Presentation | Image-tree expansion, pacing, event processing, X11 image/HUD submission and `XSync`. |
-| Overhead | The remaining frame interval, including previous-frame CSV output and loop/control overhead. |
+| Edit finalization | Commit the candidate or roll back at the body cap. |
+| Other update | Physics, command lookup, reset, camera update, and surrounding timing work. |
+| Scene preparation | Picking and HUD text preparation. |
+| Vulkan frame effect | Expand and upload geometry, record and submit draws, present, poll events, and synchronize X11. |
+| Overhead | Remaining interval, including prior-frame CSV output and loop control. |
 
-The timed path uses the same `W.carve.prepare`, `W.carve.classify`, `W.carve.surfaces` and `W.carve.finalize` transaction as interactive carving. Each phase is forced through `IO.pure` before its end timestamp. Protected and empty-target commands skip the transaction and record zero for all four edit stages. A carve request with no removable voxels still runs preparation, then skips classification and surface generation work. Multiple edits within one frame produce individual `edit` rows and summed frame-stage durations. The surface interval includes phase result materialization and clock boundary overhead; it is a wall-clock stage, not a GPU kernel measurement.
+The timed path uses the same `W.carve.prepare`, `W.carve.classify`, `W.carve.surfaces`, and `W.carve.finalize` transaction as interactive carving. Each phase is forced through `IO.pure` before its end timestamp. Protected and empty-target commands skip the transaction and record zero for all four edit stages. Multiple edits within one frame produce individual `edit` rows and summed frame-stage durations.
 
-The report validates frame/stage joins, uninterrupted end-to-end intervals, stage sums, per-edit sums, and edit/latency correspondence. `instrumentation_pass`, `workload_pass` and `performance_pass` are separate. Statistics exclude warm-up frames ending before five seconds; the raw CSV retains them. `active_edits` reports accepted-edit timings separately, avoiding zero-heavy frame distributions hiding expensive edits. Stage percentiles are not additive.
+The report validates frame/stage joins, uninterrupted frame intervals, stage sums, per-edit sums, and edit/latency correspondence. `instrumentation_pass`, `workload_pass`, and `performance_pass` are separate. Statistics exclude warm-up frames ending before five seconds; the raw CSV retains them. Stage percentiles are not additive. Instrumentation and CSV output cost remains in the end-to-end measurements.
 
-Instrumentation and CSV output have a cost. That cost remains in end-to-end measurements; do not subtract it to claim an acceptance pass. These instrumented results should not be treated as an uninstrumented compiler comparison.
-
-Archived reports under `docs/validation/` retain the earlier CSV layout with one combined `connectivity_meshing` stage. The current parser expects the split fields above; generate a fresh run to compare connectivity and surface costs.
-
-## Snapshots
-
-```sh
-make snapshots
-# After building, choose specific ticks (0–1199):
-python3 scripts/snapshot.py --ticks 0 408 540 --output build/snapshots
-```
-
-`src/snapshot.bend` runs the same replay commands and world/scene code at a fixed 60 Hz, starting at the first replay cycle's reset. Tick 0 is the initial scene; tick 408 is the moving-body cut; tick 540 is the landed-body cut. Defaults also cover the partial cut, support severing and orbit. This deterministic simulation clock differs from the benchmark's real elapsed clock.
-
-Snapshots run in a separate process without opening a window; no snapshot file output occurs in the timed benchmark. CUDA is forced on by default; `--gpu off` supports an explicitly labeled CPU comparison. No display server is needed for snapshots.
-
-Each tick writes:
-
-- A 640 × 360 RGB PNG, cropped from Bend3D's 2048-square image root.
-- A `.tree.gz` preserving the complete dump and state/HUD text.
-- JSON containing voxel/body state, transforms/velocities, backend, compiler version, source hashes and pixel SHA-256.
-- A stderr file for runtime diagnostics.
-
-The tree format is the official probe's preorder protocol: `Q` followed by top-left, top-right, bottom-left and bottom-right children; a decimal RGB value fills a leaf square. The decoder rejects malformed, truncated, over-deep and surplus data. PNG output uses Python's standard library.
-
-Native X11 HUD text is recorded in JSON and the dump, but is not painted into the snapshot PNG. HUD frame/cut times are zero on the fixed-clock path. Compare pixel hashes and state at the same tick/backend to check repeatability; cross-backend or cross-driver floating-point equivalence is not assumed.
-
-## Controlled CPU/CUDA comparison
-
-```sh
-make compare-backends
-# Customize the sweep and preserve an earlier experiment:
-make compare-backends COMPARE_ARGS='--threads 1 2 4 6 12 --rounds 2 --output build/comparison-next'
-```
-
-The runner builds each executable once and uses those same binaries with explicit `--gpu off/on` and `--threads N`. Default counts cover one worker, intermediate counts, six physical cores and twelve logical CPUs on the validation machine. Choose counts appropriate to another host. It sanitizes inherited `VOXEL_*` overrides and records hardware, CPU affinity, display, compiler, source and binary hashes. The output directory must be empty to avoid overwriting evidence.
-
-Before timing, all seven fixed-clock snapshots run at every backend/thread configuration, with `DISPLAY` unset. Decoded RGB hashes, HUD text, voxel/body counts and recorded body transforms/velocities must exactly match the first CPU configuration at the same tick. Dumps, PNGs and metadata are retained. A mismatch or failed snapshot prevents timing. This is bounded regression evidence, not proof of complete world-state equivalence; the snapshots do not serialize every voxel.
-
-Each measured process uses the existing five-second warm-up and sixty-second native-window replay. Adjacent CPU/CUDA pairs use the same thread count. Round 1 traverses counts forward with CPU first; round 2 reverses counts and runs CUDA first. Further rounds alternate these orders; an even number balances first/last positions. Runs execute serially, after all builds and snapshot work. Keep other workloads idle and avoid interacting with the benchmark window. GPU telemetry before each run and host load afterward provide context but do not remove desktop, clock, thermal or scheduling noise. The script does not lock clocks or reserve the machine.
-
-`report.json` is checkpointed after each probe and run. Raw CSV/stderr and individual percentiles remain available; the summary lists each run's frame/cut p95 and the median of frame-p95 values, without pooling frames across runs. `diagnostic_pass` requires matching snapshots, valid workloads/instrumentation and unchanged source/binary hashes. Performance misses remain visible but do not fail this diagnostic command. Timeout/failed runs remain in the report and invalidate the diagnostic result. The legacy stage key `cuda_rendering` refers to CPU rendering in CPU runs.
-
-The event schedule, viewport and code are shared, but the native benchmark advances physics with real elapsed time: backends do not render identical frame-by-frame states. Fixed-clock checks are a separate correctness control. Interpret windowed results as end-to-end behavior under the same scheduled workload, not isolated renderer or compiler speedup. Two rounds are an initial ordering-controlled diagnostic, not a confidence interval. Use more balanced rounds to establish small differences. CPU results and a tuned CUDA thread count do not replace the agreed three-run forced-CUDA acceptance test.
+Historical Bend3D snapshot and CPU/CUDA comparison procedures are documented in [the earlier validation](demo-validation.md) and [the controlled comparison](research/controlled-cpu-cuda.md). Their commands are no longer part of the current build.

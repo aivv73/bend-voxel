@@ -1,39 +1,25 @@
 # Voxel Engine in Bend 2
 
-A native Linux demo of small, destructible voxels, implemented in Bend 2. A slab rests on two supports: carve through them to detach the slab, then cut it while falling or after it lands.
+A native Linux demo of small, destructible voxels, implemented in Bend 2 with Vulkan rendering. A slab rests on two supports: carve through them to detach the slab, then cut it while falling or after it lands.
 
-![Native Bend voxel demo](docs/images/first-demo.png)
+![Native Bend voxel demo](docs/validation/vulkan-renderer/initial-vulkan.png)
 
 ## Run
 
-Requires **Bend 2.0.26**, CUDA (`/opt/cuda` by default), an NVIDIA GPU, Python 3 for the benchmark, and an X11 desktop (including XWayland).
+Requires **Bend 2.0.26**, Linux/X11 or XWayland, a Vulkan 1.3 graphics driver with Xlib surface support, Vulkan and X11 development headers, `glslc`, and `g++`. The benchmark also requires Python 3.
 
 ```sh
 make run
 ```
 
-This builds and launches at **640 × 360 on the CPU by default**. To build or launch separately:
+The build compiles the shaders, native Vulkan library, and Bend application. It launches a 640 × 360 logical view. Bend executes gameplay on the CPU; Vulkan draws and presents the scene. CUDA is not required. To build or launch separately:
 
 ```sh
 make build
 ./scripts/run.sh
-# Opt into CUDA for an interactive run:
-./scripts/run.sh --gpu on
 ```
 
-Set `CUDA_HOME` if CUDA is installed elsewhere. The build checks the compiler version and CUDA module; it does not update Bend automatically. The tested machine is a GTX 1660 / Ryzen 5 1600 Linux desktop.
-
-The interactive CPU default follows the [controlled CPU/CUDA comparison](docs/research/controlled-cpu-cuda.md). Worker count uses the runtime default. `make benchmark` still forces CUDA for acceptance, and `make snapshots` still defaults to CUDA. Launching `build/voxel-demo` directly bypasses the script's CPU default; pass `--gpu off` explicitly for CPU execution.
-
-### Live Vulkan renderer
-
-On Linux/X11 with a Vulkan 1.3 driver, Vulkan development headers and loader, `glslc`, and `g++`:
-
-```sh
-make vulkan-run
-```
-
-This builds a separate executable that uses the same Bend simulation, picking, and edit code. A native Vulkan backend renders its current cached faces, brush preview, and HUD to a swapchain; the X11 adapter returns input events. `make vulkan-benchmark` runs the 65-second replay three times through this path. All three runs passed the workload and performance gates on the GTX 1660. See the [Vulkan renderer results](docs/vulkan-renderer.md) for timing scope and current limits.
+The build checks the pinned Bend version and does not update it automatically. The measured machine is a GTX 1660 / Ryzen 5 1600 Linux desktop.
 
 ## Controls
 
@@ -58,30 +44,21 @@ make test
 make benchmark
 ```
 
-The benchmark takes about 3¼ minutes and opens the native window. It runs the agreed destruction/camera sequence three times, each with a five-second warm-up and sixty-second measurement. Raw samples and the report are saved under `build/benchmarks/`. A failed acceptance gate returns a nonzero exit code. **Current status:** correctness checks pass, but the three-run performance test misses the frame and cut p95 targets. See [validation and results](docs/demo-validation.md).
-
-Stage timings retain every end-to-end sample, including warm-up. Run `make snapshots` for deterministic CUDA-rendered PNGs and world-state dumps. See the [profiling guide](docs/profiling.md) for timing boundaries, CSV fields and snapshot commands.
-
-Run `make compare-backends` for a diagnostic CPU/CUDA thread-count sweep with fixed-clock pixel/state checks and interleaved windowed runs (about 22 minutes). Results go to `build/backend-comparison/`; use a new output directory for each experiment. This does not replace `make benchmark` for forced-CUDA acceptance.
-
+The benchmark opens the Vulkan window and runs the agreed destruction and camera sequence three times. Each run has a five-second warm-up and sixty-second measurement. Raw samples and the report are saved under `build/benchmarks/`; a failed acceptance gate returns a nonzero exit code. The [Vulkan validation](docs/vulkan-renderer.md) records three passing runs on the tested desktop. See the [profiling guide](docs/profiling.md) for timing boundaries and CSV fields.
 
 ## Implementation
 
-- `src/world.bend`: voxel ownership, carving, connectivity, atomic cap enforcement, vertical motion, cached surface rectangles and rows.
-- `src/render.bend`: camera, face picking, clipping, mesh and preview construction; Bend3D CPU/CUDA rasterization.
-- `src/input.bend`: controls, movement and focus handling.
-- `src/demo.bend`: application loop, HUD content and timed replay.
-- `src/demo_vulkan.bend` and `src/vulkan/`: live Vulkan frame effect, native rasterizer and swapchain.
-- `src/platform/`: native clock/window adapter and text presentation.
-
-The vendored [Bend3D source](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/bend3d.bend) is pinned and unchanged. See [third-party notices](src/vendor/NOTICE.md).
+- `src/world.bend`: voxel ownership, carving, connectivity, atomic cap enforcement, vertical motion, and cached surface rectangles.
+- `src/render.bend`: camera geometry and face picking used by gameplay.
+- `src/input.bend`: controls, movement, and focus handling.
+- `src/demo.bend`: gameplay state, HUD content, and timed replay.
+- `src/main.bend` and `src/vulkan/`: application loop, native rasterizer, and swapchain.
+- `src/math.bend`: vector and camera primitives adapted from Bend3D; see the [third-party notice](src/vendor/NOTICE.md).
 
 The broader engine design remains exploratory; this demo uses a bounded dense lattice rather than implementing the proposed sparse world:
 
 - [Architecture and implementation sequence](docs/architecture.md)
-- [Bend capabilities and CUDA verification](docs/bend-feasibility.md)
 - [Demo baseline research](docs/research/demo-baseline.md)
-- [Bend ecosystem resources and recommendations](docs/research/bend-ecosystem.md)
 - [World model glossary](CONTEXT.md)
 
-All project documentation is maintained in English.
+Earlier CPU/CUDA renderer experiments and measurements remain in `docs/` as historical research. All project documentation is maintained in English.

@@ -2,7 +2,7 @@ import Base
 import ../src/input.bend as I
 import ../src/render.bend as V
 import ../src/world.bend as W
-import ../src/vendor/bend3d.bend as R
+import ../src/math.bend as R
 
 def check(ok: Bool, label: String) -> IO(Unit):
   match ok:
@@ -20,10 +20,6 @@ def focused(c: I.Control) -> Bool:
 def reset(c: I.Control) -> Bool:
   I.Control{_,_,_,_,_,_,_,_,reset,_} = c
   reset
-def clipping(xs: List<R.Vec>, +count: U32) -> Bool:
-  match xs:
-    case Nil{}: U32.is_eq(count,4)
-    case p <> rest: ((V.depth(p) >= 0.049999 : F32) && clipping(rest,(count + 1 : U32)))
 def hit(a: V.Aim, kind0: U32, t0: F32) -> Bool:
   V.Aim{_,t,kind} = a
   (U32.is_eq(kind,kind0) && (F32.abs((t - t0 : F32)) < 0.0001 : F32))
@@ -35,9 +31,6 @@ def moved(c: I.Control) -> Bool:
 def main() -> IO(Unit):
   +held = I.mouse(320,180,0,True{},I.initial())
   +released = I.key(27,True{},I.key(119,True{},I.initial()))
-  +a = {R.Vec{0.0,0.0,0.01} : R.Vec}
-  +b = {R.Vec{1.0,0.0,1.0} : R.Vec}
-  +c = {R.Vec{0.0,1.0,1.0} : R.Vec}
   do IO<Unit>:
     Unit <- check(cut(held),"left press cuts once")
     Unit <- check(Bool.not(cut(I.mouse(320,180,0,True{},held))),"held left does not repeat")
@@ -49,6 +42,5 @@ def main() -> IO(Unit):
     Unit <- check(U32.is_eq(keys(I.key(0,False{},I.key(119,True{},I.initial()))),0),"focus loss clears movement")
     Unit <- check(reset(I.mouse(600,15,0,True{},I.initial())),"reset button")
     Unit <- check(moved(I.step(I.key(101,True{},I.initial()),0.5)),"movement is two meters per second")
-    Unit <- check(clipping(V.clip.walk([a,b,c],c,Nil{}),0),"near-plane crossing produces clipped quad")
     Unit <- check(hit(V.ray.face(1,40,800,3,0.0,1,R.Vec{1.8,4.0,(0.0 - 0.95 : F32)},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},14.0,0}),1,1.9),"merged face far-end picking")
-    IO.print("ALL INPUT AND RENDER CHECKS PASSED")
+    IO.print("ALL INPUT AND AIM CHECKS PASSED")

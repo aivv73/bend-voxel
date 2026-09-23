@@ -1,5 +1,5 @@
 import Base
-import ./vendor/bend3d.bend as R
+import ./math.bend as R
 import ./world.bend as W
 import ./render.bend as V
 import ./input.bend as I
@@ -84,64 +84,12 @@ def hud(n: U32, count: U32, removed: U32, s: U32, kind: U32, frameUs: U32, cutUs
   "FRAME " ++ U32.show((frameUs / 1000 : U32)) ++ " MS  CUT " ++ U32.show((cutUs / 1000 : U32)) ++ " MS\n" ++
   target(kind) ++ "\n" ++ status(s) ++ "\n" ++
   "WASD MOVE  QE UP/DOWN  RMB LOOK  LMB CUT  R RESET  ESC RELEASE"
-def scene.aim(+aim: V.Aim, +camera: V.Camera, s: State, bs: List<&2, W.Body>, n: U32, count: U32, r: U32, status: U32, frameUs: U32, last: U32) -> State & R.Cells & String:
-  V.Aim{_, _, +kind} = aim
-  (s, V.preview((kind > 0 : U32), aim, camera, V.build(bs, camera, aim)), hud(n, count, r, status, kind, frameUs, last))
-
-def scene(s: State, frameUs: U32) -> State & R.Cells & String:
-  State{w, +c, p, +last} = s
-  W.World{a, +bs, +n, +count, +r, +status} = w
-  I.Control{camera, _, _, _, _, _, _, _, _, _} = c
-  scene.aim(I.aim(c, bs), camera, State{W.World{a, bs, n, count, r, status}, c, p, last}, bs, n, count, r, status, frameUs, last)
-def frame.unpack(-T: Type, r: Image & R.Cells, k: Image -> R.Cells -> T) -> T:
-  (im, cells) = r
-  k(im, cells)
-def show.pack(r: Window & Image & List<Event>, s: State) -> IO(Window & Image & List<Event> & State):
-  (win, im, es) = r
-  IO.pure(Window & Image & List<Event> & State, (win, im, es, s))
-
-def show.drawn(r: Image & R.Cells, win: Window, s: State, hud: String) -> IO(Window & Image & List<Event> & State):
-  (im, cells) = r
-  do IO<Window & Image & List<Event> & State>:
-    unused : R.Cells <- IO.pure(R.Cells,R.Cells.drop(4n,cells))
-    shown : Window & Image & List<Event> <- P.present(win, im, hud)
-    show.pack(shown, s)
-def show.ready(r: State & R.Cells & String, win: Window, old: Image) -> IO(Window & Image & List<Event> & State):
-  (s, cells, hud) = r
-  do IO<Window & Image & List<Event> & State>:
-    +seam : U32 <- P.micros()
-    drawn : Image & R.Cells <- IO.pure(Image & R.Cells, V.frame(cells, old))
-    show.drawn(drawn, win, s, hud)
 def pending.last(p: List<&2, Sample>, +end: U32, last: U32) -> U32:
   match p:
     case Nil{}:
       last
     case Sample{t,status,_,_,_,_,_} <> rest:
       pending.last(rest,end,R.word(U32.is_eq(status,1),(end - t : U32),last))
-def loop.cont(quit: Bool, win: Window, s: State, old: Image, stamp: U32, frameUs: U32, remaining: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  match quit:
-    case True{}:
-      Window.close(win)
-    case False{}:
-      k(win, s, old, stamp, frameUs, remaining)
-def loop.next(+c: I.Control, win: Window, s: State, im: Image, now: U32, dt: U32, +remaining: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  I.Control{_, _, _, _, _, _, _, _, _, quit} = c
-  loop.cont((quit || U32.is_eq(remaining, 1)), win, s, im, now, dt, R.word((remaining > 0 : U32), (remaining - 1 : U32), 0), k)
-def loop.after(win: Window, im: Image, es: List<Event>, s: State, +before: U32, +now: U32, +remaining: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  State{w, c, pending, last} = s
-  state.world(IO(Unit), events(es, State{w, c, Nil{}, pending.last(pending, now, last)}, now), w => +c => p => last =>
-    loop.next(c, win, State{w, c, p, last}, im, before, (now - before : U32), remaining, k))
-def loop.shown(r: Window & Image & List<Event> & State, +before: U32, +remaining: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  (win, im, es, s) = r
-  do IO<Unit>:
-    +now : U32 <- P.micros()
-    loop.after(win, im, es, s, before, now, remaining, k)
-@unsafe
-def loop(win: Window, s: State, old: Image, +stamp: U32, +frameUs: U32, remaining: U32) -> IO(Unit):
-  do IO<Unit>:
-    +now : U32 <- P.micros()
-    shown : Window & Image & List<Event> & State <- show.ready(scene(advance(s, R.min(0.1, (U32.to_f32((now - stamp : U32)) / 1000000.0 : F32))), frameUs), win, old)
-    loop.shown(shown, now, remaining, w => s => im => t => dt => r => loop(w, s, im, t, dt, r))
 def env.read(r: Maybe<&2, U32>) -> U32:
   match r:
     case Some{n}:
@@ -191,53 +139,21 @@ def bench.finalize.sum(p: List<&2,Sample>) -> U32:
   match p:
     case Nil{}: 0
     case Sample{_,_,_,_,_,_,finalize} <> rest: (finalize + bench.finalize.sum(rest) : U32)
-def bench.log(+elapsed: U32, +frame: U32, n: U32, c: U32, +p: List<&2,Sample>, end: U32, +update: U32, +scene: U32, +render: U32, +dispose: U32, +present: U32) -> IO(Unit):
+def bench.log(+elapsed: U32, +frame: U32, n: U32, c: U32, +p: List<&2,Sample>, end: U32, +update: U32, +scene: U32, +render: U32) -> IO(Unit):
   +cut = bench.cut.sum(p)
   +connectivity = bench.connectivity.sum(p)
   +surface = bench.surface.sum(p)
   +finalize = bench.finalize.sum(p)
   do IO<Unit>:
     Unit <- IO.print("frame," ++ U32.show(elapsed) ++ "," ++ U32.show(frame) ++ "," ++ U32.show(n) ++ "," ++ U32.show(c))
-    Unit <- IO.print("stage," ++ U32.show(elapsed) ++ "," ++ U32.show(cut) ++ "," ++ U32.show(connectivity) ++ "," ++ U32.show(surface) ++ "," ++ U32.show(finalize) ++ "," ++ U32.show((update - cut - connectivity - surface - finalize : U32)) ++ "," ++ U32.show(scene) ++ "," ++ U32.show(render) ++ "," ++ U32.show(dispose) ++ "," ++ U32.show(present) ++ "," ++ U32.show((frame - update - scene - render - dispose - present : U32)))
+    Unit <- IO.print("stage," ++ U32.show(elapsed) ++ "," ++ U32.show(cut) ++ "," ++ U32.show(connectivity) ++ "," ++ U32.show(surface) ++ "," ++ U32.show(finalize) ++ "," ++ U32.show((update - cut - connectivity - surface - finalize : U32)) ++ "," ++ U32.show(scene) ++ "," ++ U32.show(render) ++ "," ++ U32.show((frame - update - scene - render : U32)))
     Unit <- bench.logcuts(p,end)
     bench.edits(p,elapsed)
-def bench.finish(done: Bool, win: Window, s: State, im: Image, epoch: U32, end: U32, elapsed: U32, frame: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  match done:
-    case True{}:
-      Window.close(win)
-    case False{}:
-      k(win, s, im, epoch, end, elapsed, frame)
 def events.close(es: List<Event>) -> Bool:
   match es:
     case Nil{}: False{}
     case Close{} <> rest: True{}
     case _ <> rest: events.close(rest)
-def bench.after(update: U32, scene: U32, render: U32, dispose: U32, present: U32, quit: Bool, win: Window, im: Image, s: State, +epoch: U32, previousEnd: U32, elapsed: U32, +end: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  State{w, c, +pending, last} = s
-  W.World{a, bs, +n, +count, r, status} = w
-  +total = (end - epoch : U32)
-  +dt = (end - previousEnd : U32)
-  do IO<Unit>:
-    Unit <- bench.log(total,dt,n,count,pending,end,update,scene,render,dispose,present)
-    bench.finish((quit || (total >= 65000000 : U32)), win, State{W.World{a, bs, n, count, r, status}, c, Nil{}, pending.last(pending, end, last)}, im, epoch, end, elapsed, dt, k)
-def bench.presented(r: Window & Image & List<Event>, s: State, +epoch: U32, stamp: U32, elapsed: U32, update: U32, scene: U32, render: U32, dispose: U32, presentStart: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  (win,im,es) = r
-  do IO<Unit>:
-    +end : U32 <- P.micros()
-    bench.after(update,scene,render,dispose,(end - presentStart : U32),events.close(es),win,im,s,epoch,stamp,elapsed,end,k)
-def bench.drawn(r: Image & R.Cells, s: State, hud: String, win: Window, epoch: U32, stamp: U32, elapsed: U32, update: U32, scene: U32, renderStart: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  (im,cells) = r
-  do IO<Unit>:
-    +renderEnd : U32 <- P.micros()
-    unused : R.Cells <- IO.pure(R.Cells,R.Cells.drop(4n,cells))
-    +disposed : U32 <- P.micros()
-    shown : Window & Image & List<Event> <- P.present(win,im,hud)
-    bench.presented(shown,s,epoch,stamp,elapsed,update,scene,(renderEnd - renderStart : U32),(disposed - renderEnd : U32),disposed,k)
-def bench.render(r: State & R.Cells & String, win: Window, old: Image, epoch: U32, stamp: U32, elapsed: U32, update: U32, scene: U32, renderStart: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  (s,cells,hud) = r
-  do IO<Unit>:
-    drawn : Image & R.Cells <- IO.pure(Image & R.Cells,V.frame(cells,old))
-    bench.drawn(drawn,s,hud,win,epoch,stamp,elapsed,update,scene,renderStart,k)
 def replay.point(+i: U32) -> R.Vec:
   +left = (i < 6 : U32)
   +j = ((i - 2) % 4 : U32)
@@ -326,30 +242,3 @@ def replay.scan.timed(n: Nat, +i: U32, +previous: U32, +elapsed: U32, +epoch: U3
       do IO<State>:
         next : State <- replay.when.timed(((due > previous) && (due <= elapsed) : U32),(i % 14 : U32),s,(epoch + due : U32))
         replay.scan.timed(k,(i + 1 : U32),previous,elapsed,epoch,next)
-@unsafe
-def bench.loop(win: Window, s: State, old: Image, +epoch: U32, +stamp: U32, +previous: U32, +frameUs: U32) -> IO(Unit):
-  do IO<Unit>:
-    +now : U32 <- P.micros()
-    updated : State <- replay.scan.timed(42n,0,previous,(now - epoch : U32),epoch,advance(s,(U32.to_f32((now - epoch - previous : U32)) / 1000000.0 : F32)))
-    camera : State <- IO.pure(State,replay.camera(updated,(now - epoch : U32)))
-    +updateEnd : U32 <- P.micros()
-    ready : State & R.Cells & String <- IO.pure(State & R.Cells & String,scene(camera,frameUs))
-    +sceneEnd : U32 <- P.micros()
-    bench.render(ready,win,old,epoch,stamp,(now - epoch : U32),(updateEnd - now : U32),(sceneEnd - updateEnd : U32),sceneEnd,
-      w => s => im => e => t => elapsed => dt => bench.loop(w,s,im,e,t,elapsed,dt))
-def start(benchmark: Bool, win: Window, +now: U32, limit: U32) -> IO(Unit):
-  match benchmark:
-    case True{}:
-      bench.loop(win, initial(), Pix{0}, now, now, 0, 0)
-    case False{}:
-      loop(win, initial(), Pix{0}, now, 0, limit)
-def main() -> IO(Unit):
-  do IO<Unit>:
-    benchmark : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_BENCH")
-    maxFrames : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_FRAMES")
-    win : Window <- IO.try(Window, Window.open("Bend Voxel - WASD move / RMB look / LMB carve / R reset", 640, 360))
-    +now : U32 <- P.micros()
-    start((env.number(benchmark) > 0 : U32), win, now, env.number(maxFrames))
-
-# Reproducible 20-second cycle. Benchmark times include queueing from
-# the scheduled command timestamp to the completed visible frame.

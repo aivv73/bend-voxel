@@ -1,6 +1,6 @@
 import Base
 import ../src/world.bend as W
-import ../src/vendor/bend3d.bend as R
+import ../src/math.bend as R
 import ../src/render.bend as V
 import ../src/input.bend as I
 
