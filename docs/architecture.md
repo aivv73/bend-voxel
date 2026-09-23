@@ -111,7 +111,7 @@ The Bend3D frame path is:
 
 `surface cache -> region visibility culling -> transform -> clipping -> projection/lighting -> screen Cells -> Frame.show -> Window.frame`.
 
-The bounded demo also has a [live Vulkan/Xlib path](vulkan-renderer.md): `cached faces -> native rectangle expansion -> Vulkan vertex buffer -> swapchain -> X11 HUD/events`. It keeps simulation and picking in Bend.
+The bounded demo also has a [live Vulkan/Xlib path](vulkan-renderer.md): `cached faces and HUD -> native geometry expansion -> Vulkan vertex buffer -> swapchain -> X11 events`. It keeps simulation and picking in Bend.
 
 Adapting Bend3D requires clipping triangles against the near plane before projection, checking face winding, and separate timing counters for screen-cell construction and rasterization. Screen `Cells` depend on the camera: caching surfaces does not eliminate their rebuild when the view changes. Keep both frame dimensions below 2048 in the first version; generalizing the tree is a separate task.
 

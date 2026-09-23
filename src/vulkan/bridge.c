@@ -205,23 +205,6 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   char error[512] = {0};
   int ok = voxel_vk_render_fn(win->dpy, win->win, &frame, error, sizeof error);
   if (!ok) err_fail(error[0] ? error : "Vulkan frame failed");
-  GC gc = DefaultGC(win->dpy, DefaultScreen(win->dpy));
-  XWindowAttributes attributes;
-  XGetWindowAttributes(win->dpy,win->win,&attributes);
-  const int ys[] = {20,38,55,72,325,347};
-  const unsigned long colors[] = {0xe7e8e7,0x9fdbdd,0x9fdbdd,0xffdf68,0xe7e8e7,0x9fdbdd};
-  char* start = hud;
-  for (int row=0;row<6&&start;row++) {
-    char* end = strchr(start,'\n');
-    XSetForeground(win->dpy,gc,colors[row]);
-    XDrawString(win->dpy,win->win,gc,12*attributes.width/640,
-      ys[row]*attributes.height/360,start,
-      end?(int)(end-start):(int)strlen(start));
-    start=end?end+1:NULL;
-  }
-  XSetForeground(win->dpy,gc,0x4bc1a4);
-  XDrawString(win->dpy,win->win,gc,577*attributes.width/640,
-    20*attributes.height/360,"RESET",5);
   free(hud);
   voxel_vk_pump(win);
   XSync(win->dpy, False);

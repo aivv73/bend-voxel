@@ -9,6 +9,11 @@ layout(push_constant) uniform Camera {
 } pc;
 
 void main() {
+  if (pc.pitch_offset.z > 0.5) {
+    gl_Position = vec4(position.x / 320.0 - 1.0, position.y / 180.0 - 1.0, 0.0, 1.0);
+    pixel_color = color;
+    return;
+  }
   float yaw = pc.eye_yaw.w;
   float pitch = pc.pitch_offset.x;
   float sy = sin(yaw), cy = cos(yaw);

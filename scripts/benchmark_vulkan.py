@@ -36,7 +36,7 @@ def main():
         'gpu': subprocess.check_output(['nvidia-smi', '--query-gpu=name,driver_version,memory.total',
                                         '--format=csv,noheader'], text=True).strip(),
         'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
-        'timing_scope': 'Full frame intervals include CPU simulation/edit, Bend scene preparation, Vulkan mesh upload/draw/present, X11 HUD and synchronization. The frame effect is one combined stage.'
+        'timing_scope': 'Full frame intervals include CPU simulation/edit, Bend scene preparation, Vulkan scene and HUD mesh upload/draw/present, and X11 event synchronization. The frame effect is one combined stage.'
     }
     results = []
     for number in range(1, args.runs + 1):
@@ -55,7 +55,7 @@ def main():
                                                  'workload_pass', 'performance_pass')}, indent=2), flush=True)
     report = {'metadata': metadata, 'runs': results,
               'acceptance_pass': args.runs == 3 and all(r['pass'] for r in results),
-              'note': 'The Vulkan effect includes presentation and X11 HUD; visual and input checks are separate.'}
+              'note': 'The Vulkan effect includes scene and HUD presentation; visual and input checks are separate.'}
     (out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     print(f'Report: {out / "report.json"}', flush=True)
     sys.exit(0 if report['acceptance_pass'] else 1)

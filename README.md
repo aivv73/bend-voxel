@@ -33,7 +33,7 @@ On Linux/X11 with a Vulkan 1.3 driver, Vulkan development headers and loader, `g
 make vulkan-run
 ```
 
-This builds a separate executable that uses the same Bend simulation, picking, and edit code. A native Vulkan backend renders its current cached faces and brush preview to a swapchain; the X11 adapter draws the HUD and returns input events. `make vulkan-benchmark` runs the 65-second replay three times through this path. All three runs passed the workload and performance gates on the GTX 1660. See the [Vulkan renderer results](docs/vulkan-renderer.md) for timing scope and current limits.
+This builds a separate executable that uses the same Bend simulation, picking, and edit code. A native Vulkan backend renders its current cached faces, brush preview, and HUD to a swapchain; the X11 adapter returns input events. `make vulkan-benchmark` runs the 65-second replay three times through this path. All three runs passed the workload and performance gates on the GTX 1660. See the [Vulkan renderer results](docs/vulkan-renderer.md) for timing scope and current limits.
 
 ## Controls
 

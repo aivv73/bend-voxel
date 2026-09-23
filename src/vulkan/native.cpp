@@ -27,7 +27,7 @@ Vec3 cross(Vec3 a,Vec3 b) { return {a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*
 Vec3 rgb(uint32_t word) { return {float((word>>16)&255)/255,float((word>>8)&255)/255,float(word&255)/255}; }
 Vec3 quantize(Vec3 c) { return {std::floor(c.x*255)/255,std::floor(c.y*255)/255,std::floor(c.z*255)/255}; }
 struct Vertex { Vec3 position,color; };
-struct Geometry { std::vector<Vertex> vertices; uint32_t triangles=0,lines=0; };
+struct Geometry { std::vector<Vertex> vertices; uint32_t triangles=0,lines=0,hud=0; };
 void quad(Geometry& g,Vec3 a,Vec3 b,Vec3 c,Vec3 d,Vec3 color) {
   color=quantize(color);
   for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color});
@@ -35,6 +35,57 @@ void quad(Geometry& g,Vec3 a,Vec3 b,Vec3 c,Vec3 d,Vec3 color) {
 }
 void line(Geometry& g,Vec3 a,Vec3 b,Vec3 color) {
   g.vertices.push_back({a,color}); g.vertices.push_back({b,color}); g.lines+=2;
+}
+struct Glyph { char character; uint8_t rows[7]; };
+// Five-column bitmap glyphs for the demo's uppercase ASCII HUD.
+constexpr Glyph glyphs[]={
+  {'A',{14,17,17,31,17,17,17}}, {'B',{30,17,17,30,17,17,30}},
+  {'C',{14,17,16,16,16,17,14}}, {'D',{30,17,17,17,17,17,30}},
+  {'E',{31,16,16,30,16,16,31}}, {'F',{31,16,16,30,16,16,16}},
+  {'G',{14,17,16,23,17,17,14}}, {'H',{17,17,17,31,17,17,17}},
+  {'I',{31,4,4,4,4,4,31}}, {'J',{7,2,2,2,18,18,12}},
+  {'K',{17,18,20,24,20,18,17}}, {'L',{16,16,16,16,16,16,31}},
+  {'M',{17,27,21,21,17,17,17}}, {'N',{17,25,21,19,17,17,17}},
+  {'O',{14,17,17,17,17,17,14}}, {'P',{30,17,17,30,16,16,16}},
+  {'Q',{14,17,17,17,21,18,13}}, {'R',{30,17,17,30,20,18,17}},
+  {'S',{15,16,16,14,1,1,30}}, {'T',{31,4,4,4,4,4,4}},
+  {'U',{17,17,17,17,17,17,14}}, {'V',{17,17,17,17,17,10,4}},
+  {'W',{17,17,17,21,21,21,10}}, {'X',{17,17,10,4,10,17,17}},
+  {'Y',{17,17,10,4,4,4,4}}, {'Z',{31,1,2,4,8,16,31}},
+  {'0',{14,17,19,21,25,17,14}}, {'1',{4,12,4,4,4,4,14}},
+  {'2',{14,17,1,2,4,8,31}}, {'3',{30,1,1,14,1,1,30}},
+  {'4',{2,6,10,18,31,2,2}}, {'5',{31,16,16,30,1,1,30}},
+  {'6',{14,16,16,30,17,17,14}}, {'7',{31,1,2,4,8,8,8}},
+  {'8',{14,17,17,14,17,17,14}}, {'9',{14,17,17,15,1,1,14}},
+  {'/',{1,1,2,4,8,16,16}}, {'-',{0,0,0,31,0,0,0}},
+  {'?',{14,17,1,2,4,0,4}}
+};
+const uint8_t* glyph(char c) {
+  for (const auto& entry:glyphs) if (entry.character==c) return entry.rows;
+  return glyphs[sizeof(glyphs)/sizeof(glyphs[0])-1].rows;
+}
+void hud_text(Geometry& g,float x,float baseline,const char* begin,size_t length,Vec3 color) {
+  for (size_t i=0;i<length;i++,x+=6) {
+    if (begin[i]==' ') continue;
+    const uint8_t* rows=glyph(begin[i]);
+    for (int y=0;y<7;y++) for (int bit=0;bit<5;bit++) if (rows[y]&(16>>bit)) {
+      float left=x+bit,top=baseline-10.5f+y*1.5f;
+      Vec3 a{left,top,0},b{left+1,top,0},c{left+1,top+1.5f,0},d{left,top+1.5f,0};
+      for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color});
+      g.hud+=6;
+    }
+  }
+}
+void add_hud(Geometry& g,const char* hud) {
+  constexpr int ys[]={20,38,55,72,325,347};
+  constexpr uint32_t colors[]={0xe7e8e7,0x9fdbdd,0x9fdbdd,0xffdf68,0xe7e8e7,0x9fdbdd};
+  if (hud) for (int row=0;row<6 && *hud;row++) {
+    const char* end=std::strchr(hud,'\n');
+    hud_text(g,12,float(ys[row]),hud,end?size_t(end-hud):std::strlen(hud),rgb(colors[row]));
+    if (!end) break;
+    hud=end+1;
+  }
+  hud_text(g,577,20,"RESET",5,rgb(0x4bc1a4));
 }
 Vec3 cell(uint32_t i,float offset) {
   return {float(i%40)*.1f-1.95f,float(i/40%24)*.1f+.05f+offset,float(i/960)*.1f-.95f};
@@ -108,6 +159,7 @@ Geometry geometry(const VoxelVkFrame& frame) {
       if (view_depth(a,frame)>=.05f && view_depth(b,frame)>=.05f) line(g,a,b,color);
     }
   }
+  add_hud(g,frame.hud);
   return g;
 }
 std::vector<uint32_t> spirv(const char* path) {
@@ -145,7 +197,7 @@ class Renderer {
   void* mapped=nullptr;
   VkShaderModule vs=VK_NULL_HANDLE,fs=VK_NULL_HANDLE;
   VkPipelineLayout layout=VK_NULL_HANDLE;
-  VkPipeline triangles=VK_NULL_HANDLE,lines=VK_NULL_HANDLE;
+  VkPipeline triangles=VK_NULL_HANDLE,lines=VK_NULL_HANDLE,hud_pipeline=VK_NULL_HANDLE;
   VkCommandPool pool=VK_NULL_HANDLE;
   VkCommandBuffer command=VK_NULL_HANDLE;
   VkFence fence=VK_NULL_HANDLE;
@@ -183,6 +235,8 @@ class Renderer {
     triangles=VK_NULL_HANDLE;
     if (lines) vkDestroyPipeline(device,lines,nullptr);
     lines=VK_NULL_HANDLE;
+    if (hud_pipeline) vkDestroyPipeline(device,hud_pipeline,nullptr);
+    hud_pipeline=VK_NULL_HANDLE;
     if (depth_view) vkDestroyImageView(device,depth_view,nullptr);
     depth_view=VK_NULL_HANDLE;
     if (depth) vkDestroyImage(device,depth,nullptr);
@@ -282,6 +336,7 @@ class Renderer {
     make_depth();
     triangles=pipeline(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,true);
     lines=pipeline(VK_PRIMITIVE_TOPOLOGY_LINE_LIST,false);
+    hud_pipeline=pipeline(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,false);
   }
   void ensure_vertices(VkDeviceSize bytes) {
     if (bytes<=capacity) return;
@@ -440,6 +495,12 @@ public:
     if (g.lines) {
       vkCmdBindPipeline(command,VK_PIPELINE_BIND_POINT_GRAPHICS,lines);
       vkCmdDraw(command,g.lines,1,g.triangles,0);
+    }
+    if (g.hud) {
+      push.pitch_offset[2]=1;
+      vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push),&push);
+      vkCmdBindPipeline(command,VK_PIPELINE_BIND_POINT_GRAPHICS,hud_pipeline);
+      vkCmdDraw(command,g.hud,1,g.triangles+g.lines,0);
     }
     vkCmdEndRendering(command);
     barrier(images[index],VK_IMAGE_ASPECT_COLOR_BIT,VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
