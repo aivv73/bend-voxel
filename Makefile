@@ -19,3 +19,7 @@ snapshots:
 compare-backends: build
 	./scripts/build.sh snapshot
 	python3 scripts/compare_backends.py $(COMPARE_ARGS)
+
+.PHONY: prototype-vulkan
+prototype-vulkan:
+	python3 scripts/prototype_vulkan.py $(VULKAN_ARGS)
