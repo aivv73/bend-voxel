@@ -1,8 +1,8 @@
 # First demo: Bend and Bend3D integration baseline
 
-## Subsequent compiler update
+## Subsequent compiler updates
 
-On 2026-09-22, the project was updated to **Bend 2.0.25** at the user's request. The 2.0.16 observations below are historical; they have not been relabeled as checks of the new compiler. See [demo validation](../demo-validation.md) for current validation.
+The current project pin is **Bend 2.0.26** following the 2026-09-23 update. The project was previously updated to **Bend 2.0.25** on 2026-09-22. The 2.0.16 observations below are historical; they have not been relabeled as checks of the newer compilers. See [demo validation](../demo-validation.md) for current validation.
 
 Date: 2026-09-21. Resolution of [Determine a compatible Bend and Bend3D integration baseline](https://github.com/aivv73/bend-voxel/issues/3), under [Find the way to the first destructible voxel demo](https://github.com/aivv73/bend-voxel/issues/1).
 
