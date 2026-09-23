@@ -1,0 +1,17 @@
+Bend 2.0.26 CUDA snapshots compared with archived Bend 2.0.25 CUDA snapshots.
+Equal fields: pixel_sha256, state, bodies, hud.
+
+tick-0000: all four fields match
+tick-0060: all four fields match
+tick-0216: all four fields match
+tick-0396: all four fields match
+tick-0408: all four fields match
+tick-0540: all four fields match
+tick-1140: all four fields match
+
+Bend 2.0.26 CPU snapshots compared with Bend 2.0.26 CUDA snapshots.
+Equal fields: pixel_sha256, state, bodies, hud.
+
+tick-0000: all four fields match
+tick-0408: all four fields match
+tick-0540: all four fields match

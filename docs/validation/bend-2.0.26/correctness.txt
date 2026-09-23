@@ -1,0 +1,56 @@
+./scripts/test.sh
+All terms check, but 4 defs rely on unsafe or foreign code:
+- sever
+- fixture.two
+- fixture.cap
+- main
+PASS empty body lookup returns zero
+PASS body lookup preserves first match
+PASS middle body lookup preserves all fields
+PASS later body lookup preserves all fields
+PASS missing body lookup returns zero
+PASS initial scene
+PASS partial cut
+PASS one support remains
+PASS last support detaches
+PASS floor clamp and zero velocity
+PASS all protected anchors remain
+PASS merged mesh preserves exposed voxel-face area
+PASS merged mesh preserves exposed voxel-face area
+PASS face connectivity
+PASS edge contact is not connectivity
+PASS different owners do not merge
+PASS 64 body fixture
+PASS over-cap cut rolls back
+PASS removing body frees slot
+PASS split at cap commits
+PASS split moving body preserves velocity
+PASS removing landed body's bottom resumes fall
+PASS empty cut changes nothing
+ALL WORLD CHECKS PASSED
+PASS left press cuts once
+PASS held left does not repeat
+PASS release rearms left
+PASS right look suppresses cuts
+PASS escape clears held state
+PASS unfocused movement ignored
+PASS click restores focus
+PASS focus loss clears movement
+PASS reset button
+PASS movement is two meters per second
+PASS near-plane crossing produces clipped quad
+PASS merged face far-end picking
+ALL INPUT AND RENDER CHECKS PASSED
+All terms check, but 1 def relies on unsafe or foreign code:
+- main
+PASS timed partial cut
+PASS timed cap rollback
+PASS timed no-op transaction
+PASS skipped edit records zero stages
+PASS skipped edit preserves world
+ALL PROBE CHECKS PASSED
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.002s
+
+OK

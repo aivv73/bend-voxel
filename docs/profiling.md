@@ -4,7 +4,7 @@ The probe follows the official [Slash Boss timing and image-tree dump pattern](h
 
 ## Timings
 
-Run `make benchmark`. Bend 2.0.25 and the CUDA backend are required. The native window uses the existing 640 × 360 viewport. Each of three runs records five seconds of warm-up and sixty seconds of measured work.
+Run `make benchmark`. Bend 2.0.26 and the CUDA backend are required. The native window uses the existing 640 × 360 viewport. Each of three runs records five seconds of warm-up and sixty seconds of measured work.
 
 Every duration is a wall-clock microsecond interval. CUDA rendering includes the invocation's host/device work and synchronization; it is not a kernel-only GPU timer. Presentation ends after X11 `XSync`, which confirms server processing rather than physical display scanout.
 

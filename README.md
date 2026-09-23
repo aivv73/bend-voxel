@@ -6,7 +6,7 @@ A native Linux demo of small, destructible voxels, implemented in Bend 2. A slab
 
 ## Run
 
-Requires **Bend 2.0.25**, CUDA (`/opt/cuda` by default), an NVIDIA GPU, Python 3 for the benchmark, and an X11 desktop (including XWayland).
+Requires **Bend 2.0.26**, CUDA (`/opt/cuda` by default), an NVIDIA GPU, Python 3 for the benchmark, and an X11 desktop (including XWayland).
 
 ```sh
 make run

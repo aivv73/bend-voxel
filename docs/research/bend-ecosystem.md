@@ -1,8 +1,19 @@
 # Bend ecosystem resources for the voxel engine
 
-## Subsequent compiler update
+## Subsequent compiler updates
 
-On 2026-09-22, the project was updated to **Bend 2.0.25** at the user's request. The 2.0.16 observations below are historical; they have not been relabeled as checks of the new compiler. See [demo validation](../demo-validation.md) for current validation.
+The current project pin is **Bend 2.0.26** following the 2026-09-23 update. The project was previously updated to **Bend 2.0.25** on 2026-09-22. Checks below retain their original compiler-version labels. See [demo validation](../demo-validation.md) for current engine results.
+
+## Recheck on 2026-09-23
+
+The previously recommended stage probe, deterministic snapshots and controlled CPU/CUDA sweep are now in place. The three-run 2.0.25 CUDA benchmark missed its frame and cut p95 limits; accepted-cut surface generation had a median near 19 ms, somewhat above connectivity's 15–16 ms. The later [2.0.26 benchmark](../demo-validation.md#compiler-update-to-bend-2026-2026-09-23) also misses those limits. A direct voxel DDA prototype was 5.4–38.2 times slower than the existing raster path in its measured scenes. Prioritize experiments on the current surface builder and measured scene preparation, rendering and render-cell disposal stages before adopting another renderer or package. These are recommendations from the project's measurements, not performance claims from the resource lists. [Stage probe](../profiling.md), [split-stage benchmark](../demo-validation.md#surface-generation-timing-2026-09-23), [backend comparison](controlled-cpu-cuda.md), [DDA prototype](../voxel-ray-casting-prototype.md).
+
+The [official Hub](https://hub.bend-lang.com/) now advertises package search plus optional names and versions, superseding the 2026-09-22 discovery limitation described below. Its [live statistics](https://hub.bend-lang.com/stats.json) report **143 package snapshots** and one named package, versus 121 snapshots in the earlier review; snapshots are not a count of distinct libraries. Searches for [voxel](https://hub.bend-lang.com/search.json?q=voxel), [mesh](https://hub.bend-lang.com/search.json?q=mesh) and [physics](https://hub.bend-lang.com/search.json?q=physics) return no named or described package. A scan of the [current index metadata](https://hub.bend-lang.com/index.json) likewise found no apparent dedicated voxel, octree, meshing, spatial or rigid-body package. This only covers names, descriptions and filenames, not every published source file. The [community catalog](https://777genius.github.io/bend-packages/) adds filters and GitHub provenance, but its text still says the official Hub has no names or search; use the live Hub to check availability.
+
+Two newer items warrant narrow future use, neither an immediate optimization:
+
+- [bend-tensors at its published hash](https://hub.bend-lang.com/0x92882293385d0b92a8d4a4a676bbf076/bend_tensors.bend) supplies shape-typed, tree-based F32 vectors and matrices for dense linear algebra. Its header calls this release CPU BLAS and says GPU paths are in a separate file; the published snapshot contains native effect sources but no GPU Bend file. The source passed `bend --check-only` locally with **Bend 2.0.25**, with 15 definitions reported as unsafe or foreign. This is checker compatibility, not a runtime or speed test, and its fixed block/tree layout does not address the engine's face generation or tile rasterization. Consider it only if a future measured dense-matrix workload appears. [Published package metadata](https://hub.bend-lang.com/packages.json?sort=new&limit=5), [source](https://hub.bend-lang.com/0x92882293385d0b92a8d4a4a676bbf076/bend_tensors.bend).
+- [ezimg](https://github.com/Emerging-Patterns/ezimg) is an MIT-licensed Bend 2 raster image library with 8-bit PNG and baseline JPEG decoding and JPEG encoding; its README explicitly disclaims full codec conformance. It could serve later asset ingestion. The present demo uses flat-colored faces and generates benchmark PNGs in Python, so it does not address the measured frame or edit costs. No Bend 2.0.25 integration check was run. [Package README](https://github.com/Emerging-Patterns/ezimg/blob/main/README.md), [current renderer](../../src/render.bend), [snapshot exporter](../../scripts/snapshot.py).
 
 Reviewed 2026-09-22. Discovery sources: [awesome-bend](https://github.com/777genius/awesome-bend) and [BendHub](https://hub.bend-lang.com/). Findings below distinguish upstream claims, local compatibility checks, and proposed applications.
 
@@ -34,7 +45,7 @@ A concrete local audit candidate is `src/world.bend:body.find`: it passes the re
 
 ## What the Hub actually offers
 
-The Hub uses content-hash identities and caches fetched packages locally. Its current front page loads a paginated list from [`index.json`](https://hub.bend-lang.com/index.json); it is browsable even though it has no conventional name/version search. This review retrieved **121 package snapshots**, including multiple snapshots of the same project. That is not 121 distinct libraries. [Hub documentation](https://hub.bend-lang.com/).
+The Hub uses content-hash identities and caches fetched packages locally. At the 2026-09-22 review, its front page loaded a paginated list from [`index.json`](https://hub.bend-lang.com/index.json), with no conventional name/version search. That review retrieved **121 package snapshots**, including multiple snapshots of the same project. That is not 121 distinct libraries. [Hub documentation](https://hub.bend-lang.com/).
 
 The following exact published sources were downloaded into temporary directories and checked with the installed **Bend 2.0.16**. No project imports were added. These checks establish that the inspected modules pass the checker; they are not runtime benchmarks, semantic audits, or complete proofs.
 
@@ -110,8 +121,8 @@ These are checker results, not native/CUDA execution or performance results. The
 
 ## Recommended next work
 
-1. Model stage instrumentation and snapshot output on the official Slash Boss probe. Add timings for carving, connectivity/meshing, scene preparation, CUDA rendering and presentation; retain the complete end-to-end samples.
-2. Use portal-bend's controlled comparison method: same replay, same pixels/state checks, interleaved runs, thread-count sweep. CPU runs are diagnostic, not substitutes for CUDA acceptance. **Completed initial sweep on 2026-09-22 with Bend 2.0.25:** [controlled CPU/CUDA results](controlled-cpu-cuda.md) record 70 matching fixed-clock probes and 20 interleaved windowed runs at 1/2/4/6/12 workers. CUDA still misses frame/cut p95; no unique thread-count optimum was established. Windowed physics uses elapsed time, so fixed-clock equivalence is checked separately.
-3. Audit eager recursive selectors and repeated owner lookups using Bolt's documented rules; measure one change at a time.
-4. Add deterministic generated edit sequences and image snapshots. Consider the small PRNG or selected proof lemmas only when those tests/laws need them.
-5. Defer new containers, Godot integration and packaging changes until a measured requirement justifies them.
+The Slash Boss-style [stage probe and snapshots](../profiling.md), portal-style [controlled CPU/CUDA sweep](controlled-cpu-cuda.md), and [owner-lookup audit](../validation/lookup-audit/report.json) have been completed. For the current Bend 2.0.26 demo:
+
+1. Profile and improve the existing face builder and the measured scene preparation, rendering and render-cell disposal stages, one change at a time. Keep the current replay, snapshots and end-to-end CUDA acceptance gate. [Latest split-stage measurements](../demo-validation.md#surface-generation-timing-2026-09-23).
+2. Add generated edit traces or proof lemmas only when a specific regression or engine rule calls for them; keep fixed-clock image and state checks alongside performance experiments. [Snapshot protocol](../profiling.md#snapshots).
+3. Defer new containers, image libraries, Godot integration and packaging changes until a measured requirement justifies them. The current Hub scan does not identify a ready-made voxel engine component.

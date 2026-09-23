@@ -4,7 +4,7 @@
 
 The demo implements the scene and interaction decisions from GitHub issues #2–#6 in `aivv73/bend-voxel`. Planning completion is separate from executable acceptance.
 
-This is a Linux/X11 and CUDA implementation, pinned to Bend 2.0.25 and upstream Bend3D commit `a49524265bdfa5753a4bf38e25f0574a705dd868`. The native adapter draws HUD text after the CUDA-rendered image. The sphere preview uses three twelve-segment rings, with individual affected voxel cells highlighted in yellow. Gameplay, ownership, meshing, picking, clipping and preview construction are Bend code.
+This is a Linux/X11 and CUDA implementation, pinned to Bend 2.0.26 and upstream Bend3D commit `a49524265bdfa5753a4bf38e25f0574a705dd868`. The native adapter draws HUD text after the CUDA-rendered image. The sphere preview uses three twelve-segment rings, with individual affected voxel cells highlighted in yellow. Gameplay, ownership, meshing, picking, clipping and preview construction are Bend code.
 
 The fixed lattice is 40 × 24 × 20 cells with 10 cm spacing. The 4 × 2 × 0.4 m slab starts at y = 2 m. Two 0.6 m square supports extend from the floor to the slab. Their 72 base cells are protected.
 
@@ -33,6 +33,20 @@ Frames include application work, CUDA rendering, image transfer, HUD drawing and
 Each run must have frame p95 ≤ 33.3 ms, accepted-cut p95 ≤ 100 ms and maximum ≤ 250 ms, all 33 expected accepted cuts, and a complete measurement window. Overall performance acceptance requires all three runs. Correctness and native interaction inspection are separate gates.
 
 The replay invokes the same world-edit operation at scripted world coordinates. It does not synthesize the mouse movements needed to acquire every target; picking and input are checked separately. The timed workload does not intentionally fill all 64 body slots; the cap is exercised by the correctness fixture.
+
+## Compiler update to Bend 2.0.26 (2026-09-23)
+
+The project build pin now matches the installed [Bend 2.0.26 release](https://github.com/bendlang/bend/releases/tag/v2.0.26). The vendored Bend3D and native window adapter needed no source changes. `make build` produced the CUDA module, and `make test` passed the world, input/render, probe and Python checks. Seven fixed-clock CUDA snapshots matched the archived 2.0.25 image hashes, state, body transforms and HUD text. Three CPU snapshots also matched the corresponding 2.0.26 CUDA images and state, covering the launcher's default backend. [Correctness output](validation/bend-2.0.26/correctness.txt), [snapshot comparison](validation/bend-2.0.26/snapshot-checks.txt).
+
+A fresh three-run, forced-CUDA native-window benchmark completed the expected workload and passed instrumentation checks in every run. Performance acceptance remains open:
+
+| Run | Frame p95 (ms) | Cut p95 (ms) | Cut maximum (ms) | Accepted cuts |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 46.206 | 151.050 | 171.794 | 33 |
+| 2 | 45.385 | 151.075 | 164.163 | 33 |
+| 3 | 46.062 | 159.565 | 162.035 | 33 |
+
+Each run retained five seconds of warm-up and sixty seconds of measurement, plus all six expected protected/empty attempts. The frame and cut p95 targets failed in every run; maximum cut latency remained below 250 ms. These fresh runs validate the 2.0.26 build and workload. They are not an interleaved comparison that isolates a compiler performance change. [Report, source hashes and stage statistics](validation/bend-2.0.26/report.json); raw samples: [run 1](validation/bend-2.0.26/run-1.csv.gz), [run 2](validation/bend-2.0.26/run-2.csv.gz), [run 3](validation/bend-2.0.26/run-3.csv.gz).
 
 ## Surface-generation timing (2026-09-23)
 
