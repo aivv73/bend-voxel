@@ -1,0 +1,120 @@
+{
+  "prototype": "offscreen Vulkan face rasterization",
+  "bend": "bend 2.0.26",
+  "resolution": [
+    640,
+    360
+  ],
+  "backend": "NVIDIA GeForce GTX 1660",
+  "timing_scope": "Fixed cached geometry; command recording, GPU draw, readback and fence wait per frame. No scene export, edits, HUD, window or presentation in timed frame.",
+  "image_scope": "Raw RGB comparison; brush preview is not rendered by Vulkan.",
+  "source_sha256": {
+    "src/prototype/vulkan-scene.bend": "2065410f6649f56fd1a7f9234c62180342ad25519fbc6df5555bf9a7dc0325fa",
+    "src/prototype/vulkan_offscreen.cpp": "1036933579161cccdf37e51899d2d602ef3635f72d038f8e6e2c73004ca60ef2",
+    "src/prototype/vulkan.vert": "c862ecdb491e23526db674173c520cbc16409375eeb75b2767a39a7a9543035c",
+    "src/prototype/vulkan.frag": "53f2ae0d055d8888093f943c8c34e5cdab1a44a3264eab12d0af871a344e9447",
+    "scripts/prototype_vulkan.py": "d46671cb87b4070ff4d5b649383f825080c8a347a664937de83200cceddd06da"
+  },
+  "scenes": [
+    {
+      "tick": 0,
+      "state": {
+        "solids": 4640,
+        "bodies": 0,
+        "removed": 0,
+        "status": 1
+      },
+      "render": {
+        "device": "NVIDIA GeForce GTX 1660",
+        "tick": 0,
+        "solids": 4640,
+        "bodies": 0,
+        "faces": 184,
+        "prepare_ms": 0.16938,
+        "wall_median_ms": 0.171755,
+        "gpu_median_ms": 0.01056,
+        "frames": 100
+      },
+      "different_pixels": 1879,
+      "different_percent": 0.8155381944444444,
+      "mean_absolute_channel_error": 0.20421875,
+      "vulkan_pixel_sha256": "34c54042f591e9a1acb370ddf345d3bd5f095e313327d06acff53cdbbdc4540b",
+      "bend_pixel_sha256": "0379f587424018eea8a82ff85bef2935e55cc662e7601fc7daa356a16023ab3a"
+    },
+    {
+      "tick": 408,
+      "state": {
+        "solids": 4385,
+        "bodies": 1,
+        "removed": 23,
+        "status": 1
+      },
+      "render": {
+        "device": "NVIDIA GeForce GTX 1660",
+        "tick": 408,
+        "solids": 4385,
+        "bodies": 1,
+        "faces": 324,
+        "prepare_ms": 0.626954,
+        "wall_median_ms": 0.166517,
+        "gpu_median_ms": 0.012544,
+        "frames": 100
+      },
+      "different_pixels": 1805,
+      "different_percent": 0.7834201388888888,
+      "mean_absolute_channel_error": 0.20580873842592592,
+      "vulkan_pixel_sha256": "a779d82caa01939c8a8dc27886c21fdaf0947e4917d8dee43507de57043eca5b",
+      "bend_pixel_sha256": "75ff971060ae5cf34441fc36a336793d951b64a2d6c41c0efd4060f7dc7515b9"
+    },
+    {
+      "tick": 540,
+      "state": {
+        "solids": 4374,
+        "bodies": 1,
+        "removed": 11,
+        "status": 1
+      },
+      "render": {
+        "device": "NVIDIA GeForce GTX 1660",
+        "tick": 540,
+        "solids": 4374,
+        "bodies": 1,
+        "faces": 342,
+        "prepare_ms": 0.287214,
+        "wall_median_ms": 0.171406,
+        "gpu_median_ms": 0.012736,
+        "frames": 100
+      },
+      "different_pixels": 1955,
+      "different_percent": 0.8485243055555556,
+      "mean_absolute_channel_error": 0.30389467592592595,
+      "vulkan_pixel_sha256": "31d37191f668a837b5b8d1edc6955a86657ac82c7cc31c7c8da8d13e8ecf4c96",
+      "bend_pixel_sha256": "111dd695d1daa0ff451c6146774f1b657cd1dc247455b6e03641bff04704fb4c"
+    },
+    {
+      "tick": 1140,
+      "state": {
+        "solids": 4374,
+        "bodies": 1,
+        "removed": 0,
+        "status": 2
+      },
+      "render": {
+        "device": "NVIDIA GeForce GTX 1660",
+        "tick": 1140,
+        "solids": 4374,
+        "bodies": 1,
+        "faces": 342,
+        "prepare_ms": 0.300415,
+        "wall_median_ms": 0.185027,
+        "gpu_median_ms": 0.012608,
+        "frames": 100
+      },
+      "different_pixels": 903,
+      "different_percent": 0.3919270833333333,
+      "mean_absolute_channel_error": 0.2289380787037037,
+      "vulkan_pixel_sha256": "92f57f6054f4c5cacf85103a3ab3905d0484a9280b7b4162417be4e191c6b0af",
+      "bend_pixel_sha256": "1a0c13b6d1c2c2da48348ffb3d877f6f1a4c97484df7abb7e4022d72a0bb5018"
+    }
+  ]
+}

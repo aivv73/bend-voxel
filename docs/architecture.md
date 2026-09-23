@@ -107,9 +107,11 @@ The first mesher emits only faces between a solid cell and air, reading neighbor
 
 Store meshes in local coordinates. Camera or body motion does not trigger meshing. Cache keys depend on geometry, neighboring boundaries, and construction parameters. Normal direction and material are part of the merge criteria; if baked shading is added, it must also be compatible across the merged face.
 
-Frame path:
+The Bend3D frame path is:
 
 `surface cache -> region visibility culling -> transform -> clipping -> projection/lighting -> screen Cells -> Frame.show -> Window.frame`.
+
+The bounded demo also has a [live Vulkan/Xlib path](vulkan-renderer.md): `cached faces and HUD -> native geometry expansion -> Vulkan vertex buffer -> swapchain -> X11 events`. It keeps simulation and picking in Bend.
 
 Adapting Bend3D requires clipping triangles against the near plane before projection, checking face winding, and separate timing counters for screen-cell construction and rasterization. Screen `Cells` depend on the camera: caching surfaces does not eliminate their rebuild when the view changes. Keep both frame dimensions below 2048 in the first version; generalizing the tree is a separate task.
 
@@ -119,7 +121,7 @@ Initial lighting is ambient plus directional, with flat opaque materials. Add sh
 
 This tests the user-proposed Bend3D and separates destruction cost from image generation cost. An alternative is ray traversal through sparse bricks: potentially better for very fine geometry, but requiring custom traversal, acceleration, lighting, and data transfer. A full sparse voxel octree also complicates editing and body separation.
 
-Hide the backend behind a contract that accepts a scene and returns an image and metrics. If projection, triangle distribution, or rasterization exceeds the budget on the GTX 1660, separately compare brick raycasting and an external graphics backend. Do not assume Vulkan/FFI support is ready for this; it is a separate technical experiment, not an existing engine capability.
+Hide the backend behind a contract that accepts a scene and returns an image and metrics. If projection, triangle distribution, or rasterization exceeds the budget on the GTX 1660, separately compare brick raycasting and an external graphics backend. The live Vulkan route validates a native backend for the bounded demo; its compiler-specific bridge and X11 presentation are not yet a general engine interface.
 
 ## 7. Physics and queries
 
