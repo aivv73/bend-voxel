@@ -9,25 +9,3 @@ benchmark: build
 	python3 scripts/benchmark.py
 clean:
 	rm -rf build
-
-.PHONY: snapshots
-snapshots:
-	./scripts/build.sh snapshot
-	python3 scripts/snapshot.py
-
-.PHONY: compare-backends
-compare-backends: build
-	./scripts/build.sh snapshot
-	python3 scripts/compare_backends.py $(COMPARE_ARGS)
-
-.PHONY: prototype-vulkan
-prototype-vulkan:
-	python3 scripts/prototype_vulkan.py $(VULKAN_ARGS)
-
-.PHONY: vulkan-build vulkan-run vulkan-benchmark
-vulkan-build:
-	./scripts/build_vulkan.sh
-vulkan-run: vulkan-build
-	./scripts/run_vulkan.sh
-vulkan-benchmark: vulkan-build
-	python3 scripts/benchmark_vulkan.py $(VULKAN_BENCH_ARGS)

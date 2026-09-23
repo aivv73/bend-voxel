@@ -1,5 +1,7 @@
 # Bend ecosystem resources for the voxel engine
 
+This is a historical research record. Its CPU/CUDA renderer recommendations and source references predate the Vulkan switch. See the [current README](../../README.md) for build and run commands.
+
 ## Subsequent compiler updates
 
 The current project pin is **Bend 2.0.26** following the 2026-09-23 update. The project was previously updated to **Bend 2.0.25** on 2026-09-22. Checks below retain their original compiler-version labels. See [demo validation](../demo-validation.md) for current engine results.
@@ -13,7 +15,7 @@ The [official Hub](https://hub.bend-lang.com/) now advertises package search plu
 Two newer items warrant narrow future use, neither an immediate optimization:
 
 - [bend-tensors at its published hash](https://hub.bend-lang.com/0x92882293385d0b92a8d4a4a676bbf076/bend_tensors.bend) supplies shape-typed, tree-based F32 vectors and matrices for dense linear algebra. Its header calls this release CPU BLAS and says GPU paths are in a separate file; the published snapshot contains native effect sources but no GPU Bend file. The source passed `bend --check-only` locally with **Bend 2.0.25**, with 15 definitions reported as unsafe or foreign. This is checker compatibility, not a runtime or speed test, and its fixed block/tree layout does not address the engine's face generation or tile rasterization. Consider it only if a future measured dense-matrix workload appears. [Published package metadata](https://hub.bend-lang.com/packages.json?sort=new&limit=5), [source](https://hub.bend-lang.com/0x92882293385d0b92a8d4a4a676bbf076/bend_tensors.bend).
-- [ezimg](https://github.com/Emerging-Patterns/ezimg) is an MIT-licensed Bend 2 raster image library with 8-bit PNG and baseline JPEG decoding and JPEG encoding; its README explicitly disclaims full codec conformance. It could serve later asset ingestion. The present demo uses flat-colored faces and generates benchmark PNGs in Python, so it does not address the measured frame or edit costs. No Bend 2.0.25 integration check was run. [Package README](https://github.com/Emerging-Patterns/ezimg/blob/main/README.md), [current renderer](../../src/render.bend), [snapshot exporter](../../scripts/snapshot.py).
+- [ezimg](https://github.com/Emerging-Patterns/ezimg) is an MIT-licensed Bend 2 raster image library with 8-bit PNG and baseline JPEG decoding and JPEG encoding; its README explicitly disclaims full codec conformance. It could serve later asset ingestion. The earlier demo used flat-colored faces and generated snapshot PNGs in Python, so it did not address the measured frame or edit costs. No Bend 2.0.25 integration check was run. [Package README](https://github.com/Emerging-Patterns/ezimg/blob/main/README.md), [archived snapshot results](../demo-validation.md).
 
 Reviewed 2026-09-22. Discovery sources: [awesome-bend](https://github.com/777genius/awesome-bend) and [BendHub](https://hub.bend-lang.com/). Findings below distinguish upstream claims, local compatibility checks, and proposed applications.
 

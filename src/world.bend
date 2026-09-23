@@ -1,5 +1,5 @@
 import Base
-import ./vendor/bend3d.bend as R
+import ./math.bend as R
 
 # The original 40 x 24 x 20 lattice holds owner IDs (0 air, 1 anchored,
 # 2..65 fragments). Bodies translate vertically, preserving local cell IDs.

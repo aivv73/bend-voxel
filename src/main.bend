@@ -5,7 +5,7 @@ import ./render.bend as V
 import ./input.bend as I
 import ./platform.bend as P
 import ./vulkan.bend as VK
-import ./vendor/bend3d.bend as R
+import ./math.bend as R
 
 def aim.kind(a: V.Aim) -> U32:
   V.Aim{_, _, kind} = a
@@ -79,7 +79,7 @@ def bench.world(w: W.World, c: I.Control, +pending: List<&2,D.Sample>, last: U32
   +duration = (end - previousEnd : U32)
   do IO<Unit>:
     Unit <- D.bench.log(total, duration, solids, count, pending, end,
-      (updateEnd - now : U32), (sceneEnd - updateEnd : U32), (end - sceneEnd : U32), 0, 0)
+      (updateEnd - now : U32), (sceneEnd - updateEnd : U32), (end - sceneEnd : U32))
     bench.done((D.events.close(events) || (total >= 65000000 : U32)), win,
       D.State{W.World{a, bs, solids, count, removed, status}, c, Nil{}, D.pending.last(pending, end, last)},
       epoch, end, (now - epoch : U32), duration, k)

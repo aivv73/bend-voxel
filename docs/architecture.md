@@ -1,6 +1,6 @@
 # Voxel Engine Architecture in Bend 2
 
-Status: a proposal for the first technical prototype; the engine has not been implemented or benchmarked.
+Status: historical architecture proposal. The current bounded demo uses the Vulkan renderer described in [vulkan-renderer.md](vulkan-renderer.md); the Bend3D renderer discussed below was removed after validation.
 
 Confirmed goal: small, destructible voxels, architecture first, with the initial build running on the current Linux PC. Level scale, art style, and physics complexity remain unspecified. This proposal starts with a bounded arena, solid opaque materials, and detachable fragments.
 

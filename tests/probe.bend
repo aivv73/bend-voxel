@@ -1,7 +1,7 @@
 import Base
 import ../src/probe.bend as P
 import ../src/world.bend as W
-import ../src/vendor/bend3d.bend as R
+import ../src/math.bend as R
 import ./world.bend as T
 
 def verify(r: P.EditResult, n: U32, c: U32, status: U32, label: String) -> IO(Unit):

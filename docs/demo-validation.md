@@ -1,3 +1,5 @@
+> Historical Bend3D CPU/CUDA renderer validation. The current application uses Vulkan; see [Vulkan renderer](vulkan-renderer.md).
+
 # First demo validation
 
 ## Scope
