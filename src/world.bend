@@ -178,8 +178,12 @@ def body.find.go(bs: List<&2, Body>, +id: U32, found: Bool, value: R.Vec) -> R.V
 def body.find(bs: List<&2, Body>, id: U32) -> R.Vec:
   body.find.go(bs, id, False{}, R.Vec{0.0, 0.0, 0.0})
 
+type PendingBody is Data:
+  PendingBody{id: U32, owner: U32, offset: F32, speed: F32, bottom: F32, members: List<&2, U32>}
 type Rebuild is Type:
-  Rebuild{source: Array<U32>, seen: Array<U32>, output: Array<U32>, bodies: List<&2, Body>, next: U32}
+  Rebuild{source: Array<U32>, seen: Array<U32>, output: Array<U32>, bodies: List<&2, PendingBody>, next: U32}
+type Classified is Type:
+  Classified{source: Array<U32>, output: Array<U32>, bodies: List<&2, PendingBody>, count: U32, removed: U32, fragments: U32}
 def use.flood(-C: Type, f: Flood, k: Array<U32> -> Array<U32> -> List<U32> -> List<&2, U32> -> Bool -> F32 -> C) -> C:
   Flood{a, b, c, d, e, f} = f
   k(a, b, c, d, e, f)
@@ -193,10 +197,8 @@ def rebuild.one(doit: Bool, +i: U32, +owner: U32, +old: List<&2, Body>, r: Rebui
       use.flood(Rebuild, flood.run(Flood{a, Array.set(U32, seen, i, 1), [i], Nil{}, False{}, 100.0}, owner), a => seen => unused2 => members => +anchored => bottom =>
         +members = members
         +newid = R.word(anchored, 1, next)
-        pair(Array<U32>, List<&2, Face>, Rebuild, faces.cells(members, owner, a, Nil{}), a => fs =>
-          vec(Rebuild, body.find(old, owner), offset => speed => unused2 =>
-            Rebuild{a, seen, assign(members, newid, out), Body{newid, offset, speed, bottom, fs} <> bs, (next + R.word(anchored, 0, 1) : U32)}
-          )
+        vec(Rebuild, body.find(old, owner), offset => speed => unused2 =>
+          Rebuild{a, seen, assign(members, newid, out), PendingBody{newid, owner, offset, speed, bottom, members} <> bs, (next + R.word(anchored, 0, 1) : U32)}
         )
       )
 def rebuild.scan(n: Nat, +i: U32, +old: List<&2, Body>, r: Rebuild) -> Rebuild:
@@ -210,13 +212,26 @@ def rebuild.scan(n: Nat, +i: U32, +old: List<&2, Body>, r: Rebuild) -> Rebuild:
           rebuild.scan(k, (i + 1 : U32), old, rebuild.one(((owner > 0 : U32) && U32.is_eq(marked, 0)), i, owner, old, Rebuild{a, seen, out, bs, next}))
         )
       )
-def use.rebuild(-C: Type, r: Rebuild, k: Array<U32> -> Array<U32> -> Array<U32> -> List<&2, Body> -> U32 -> C) -> C:
+def use.rebuild(-C: Type, r: Rebuild, k: Array<U32> -> Array<U32> -> Array<U32> -> List<&2, PendingBody> -> U32 -> C) -> C:
   Rebuild{a, b, c, d, e} = r
   k(a, b, c, d, e)
-def rebuild(a: Array<U32>, old: List<&2, Body>, count: U32, removed: U32) -> World:
-  use.rebuild(World, rebuild.scan(19200n, 0, old, Rebuild{a, Array.new(U32, 15n, 0), Array.new(U32, 15n, 0), Nil{}, 2}), unused0 => unused1 => out => bs => next =>
-    World{out, bs, count, (next - 2 : U32), removed, 1}
+def rebuild.classify(a: Array<U32>, old: List<&2, Body>, count: U32, removed: U32) -> Classified:
+  use.rebuild(Classified, rebuild.scan(19200n, 0, old, Rebuild{a, Array.new(U32, 15n, 0), Array.new(U32, 15n, 0), Nil{}, 2}), source => unused1 => out => bs => next =>
+    Classified{source, out, bs, count, removed, (next - 2 : U32)}
   )
+def faces.bodies(bs: List<&2, PendingBody>, a: Array<U32>) -> Array<U32> & List<&2, Body>:
+  match bs:
+    case Nil{}: (a, Nil{})
+    case PendingBody{id, owner, offset, speed, bottom, members} <> rest:
+      pair(Array<U32>, List<&2, Face>, Array<U32> & List<&2, Body>, faces.cells(members, owner, a, Nil{}), a => fs =>
+        pair(Array<U32>, List<&2, Body>, Array<U32> & List<&2, Body>, faces.bodies(rest, a), a => others =>
+          (a, Body{id, offset, speed, bottom, fs} <> others)))
+def rebuild.surfaces(c: Classified) -> World:
+  Classified{source, out, pending, count, removed, fragments} = c
+  pair(Array<U32>, List<&2, Body>, World, faces.bodies(pending, source), unused => bs =>
+    World{out, bs, count, fragments, removed, 1})
+def rebuild(a: Array<U32>, old: List<&2, Body>, count: U32, removed: U32) -> World:
+  rebuild.surfaces(rebuild.classify(a, old, count, removed))
 def initial() -> World:
   rebuild(initial.fill(19200n, 0, Array.new(U32, 15n, 0)), Nil{}, 4640, 0)
 
@@ -248,28 +263,46 @@ def carve.commit(ok: Bool, old: World, fresh: World) -> World:
 def use.world(-C: Type, w: World, k: Array<U32> -> List<&2, Body> -> U32 -> U32 -> U32 -> U32 -> C) -> C:
   World{a, b, c, d, e, f} = w
   k(a, b, c, d, e, f)
-def carve.changed(changed: Bool, a: Array<U32>, old: World, +removed: U32) -> World:
-  match changed:
-    case False{}:
-      World{a0, bs, n, c, _, _} = old
-      World{a0, bs, n, c, 0, 2}
-    case True{}:
-      World{a0, +bs, +n, c, r, s} = old
-      use.world(World, rebuild(a, bs, (n - removed : U32), removed), a => bs2 => n2 => +c2 => r2 => s2 =>
-        carve.commit((c2 <= 64 : U32), World{a0, bs, n, c, r, s}, World{a, bs2, n2, c2, r2, s2})
-      )
 # The transaction boundary is shared by interactive edits and timed probes.
-# prepare owns the candidate; finish either commits it or returns the old world.
+# prepare owns the candidate; classify finds bodies; surfaces emits faces;
+# finish either commits the result or returns the old world.
 type Edit is Type:
   Edit{candidate: Array<U32>, old: World, removed: U32}
+type EditClassification is Type:
+  Unchanged{old: World}
+  Changed{old: World, classified: Classified}
+type EditSurfaces is Type:
+  Unmeshed{old: World}
+  Meshed{old: World, candidate: World}
 def carve.prepare(w: World, p: R.Vec) -> Edit:
   World{a, +bs, n, c, r, s} = w
   pair(Array<U32>, Array<U32>, Edit, Array.clone(U32, a), a0 => a =>
     pair(Array<U32>, U32, Edit, remove.scan(19200n, 0, a, bs, p, 0), a => removed =>
       Edit{a, World{a0, bs, n, c, r, s}, removed}))
-def carve.finish(edit: Edit) -> World:
+def carve.classify.changed(a: Array<U32>, old: World, +removed: U32) -> EditClassification:
+  World{a0, +bs, +n, c, r, s} = old
+  Changed{World{a0, bs, n, c, r, s}, rebuild.classify(a, bs, (n - removed : U32), removed)}
+def carve.classify.go(changed: Bool, a: Array<U32>, old: World, +removed: U32) -> EditClassification:
+  match changed:
+    case False{}: Unchanged{old}
+    case True{}: carve.classify.changed(a,old,removed)
+def carve.classify(edit: Edit) -> EditClassification:
   Edit{a,old,+removed} = edit
-  carve.changed((removed > 0 : U32),a,old,removed)
+  carve.classify.go((removed > 0 : U32),a,old,removed)
+def carve.surfaces(edit: EditClassification) -> EditSurfaces:
+  match edit:
+    case Unchanged{old}: Unmeshed{old}
+    case Changed{old, classified}: Meshed{old, rebuild.surfaces(classified)}
+def carve.finalize(edit: EditSurfaces) -> World:
+  match edit:
+    case Unmeshed{old}:
+      World{a0, bs, n, c, _, _} = old
+      World{a0, bs, n, c, 0, 2}
+    case Meshed{old, fresh}:
+      use.world(World, fresh, a => bs2 => n2 => +c2 => r2 => s2 =>
+        carve.commit((c2 <= 64 : U32), old, World{a, bs2, n2, c2, r2, s2}))
+def carve.finish(edit: Edit) -> World:
+  carve.finalize(carve.surfaces(carve.classify(edit)))
 def carve(w: World, p: R.Vec) -> World:
   carve.finish(carve.prepare(w,p))
 
