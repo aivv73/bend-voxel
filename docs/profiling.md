@@ -12,20 +12,22 @@ The raw CSV contains these rows (without a header):
 
 ```text
 frame,elapsed_us,frame_us,solids,bodies
-stage,elapsed_us,carve_us,rebuild_us,update_other_us,scene_us,render_us,dispose_us,present_us,overhead_us
+stage,elapsed_us,carve_us,connectivity_us,surface_us,finalize_us,update_other_us,scene_us,render_us,dispose_us,present_us,overhead_us
 cut,scheduled_absolute_us,latency_us,status,kind
 attempt,scheduled_absolute_us,latency_us,status,kind
-edit,frame_elapsed_us,scheduled_absolute_us,kind,status,carve_us,rebuild_us
+edit,frame_elapsed_us,scheduled_absolute_us,kind,status,carve_us,connectivity_us,surface_us,finalize_us
 ```
 
 `frame_us` remains the entire interval between completed presentations. The first frame starts at the benchmark epoch. Cut/attempt latency still starts at the scheduled command time and ends at completed presentation, including queueing. Absolute timestamps are wrapping U32 microseconds; durations use modular subtraction in Bend. No slow samples are removed. The final frame crossing the 65-second boundary is retained.
 
-The eight exclusive stage components add up exactly to each frame's end-to-end duration:
+The ten exclusive stage components add up exactly to each frame's end-to-end duration:
 
 | Stage | Boundary |
 | --- | --- |
 | Carving | Clone the candidate voxel array and remove eligible cells. |
-| Connectivity/meshing | Six-face connectivity, body assignment, face rebuilding, commit or rollback, and transaction cleanup. A no-op transaction still finalizes here. |
+| Connectivity | Full-grid scan, six-face flood fill, component classification and body ID assignment. |
+| Surface generation | Build cached, merged exposed-face rectangles for classified bodies. |
+| Edit finalization | Commit the candidate or roll back at the body cap; a no-op transaction also finalizes here. |
 | Other update | Physics, command lookup/validation, reset, camera update, and surrounding timing/control work. |
 | Scene preparation | Picking, body transforms, clipping, render-cell construction, brush preview and HUD preparation. |
 | CUDA rendering | `V.frame`, including its completed CUDA invocation and image result. |
@@ -33,11 +35,13 @@ The eight exclusive stage components add up exactly to each frame's end-to-end d
 | Presentation | Image-tree expansion, pacing, event processing, X11 image/HUD submission and `XSync`. |
 | Overhead | The remaining frame interval, including previous-frame CSV output and loop/control overhead. |
 
-Carving and rebuilding use the same `W.carve.prepare` / `W.carve.finish` transaction as interactive carving. Protected and empty-target commands skip that transaction and record zero for both stages. Multiple edits within one frame produce individual `edit` rows and summed frame-stage durations.
+The timed path uses the same `W.carve.prepare`, `W.carve.classify`, `W.carve.surfaces` and `W.carve.finalize` transaction as interactive carving. Each phase is forced through `IO.pure` before its end timestamp. Protected and empty-target commands skip the transaction and record zero for all four edit stages. A carve request with no removable voxels still runs preparation, then skips classification and surface generation work. Multiple edits within one frame produce individual `edit` rows and summed frame-stage durations. The surface interval includes phase result materialization and clock boundary overhead; it is a wall-clock stage, not a GPU kernel measurement.
 
 The report validates frame/stage joins, uninterrupted end-to-end intervals, stage sums, per-edit sums, and edit/latency correspondence. `instrumentation_pass`, `workload_pass` and `performance_pass` are separate. Statistics exclude warm-up frames ending before five seconds; the raw CSV retains them. `active_edits` reports accepted-edit timings separately, avoiding zero-heavy frame distributions hiding expensive edits. Stage percentiles are not additive.
 
 Instrumentation and CSV output have a cost. That cost remains in end-to-end measurements; do not subtract it to claim an acceptance pass. These instrumented results should not be treated as an uninstrumented compiler comparison.
+
+Archived reports under `docs/validation/` retain the earlier CSV layout with one combined `connectivity_meshing` stage. The current parser expects the split fields above; generate a fresh run to compare connectivity and surface costs.
 
 ## Snapshots
 

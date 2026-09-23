@@ -34,6 +34,18 @@ Each run must have frame p95 ≤ 33.3 ms, accepted-cut p95 ≤ 100 ms and maximu
 
 The replay invokes the same world-edit operation at scripted world coordinates. It does not synthesize the mouse movements needed to acquire every target; picking and input are checked separately. The timed workload does not intentionally fill all 64 body slots; the cap is exercised by the correctness fixture.
 
+## Surface-generation timing (2026-09-23)
+
+The profiler now times connectivity and cached face generation as separate edit stages. A fresh three-run forced-CUDA benchmark used Bend 2.0.25 on the GTX 1660 at 640 × 360. Each run passed instrumentation and workload checks, with 33 accepted cuts and six protected/empty attempts. The performance gate still failed: frame p95 exceeded 33.3 ms and cut p95 exceeded 100 ms in every run.
+
+| Run | Frame p95 (ms) | Cut p95 (ms) | Connectivity p50 / p95 (ms) | Surface generation p50 / p95 (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 44.646 | 150.199 | 15.625 / 16.925 | 19.036 / 19.701 |
+| 2 | 45.262 | 153.677 | 15.199 / 18.306 | 18.888 / 21.244 |
+| 3 | 46.303 | 150.961 | 15.832 / 18.338 | 19.714 / 22.358 |
+
+The connectivity and surface percentiles include accepted edits only; they are separate wall-clock intervals and their percentiles should not be added. Surface generation is slightly costlier than connectivity in this workload. These runs measure a refactored two-phase rebuild, so direct performance attribution against earlier combined-stage reports is not established. The source tree was uncommitted during measurement; the report records source hashes. [Full report](validation/surface-generation-2026-09-23/report.json) and complete raw samples: [run 1](validation/surface-generation-2026-09-23/run-1.csv.gz), [run 2](validation/surface-generation-2026-09-23/run-2.csv.gz), [run 3](validation/surface-generation-2026-09-23/run-3.csv.gz).
+
 ## Compiler upgrade to Bend 2.0.25
 
 On 2026-09-22, the installed compiler and project build pin were updated from 2.0.16 to [2.0.25](https://github.com/bendlang/bend/releases/tag/v2.0.25). The official installer verified the release archive checksum. The previous compiler, Base and guides were backed up locally under `build/toolchain-backup/bend-2.0.16.tar.gz`.

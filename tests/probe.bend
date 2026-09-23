@@ -5,14 +5,14 @@ import ../src/vendor/bend3d.bend as R
 import ./world.bend as T
 
 def verify(r: P.EditResult, n: U32, c: U32, status: U32, label: String) -> IO(Unit):
-  P.EditResult{w,_,_} = r
+  P.EditResult{w,_,_,_,_} = r
   do IO<Unit>:
     w : W.World <- T.inspect(w,n,c,status,label)
     IO.pure(Unit,Unit{})
 def skipped(r: P.EditResult) -> IO(Unit):
-  P.EditResult{w,cut,rebuild} = r
+  P.EditResult{w,cut,connectivity,surface,finalize} = r
   do IO<Unit>:
-    Unit <- T.check((U32.is_eq(cut,0) && U32.is_eq(rebuild,0)),"skipped edit records zero stages")
+    Unit <- T.check((U32.is_eq(cut,0) && U32.is_eq(connectivity,0) && U32.is_eq(surface,0) && U32.is_eq(finalize,0)),"skipped edit records zero stages")
     w : W.World <- T.inspect(w,4640,0,1,"skipped edit preserves world")
     IO.pure(Unit,Unit{})
 def main() -> IO(Unit):

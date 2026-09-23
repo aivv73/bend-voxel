@@ -7,7 +7,7 @@ import ./platform.bend as P
 import ./probe.bend as Probe
 
 type Sample is Data:
-  Sample{stamp: U32, status: U32, kind: U32, carveUs: U32, rebuildUs: U32}
+  Sample{stamp: U32, status: U32, kind: U32, carveUs: U32, connectivityUs: U32, surfaceUs: U32, finalizeUs: U32}
 type State is Type:
   State{world: W.World, control: I.Control, pending: List<&2, Sample>, lastCut: U32}
 def initial() -> State:
@@ -23,7 +23,7 @@ def selected(kind: U32, w: W.World, point: R.Vec) -> W.World:
       W.World{a, bs, n, count, _, _} = w
       W.World{a, bs, n, count, 0, 2}
 def pending.add(status: U32, kind: U32, stamp: U32, p: List<&2,Sample>) -> List<&2,Sample>:
-  Sample{stamp,status,kind,0,0} <> p
+  Sample{stamp,status,kind,0,0,0,0} <> p
 def status(s: U32) -> String:
   match s:
     case 1:
@@ -116,7 +116,7 @@ def pending.last(p: List<&2, Sample>, +end: U32, last: U32) -> U32:
   match p:
     case Nil{}:
       last
-    case Sample{t,status,_,_,_} <> rest:
+    case Sample{t,status,_,_,_,_,_} <> rest:
       pending.last(rest,end,R.word(U32.is_eq(status,1),(end - t : U32),last))
 def loop.cont(quit: Bool, win: Window, s: State, old: Image, stamp: U32, frameUs: U32, remaining: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
   match quit:
@@ -164,31 +164,41 @@ def bench.logcuts(p: List<&2, Sample>, +end: U32) -> IO(Unit):
   match p:
     case Nil{}:
       IO.pure(Unit, Unit{})
-    case Sample{+t,+status,kind,_,_} <> rest:
+    case Sample{+t,+status,kind,_,_,_,_} <> rest:
       do IO<Unit>:
         Unit <- IO.print(Bool.pick(String,U32.is_eq(status,1),"cut,","attempt,") ++ U32.show(t) ++ "," ++ U32.show((end - t : U32)) ++ "," ++ U32.show(status) ++ "," ++ U32.show(kind))
         bench.logcuts(rest, end)
 def bench.edits(p: List<&2,Sample>, +elapsed: U32) -> IO(Unit):
   match p:
     case Nil{}: IO.pure(Unit,Unit{})
-    case Sample{stamp,status,kind,cut,rebuild} <> rest:
+    case Sample{stamp,status,kind,cut,connectivity,surface,finalize} <> rest:
       do IO<Unit>:
-        Unit <- IO.print("edit," ++ U32.show(elapsed) ++ "," ++ U32.show(stamp) ++ "," ++ U32.show(kind) ++ "," ++ U32.show(status) ++ "," ++ U32.show(cut) ++ "," ++ U32.show(rebuild))
+        Unit <- IO.print("edit," ++ U32.show(elapsed) ++ "," ++ U32.show(stamp) ++ "," ++ U32.show(kind) ++ "," ++ U32.show(status) ++ "," ++ U32.show(cut) ++ "," ++ U32.show(connectivity) ++ "," ++ U32.show(surface) ++ "," ++ U32.show(finalize))
         bench.edits(rest,elapsed)
 def bench.cut.sum(p: List<&2,Sample>) -> U32:
   match p:
     case Nil{}: 0
-    case Sample{_,_,_,cut,_} <> rest: (cut + bench.cut.sum(rest) : U32)
-def bench.rebuild.sum(p: List<&2,Sample>) -> U32:
+    case Sample{_,_,_,cut,_,_,_} <> rest: (cut + bench.cut.sum(rest) : U32)
+def bench.connectivity.sum(p: List<&2,Sample>) -> U32:
   match p:
     case Nil{}: 0
-    case Sample{_,_,_,_,rebuild} <> rest: (rebuild + bench.rebuild.sum(rest) : U32)
+    case Sample{_,_,_,_,connectivity,_,_} <> rest: (connectivity + bench.connectivity.sum(rest) : U32)
+def bench.surface.sum(p: List<&2,Sample>) -> U32:
+  match p:
+    case Nil{}: 0
+    case Sample{_,_,_,_,_,surface,_} <> rest: (surface + bench.surface.sum(rest) : U32)
+def bench.finalize.sum(p: List<&2,Sample>) -> U32:
+  match p:
+    case Nil{}: 0
+    case Sample{_,_,_,_,_,_,finalize} <> rest: (finalize + bench.finalize.sum(rest) : U32)
 def bench.log(+elapsed: U32, +frame: U32, n: U32, c: U32, +p: List<&2,Sample>, end: U32, +update: U32, +scene: U32, +render: U32, +dispose: U32, +present: U32) -> IO(Unit):
   +cut = bench.cut.sum(p)
-  +rebuild = bench.rebuild.sum(p)
+  +connectivity = bench.connectivity.sum(p)
+  +surface = bench.surface.sum(p)
+  +finalize = bench.finalize.sum(p)
   do IO<Unit>:
     Unit <- IO.print("frame," ++ U32.show(elapsed) ++ "," ++ U32.show(frame) ++ "," ++ U32.show(n) ++ "," ++ U32.show(c))
-    Unit <- IO.print("stage," ++ U32.show(elapsed) ++ "," ++ U32.show(cut) ++ "," ++ U32.show(rebuild) ++ "," ++ U32.show((update - cut - rebuild : U32)) ++ "," ++ U32.show(scene) ++ "," ++ U32.show(render) ++ "," ++ U32.show(dispose) ++ "," ++ U32.show(present) ++ "," ++ U32.show((frame - update - scene - render - dispose - present : U32)))
+    Unit <- IO.print("stage," ++ U32.show(elapsed) ++ "," ++ U32.show(cut) ++ "," ++ U32.show(connectivity) ++ "," ++ U32.show(surface) ++ "," ++ U32.show(finalize) ++ "," ++ U32.show((update - cut - connectivity - surface - finalize : U32)) ++ "," ++ U32.show(scene) ++ "," ++ U32.show(render) ++ "," ++ U32.show(dispose) ++ "," ++ U32.show(present) ++ "," ++ U32.show((frame - update - scene - render - dispose - present : U32)))
     Unit <- bench.logcuts(p,end)
     bench.edits(p,elapsed)
 def bench.finish(done: Bool, win: Window, s: State, im: Image, epoch: U32, end: U32, elapsed: U32, frame: U32, k: Window -> State -> Image -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
@@ -293,9 +303,9 @@ def replay.scan(n: Nat, +i: U32, +previous: U32, +elapsed: U32, +epoch: U32, s: 
       +due = (5000000 + i / 14 * 20000000 + replay.time((i % 14 : U32)) : U32)
       replay.scan(k, (i + 1 : U32), previous, elapsed, epoch, replay.when(((due > previous) && (due <= elapsed) : U32), (i % 14 : U32), s, (epoch + due : U32)))
 def replay.measured(r: Probe.EditResult, c: I.Control, p: List<&2,Sample>, last: U32, kind: U32, stamp: U32) -> State:
-  Probe.EditResult{w,cut,rebuild} = r
+  Probe.EditResult{w,cut,connectivity,surface,finalize} = r
   W.use.world(State,w,a => bs => n => count => r => +status =>
-    State{W.World{a,bs,n,count,r,status},c,Sample{stamp,status,kind,cut,rebuild} <> p,last})
+    State{W.World{a,bs,n,count,r,status},c,Sample{stamp,status,kind,cut,connectivity,surface,finalize} <> p,last})
 def replay.apply.timed(i: U32, s: State, stamp: U32) -> IO(State):
   match i:
     case 0: IO.pure(State,initial())
