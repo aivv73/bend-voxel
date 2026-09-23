@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "date": "2026-09-23T19:26:33+0400",
+    "date": "2026-09-23T19:49:03+0400",
     "bend": "bend 2.0.26",
-    "git_revision": "6d2b73ac59b13982323d89c09e465c7023653ebc",
-    "working_tree_dirty": true,
+    "git_revision": "d9380766e3e302c37835602c0a6a5e6ca92832c2",
+    "working_tree_dirty": false,
     "resolution": [
       640,
       360
@@ -13,12 +13,12 @@
     "source_sha256": {
       "src/demo_vulkan.bend": "1b6eb284236c320b9c718e07a0a7edeef5a6c5a94fcbdded8aded6ef8fe8bdaa",
       "src/vulkan.bend": "825b02e89ea8181b319a115befedcd5a47abdf0ad997621bc492808a481aff6e",
-      "src/vulkan/bridge.c": "3bcadbf3c602198774fb673d3d8712bdbe2a4809a99f3dab4b37a73cd31ca64f",
-      "src/vulkan/native.cpp": "6649603ed3184e3de7c7368761a390d800e437243413dd4f19d1a33d18591739",
-      "src/vulkan/scene.vert": "c862ecdb491e23526db674173c520cbc16409375eeb75b2767a39a7a9543035c",
+      "src/vulkan/bridge.c": "525714620b8dca8b8eed9cc885906580ceceb4346215fa939c197d8a84ec8186",
+      "src/vulkan/native.cpp": "d7e6c6e55afb7fa1a5b0dcd608071820e20dd934dd653f209b35521f93dc01ee",
+      "src/vulkan/scene.vert": "54812ea6837ff194cd5596087acd5618eb7c72633c8d68c19e0597ad3c65664b",
       "src/vulkan/scene.frag": "53f2ae0d055d8888093f943c8c34e5cdab1a44a3264eab12d0af871a344e9447"
     },
-    "timing_scope": "Full frame intervals include CPU simulation/edit, Bend scene preparation, Vulkan mesh upload/draw/present, X11 HUD and synchronization. The frame effect is one combined stage."
+    "timing_scope": "Full frame intervals include CPU simulation/edit, Bend scene preparation, Vulkan scene and HUD mesh upload/draw/present, and X11 event synchronization. The frame effect is one combined stage."
   },
   "runs": [
     {
@@ -26,54 +26,54 @@
       "exit_code": 0,
       "complete_window": true,
       "expected_accepted_cuts": 33,
-      "raw_frame_samples": 9263,
-      "warmup_frame_samples": 680,
+      "raw_frame_samples": 9271,
+      "warmup_frame_samples": 690,
       "frames": {
-        "samples": 8583,
-        "p50_ms": 6.93,
-        "p95_ms": 8.093,
-        "p99_ms": 9.825,
-        "max_ms": 50.201,
-        "mean_ms": 6.990590469532797,
-        "total_ms": 60000.238
+        "samples": 8581,
+        "p50_ms": 6.939,
+        "p95_ms": 7.732,
+        "p99_ms": 9.775,
+        "max_ms": 45.518,
+        "mean_ms": 6.99303437827759,
+        "total_ms": 60007.228
       },
       "cuts": {
         "samples": 33,
-        "p50_ms": 46.141,
-        "p95_ms": 53.162,
-        "p99_ms": 56.27,
-        "max_ms": 56.27,
-        "mean_ms": 42.142575757575756,
-        "total_ms": 1390.705
+        "p50_ms": 44.815,
+        "p95_ms": 49.614,
+        "p99_ms": 50.696,
+        "max_ms": 50.696,
+        "mean_ms": 43.24818181818182,
+        "total_ms": 1427.19
       },
       "protected_and_empty_attempts": [
         {
-          "latency_ms": 6.409,
+          "latency_ms": 11.717,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 13.619,
+          "latency_ms": 12.233,
           "status": 2,
           "kind": 113
         },
         {
-          "latency_ms": 13.072,
+          "latency_ms": 12.15,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 6.425,
+          "latency_ms": 11.613,
           "status": 2,
           "kind": 113
         },
         {
-          "latency_ms": 13.569,
+          "latency_ms": 11.917,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 13.521,
+          "latency_ms": 11.992,
           "status": 2,
           "kind": 113
         }
@@ -81,61 +81,61 @@
       "max_bodies": 1,
       "stages": {
         "carving": {
-          "samples": 8583,
+          "samples": 8581,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 12.119,
-          "mean_ms": 0.025905394384247934,
-          "total_ms": 222.346
+          "max_ms": 7.985,
+          "mean_ms": 0.02494056636755623,
+          "total_ms": 214.01500000000001
         },
         "connectivity": {
-          "samples": 8583,
+          "samples": 8581,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 18.267,
-          "mean_ms": 0.05271012466503554,
-          "total_ms": 452.411
+          "max_ms": 18.108,
+          "mean_ms": 0.05441755040205104,
+          "total_ms": 466.957
         },
         "surface_generation": {
-          "samples": 8583,
+          "samples": 8581,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 23.332,
-          "mean_ms": 0.06305417686123732,
-          "total_ms": 541.194
+          "max_ms": 21.721,
+          "mean_ms": 0.0675569280969584,
+          "total_ms": 579.706
         },
         "edit_finalization": {
-          "samples": 8583,
+          "samples": 8581,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 0.008,
-          "mean_ms": 1.7010369334731443e-05,
-          "total_ms": 0.146
+          "max_ms": 0.006,
+          "mean_ms": 1.619857825428272e-05,
+          "total_ms": 0.139
         },
         "update_other": {
-          "samples": 8583,
-          "p50_ms": 0.024,
-          "p95_ms": 0.037,
-          "p99_ms": 0.053,
-          "max_ms": 40.414,
-          "mean_ms": 0.0349743679366189,
-          "total_ms": 300.185
+          "samples": 8581,
+          "p50_ms": 0.023,
+          "p95_ms": 0.035,
+          "p99_ms": 0.052,
+          "max_ms": 38.989,
+          "mean_ms": 0.036282251485840813,
+          "total_ms": 311.338
         },
         "scene_preparation": {
-          "samples": 8583,
-          "p50_ms": 0.178,
-          "p95_ms": 0.24,
-          "p99_ms": 0.299,
-          "max_ms": 0.595,
-          "mean_ms": 0.16793545380403124,
-          "total_ms": 1441.39
+          "samples": 8581,
+          "p50_ms": 0.183,
+          "p95_ms": 0.272,
+          "p99_ms": 0.445,
+          "max_ms": 0.682,
+          "mean_ms": 0.17917340636289478,
+          "total_ms": 1537.487
         },
         "cell_disposal": {
-          "samples": 8583,
+          "samples": 8581,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
@@ -144,7 +144,7 @@
           "total_ms": 0.0
         },
         "presentation": {
-          "samples": 8583,
+          "samples": 8581,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
@@ -153,60 +153,60 @@
           "total_ms": 0.0
         },
         "overhead": {
-          "samples": 8583,
-          "p50_ms": 0.022,
-          "p95_ms": 0.031,
-          "p99_ms": 0.05,
-          "max_ms": 0.246,
-          "mean_ms": 0.022880111849003845,
-          "total_ms": 196.38
+          "samples": 8581,
+          "p50_ms": 0.021,
+          "p95_ms": 0.03,
+          "p99_ms": 0.048,
+          "max_ms": 0.464,
+          "mean_ms": 0.02218086470108379,
+          "total_ms": 190.334
         },
         "vulkan_frame_effect": {
-          "samples": 8583,
-          "p50_ms": 6.712,
-          "p95_ms": 7.853,
-          "p99_ms": 9.114,
-          "max_ms": 19.91,
-          "mean_ms": 6.623113829663288,
-          "total_ms": 56846.186
+          "samples": 8581,
+          "p50_ms": 6.71,
+          "p95_ms": 7.504,
+          "p99_ms": 9.137,
+          "max_ms": 16.351,
+          "mean_ms": 6.6084666122829505,
+          "total_ms": 56707.252
         }
       },
       "active_edits": {
         "carving": {
           "samples": 33,
-          "p50_ms": 7.275,
-          "p95_ms": 9.213,
-          "p99_ms": 12.119,
-          "max_ms": 12.119,
-          "mean_ms": 6.737757575757576,
-          "total_ms": 222.346
+          "p50_ms": 6.769,
+          "p95_ms": 7.761,
+          "p99_ms": 7.985,
+          "max_ms": 7.985,
+          "mean_ms": 6.48530303030303,
+          "total_ms": 214.01500000000001
         },
         "connectivity": {
           "samples": 33,
-          "p50_ms": 14.904,
-          "p95_ms": 17.542,
-          "p99_ms": 18.267,
-          "max_ms": 18.267,
-          "mean_ms": 13.709424242424243,
-          "total_ms": 452.411
+          "p50_ms": 14.583,
+          "p95_ms": 16.973,
+          "p99_ms": 18.108,
+          "max_ms": 18.108,
+          "mean_ms": 14.150212121212121,
+          "total_ms": 466.957
         },
         "surface_generation": {
           "samples": 33,
-          "p50_ms": 18.977,
-          "p95_ms": 22.033,
-          "p99_ms": 23.332,
-          "max_ms": 23.332,
-          "mean_ms": 16.39981818181818,
-          "total_ms": 541.194
+          "p50_ms": 18.533,
+          "p95_ms": 20.057,
+          "p99_ms": 21.721,
+          "max_ms": 21.721,
+          "mean_ms": 17.566848484848485,
+          "total_ms": 579.706
         },
         "edit_finalization": {
           "samples": 33,
           "p50_ms": 0.004,
           "p95_ms": 0.006,
-          "p99_ms": 0.008,
-          "max_ms": 0.008,
-          "mean_ms": 0.004424242424242424,
-          "total_ms": 0.146
+          "p99_ms": 0.006,
+          "max_ms": 0.006,
+          "mean_ms": 0.004212121212121212,
+          "total_ms": 0.139
         }
       },
       "instrumentation_pass": true,
@@ -221,54 +221,54 @@
       "exit_code": 0,
       "complete_window": true,
       "expected_accepted_cuts": 33,
-      "raw_frame_samples": 9275,
-      "warmup_frame_samples": 684,
+      "raw_frame_samples": 9268,
+      "warmup_frame_samples": 690,
       "frames": {
-        "samples": 8591,
-        "p50_ms": 6.935,
-        "p95_ms": 8.076,
-        "p99_ms": 9.883,
-        "max_ms": 47.671,
-        "mean_ms": 6.984873588639274,
-        "total_ms": 60007.049
+        "samples": 8578,
+        "p50_ms": 6.942,
+        "p95_ms": 8.192,
+        "p99_ms": 9.972,
+        "max_ms": 46.731,
+        "mean_ms": 6.995434483562602,
+        "total_ms": 60006.837
       },
       "cuts": {
         "samples": 33,
-        "p50_ms": 44.067,
-        "p95_ms": 51.845,
-        "p99_ms": 52.043,
-        "max_ms": 52.043,
-        "mean_ms": 41.44627272727273,
-        "total_ms": 1367.727
+        "p50_ms": 43.126,
+        "p95_ms": 47.49,
+        "p99_ms": 48.052,
+        "max_ms": 48.052,
+        "mean_ms": 39.81727272727273,
+        "total_ms": 1313.97
       },
       "protected_and_empty_attempts": [
         {
-          "latency_ms": 11.41,
+          "latency_ms": 8.92,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 12.319,
+          "latency_ms": 8.746,
           "status": 2,
           "kind": 113
         },
         {
-          "latency_ms": 11.231,
+          "latency_ms": 7.388,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 10.31,
+          "latency_ms": 7.867,
           "status": 2,
           "kind": 113
         },
         {
-          "latency_ms": 10.046,
+          "latency_ms": 7.379,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 10.639,
+          "latency_ms": 7.575,
           "status": 2,
           "kind": 113
         }
@@ -276,61 +276,61 @@
       "max_bodies": 1,
       "stages": {
         "carving": {
-          "samples": 8591,
+          "samples": 8578,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 8.117,
-          "mean_ms": 0.02509102549179374,
-          "total_ms": 215.55700000000002
+          "max_ms": 8.667,
+          "mean_ms": 0.02468932152016787,
+          "total_ms": 211.785
         },
         "connectivity": {
-          "samples": 8591,
+          "samples": 8578,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 20.541,
-          "mean_ms": 0.05253998370387615,
-          "total_ms": 451.371
+          "max_ms": 19.02,
+          "mean_ms": 0.054477267428304964,
+          "total_ms": 467.306
         },
         "surface_generation": {
-          "samples": 8591,
+          "samples": 8578,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 21.975,
-          "mean_ms": 0.06351635432429287,
-          "total_ms": 545.669
+          "max_ms": 23.058,
+          "mean_ms": 0.060110398694334335,
+          "total_ms": 515.627
         },
         "edit_finalization": {
-          "samples": 8591,
+          "samples": 8578,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 0.012,
-          "mean_ms": 1.6179722965894543e-05,
-          "total_ms": 0.139
+          "max_ms": 0.018,
+          "mean_ms": 1.8768943809745862e-05,
+          "total_ms": 0.161
         },
         "update_other": {
-          "samples": 8591,
+          "samples": 8578,
           "p50_ms": 0.023,
-          "p95_ms": 0.036,
-          "p99_ms": 0.054,
-          "max_ms": 40.31,
-          "mean_ms": 0.03625456873472239,
-          "total_ms": 311.463
+          "p95_ms": 0.037,
+          "p99_ms": 0.058,
+          "max_ms": 38.727,
+          "mean_ms": 0.036226859407787367,
+          "total_ms": 310.754
         },
         "scene_preparation": {
-          "samples": 8591,
-          "p50_ms": 0.181,
-          "p95_ms": 0.245,
-          "p99_ms": 0.306,
-          "max_ms": 0.597,
-          "mean_ms": 0.1701230357350716,
-          "total_ms": 1461.527
+          "samples": 8578,
+          "p50_ms": 0.167,
+          "p95_ms": 0.278,
+          "p99_ms": 0.387,
+          "max_ms": 0.701,
+          "mean_ms": 0.17256773140592213,
+          "total_ms": 1480.286
         },
         "cell_disposal": {
-          "samples": 8591,
+          "samples": 8578,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
@@ -339,7 +339,7 @@
           "total_ms": 0.0
         },
         "presentation": {
-          "samples": 8591,
+          "samples": 8578,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
@@ -348,60 +348,60 @@
           "total_ms": 0.0
         },
         "overhead": {
-          "samples": 8591,
-          "p50_ms": 0.021,
-          "p95_ms": 0.03,
-          "p99_ms": 0.049,
-          "max_ms": 0.231,
-          "mean_ms": 0.021631591200093118,
-          "total_ms": 185.837
+          "samples": 8578,
+          "p50_ms": 0.022,
+          "p95_ms": 0.031,
+          "p99_ms": 0.052,
+          "max_ms": 0.358,
+          "mean_ms": 0.02283212870132898,
+          "total_ms": 195.854
         },
         "vulkan_frame_effect": {
-          "samples": 8591,
-          "p50_ms": 6.707,
-          "p95_ms": 7.834,
-          "p99_ms": 9.216,
-          "max_ms": 13.84,
-          "mean_ms": 6.6157008497264576,
-          "total_ms": 56835.486
+          "samples": 8578,
+          "p50_ms": 6.723,
+          "p95_ms": 7.929,
+          "p99_ms": 9.212,
+          "max_ms": 16.402,
+          "mean_ms": 6.624512007460947,
+          "total_ms": 56825.064
         }
       },
       "active_edits": {
         "carving": {
           "samples": 33,
-          "p50_ms": 6.976,
-          "p95_ms": 8.067,
-          "p99_ms": 8.117,
-          "max_ms": 8.117,
-          "mean_ms": 6.532030303030304,
-          "total_ms": 215.55700000000002
+          "p50_ms": 6.623,
+          "p95_ms": 8.533,
+          "p99_ms": 8.667,
+          "max_ms": 8.667,
+          "mean_ms": 6.417727272727273,
+          "total_ms": 211.785
         },
         "connectivity": {
           "samples": 33,
-          "p50_ms": 15.209,
-          "p95_ms": 18.111,
-          "p99_ms": 20.541,
-          "max_ms": 20.541,
-          "mean_ms": 13.67790909090909,
-          "total_ms": 451.371
+          "p50_ms": 14.622,
+          "p95_ms": 18.32,
+          "p99_ms": 19.02,
+          "max_ms": 19.02,
+          "mean_ms": 14.160787878787879,
+          "total_ms": 467.306
         },
         "surface_generation": {
           "samples": 33,
-          "p50_ms": 18.83,
-          "p95_ms": 21.401,
-          "p99_ms": 21.975,
-          "max_ms": 21.975,
-          "mean_ms": 16.53542424242424,
-          "total_ms": 545.669
+          "p50_ms": 17.591,
+          "p95_ms": 21.347,
+          "p99_ms": 23.058,
+          "max_ms": 23.058,
+          "mean_ms": 15.625060606060604,
+          "total_ms": 515.627
         },
         "edit_finalization": {
           "samples": 33,
           "p50_ms": 0.004,
-          "p95_ms": 0.006,
-          "p99_ms": 0.012,
-          "max_ms": 0.012,
-          "mean_ms": 0.004212121212121212,
-          "total_ms": 0.139
+          "p95_ms": 0.008,
+          "p99_ms": 0.018,
+          "max_ms": 0.018,
+          "mean_ms": 0.004878787878787879,
+          "total_ms": 0.161
         }
       },
       "instrumentation_pass": true,
@@ -416,54 +416,54 @@
       "exit_code": 0,
       "complete_window": true,
       "expected_accepted_cuts": 33,
-      "raw_frame_samples": 9272,
-      "warmup_frame_samples": 687,
+      "raw_frame_samples": 9277,
+      "warmup_frame_samples": 685,
       "frames": {
-        "samples": 8585,
-        "p50_ms": 6.927,
-        "p95_ms": 8.229,
-        "p99_ms": 9.894,
-        "max_ms": 48.585,
-        "mean_ms": 6.989641467676179,
-        "total_ms": 60006.072
+        "samples": 8592,
+        "p50_ms": 6.939,
+        "p95_ms": 8.185,
+        "p99_ms": 9.665,
+        "max_ms": 49.458,
+        "mean_ms": 6.98454469273743,
+        "total_ms": 60011.208
       },
       "cuts": {
         "samples": 33,
-        "p50_ms": 44.711,
-        "p95_ms": 52.513,
-        "p99_ms": 57.318,
-        "max_ms": 57.318,
-        "mean_ms": 41.8729393939394,
-        "total_ms": 1381.807
+        "p50_ms": 43.165,
+        "p95_ms": 47.946,
+        "p99_ms": 52.592,
+        "max_ms": 52.592,
+        "mean_ms": 40.34530303030303,
+        "total_ms": 1331.395
       },
       "protected_and_empty_attempts": [
         {
-          "latency_ms": 13.427,
+          "latency_ms": 16.166,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 13.313,
+          "latency_ms": 7.308,
           "status": 2,
           "kind": 113
         },
         {
-          "latency_ms": 12.905,
+          "latency_ms": 13.786,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 12.462,
+          "latency_ms": 14.784,
           "status": 2,
           "kind": 113
         },
         {
-          "latency_ms": 13.398,
+          "latency_ms": 9.458,
           "status": 2,
           "kind": 112
         },
         {
-          "latency_ms": 13.09,
+          "latency_ms": 7.059,
           "status": 2,
           "kind": 113
         }
@@ -471,61 +471,61 @@
       "max_bodies": 1,
       "stages": {
         "carving": {
-          "samples": 8585,
+          "samples": 8592,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 11.635,
-          "mean_ms": 0.0247537565521258,
-          "total_ms": 212.511
+          "max_ms": 9.128,
+          "mean_ms": 0.0254457635009311,
+          "total_ms": 218.63
         },
         "connectivity": {
-          "samples": 8585,
+          "samples": 8592,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 19.425,
-          "mean_ms": 0.052357716948165406,
-          "total_ms": 449.491
+          "max_ms": 21.19,
+          "mean_ms": 0.055683659217877095,
+          "total_ms": 478.434
         },
         "surface_generation": {
-          "samples": 8585,
+          "samples": 8592,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 22.19,
-          "mean_ms": 0.06206429819452534,
-          "total_ms": 532.822
+          "max_ms": 21.671,
+          "mean_ms": 0.05881366387337058,
+          "total_ms": 505.327
         },
         "edit_finalization": {
-          "samples": 8585,
+          "samples": 8592,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
-          "max_ms": 0.007,
-          "mean_ms": 1.712288875946418e-05,
-          "total_ms": 0.147
+          "max_ms": 0.006,
+          "mean_ms": 1.5945065176908752e-05,
+          "total_ms": 0.137
         },
         "update_other": {
-          "samples": 8585,
+          "samples": 8592,
           "p50_ms": 0.023,
           "p95_ms": 0.036,
-          "p99_ms": 0.054,
-          "max_ms": 35.296,
-          "mean_ms": 0.03239231217239371,
-          "total_ms": 278.088
+          "p99_ms": 0.056,
+          "max_ms": 36.393,
+          "mean_ms": 0.03556191806331471,
+          "total_ms": 305.548
         },
         "scene_preparation": {
-          "samples": 8585,
-          "p50_ms": 0.161,
-          "p95_ms": 0.243,
-          "p99_ms": 0.307,
-          "max_ms": 0.63,
-          "mean_ms": 0.16420570762958647,
-          "total_ms": 1409.706
+          "samples": 8592,
+          "p50_ms": 0.166,
+          "p95_ms": 0.272,
+          "p99_ms": 0.332,
+          "max_ms": 0.654,
+          "mean_ms": 0.1696236033519553,
+          "total_ms": 1457.406
         },
         "cell_disposal": {
-          "samples": 8585,
+          "samples": 8592,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
@@ -534,7 +534,7 @@
           "total_ms": 0.0
         },
         "presentation": {
-          "samples": 8585,
+          "samples": 8592,
           "p50_ms": 0.0,
           "p95_ms": 0.0,
           "p99_ms": 0.0,
@@ -543,60 +543,60 @@
           "total_ms": 0.0
         },
         "overhead": {
-          "samples": 8585,
-          "p50_ms": 0.021,
-          "p95_ms": 0.03,
-          "p99_ms": 0.05,
-          "max_ms": 0.266,
-          "mean_ms": 0.02135923121723937,
-          "total_ms": 183.369
+          "samples": 8592,
+          "p50_ms": 0.022,
+          "p95_ms": 0.031,
+          "p99_ms": 0.052,
+          "max_ms": 0.33,
+          "mean_ms": 0.022474045623836127,
+          "total_ms": 193.097
         },
         "vulkan_frame_effect": {
-          "samples": 8585,
-          "p50_ms": 6.713,
-          "p95_ms": 7.993,
-          "p99_ms": 9.259,
-          "max_ms": 13.597,
-          "mean_ms": 6.632491322073384,
-          "total_ms": 56939.938
+          "samples": 8592,
+          "p50_ms": 6.717,
+          "p95_ms": 7.944,
+          "p99_ms": 9.054,
+          "max_ms": 15.738,
+          "mean_ms": 6.616926094040968,
+          "total_ms": 56852.629
         }
       },
       "active_edits": {
         "carving": {
           "samples": 33,
-          "p50_ms": 6.625,
-          "p95_ms": 10.764,
-          "p99_ms": 11.635,
-          "max_ms": 11.635,
-          "mean_ms": 6.439727272727272,
-          "total_ms": 212.511
+          "p50_ms": 7.162,
+          "p95_ms": 8.37,
+          "p99_ms": 9.128,
+          "max_ms": 9.128,
+          "mean_ms": 6.625151515151515,
+          "total_ms": 218.63
         },
         "connectivity": {
           "samples": 33,
-          "p50_ms": 14.978,
-          "p95_ms": 19.286,
-          "p99_ms": 19.425,
-          "max_ms": 19.425,
-          "mean_ms": 13.620939393939393,
-          "total_ms": 449.491
+          "p50_ms": 14.558,
+          "p95_ms": 18.32,
+          "p99_ms": 21.19,
+          "max_ms": 21.19,
+          "mean_ms": 14.498000000000001,
+          "total_ms": 478.434
         },
         "surface_generation": {
           "samples": 33,
-          "p50_ms": 18.128,
-          "p95_ms": 21.274,
-          "p99_ms": 22.19,
-          "max_ms": 22.19,
-          "mean_ms": 16.146121212121212,
-          "total_ms": 532.822
+          "p50_ms": 16.608,
+          "p95_ms": 21.179,
+          "p99_ms": 21.671,
+          "max_ms": 21.671,
+          "mean_ms": 15.312939393939393,
+          "total_ms": 505.327
         },
         "edit_finalization": {
           "samples": 33,
-          "p50_ms": 0.005,
-          "p95_ms": 0.007,
-          "p99_ms": 0.007,
-          "max_ms": 0.007,
-          "mean_ms": 0.004454545454545454,
-          "total_ms": 0.147
+          "p50_ms": 0.004,
+          "p95_ms": 0.006,
+          "p99_ms": 0.006,
+          "max_ms": 0.006,
+          "mean_ms": 0.004151515151515152,
+          "total_ms": 0.137
         }
       },
       "instrumentation_pass": true,
@@ -608,5 +608,5 @@
     }
   ],
   "acceptance_pass": true,
-  "note": "The Vulkan effect includes presentation and X11 HUD; visual and input checks are separate."
+  "note": "The Vulkan effect includes scene and HUD presentation; visual and input checks are separate."
 }

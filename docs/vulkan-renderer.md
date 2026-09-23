@@ -23,7 +23,7 @@ The native effect returns the same Bend state it received. This preserves the ex
 
 ## Validation
 
-`make test` still checks world, input, render geometry, timed edits, and the snapshot parser. A finite Vulkan window run, pointer cut, reset, and 800 × 450 resize were inspected on the local GTX 1660/XWayland desktop. The pointer cut removed 17 voxels and reset restored all 4,640. The fixed-scene [offscreen prototype](../src/prototype/README.md) retains Bend/CUDA image comparisons for four replay states; the live route uses the same face geometry but adds the swapchain, current-state bridge, brush, HUD, and input loop.
+`make test` still checks world, input, render geometry, timed edits, and the snapshot parser. A finite Vulkan window run, pointer cut, reset, and 800 × 450 resize were inspected on the local GTX 1660/XWayland desktop. The pointer cut removed 16 voxels and reset restored all 4,640. The fixed-scene [offscreen prototype](../src/prototype/README.md) retains Bend/CUDA image comparisons for four replay states; the live route uses the same face geometry but adds the swapchain, current-state bridge, brush, HUD, and input loop.
 
 Live [Bend3D](validation/vulkan-renderer/initial-bend.png) and [Vulkan](validation/vulkan-renderer/initial-vulkan.png) captures of the initial state use the same default camera. The captures were taken at different times and use different text drawing methods. They are a visual diagnostic, not a synchronized pixel parity gate. The Vulkan HUD was also checked in repeated captures without input and after an 800 × 450 resize.
 
@@ -31,11 +31,11 @@ The fresh three-run replay passed all workload, instrumentation, and performance
 
 | Run | Frame p95 (ms) | Accepted-cut p95 (ms) | Cut maximum (ms) | Result |
 | --- | ---: | ---: | ---: | --- |
-| 1 | 8.093 | 53.162 | 56.270 | Pass |
-| 2 | 8.076 | 51.845 | 52.043 | Pass |
-| 3 | 8.229 | 52.513 | 57.318 | Pass |
+| 1 | 7.732 | 49.614 | 50.696 | Pass |
+| 2 | 8.192 | 47.490 | 48.052 | Pass |
+| 3 | 8.185 | 47.946 | 52.592 | Pass |
 
-[Machine-readable report](validation/vulkan-renderer/report.json), raw samples: [run 1](validation/vulkan-renderer/run-1.csv.gz), [run 2](validation/vulkan-renderer/run-2.csv.gz), [run 3](validation/vulkan-renderer/run-3.csv.gz). The [interactive cut](validation/vulkan-renderer/interactive-cut.png) and [resized window](validation/vulkan-renderer/resized.png) screenshots document the native presentation path. The report records source hashes because the branch was uncommitted during measurement.
+[Machine-readable report](validation/vulkan-renderer/report.json), raw samples: [run 1](validation/vulkan-renderer/run-1.csv.gz), [run 2](validation/vulkan-renderer/run-2.csv.gz), [run 3](validation/vulkan-renderer/run-3.csv.gz). The [interactive cut](validation/vulkan-renderer/interactive-cut.png) and [resized window](validation/vulkan-renderer/resized.png) screenshots document the native presentation path. The report records the tested commit and source hashes.
 
 The benchmark's `vulkan_frame_effect` stage includes Bend heap traversal, native rectangle and HUD geometry expansion, vertex upload, command recording, Vulkan submission/presentation, event polling, and X11 synchronization. The stage does not isolate GPU execution time. The frame interval includes all application work; accepted-cut latency starts at each scheduled replay action and ends after frame presentation and X11 synchronization. X11 synchronization does not timestamp physical display scanout.
 
