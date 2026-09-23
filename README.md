@@ -6,7 +6,7 @@ A native Linux demo of small, destructible voxels, implemented in Bend 2. A slab
 
 ## Run
 
-Requires **Bend 2.0.25**, CUDA (`/opt/cuda` by default), an NVIDIA GPU, Python 3 for the benchmark, and an X11 desktop (including XWayland).
+Requires **Bend 2.0.26**, CUDA (`/opt/cuda` by default), an NVIDIA GPU, Python 3 for the benchmark, and an X11 desktop (including XWayland).
 
 ```sh
 make run
@@ -24,6 +24,16 @@ make build
 Set `CUDA_HOME` if CUDA is installed elsewhere. The build checks the compiler version and CUDA module; it does not update Bend automatically. The tested machine is a GTX 1660 / Ryzen 5 1600 Linux desktop.
 
 The interactive CPU default follows the [controlled CPU/CUDA comparison](docs/research/controlled-cpu-cuda.md). Worker count uses the runtime default. `make benchmark` still forces CUDA for acceptance, and `make snapshots` still defaults to CUDA. Launching `build/voxel-demo` directly bypasses the script's CPU default; pass `--gpu off` explicitly for CPU execution.
+
+### Live Vulkan renderer
+
+On Linux/X11 with a Vulkan 1.3 driver, Vulkan development headers and loader, `glslc`, and `g++`:
+
+```sh
+make vulkan-run
+```
+
+This builds a separate executable that uses the same Bend simulation, picking, and edit code. A native Vulkan backend renders its current cached faces and brush preview to a swapchain; the X11 adapter draws the HUD and returns input events. `make vulkan-benchmark` runs the 65-second replay three times through this path. All three runs passed the workload and performance gates on the GTX 1660. See the [Vulkan renderer results](docs/vulkan-renderer.md) for timing scope and current limits.
 
 ## Controls
 
@@ -61,6 +71,7 @@ Run `make compare-backends` for a diagnostic CPU/CUDA thread-count sweep with fi
 - `src/render.bend`: camera, face picking, clipping, mesh and preview construction; Bend3D CPU/CUDA rasterization.
 - `src/input.bend`: controls, movement and focus handling.
 - `src/demo.bend`: application loop, HUD content and timed replay.
+- `src/demo_vulkan.bend` and `src/vulkan/`: live Vulkan frame effect, native rasterizer and swapchain.
 - `src/platform/`: native clock/window adapter and text presentation.
 
 The vendored [Bend3D source](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/bend3d.bend) is pinned and unchanged. See [third-party notices](src/vendor/NOTICE.md).

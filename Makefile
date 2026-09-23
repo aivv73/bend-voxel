@@ -23,3 +23,11 @@ compare-backends: build
 .PHONY: prototype-vulkan
 prototype-vulkan:
 	python3 scripts/prototype_vulkan.py $(VULKAN_ARGS)
+
+.PHONY: vulkan-build vulkan-run vulkan-benchmark
+vulkan-build:
+	./scripts/build_vulkan.sh
+vulkan-run: vulkan-build
+	./scripts/run_vulkan.sh
+vulkan-benchmark: vulkan-build
+	python3 scripts/benchmark_vulkan.py $(VULKAN_BENCH_ARGS)
