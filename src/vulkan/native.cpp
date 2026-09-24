@@ -121,28 +121,32 @@ void face_quad(Geometry& g,Vec3 p,uint32_t side,uint32_t len,uint32_t rows,Vec3 
   Vec3 c=p+n*.05f;
   quad(g,c-u-v,c+u-v,c+u+v,c-u+v,color);
 }
-void face(Geometry& g,const VoxelVkFace& f,const VoxelVkFrame& frame) {
+void face(Geometry& g,const VoxelVkFace& f) {
   if (f.index>=19200 || f.side>=6 || !f.length || !f.rows || f.length>40 || f.rows>20)
     throw std::runtime_error("invalid Bend face");
-  Vec3 p=center(f),eye={frame.eye[0],frame.eye[1],frame.eye[2]};
-  if (dot(normal(f.side),eye-p)<=.05f) return;
   bool anchor=f.owner==1 && f.index/40%24==0;
   Vec3 base=rgb(anchor?4964772u:f.owner>1?11375835u:13736040u);
   float shade=f.side==3?1.0f:f.side<2?.78f:.62f;
+  face_quad(g,center(f),f.side,f.length,f.rows,base*shade);
+}
+void preview_face(Geometry& g,const VoxelVkFace& f,const VoxelVkFrame& frame) {
+  if (frame.aim_kind!=1 || (f.owner==1 && f.index/40%24==0)) return;
+  Vec3 p=center(f),eye={frame.eye[0],frame.eye[1],frame.eye[2]};
+  if (dot(normal(f.side),eye-p)<=.05f) return;
   Vec3 aim={frame.aim[0],frame.aim[1],frame.aim[2]};
   Vec3 delta=aim-p;
   float span_x=f.side<2?.201f:.201f+f.length*.05f;
   float span_z=f.side<2?.201f+f.length*.05f:.201f+f.rows*.05f;
-  bool detail=frame.aim_kind==1 && !anchor && std::abs(delta.y)<=.201f &&
-    std::abs(delta.x)<=span_x && std::abs(delta.z)<=span_z;
-  if (!detail) { face_quad(g,p,f.side,f.length,f.rows,base*shade); return; }
+  if (std::abs(delta.y)>.201f || std::abs(delta.x)>span_x ||
+      std::abs(delta.z)>span_z) return;
+  float shade=f.side==3?1.0f:f.side<2?.78f:.62f;
   for (uint32_t row=0;row<f.rows;row++) for (uint32_t col=0;col<f.length;col++) {
     // X-normal rectangles extend only along z, so their rows are always one.
     uint32_t index=f.side<2?f.index+col*960:f.index+row*960+col;
     Vec3 cp=cell(index,f.offset),d=cp-aim;
-    bool selected=dot(d,d)<=.0400001f;
-    face_quad(g,cp,f.side,1,1,rgb(selected?16768872u:
-      (f.owner==1&&index/40%24==0)?4964772u:f.owner>1?11375835u:13736040u)*shade);
+    // Keep the preview just in front of the cached face for the LESS depth test.
+    if (dot(d,d)<=.0400001f)
+      face_quad(g,cp+normal(f.side)*.001f,f.side,1,1,rgb(16768872u)*shade);
   }
 }
 Vec3 ring_point(Vec3 p,uint32_t axis,float angle) {
@@ -156,17 +160,14 @@ float view_depth(Vec3 p,const VoxelVkFrame& f) {
 struct GeometryCache {
   Geometry geometry;
   std::vector<VoxelVkFace> faces;
-  float eye[3]{},aim[3]{};
-  uint32_t aim_kind=0,copies=0;
+  uint32_t copies=0,scene_vertices=0;
   bool valid=false;
 };
-// Face vertices depend on world faces, eye position and aim. The HUD and ring
-// also depend on text and orientation, so they are rebuilt after this check.
+// Scene vertices depend only on world faces and the stress draw multiplier.
+// Camera projection runs in the vertex shader; the preview and HUD are rebuilt.
 bool same_scene(const GeometryCache& cache,const VoxelVkFrame& frame,uint32_t copies) {
-  if (!cache.valid || cache.copies!=copies || cache.aim_kind!=frame.aim_kind ||
-      cache.faces.size()!=frame.face_count ||
-      std::memcmp(cache.eye,frame.eye,sizeof cache.eye) ||
-      std::memcmp(cache.aim,frame.aim,sizeof cache.aim)) return false;
+  if (!cache.valid || cache.copies!=copies || cache.faces.size()!=frame.face_count)
+    return false;
   for (uint32_t i=0;i<frame.face_count;i++) {
     const auto& a=cache.faces[i];
     const auto& b=frame.faces[i];
@@ -187,24 +188,25 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   }
   scene_reused=same_scene(cache,frame,copies);
   if (scene_reused) {
-    g.vertices.resize(g.triangles);
+    g.vertices.resize(cache.scene_vertices);
+    g.triangles=cache.scene_vertices;
   } else {
     g.vertices.clear();
     g.triangles=0;
     quad(g,{-6,0,-6},{-6,0,6},{6,0,6},{6,0,-6},{.12f,.19f,.24f});
     for (uint32_t copy=0;copy<copies;copy++)
-      for (uint32_t i=0;i<frame.face_count;i++) face(g,frame.faces[i],frame);
+      for (uint32_t i=0;i<frame.face_count;i++) face(g,frame.faces[i]);
+    cache.scene_vertices=g.triangles;
     cache.faces.clear();
     cache.faces.reserve(frame.face_count);
     for (uint32_t i=0;i<frame.face_count;i++) cache.faces.push_back(frame.faces[i]);
-    std::memcpy(cache.eye,frame.eye,sizeof cache.eye);
-    std::memcpy(cache.aim,frame.aim,sizeof cache.aim);
-    cache.aim_kind=frame.aim_kind;
     cache.copies=copies;
     cache.valid=true;
   }
   g.lines=0;
   g.hud=0;
+  if (frame.aim_kind==1)
+    for (uint32_t i=0;i<frame.face_count;i++) preview_face(g,frame.faces[i],frame);
   if (frame.aim_kind) {
     Vec3 p={frame.aim[0],frame.aim[1],frame.aim[2]};
     Vec3 color=rgb(frame.aim_kind==1?16768872u:16552594u);
@@ -537,8 +539,8 @@ public:
     timings.fence_wait_us=microseconds(after_geometry,after_fence);
     bool new_buffer=ensure_vertices(g.vertices.size()*sizeof(Vertex));
     // The fence above protects the single mapped buffer. On a scene cache hit,
-    // its triangle prefix is still present; only the HUD and ring need upload.
-    size_t first=(scene_reused && !new_buffer)?g.triangles:0;
+    // its scene prefix is still present; only the preview, ring and HUD need upload.
+    size_t first=(scene_reused && !new_buffer)?geometry_cache.scene_vertices:0;
     std::memcpy(static_cast<Vertex*>(mapped)+first,g.vertices.data()+first,
       (g.vertices.size()-first)*sizeof(Vertex));
     auto after_upload=Clock::now();
