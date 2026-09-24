@@ -214,6 +214,13 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   static int stress_scene_logged;
   if (getenv("VOXEL_STRESS_SCENE") && !stress_scene_logged++)
     fprintf(stdout,"surface,%u\n",frame.face_count);
+  const char* view = getenv("VOXEL_STRESS_VIEW");
+  if (view && strcmp(view,"0") != 0) {
+    static u32 view_frame;
+    fprintf(stdout,"view,%u,%.6f,%.6f,%.6f,%.6f,%.6f,%u,%.6f,%.6f,%.6f\n",
+      view_frame++,frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw,frame.pitch,
+      frame.aim_kind,frame.aim[0],frame.aim[1],frame.aim[2]);
+  }
   static u32 trace_frames;
   if (getenv("VOXEL_VULKAN_TRACE") && trace_frames++<10)
     fprintf(stderr,"vulkan frame eye %.3f %.3f %.3f yaw %.3f pitch %.3f faces %u aim %u\n",
