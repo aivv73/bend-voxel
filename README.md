@@ -44,7 +44,7 @@ make test
 make benchmark-stress
 ```
 
-The stress benchmark opens the Vulkan window and measures six scenes with increasing density, exposed surface, and render copies. It uses an unpaced presentation mode and saves raw samples and a report under `build/stress/`. The suite checks workload completion and sample accounting; it has no fixed FPS gate. See the [stress benchmark guide](docs/stress-benchmark.md) for workloads and timing limits.
+The stress benchmark opens the Vulkan window and measures ten workloads covering scene density, exposed surface, render copies, camera motion, and aim sweeps. It uses an unpaced presentation mode and saves raw samples and a report under `build/stress/`. The suite checks workload completion and sample accounting; it has no fixed FPS gate. See the [stress benchmark guide](docs/stress-benchmark.md) for workloads, timing limits, and the cache comparison.
 
 The earlier 65-second replay results remain in the [Vulkan validation archive](docs/vulkan-renderer.md) and its [report](docs/validation/bend-2.0.27-vulkan/report.json). That replay is no longer a runnable benchmark.
 

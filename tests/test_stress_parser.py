@@ -5,7 +5,7 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from stress_parser import parse_stress
+from stress_parser import parse_stress, summarize_views
 
 
 ROWS = '''init,4,500000
@@ -47,6 +47,20 @@ class StressParserTests(unittest.TestCase):
                      ROWS + 'cut,1000,1500,1,200\n',
                      ROWS + 'edit,2500,1000,200,1,100,100,100,0\n'):
             self.assertFalse(self.parse(rows)['pass'])
+
+    def test_view_workloads_require_actual_changes(self):
+        camera = [f'view,{i},{i}.0,3.0,6.0,3.14,-0.2,0,0.0,0.0,0.0'.split(',')
+                  for i in range(16)]
+        summary, errors = summarize_views(camera, 'camera', 2, 14)
+        self.assertFalse(errors)
+        self.assertEqual(summary['camera_positions'], 14)
+        self.assertTrue(summarize_views(camera, 'aim', 2, 14)[1])
+        aim = [f'view,{i},0.0,3.0,5.0,3.14,-0.2,1,{i}.0,1.0,0.0'.split(',')
+               for i in range(16)]
+        summary, errors = summarize_views(aim, 'aim', 2, 14)
+        self.assertFalse(errors)
+        self.assertEqual(summary['preview_frames'], 14)
+        self.assertTrue(summarize_views(aim, 'camera', 2, 14)[1])
 
 
 if __name__ == '__main__':

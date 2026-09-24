@@ -73,7 +73,48 @@ def validate_samples(rows):
     return errors
 
 
-def parse_stress(lines, exit_code, warmup, measured, edit_every):
+def summarize_views(rows, mode, warmup, measured):
+    errors = []
+    if mode == 'static':
+        if rows:
+            errors.append('Unexpected view rows for a static case')
+        return {}, errors
+    if len(rows) != warmup + measured:
+        errors.append(f'Expected {warmup + measured} view rows')
+    views = []
+    for index, row in enumerate(rows):
+        try:
+            if len(row) != 11 or int(row[1]) != index:
+                raise ValueError('invalid frame index or field count')
+            camera = tuple(float(value) for value in row[2:7])
+            kind = int(row[7])
+            aim = tuple(float(value) for value in row[8:11])
+            if not all(math.isfinite(value) for value in camera + aim) or kind not in (0, 1, 2, 3):
+                raise ValueError('invalid camera or aim')
+            views.append((camera, kind, aim))
+        except ValueError as exc:
+            errors.append(f'Invalid view row {index}: {exc}')
+    if errors:
+        return {}, errors
+    sample = views[warmup:]
+    camera_positions = len({camera for camera, _, _ in sample})
+    aim_positions = len({aim for _, kind, aim in sample if kind != 0})
+    target_frames = sum(kind != 0 for _, kind, _ in sample)
+    preview_frames = sum(kind == 1 for _, kind, _ in sample)
+    required_positions = min(12, max(2, measured // 4))
+    if mode == 'camera':
+        if camera_positions < required_positions or target_frames:
+            errors.append('Camera workload did not move with aim disabled')
+    elif mode == 'aim':
+        if camera_positions != 1 or aim_positions < required_positions or preview_frames < measured // 4:
+            errors.append('Aim workload did not sweep removable targets with a fixed camera')
+    else:
+        errors.append(f'Unknown view mode {mode}')
+    return {'camera_positions': camera_positions, 'aim_positions': aim_positions,
+            'target_frames': target_frames, 'preview_frames': preview_frames}, errors
+
+
+def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='static'):
     rows = list(csv.reader(lines))
     errors = []
     special = {}
@@ -86,7 +127,10 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every):
             special[tag] = [int(value) for value in found[0][1:]]
         except ValueError:
             errors.append(f'Invalid {tag} row')
-    ordinary = [row for row in rows if row and row[0] not in ('init', 'surface')]
+    views = [row for row in rows if row and row[0] == 'view']
+    view_summary, view_errors = summarize_views(views, view_mode, warmup, measured)
+    errors.extend(view_errors)
+    ordinary = [row for row in rows if row and row[0] not in ('init', 'surface', 'view')]
     errors.extend(validate_samples(ordinary))
     frames = [row for row in ordinary if row[0] == 'frame']
     stages = [row for row in ordinary if row[0] == 'stage']
@@ -135,6 +179,7 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every):
         'vulkan_stages': {name: stats([row[i + 1] / 1000 for row in measured_vk])
                           for i, name in enumerate(VULKAN_STAGES)},
         'acquire_wait_fraction': acquire_us / total_us,
+        'view': view_summary,
         'edits': len(edits),
         'edit_latency': stats([int(row[2]) / 1000 for row in cuts]),
     }

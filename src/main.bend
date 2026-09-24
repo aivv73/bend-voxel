@@ -85,8 +85,24 @@ def stress.edit.due(+index: U32, warmup: U32, every: U32) -> Bool:
   match every:
     case 0: False{}
     case +period: ((index >= warmup : U32) && U32.is_eq((index % period : U32), 0))
+def stress.camera(+index: U32, s: D.State) -> D.State:
+  D.State{w, _, p, last} = s
+  +angle = (U32.to_f32((index % 240 : U32)) * 0.02617994 : F32)
+  +eye = {R.Vec{(6.0 * F32.sin(angle) : F32), 3.0, (6.0 * F32.cos(angle) : F32)} : R.Vec}
+  D.State{w, I.Control{V.Camera{eye, (3.14159265 + angle : F32), (0.0 - 0.2 : F32)},
+    0, 320, 180, False{}, False{}, False{}, False{}, False{}, False{}}, p, last}
+def stress.aim(+index: U32, s: D.State) -> D.State:
+  D.State{w, _, p, last} = s
+  +mx = (200 + index * 5 % 240 : U32)
+  D.State{w, I.Control{V.Camera{R.Vec{0.0, 3.0, 5.0}, 3.14159265, (0.0 - 0.2 : F32)},
+    0, mx, 180, False{}, False{}, True{}, False{}, False{}, False{}}, p, last}
+def stress.view(+mode: U32, +index: U32, s: D.State) -> D.State:
+  match mode:
+    case 1: stress.camera(index, s)
+    case 2: stress.aim(index, s)
+    case _: s
 type Stress is Data:
-  Stress{epoch: U32, index: U32, total: U32, scene: U32, warmup: U32, every: U32}
+  Stress{epoch: U32, index: U32, total: U32, scene: U32, warmup: U32, every: U32, mode: U32}
 def stress.done(done: Bool, win: Window, state: D.State, config: Stress, end: U32, frameUs: U32,
   k: Window -> D.State -> Stress -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
   match done:
@@ -95,7 +111,7 @@ def stress.done(done: Bool, win: Window, state: D.State, config: Stress, end: U3
 def stress.world(w: W.World, c: I.Control, +pending: List<&2,D.Sample>, last: U32,
   events: List<Event>, win: Window, +epoch: U32, +previousEnd: U32,
   now: U32, +updateEnd: U32, +sceneEnd: U32, +end: U32,
-  +index: U32, +total: U32, scene: U32, warmup: U32, every: U32,
+  +index: U32, +total: U32, scene: U32, warmup: U32, every: U32, mode: U32,
   k: Window -> D.State -> Stress -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
   W.World{a, bs, +solids, +bodies, removed, status} = w
   do IO<Unit>:
@@ -103,15 +119,15 @@ def stress.world(w: W.World, c: I.Control, +pending: List<&2,D.Sample>, last: U3
       pending, end, (updateEnd - now : U32), (sceneEnd - updateEnd : U32), (end - sceneEnd : U32))
     stress.done(((index + 1 >= total : U32) || D.events.close(events)), win,
       D.State{W.World{a, bs, solids, bodies, removed, status}, c, Nil{}, D.pending.last(pending, end, last)},
-      Stress{epoch, (index + 1 : U32), total, scene, warmup, every}, end,
+      Stress{epoch, (index + 1 : U32), total, scene, warmup, every, mode}, end,
       (end - previousEnd : U32), k)
 def stress.config(w: W.World, c: I.Control, pending: List<&2,D.Sample>, last: U32,
   events: List<Event>, win: Window, config: Stress, previousEnd: U32,
   now: U32, updateEnd: U32, sceneEnd: U32, end: U32,
   k: Window -> D.State -> Stress -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  Stress{epoch, index, total, scene, warmup, every} = config
+  Stress{epoch, index, total, scene, warmup, every, mode} = config
   stress.world(w, c, pending, last, events, win, epoch, previousEnd,
-    now, updateEnd, sceneEnd, end, index, total, scene, warmup, every, k)
+    now, updateEnd, sceneEnd, end, index, total, scene, warmup, every, mode, k)
 def stress.after(win: Window, state: D.State, events: List<Event>, config: Stress,
   previousEnd: U32, now: U32, updateEnd: U32, sceneEnd: U32, end: U32,
   k: Window -> D.State -> Stress -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
@@ -125,31 +141,32 @@ def stress.shown(r: Window & D.State & List<Event>, config: Stress, previousEnd:
   stress.after(win, state, events, config, previousEnd, now, updateEnd, sceneEnd, end, k)
 @unsafe
 def stress.loop(win: Window, state: D.State, config: Stress, +previousEnd: U32, frameUs: U32) -> IO(Unit):
-  Stress{epoch, +index, total, +scene, +warmup, +every} = config
+  Stress{epoch, +index, total, +scene, +warmup, +every, +mode} = config
   do IO<Unit>:
     +now : U32 <- P.micros()
     updated : D.State <- stress.edit(stress.edit.due(index, warmup, every),
       D.advance(state, R.min(0.1, (U32.to_f32((now - previousEnd : U32)) / 1000000.0 : F32))), index, every, scene, now)
+    viewed : D.State <- IO.pure(D.State, stress.view(mode, index, updated))
     +updateEnd : U32 <- P.micros()
-    sceneState : D.State & V.Aim & String <- IO.pure(D.State & V.Aim & String, ready(updated, frameUs))
+    sceneState : D.State & V.Aim & String <- IO.pure(D.State & V.Aim & String, ready(viewed, frameUs))
     +sceneEnd : U32 <- P.micros()
     shown : Window & D.State & List<Event> <- show(sceneState, win)
     +end : U32 <- P.micros()
-    stress.shown(shown, Stress{epoch, index, total, scene, warmup, every}, previousEnd,
+    stress.shown(shown, Stress{epoch, index, total, scene, warmup, every, mode}, previousEnd,
       now, updateEnd, sceneEnd, end, w => s => c => t => dt => stress.loop(w, s, c, t, dt))
-def stress.start(win: Window, +scene: U32, +warmup: U32, measured: U32, every: U32) -> IO(Unit):
+def stress.start(win: Window, +scene: U32, +warmup: U32, measured: U32, every: U32, mode: U32) -> IO(Unit):
   do IO<Unit>:
     +start : U32 <- P.micros()
     world : W.World <- IO.pure(W.World, W.stress(scene))
     +epoch : U32 <- P.micros()
     Unit <- IO.print("init," ++ U32.show(scene) ++ "," ++ U32.show((epoch - start : U32)))
     stress.loop(win, D.State{world, I.initial(), Nil{}, 0},
-      Stress{epoch, 0, (warmup + measured : U32), scene, warmup, every}, epoch, 0)
+      Stress{epoch, 0, (warmup + measured : U32), scene, warmup, every, mode}, epoch, 0)
 
 def start.stress(on: Bool, win: Window, now: U32, frames: U32,
-  scene: U32, warmup: U32, measured: U32, every: U32) -> IO(Unit):
+  scene: U32, warmup: U32, measured: U32, every: U32, mode: U32) -> IO(Unit):
   match on:
-    case True{}: stress.start(win, scene, warmup, measured, every)
+    case True{}: stress.start(win, scene, warmup, measured, every, mode)
     case False{}: loop(win, D.initial(), now, frames)
 
 def main() -> IO(Unit):
@@ -159,8 +176,9 @@ def main() -> IO(Unit):
     stressWarmup : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_STRESS_WARMUP")
     stressMeasured : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_STRESS_MEASURED")
     stressEdit : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_STRESS_EDIT_EVERY")
+    stressView : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_STRESS_VIEW")
     +stressId : U32 <- IO.pure(U32, number(stressScene))
     win : Window <- IO.try(Window, Window.open("Bend Voxel Vulkan - WASD / RMB look / LMB carve / R reset", 640, 360))
     +now : U32 <- P.micros()
     start.stress((stressId > 0 : U32), win, now, number(frames),
-      stressId, number(stressWarmup), number(stressMeasured), number(stressEdit))
+      stressId, number(stressWarmup), number(stressMeasured), number(stressEdit), number(stressView))

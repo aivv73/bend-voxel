@@ -14,13 +14,18 @@ from stress_parser import parse_stress
 
 ROOT = Path(__file__).resolve().parent.parent
 CASES = {
-    'demo': (1, 1),
-    'dense': (2, 1),
-    'full': (3, 1),
-    'comb': (4, 1),
-    'comb-4x': (4, 4),
-    'comb-16x': (4, 16),
+    'demo': (1, 1, 'static'),
+    'dense': (2, 1, 'static'),
+    'full': (3, 1, 'static'),
+    'comb': (4, 1, 'static'),
+    'comb-4x': (4, 4, 'static'),
+    'comb-16x': (4, 16, 'static'),
+    'comb-camera': (4, 1, 'camera'),
+    'comb-camera-16x': (4, 16, 'camera'),
+    'comb-aim': (4, 1, 'aim'),
+    'comb-aim-16x': (4, 16, 'aim'),
 }
+VIEW_IDS = {'static': 0, 'camera': 1, 'aim': 2}
 
 
 def main():
@@ -56,19 +61,21 @@ def main():
             'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sources},
             'timing_scope': 'Frame throughput includes Bend simulation and edits, scene preparation, native geometry expansion, upload, Vulkan submission/presentation, and X11 synchronization. Fence and acquisition waits include GPU/presentation backpressure; these CPU wall-clock intervals are not GPU timestamps.',
-            'scale_scope': 'Scene cases vary solid density and exposed surface within the fixed 40x24x20 lattice. N-x cases repeat faces at the same positions. The renderer caches the world mesh by face records, independent of camera and aim, and uploads only dynamic overlays on a hit. Face or body-offset changes rebuild and upload all copies. No case multiplies simulated voxel cells.',
+            'scale_scope': 'Scene cases vary solid density and exposed surface within the fixed 40x24x20 lattice. N-x cases repeat faces at the same positions. Camera and aim cases use a static comb world without edits and change only the view or pointer each frame. No case multiplies simulated voxel cells.',
         },
         'cases': [],
     }
     for name in args.cases:
-        scene, copies = CASES[name]
-        print(f'Stress {name}: scene {scene}, {copies} render copies', flush=True)
+        scene, copies, view = CASES[name]
+        edit_every = 0 if view != 'static' else args.edit_every
+        print(f'Stress {name}: scene {scene}, {copies} render copies, {view} view', flush=True)
         csv_path = out / f'{name}.csv'
         env = {**os.environ, 'VOXEL_STRESS_SCENE': str(scene),
                'VOXEL_STRESS_COPIES': str(copies), 'VOXEL_STRESS_PRESENT': 'unpaced',
+               'VOXEL_STRESS_VIEW': str(VIEW_IDS[view]),
                'VOXEL_STRESS_WARMUP': str(args.warmup),
                'VOXEL_STRESS_MEASURED': str(args.frames),
-               'VOXEL_STRESS_EDIT_EVERY': str(args.edit_every)}
+               'VOXEL_STRESS_EDIT_EVERY': str(edit_every)}
         try:
             with csv_path.open('w') as stream:
                 proc = subprocess.run([str(binary), '--gpu', 'off'], cwd=ROOT, env=env,
@@ -81,12 +88,14 @@ def main():
                                  else captured), 124
         (out / f'{name}.stderr').write_text(stderr)
         with csv_path.open() as stream:
-            result = parse_stress(stream, exit_code, args.warmup, args.frames, args.edit_every)
+            result = parse_stress(stream, exit_code, args.warmup, args.frames,
+                                  edit_every, view)
         modes = re.findall(r'^stress_present_mode,(immediate|mailbox)$', stderr, re.MULTILINE)
         if not modes or len(set(modes)) != 1:
             result['errors'].append('Unpaced present mode was not confirmed')
             result['pass'] = False
-        result.update({'name': name, 'render_copies': copies,
+        result.update({'name': name, 'render_copies': copies, 'view_mode': view,
+                       'edit_every_frames': edit_every,
                        'present_mode': modes[0] if modes else None})
         if 'surface_rectangles' in result:
             result['face_inputs_per_rebuild'] = result['surface_rectangles'] * copies
