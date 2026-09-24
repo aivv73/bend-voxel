@@ -1,5 +1,7 @@
 # Lookup audit and one measured change
 
+This is a historical audit. The replay code referenced below was removed when the stress suite became the sole runnable application benchmark.
+
 ## Audit
 
 The audit covered project-owned body/owner lookup, cell access, and picking paths.

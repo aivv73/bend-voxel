@@ -203,8 +203,7 @@ static Term voxel_vk_events(Env e, BendWin* win) {
 }
 
 Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
-  const char* bench = getenv("VOXEL_BENCH");
-  int profile = bench && strcmp(bench, "1") == 0;
+  int profile = getenv("VOXEL_STRESS_SCENE") != NULL;
   u64 start = profile ? voxel_vk_tick() : 0;
   io_sync();
   voxel_vk_load();

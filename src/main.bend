@@ -64,54 +64,6 @@ def loop(win: Window, state: D.State, +stamp: U32, limit: U32) -> IO(Unit):
       R.min(0.1, (U32.to_f32((now - stamp : U32)) / 1000000.0 : F32))), (now - stamp : U32)), win)
     loop.shown(shown, now, limit, w => s => t => n => loop(w, s, t, n))
 
-def bench.done(done: Bool, win: Window, state: D.State, epoch: U32, end: U32,
-  elapsed: U32, frameUs: U32,
-  k: Window -> D.State -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  match done:
-    case True{}: close(win)
-    case False{}: k(win, state, epoch, end, elapsed, frameUs)
-
-def bench.world(w: W.World, c: I.Control, +pending: List<&2,D.Sample>, last: U32,
-  events: List<Event>, win: Window, +epoch: U32, previousEnd: U32,
-  +now: U32, +updateEnd: U32, +sceneEnd: U32, +end: U32,
-  k: Window -> D.State -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  W.World{a, bs, +solids, +count, removed, status} = w
-  +total = (end - epoch : U32)
-  +duration = (end - previousEnd : U32)
-  do IO<Unit>:
-    Unit <- D.bench.log(total, duration, solids, count, pending, end,
-      (updateEnd - now : U32), (sceneEnd - updateEnd : U32), (end - sceneEnd : U32))
-    bench.done((D.events.close(events) || (total >= 65000000 : U32)), win,
-      D.State{W.World{a, bs, solids, count, removed, status}, c, Nil{}, D.pending.last(pending, end, last)},
-      epoch, end, (now - epoch : U32), duration, k)
-
-def bench.after(win: Window, state: D.State, events: List<Event>, epoch: U32,
-  previousEnd: U32, now: U32, updateEnd: U32, sceneEnd: U32, end: U32,
-  k: Window -> D.State -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  D.State{w, c, +pending, last} = state
-  bench.world(w, c, pending, last, events, win, epoch, previousEnd, now, updateEnd, sceneEnd, end, k)
-
-def bench.shown(r: Window & D.State & List<Event>, epoch: U32,
-  previousEnd: U32, now: U32, updateEnd: U32, sceneEnd: U32, end: U32,
-  k: Window -> D.State -> U32 -> U32 -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
-  (win, state, events) = r
-  bench.after(win, state, events, epoch, previousEnd, now, updateEnd, sceneEnd, end, k)
-
-@unsafe
-def bench.loop(win: Window, state: D.State, +epoch: U32, +previousEnd: U32, +previousElapsed: U32, frameUs: U32) -> IO(Unit):
-  do IO<Unit>:
-    +now : U32 <- P.micros()
-    updated : D.State <- D.replay.scan.timed(42n, 0, previousElapsed, (now - epoch : U32), epoch,
-      D.advance(state, (U32.to_f32((now - epoch - previousElapsed : U32)) / 1000000.0 : F32)))
-    camera : D.State <- IO.pure(D.State, D.replay.camera(updated, (now - epoch : U32)))
-    +updateEnd : U32 <- P.micros()
-    scene : D.State & V.Aim & String <- IO.pure(D.State & V.Aim & String, ready(camera, frameUs))
-    +sceneEnd : U32 <- P.micros()
-    shown : Window & D.State & List<Event> <- show(scene, win)
-    +end : U32 <- P.micros()
-    bench.shown(shown, epoch, previousEnd, now, updateEnd, sceneEnd, end,
-      w => s => e => t => elapsed => dt => bench.loop(w, s, e, t, elapsed, dt))
-
 def number(r: Result<&1, &1, U32 & String, String>) -> U32:
   match r:
     case Fail{_}: 0
@@ -128,7 +80,7 @@ def stress.edit(on: Bool, state: D.State, index: U32, every: U32, scene: U32, st
       D.State{w, c, p, last} = state
       do IO<D.State>:
         result : Probe.EditResult <- Probe.timed(Probe.Request{w, stress.point((index / every : U32), scene), True{}})
-        IO.pure(D.State, D.replay.measured(result, c, p, last, 200, stamp))
+        IO.pure(D.State, D.sample.measured(result, c, p, last, 200, stamp))
 def stress.edit.due(+index: U32, warmup: U32, every: U32) -> Bool:
   match every:
     case 0: False{}
@@ -147,7 +99,7 @@ def stress.world(w: W.World, c: I.Control, +pending: List<&2,D.Sample>, last: U3
   k: Window -> D.State -> Stress -> U32 -> U32 -> IO(Unit)) -> IO(Unit):
   W.World{a, bs, +solids, +bodies, removed, status} = w
   do IO<Unit>:
-    Unit <- D.bench.log((end - epoch : U32), (end - previousEnd : U32), solids, bodies,
+    Unit <- D.sample.log((end - epoch : U32), (end - previousEnd : U32), solids, bodies,
       pending, end, (updateEnd - now : U32), (sceneEnd - updateEnd : U32), (end - sceneEnd : U32))
     stress.done(((index + 1 >= total : U32) || D.events.close(events)), win,
       D.State{W.World{a, bs, solids, bodies, removed, status}, c, Nil{}, D.pending.last(pending, end, last)},
@@ -194,19 +146,14 @@ def stress.start(win: Window, +scene: U32, +warmup: U32, measured: U32, every: U
     stress.loop(win, D.State{world, I.initial(), Nil{}, 0},
       Stress{epoch, 0, (warmup + measured : U32), scene, warmup, every}, epoch, 0)
 
-def start(benchmark: Bool, win: Window, +now: U32, limit: U32) -> IO(Unit):
-  match benchmark:
-    case True{}: bench.loop(win, D.initial(), now, now, 0, 0)
-    case False{}: loop(win, D.initial(), now, limit)
-def start.stress(on: Bool, win: Window, now: U32, benchmark: U32, frames: U32,
+def start.stress(on: Bool, win: Window, now: U32, frames: U32,
   scene: U32, warmup: U32, measured: U32, every: U32) -> IO(Unit):
   match on:
     case True{}: stress.start(win, scene, warmup, measured, every)
-    case False{}: start((benchmark > 0 : U32), win, now, frames)
+    case False{}: loop(win, D.initial(), now, frames)
 
 def main() -> IO(Unit):
   do IO<Unit>:
-    benchmark : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_BENCH")
     frames : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_FRAMES")
     stressScene : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_STRESS_SCENE")
     stressWarmup : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_STRESS_WARMUP")
@@ -215,5 +162,5 @@ def main() -> IO(Unit):
     +stressId : U32 <- IO.pure(U32, number(stressScene))
     win : Window <- IO.try(Window, Window.open("Bend Voxel Vulkan - WASD / RMB look / LMB carve / R reset", 640, 360))
     +now : U32 <- P.micros()
-    start.stress((stressId > 0 : U32), win, now, number(benchmark), number(frames),
+    start.stress((stressId > 0 : U32), win, now, number(frames),
       stressId, number(stressWarmup), number(stressMeasured), number(stressEdit))

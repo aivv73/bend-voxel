@@ -39,6 +39,15 @@ class StressParserTests(unittest.TestCase):
                      ROWS.replace('frame,2500,1500,5380,0\n', '')):
             self.assertFalse(self.parse(rows)['pass'])
 
+    def test_corrupt_timing_or_duplicate_samples_fail(self):
+        for rows in (ROWS.replace('stage,2500,100,100,100,0,0,0,1100,100\n', ''),
+                     ROWS.replace(',1100,100\n', ',1100,101\n'),
+                     ROWS.replace('vulkan_stage,1,100,100,100',
+                                  'vulkan_stage,1,100,400,100'),
+                     ROWS + 'cut,1000,1500,1,200\n',
+                     ROWS + 'edit,2500,1000,200,1,100,100,100,0\n'):
+            self.assertFalse(self.parse(rows)['pass'])
+
 
 if __name__ == '__main__':
     unittest.main()

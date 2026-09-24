@@ -6,16 +6,16 @@ Vulkan is the renderer for the 640 × 360 demo. Gameplay remains in Bend: voxel 
 
 ```sh
 make run
-make benchmark
+make benchmark-stress
 ```
 
-The build requires Bend 2.0.27, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. The benchmark opens a window and runs three independent 65-second replays: five seconds warm-up and sixty seconds measured. It retains each frame and edit sample under `build/benchmarks/` and checks the same 33 accepted cuts, six protected/empty attempts, 33.3 ms frame p95, 100 ms accepted-cut p95, and 250 ms cut maximum gates as the original demo. One diagnostic pass can be requested with `python3 scripts/benchmark.py --runs 1 --output build/vulkan-pilot` after `make build`.
+The build requires Bend 2.0.27, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures larger and more exposed scenes with unpaced presentation; see the [stress benchmark guide](stress-benchmark.md). The earlier 65-second acceptance replay described below is historical and is no longer runnable.
 
 ## Frame path
 
 1. Bend updates the world and computes the camera aim and HUD text.
 2. The pinned native effect reads the current cached `Body` and merged `Face` values from Bend's heap. It passes a flat face list, camera, aim, and HUD to `libvoxel_vulkan.so`.
-3. The native renderer expands visible rectangles into triangles and highlights affected voxel cells near the brush. Falling-body offsets are applied to current vertices. Three twelve-segment rings show the brush location.
+3. The native renderer caches world-face triangles until face records or body offsets change. It adds affected voxel cells near the brush and three twelve-segment rings each frame.
 4. Vulkan 1.3 dynamic rendering draws triangles with depth testing, brush lines, and screen-space bitmap text into the same Xlib swapchain image. The backend handles acquire, submission, presentation, and resize recreation. It uses a present wait semaphore per swapchain image, following [Khronos's swapchain reuse guidance](https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html).
 5. The X11 adapter synchronizes the X server and sends key, mouse, focus, and close events back to Bend. Pointer positions are mapped to the demo's 640 × 360 logical space after resize.
 
@@ -47,9 +47,9 @@ The archived integration replay passed all workload, instrumentation, and perfor
 | 2 | 8.192 | 47.490 | 48.052 | Pass |
 | 3 | 8.185 | 47.946 | 52.592 | Pass |
 
-[Machine-readable report](validation/vulkan-renderer/report.json), raw samples: [run 1](validation/vulkan-renderer/run-1.csv.gz), [run 2](validation/vulkan-renderer/run-2.csv.gz), [run 3](validation/vulkan-renderer/run-3.csv.gz). The [interactive cut](validation/vulkan-renderer/interactive-cut.png) and [resized window](validation/vulkan-renderer/resized.png) screenshots document the native presentation path. The archived report records the tested commit and source hashes. The current benchmark uses the same workload but a shorter stage row without the removed image-tree rendering and disposal stages.
+[Machine-readable report](validation/vulkan-renderer/report.json), raw samples: [run 1](validation/vulkan-renderer/run-1.csv.gz), [run 2](validation/vulkan-renderer/run-2.csv.gz), [run 3](validation/vulkan-renderer/run-3.csv.gz). The [interactive cut](validation/vulkan-renderer/interactive-cut.png) and [resized window](validation/vulkan-renderer/resized.png) screenshots document the native presentation path. The archived report records the tested commit and source hashes. The later retired replay used the same workload but a shorter stage row without the removed image-tree rendering and disposal stages.
 
-After making Vulkan the default, a local `make benchmark` run also passed all three gates in each of its three runs. Frame p95 was 7.825, 7.779, and 7.718 ms; accepted-cut p95 was 48.885, 48.974, and 49.953 ms. Its report and raw samples were written to `build/benchmarks/`. The current benchmark uses the same workload but a shorter stage row without the removed image-tree rendering and disposal stages.
+After making Vulkan the default, a local replay run also passed all three gates in each of its three runs. Frame p95 was 7.825, 7.779, and 7.718 ms; accepted-cut p95 was 48.885, 48.974, and 49.953 ms. Its report and raw samples were written to `build/benchmarks/`. This retired replay used a shorter stage row without the removed image-tree rendering and disposal stages.
 
 The benchmark's `vulkan_frame_effect` stage includes Bend heap traversal, native rectangle and HUD geometry expansion, vertex upload, command recording, Vulkan submission/presentation, event polling, and X11 synchronization. The stage does not isolate GPU execution time. The frame interval includes all application work; accepted-cut latency starts at each scheduled replay action and ends after frame presentation and X11 synchronization. X11 synchronization does not timestamp physical display scanout.
 
@@ -57,4 +57,4 @@ The benchmark runs Bend gameplay with `--gpu off` and renders through Vulkan. Th
 
 ## Current boundaries
 
-The renderer expands and uploads visible rectangles and bitmap HUD glyphs each frame. It uses one frame in flight and a host-visible vertex buffer. The implementation is Linux/X11-specific and does not use the Bend3D image tree. The preview matches the affected-cell/ring behavior, but the live image has not been given a pixel-by-pixel parity gate against Bend3D. Vulkan validation layers are not installed on the tested desktop; the live path has been exercised through window, edit, reset, resize, and replay checks.
+The renderer caches scene triangles across unchanged inputs and updates bitmap HUD glyphs each frame. It uses one frame in flight and a host-visible vertex buffer. The implementation is Linux/X11-specific and does not use the Bend3D image tree. The preview matches the affected-cell/ring behavior, but the live image has not been given a pixel-by-pixel parity gate against Bend3D. Vulkan validation layers are not installed on the tested desktop; the live path has been exercised through window, edit, reset, resize, and historical replay checks.

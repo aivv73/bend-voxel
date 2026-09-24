@@ -1,6 +1,6 @@
-# Vulkan replay profiling
+# Historical Vulkan replay profiling
 
-Run `make benchmark` after installing the dependencies listed in the [README](../README.md). The native window uses a 640 × 360 logical viewport. Each of three runs records five seconds of warm-up and sixty seconds of measured work. A single diagnostic run can be requested with `python3 scripts/benchmark.py --runs 1 --output build/pilot` after `make build`; three passing runs are required for acceptance.
+This document describes the retired 65-second replay and its archived measurements. The current runnable benchmark is the [stress and scale suite](stress-benchmark.md), invoked with `make benchmark-stress`. The replay used a 640 × 360 native window, five seconds of warm-up, and sixty seconds of measured work per run. Three passing runs were required for its acceptance gate.
 
 Every duration is a wall-clock microsecond interval. The Vulkan frame effect includes Bend heap traversal, native scene and HUD geometry preparation, upload, draw submission, presentation, event handling, and X11 synchronization. The frame interval includes gameplay, scene preparation, and the effect. X11 synchronization confirms server processing rather than physical display scanout.
 

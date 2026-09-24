@@ -64,7 +64,7 @@ def main():
         scene, copies = CASES[name]
         print(f'Stress {name}: scene {scene}, {copies} render copies', flush=True)
         csv_path = out / f'{name}.csv'
-        env = {**os.environ, 'VOXEL_BENCH': '1', 'VOXEL_STRESS_SCENE': str(scene),
+        env = {**os.environ, 'VOXEL_STRESS_SCENE': str(scene),
                'VOXEL_STRESS_COPIES': str(copies), 'VOXEL_STRESS_PRESENT': 'unpaced',
                'VOXEL_STRESS_WARMUP': str(args.warmup),
                'VOXEL_STRESS_MEASURED': str(args.frames),
