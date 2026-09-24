@@ -42,13 +42,26 @@ def hall.columns(n: Nat, +i: U32, +y: F32, bs: List<&2,S.Box>) -> List<&2,S.Box>
       +x = (0.0 - 280.0 + U32.to_f32((i % 5 : U32)) * 63.0 : F32)
       +z = (20.0 + U32.to_f32((i / 5 : U32)) * 58.0 : F32)
       hall.columns(k,(i + 1 : U32),y,box(x,y,z,8.0,56.0,8.0,3) <> bs)
+# Windowed 20 cm wall panels fit strictly between the perimeter columns.
+# Each bay has a 2 m lower panel and 1.6 m upper panel around an open window.
+def hall.walls(n: Nat, +i: U32, +y: F32, bs: List<&2,S.Box>) -> List<&2,S.Box>:
+  match n:
+    case 0n: bs
+    case 1n+k:
+      +x = (0.0 - 272.0 + U32.to_f32(i) * 63.0 : F32)
+      +z = (28.0 + U32.to_f32(i) * 58.0 : F32)
+      hall.walls(k,(i + 1 : U32),y,
+        box(x,y,20.0,55.0,20.0,2.0,2) <> box(x,(y + 40.0 : F32),20.0,55.0,16.0,2.0,2) <>
+        box(x,y,258.0,55.0,20.0,2.0,2) <> box(x,(y + 40.0 : F32),258.0,55.0,16.0,2.0,2) <>
+        box((0.0 - 280.0 : F32),y,z,2.0,20.0,50.0,2) <> box((0.0 - 280.0 : F32),(y + 40.0 : F32),z,2.0,16.0,50.0,2) <>
+        box((0.0 - 22.0 : F32),y,z,2.0,20.0,50.0,2) <> box((0.0 - 22.0 : F32),(y + 40.0 : F32),z,2.0,16.0,50.0,2) <> bs)
 def hall.floors(n: Nat, +level: U32, bs: List<&2,S.Box>) -> List<&2,S.Box>:
   match n:
     case 0n: bs
     case 1n+k:
       +y = (U32.to_f32(level) * 60.0 : F32)
-      hall.floors(k,(level + 1 : U32),hall.columns(25n,0,(y + 4.0 : F32),
-        box((0.0 - 280.0 : F32),y,20.0,260.0,4.0,240.0,R.word(U32.is_eq(level,0),1,2)) <> bs))
+      hall.floors(k,(level + 1 : U32),hall.columns(25n,0,(y + 4.0 : F32),hall.walls(4n,0,(y + 4.0 : F32),
+        box((0.0 - 280.0 : F32),y,20.0,260.0,4.0,240.0,R.word(U32.is_eq(level,0),1,2)) <> bs)))
 def hall() -> S.Tree:
   S.build(hall.floors(3n,0,[box((0.0 - 280.0 : F32),180.0,20.0,260.0,4.0,240.0,2)]))
 def rack.bars(n: Nat, +i: U32, +x: F32, +y: F32, +z: F32, bs: List<&2,S.Box>) -> List<&2,S.Box>:

@@ -70,7 +70,7 @@ def main():
             'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sources},
             'timing_scope': 'Frame throughput includes Bend simulation and edits, scene preparation, native geometry expansion, upload, Vulkan submission/presentation, and X11 synchronization. Fence and acquisition waits include GPU/presentation backpressure; these CPU wall-clock intervals are not GPU timestamps.',
-            'scale_scope': 'Each district contains 2,261,844 real editable 10 cm cells at distinct signed coordinates. Scale cases contain 1, 4, or 16 districts. Sparse solid cuboids compress occupancy; there are no render copies. Physics advances exactly 1/60 second per frame. Fragment workloads sever eight supports per district per frame for sixteen frames, then follow falling fragments.',
+            'scale_scope': 'Each district contains 2,443,284 real editable 10 cm cells at distinct signed coordinates. Scale cases contain 1, 4, or 16 districts. Sparse solid cuboids compress occupancy; there are no render copies. Physics advances exactly 1/60 second per frame. Fragment workloads sever eight supports per district per frame for sixteen frames, then follow falling fragments.',
         },
         'cases': [],
     }

@@ -63,8 +63,8 @@ class StressParserTests(unittest.TestCase):
         self.assertTrue(summarize_views(aim, 'camera', 2, 14)[1])
 
     def district_rows(self):
-        return (ROWS.replace(',5400,0', ',2261844,0').replace(',5380,0', ',2261824,0') +
-                'world,2261844,154,3338,1,2048\n'
+        return (ROWS.replace(',5400,0', ',2443284,0').replace(',5380,0', ',2443264,0') +
+                'world,2443284,154,3434,1,2048\n'
                 'mesh_cache,0,154,154,100,119658,3000000\n'
                 'mesh_cache,1,1,154,100,119658,16000\n'
                 'bodies,0,154,0,0,0.000000\n'
@@ -77,8 +77,8 @@ class StressParserTests(unittest.TestCase):
                               'carve', world_scale=1)
         self.assertTrue(result['pass'], result['errors'])
         self.assertEqual(result['meshes_rebuilt'], 1)
-        self.assertEqual(result['initial_solid_cells'], 2261844)
-        for old, new in (('world,2261844', 'world,5400'),
+        self.assertEqual(result['initial_solid_cells'], 2443284)
+        for old, new in (('world,2443284', 'world,5400'),
                          ('bodies,1,154', 'bodies,1,0'),
                          ('mesh_cache,1,1,154', 'mesh_cache,1,154,154')):
             result = parse_stress(io.StringIO(self.district_rows().replace(old, new)),
@@ -86,7 +86,7 @@ class StressParserTests(unittest.TestCase):
             self.assertFalse(result['pass'])
 
     def test_unedited_frames_cannot_rebuild_world(self):
-        rows = self.district_rows().replace('2261824', '2261844')
+        rows = self.district_rows().replace('2443264', '2443284')
         rows = rows.replace('stage,2500,100,100,100,0,0,0,1100,100',
                             'stage,2500,0,0,0,0,300,0,1100,100')
         rows = '\n'.join(row for row in rows.splitlines()

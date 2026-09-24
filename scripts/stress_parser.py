@@ -209,7 +209,7 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
         if len(inventory) != 1 or len(inventory[0]) != 6:
             raise ValueError('expected one world inventory')
         solids, assemblies, regions, districts, budget = map(int, inventory[0][1:])
-        if (solids, assemblies, regions, districts) != (2261844 * scale, 154 * scale, 3338 * scale, scale):
+        if (solids, assemblies, regions, districts) != (2443284 * scale, 154 * scale, 3434 * scale, scale):
             raise ValueError('world inventory does not match real district scale')
         if len(cache_rows) != len(frames) or len(body_rows) != len(frames):
             raise ValueError('missing mesh cache or body samples')

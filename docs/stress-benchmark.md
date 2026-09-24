@@ -13,16 +13,16 @@ python3 scripts/benchmark_stress.py --cases district-camera district-bridge dist
 
 ## Real world scale
 
-Each district occupies a 64 × 64 × 32 meter content envelope at 10 cm resolution. Its 2,261,844 occupied cells are compressed into 3,338 solid regions, forming 154 anchored assemblies and 19,942 exposed surface rectangles. Districts are placed 64 meters apart on a square grid. Every district contributes independently editable material and bodies.
+Each district occupies a 64 × 64 × 32 meter content envelope at 10 cm resolution. Its 2,443,284 occupied cells are compressed into 3,434 solid regions, forming 154 anchored assemblies and 20,374 exposed surface rectangles. Districts are placed 64 meters apart on a square grid. Every district contributes independently editable material and bodies.
 
 | Cases | Districts | Occupied cells | Workload |
 | --- | ---: | ---: | --- |
-| `district`, `district-4`, `district-16` | 1 / 4 / 16 | 2.26 / 9.05 / 36.19 million | Fixed overview, aim disabled |
+| `district`, `district-4`, `district-16` | 1 / 4 / 16 | 2.44 / 9.77 / 39.09 million | Fixed overview, aim disabled |
 | `district-camera`, `district-camera-4`, `district-camera-16` | 1 / 4 / 16 | Same real scale | Orbit sized to the whole district grid, aim disabled |
-| `district-aim`, `district-aim-16` | 1 / 16 | 2.26 / 36.19 million | Fixed camera; pointer sweeps the machinery racks |
-| `district-carve` | 1 | 2.26 million initially | Cuts through shared floor/column region boundaries |
-| `district-bridge` | 1 | 2.26 million initially | Sever the two bridge fuses and let the detached bridge fall |
-| `district-fragments`, `district-fragments-4` | 1 / 4 | 2.26 / 9.05 million initially | Detach and follow 128 / 512 simultaneously falling bodies |
+| `district-aim`, `district-aim-16` | 1 / 16 | 2.44 / 39.09 million | Fixed camera; pointer sweeps the machinery racks |
+| `district-carve` | 1 | 2.44 million initially | Cuts through shared floor/column region boundaries |
+| `district-bridge` | 1 | 2.44 million initially | Sever the two bridge fuses and let the detached bridge fall |
+| `district-fragments`, `district-fragments-4` | 1 / 4 | 2.44 / 9.77 million initially | Detach and follow 128 / 512 simultaneously falling bodies |
 
 The former small dense/comb scenes and overlapping render copies are retired. Their archived results characterize the earlier renderer; they are not direct throughput baselines for these larger worlds.
 

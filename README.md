@@ -1,10 +1,10 @@
 # Bend Voxel
 
-An interactive destructible voxel district built with [Bend 2](https://github.com/bendlang/bend) and a native Vulkan renderer. Explore two towers connected by a severable bridge, a production hall, machinery racks, and a field of supported blocks. Voxel storage, connectivity, carving, picking, and motion run in Bend on the CPU. CUDA is not required.
+An interactive destructible voxel district built with [Bend 2](https://github.com/bendlang/bend) and a native Vulkan renderer. Explore two towers connected by a severable bridge, a windowed production hall, machinery racks, and a field of supported blocks. Voxel storage, connectivity, carving, picking, and motion run in Bend on the CPU. CUDA is not required.
 
 ![Demolition district](docs/validation/demolition-district/district.png)
 
-One district contains **2,261,844 editable 10 cm voxels** in a **64 × 64 × 32 meter** content envelope. Launch 4 or 16 districts to reach **9,047,376** or **36,189,504** occupied cells. Worlds use signed coordinates and sparse storage; the old fixed lattice is removed.
+One district contains **2,443,284 editable 10 cm voxels** in a **64 × 64 × 32 meter** content envelope. Launch 4 or 16 districts to reach **9,773,136** or **39,092,544** occupied cells. Worlds use signed coordinates and sparse storage; the old fixed lattice is removed.
 
 ## Quick start
 
