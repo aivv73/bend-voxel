@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace {
 constexpr uint32_t WIDTH=640, HEIGHT=360;
@@ -26,7 +27,6 @@ Vec3 operator+(Vec3 a,Vec3 b) { return {a.x+b.x,a.y+b.y,a.z+b.z}; }
 Vec3 operator-(Vec3 a,Vec3 b) { return {a.x-b.x,a.y-b.y,a.z-b.z}; }
 Vec3 operator*(Vec3 a,float k) { return {a.x*k,a.y*k,a.z*k}; }
 float dot(Vec3 a,Vec3 b) { return a.x*b.x+a.y*b.y+a.z*b.z; }
-Vec3 cross(Vec3 a,Vec3 b) { return {a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x}; }
 Vec3 rgb(uint32_t word) { return {float((word>>16)&255)/255,float((word>>8)&255)/255,float(word&255)/255}; }
 Vec3 quantize(Vec3 c) { return {std::floor(c.x*255)/255,std::floor(c.y*255)/255,std::floor(c.z*255)/255}; }
 struct Vertex { Vec3 position,color; };
@@ -94,125 +94,164 @@ void add_hud(Geometry& g,const char* hud) {
   }
   hud_text(g,577,20,"RESET",5,rgb(0x4bc1a4));
 }
-Vec3 cell(uint32_t i,float offset) {
-  return {float(i%40)*.1f-1.95f,float(i/40%24)*.1f+.05f+offset,float(i/960)*.1f-.95f};
+Vec3 vector(const float* p) { return {p[0],p[1],p[2]}; }
+void face_quad(Geometry& g,const VoxelVkFace& f,Vec3 color,float offset=0) {
+  uint32_t a=f.side/2,u=(a+1)%3,v=(a+2)%3;
+  float p[4][3];
+  for (auto& corner:p) for (uint32_t i=0;i<3;i++) corner[i]=f.lo[i]*.1f;
+  p[1][u]=p[2][u]=f.hi[u]*.1f;
+  p[2][v]=p[3][v]=f.hi[v]*.1f;
+  for (auto& corner:p) corner[1]+=offset;
+  // Culling is disabled, but keep the winding consistent with the outward normal.
+  if (f.side%2) quad(g,vector(p[0]),vector(p[1]),vector(p[2]),vector(p[3]),color);
+  else quad(g,vector(p[3]),vector(p[2]),vector(p[1]),vector(p[0]),color);
 }
-Vec3 normal(uint32_t side) {
-  const Vec3 n[6]={{-1,0,0},{1,0,0},{0,-1,0},{0,1,0},{0,0,-1},{0,0,1}};
-  return n[side];
+float shade(uint32_t side) { return side==3?1.f:side<2?.78f:.62f; }
+void face(Geometry& g,const VoxelVkFace& f,bool anchored) {
+  if (f.side>=6 || !f.material) throw std::runtime_error("invalid Bend face");
+  uint32_t a=f.side/2;
+  for (uint32_t i=0;i<3;i++) {
+    if (!std::isfinite(f.lo[i]) || !std::isfinite(f.hi[i]) ||
+        (i==a ? f.hi[i]!=f.lo[i] : f.hi[i]<=f.lo[i]))
+      throw std::runtime_error("invalid Bend face bounds");
+  }
+  uint32_t color=f.material==1?0x4bc1a4:!anchored?0xad94db:
+    f.material==3?0x668fac:f.material==4?0xd9954f:0xd19d68;
+  face_quad(g,f,rgb(color)*shade(f.side));
 }
-Vec3 tangent(uint32_t side) {
-  const Vec3 u[6]={{0,0,.05f},{0,.05f,0},{.05f,0,0},{0,0,.05f},{0,.05f,0},{.05f,0,0}};
-  return u[side];
+bool near_aim(const VoxelVkBody& body,const VoxelVkFrame& frame) {
+  for (uint32_t i=0;i<3;i++) {
+    float p=frame.aim[i]-(i==1?body.offset:0);
+    if (p<body.lo[i]*.1f-.201f || p>body.hi[i]*.1f+.201f) return false;
+  }
+  return true;
 }
-Vec3 center(const VoxelVkFace& f) {
-  Vec3 p=cell(f.index,f.offset);
-  float half=(f.length-1)*.05f;
-  if (f.side<2) p.z+=half;
-  else { p.x+=half; p.z+=(f.rows-1)*.05f; }
-  return p;
-}
-void face_quad(Geometry& g,Vec3 p,uint32_t side,uint32_t len,uint32_t rows,Vec3 color) {
-  Vec3 n=normal(side),u=tangent(side),v=cross(n,u);
-  u=u*float(side==0||side==2||side==5?len:1);
-  v=v*float(side==1||side==3||side==4?len:1);
-  u=u*float(side==3?rows:1);
-  v=v*float(side==2?rows:1);
-  Vec3 c=p+n*.05f;
-  quad(g,c-u-v,c+u-v,c+u+v,c-u+v,color);
-}
-void face(Geometry& g,const VoxelVkFace& f) {
-  if (f.index>=19200 || f.side>=6 || !f.length || !f.rows || f.length>40 || f.rows>20)
-    throw std::runtime_error("invalid Bend face");
-  bool anchor=f.owner==1 && f.index/40%24==0;
-  Vec3 base=rgb(anchor?4964772u:f.owner>1?11375835u:13736040u);
-  float shade=f.side==3?1.0f:f.side<2?.78f:.62f;
-  face_quad(g,center(f),f.side,f.length,f.rows,base*shade);
-}
-void preview_face(Geometry& g,const VoxelVkFace& f,const VoxelVkFrame& frame) {
-  if (frame.aim_kind!=1 || (f.owner==1 && f.index/40%24==0)) return;
-  Vec3 p=center(f),eye={frame.eye[0],frame.eye[1],frame.eye[2]};
-  if (dot(normal(f.side),eye-p)<=.05f) return;
-  Vec3 aim={frame.aim[0],frame.aim[1],frame.aim[2]};
-  Vec3 delta=aim-p;
-  float span_x=f.side<2?.201f:.201f+f.length*.05f;
-  float span_z=f.side<2?.201f+f.length*.05f:.201f+f.rows*.05f;
-  if (std::abs(delta.y)>.201f || std::abs(delta.x)>span_x ||
-      std::abs(delta.z)>span_z) return;
-  float shade=f.side==3?1.0f:f.side<2?.78f:.62f;
-  for (uint32_t row=0;row<f.rows;row++) for (uint32_t col=0;col<f.length;col++) {
-    // X-normal rectangles extend only along z, so their rows are always one.
-    uint32_t index=f.side<2?f.index+col*960:f.index+row*960+col;
-    Vec3 cp=cell(index,f.offset),d=cp-aim;
-    // Keep the preview just in front of the cached face for the LESS depth test.
-    if (dot(d,d)<=.0400001f)
-      face_quad(g,cp+normal(f.side)*.001f,f.side,1,1,rgb(16768872u)*shade);
+void preview_face(Geometry& g,const VoxelVkFace& f,const VoxelVkBody& body,const VoxelVkFrame& frame) {
+  if (f.material==1) return;
+  uint32_t a=f.side/2,u=(a+1)%3,v=(a+2)%3;
+  float aim[3]={frame.aim[0]*10,(frame.aim[1]-body.offset)*10,frame.aim[2]*10};
+  float cell_a=f.lo[a]+(f.side%2?-.5f:.5f);
+  if (std::abs(cell_a-aim[a])>2.00001f) return;
+  float eye=frame.eye[a]-(a==1?body.offset:0);
+  if ((eye-f.lo[a]*.1f)*(f.side%2?1.f:-1.f)<=0) return;
+  // Clip the iteration to the 20 cm sphere, even for an enormous merged face.
+  int u0=int(std::max(f.lo[u],std::ceil(aim[u]-2.50001f)));
+  int u1=int(std::min(f.hi[u]-1,std::floor(aim[u]+1.50001f)));
+  int v0=int(std::max(f.lo[v],std::ceil(aim[v]-2.50001f)));
+  int v1=int(std::min(f.hi[v]-1,std::floor(aim[v]+1.50001f)));
+  for (int x=u0;x<=u1;x++) for (int y=v0;y<=v1;y++) {
+    float da=cell_a-aim[a],du=x+.5f-aim[u],dv=y+.5f-aim[v];
+    if (da*da+du*du+dv*dv>4.00001f) continue;
+    VoxelVkFace preview=f;
+    preview.lo[u]=float(x); preview.hi[u]=float(x+1);
+    preview.lo[v]=float(y); preview.hi[v]=float(y+1);
+    preview.lo[a]=preview.hi[a]=f.lo[a]+(f.side%2?.01f:-.01f);
+    face_quad(g,preview,rgb(0xffdf68)*shade(f.side),body.offset);
   }
 }
 Vec3 ring_point(Vec3 p,uint32_t axis,float angle) {
   float c=.2f*std::cos(angle),s=.2f*std::sin(angle);
   return axis==0?p+Vec3{0,c,s}:axis==1?p+Vec3{c,0,s}:p+Vec3{c,s,0};
 }
-float view_depth(Vec3 p,const VoxelVkFrame& f) {
+Vec3 view_position(Vec3 p,const VoxelVkFrame& f) {
   float sy=std::sin(f.yaw),cy=std::cos(f.yaw),sp=std::sin(f.pitch),cp=std::cos(f.pitch);
-  return dot(p-Vec3{f.eye[0],f.eye[1],f.eye[2]},{sy*cp,sp,cy*cp});
+  Vec3 d=p-Vec3{f.eye[0],f.eye[1],f.eye[2]};
+  return {dot(d,{-cy,0,sy}),dot(d,{-sy*sp,cp,-cy*sp}),dot(d,{sy*cp,sp,cy*cp})};
 }
+float view_depth(Vec3 p,const VoxelVkFrame& f) { return view_position(p,f).z; }
+bool visible(const VoxelVkBody& body,const VoxelVkFrame& frame) {
+  unsigned outside=31;
+  for (unsigned corner=0;corner<8;corner++) {
+    Vec3 p={(corner&1?body.hi[0]:body.lo[0])*.1f,
+      (corner&2?body.hi[1]:body.lo[1])*.1f+body.offset,
+      (corner&4?body.hi[2]:body.lo[2])*.1f};
+    auto v=view_position(p,frame);
+    unsigned mask=(v.z<.05f?1u:0u)|(v.x*1.25f>v.z?2u:0u)|
+      (-v.x*1.25f>v.z?4u:0u)|(v.y*(400.f/180)>v.z?8u:0u)|
+      (-v.y*(400.f/180)>v.z?16u:0u);
+    outside&=mask;
+  }
+  return outside==0;
+}
+struct Range { uint32_t first,count; };
+struct Draw { uint32_t first,count; float offset; };
+struct Mesh { uint32_t revision,anchored,first,count,seen; };
 struct GeometryCache {
   Geometry geometry;
-  std::vector<VoxelVkFace> faces;
-  uint32_t copies=0,scene_vertices=0;
-  bool valid=false;
-};
-// Scene vertices depend only on world faces and the stress draw multiplier.
-// Camera projection runs in the vertex shader; the preview and HUD are rebuilt.
-bool same_scene(const GeometryCache& cache,const VoxelVkFrame& frame,uint32_t copies) {
-  if (!cache.valid || cache.copies!=copies || cache.faces.size()!=frame.face_count)
-    return false;
-  for (uint32_t i=0;i<frame.face_count;i++) {
-    const auto& a=cache.faces[i];
-    const auto& b=frame.faces[i];
-    if (a.index!=b.index || a.side!=b.side || a.length!=b.length ||
-        a.rows!=b.rows || a.owner!=b.owner || a.offset!=b.offset) return false;
+  std::unordered_map<uint32_t,Mesh> meshes;
+  std::vector<Range> free,dirty;
+  std::vector<Draw> draws;
+  uint32_t scene_vertices=0,generation=0,rebuilt=0;
+  void release(Range range) {
+    free.push_back(range);
+    std::sort(free.begin(),free.end(),[](Range a,Range b){return a.first<b.first;});
+    std::vector<Range> joined;
+    for (auto r:free) {
+      if (!joined.empty() && joined.back().first+joined.back().count==r.first)
+        joined.back().count+=r.count;
+      else joined.push_back(r);
+    }
+    free.swap(joined);
   }
-  return true;
-}
+  uint32_t allocate(uint32_t count) {
+    for (size_t i=0;i<free.size();i++) if (free[i].count>=count) {
+      uint32_t first=free[i].first;
+      free[i].first+=count; free[i].count-=count;
+      if (!free[i].count) free.erase(free.begin()+i);
+      return first;
+    }
+    if (count>UINT32_MAX-scene_vertices) throw std::runtime_error("vertex arena overflow");
+    uint32_t first=scene_vertices; scene_vertices+=count;
+    return first;
+  }
+};
+// Geometry identity consists of body ID + revision. Camera, aim, culling and
+// transforms affect only draws/overlays. Dirty ranges upload edited meshes.
 Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_reused) {
   Geometry& g=cache.geometry;
-  uint32_t copies=1;
-  if (const char* value=std::getenv("VOXEL_STRESS_COPIES")) {
-    char* end=nullptr;
-    unsigned long parsed=std::strtoul(value,&end,10);
-    if (!*value || *end || parsed<1 || parsed>64)
-      throw std::runtime_error("VOXEL_STRESS_COPIES must be 1..64");
-    copies=uint32_t(parsed);
+  cache.generation++; cache.dirty.clear(); cache.draws.clear(); cache.rebuilt=0;
+  if (!cache.scene_vertices) {
+    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},{.12f,.19f,.24f});
+    cache.scene_vertices=6; cache.dirty.push_back({0,6});
   }
-  scene_reused=same_scene(cache,frame,copies);
-  if (scene_reused) {
-    g.vertices.resize(cache.scene_vertices);
-    g.triangles=cache.scene_vertices;
-  } else {
-    g.vertices.clear();
-    g.triangles=0;
-    quad(g,{-6,0,-6},{-6,0,6},{6,0,6},{6,0,-6},{.12f,.19f,.24f});
-    for (uint32_t copy=0;copy<copies;copy++)
-      for (uint32_t i=0;i<frame.face_count;i++) face(g,frame.faces[i]);
-    cache.scene_vertices=g.triangles;
-    cache.faces.clear();
-    cache.faces.reserve(frame.face_count);
-    for (uint32_t i=0;i<frame.face_count;i++) cache.faces.push_back(frame.faces[i]);
-    cache.copies=copies;
-    cache.valid=true;
+  for (uint32_t i=0;i<frame.body_count;i++) {
+    auto it=cache.meshes.find(frame.bodies[i].id);
+    if (it!=cache.meshes.end()) it->second.seen=cache.generation;
   }
-  g.lines=0;
-  g.hud=0;
-  if (frame.aim_kind==1)
-    for (uint32_t i=0;i<frame.face_count;i++) preview_face(g,frame.faces[i],frame);
+  for (auto it=cache.meshes.begin();it!=cache.meshes.end();) {
+    if (it->second.seen!=cache.generation) {
+      cache.release({it->second.first,it->second.count});
+      it=cache.meshes.erase(it);
+    } else ++it;
+  }
+  g.vertices.resize(cache.scene_vertices);
+  for (uint32_t i=0;i<frame.body_count;i++) {
+    const auto& b=frame.bodies[i];
+    auto it=cache.meshes.find(b.id);
+    if (it==cache.meshes.end() || it->second.revision!=b.revision || it->second.anchored!=b.anchored) {
+      if (it!=cache.meshes.end()) cache.release({it->second.first,it->second.count});
+      Geometry mesh;
+      for (uint32_t f=0;f<b.face_count;f++) face(mesh,b.faces[f],b.anchored);
+      uint32_t first=cache.allocate(mesh.triangles);
+      g.vertices.resize(cache.scene_vertices);
+      std::copy(mesh.vertices.begin(),mesh.vertices.end(),g.vertices.begin()+first);
+      cache.dirty.push_back({first,mesh.triangles}); cache.rebuilt++;
+      cache.meshes[b.id]={b.revision,b.anchored,first,mesh.triangles,cache.generation};
+    }
+    const auto& mesh=cache.meshes.at(b.id);
+    if (visible(b,frame)) cache.draws.push_back({mesh.first,mesh.count,b.offset});
+  }
+  scene_reused=cache.dirty.empty();
+  g.triangles=cache.scene_vertices; g.lines=0; g.hud=0;
+  if (frame.aim_kind==1) for (uint32_t i=0;i<frame.body_count;i++) {
+    const auto& b=frame.bodies[i];
+    if (near_aim(b,frame)) for (uint32_t f=0;f<b.face_count;f++) preview_face(g,b.faces[f],b,frame);
+  }
   if (frame.aim_kind) {
     Vec3 p={frame.aim[0],frame.aim[1],frame.aim[2]};
     Vec3 color=rgb(frame.aim_kind==1?16768872u:16552594u);
     for (uint32_t axis=0;axis<3;axis++) for (uint32_t i=0;i<12;i++) {
-      Vec3 a=ring_point(p,axis,float(i)*.5235988f);
-      Vec3 b=ring_point(p,axis,float(i+1)*.5235988f);
+      Vec3 a=ring_point(p,axis,float(i)*.5235988f),b=ring_point(p,axis,float(i+1)*.5235988f);
       if (view_depth(a,frame)>=.05f && view_depth(b,frame)>=.05f) line(g,a,b,color);
     }
   }
@@ -538,12 +577,26 @@ public:
     auto after_fence=Clock::now();
     timings.fence_wait_us=microseconds(after_geometry,after_fence);
     bool new_buffer=ensure_vertices(g.vertices.size()*sizeof(Vertex));
-    // The fence above protects the single mapped buffer. On a scene cache hit,
-    // its scene prefix is still present; only the preview, ring and HUD need upload.
-    size_t first=(scene_reused && !new_buffer)?geometry_cache.scene_vertices:0;
-    std::memcpy(static_cast<Vertex*>(mapped)+first,g.vertices.data()+first,
-      (g.vertices.size()-first)*sizeof(Vertex));
+    // The fence protects the single mapped arena. Its stable mesh slots survive
+    // transforms and view changes; edits upload only new/changed slots.
+    size_t uploaded_vertices=0;
+    auto upload=[&](size_t first,size_t count) {
+      uploaded_vertices+=count;
+      if (count) std::memcpy(static_cast<Vertex*>(mapped)+first,
+        g.vertices.data()+first,count*sizeof(Vertex));
+    };
+    if (new_buffer) upload(0,g.vertices.size());
+    else {
+      for (auto range:geometry_cache.dirty) upload(range.first,range.count);
+      upload(geometry_cache.scene_vertices,g.vertices.size()-geometry_cache.scene_vertices);
+    }
     auto after_upload=Clock::now();
+    if (std::getenv("VOXEL_STRESS_SCENE")) {
+      static uint32_t cache_frame;
+      std::fprintf(stdout,"mesh_cache,%u,%u,%u,%zu,%u,%zu\n",cache_frame++,
+        geometry_cache.rebuilt,frame.body_count,geometry_cache.draws.size(),
+        geometry_cache.scene_vertices,uploaded_vertices*sizeof(Vertex));
+    }
     timings.vertex_upload_us=microseconds(after_fence,after_upload);
     uint32_t index=0;
     VkResult acquire=vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,acquired,VK_NULL_HANDLE,&index);
@@ -582,7 +635,15 @@ public:
     Push push{{frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw},{frame.pitch,0,0,0}};
     vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push),&push);
     vkCmdBindPipeline(command,VK_PIPELINE_BIND_POINT_GRAPHICS,triangles);
-    vkCmdDraw(command,g.triangles,1,0,0);
+    vkCmdDraw(command,6,1,0,0); // Ground.
+    for (auto draw:geometry_cache.draws) {
+      push.pitch_offset[1]=draw.offset;
+      vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push),&push);
+      vkCmdDraw(command,draw.count,1,draw.first,0);
+    }
+    push.pitch_offset[1]=0;
+    vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push),&push);
+    vkCmdDraw(command,g.triangles-geometry_cache.scene_vertices,1,geometry_cache.scene_vertices,0);
     if (g.lines) {
       vkCmdBindPipeline(command,VK_PIPELINE_BIND_POINT_GRAPHICS,lines);
       vkCmdDraw(command,g.lines,1,g.triangles,0);

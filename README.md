@@ -1,10 +1,10 @@
 # Bend Voxel
 
-An interactive, destructible voxel demo built with [Bend 2](https://github.com/bendlang/bend) and a native Vulkan renderer. Carve through the two supports to detach the slab, then cut the falling or landed fragment again. Voxel ownership, connectivity, carving, and motion run in Bend on the CPU; Vulkan draws the scene. CUDA is not required.
+An interactive destructible voxel district built with [Bend 2](https://github.com/bendlang/bend) and a native Vulkan renderer. Explore two towers connected by a severable bridge, a production hall, machinery racks, and a field of supported blocks. Voxel storage, connectivity, carving, picking, and motion run in Bend on the CPU. CUDA is not required.
 
-![Native Bend voxel demo](docs/validation/vulkan-renderer/initial-vulkan.png)
+![Demolition district](docs/validation/demolition-district/district.png)
 
-This bounded Linux demo is listed in [Awesome Bend's community demos](https://github.com/777genius/awesome-bend#community-demos). See an [interactive cut](docs/validation/vulkan-renderer/interactive-cut.png).
+One district contains **2,261,844 editable 10 cm voxels** in a **64 × 64 × 32 meter** content envelope. Launch 4 or 16 districts to reach **9,047,376** or **36,189,504** occupied cells. Worlds use signed coordinates and sparse storage; the old fixed lattice is removed.
 
 ## Quick start
 
@@ -33,9 +33,16 @@ make build
 | R or RESET | Restore the scene and camera |
 | Escape | Release controls; click the scene to resume |
 
-Green voxels are protected anchors. Purple geometry is detached. The floor is indestructible. Detached bodies fall vertically and stop on the floor; they do not rotate, collide with each other, or reattach. The camera has bounded movement and no collision.
+Green material marks protected anchors; concrete is tan, frames are blue, machinery and bridge fuses are orange, and detached geometry is purple. The floor is indestructible. Bodies fall vertically and stop at the floor. Rotation, body collisions, stacking, and reattachment are not implemented. The camera travels at 12 m/s without collision or horizontal bounds.
 
-The scene contains 4,640 ten-centimeter voxels. Connectivity uses shared faces. A cut that would exceed **64 detached bodies, including landed bodies**, is rejected without changing the world.
+```sh
+VOXEL_DISTRICTS=4 ./scripts/run.sh
+VOXEL_DISTRICTS=16 VOXEL_BODY_BUDGET=4096 ./scripts/run.sh
+```
+
+`VOXEL_DISTRICTS` accepts 1, 4, or 16; each adds real material at distinct coordinates. The default detached-body budget is 2,048, configurable up to 65,536. An edit that exceeds the budget is rejected atomically. Reset restores the selected district count and budget.
+
+The bridge is 16 meters above the ground, between the northern towers. Its two orange fuses are near **(−15.9, 16.25, −19.95)** and **(15.9, 16.25, −19.95)** meters. Cut both to detach it, then cut the falling or landed fragment again. The repeatable bridge workload performs the same two edits automatically.
 
 ## Verify
 
@@ -44,23 +51,18 @@ make test
 make benchmark-stress
 ```
 
-The stress benchmark opens the Vulkan window and measures ten workloads covering scene density, exposed surface, render copies, camera motion, and aim sweeps. It uses an unpaced presentation mode and saves raw samples and a report under `build/stress/`. The suite checks workload completion and sample accounting; it has no fixed FPS gate. See the [stress benchmark guide](docs/stress-benchmark.md) for workloads, timing limits, and the cache comparison.
-
-The earlier 65-second replay results remain in the [Vulkan validation archive](docs/vulkan-renderer.md) and its [report](docs/validation/bend-2.0.27-vulkan/report.json). That replay is no longer a runnable benchmark.
+The stress suite opens the Vulkan window and measures real scale, camera motion, aim sweeps, cuts across region boundaries, bridge severing, and 128/512 falling bodies. It uses unpaced presentation, records mesh-cache behavior, and saves samples and a report under `build/stress/`. See the [stress benchmark guide](docs/stress-benchmark.md).
 
 ## Implementation
 
-- `src/world.bend`: voxel ownership, carving, connectivity, atomic cap enforcement, vertical motion, and cached surface rectangles.
-- `src/render.bend`: camera geometry and face picking used by gameplay.
-- `src/input.bend`: controls, movement, and focus handling.
-- `src/demo.bend`: gameplay state, HUD content, and timing samples.
-- `src/main.bend` and `src/vulkan/`: application loop, native Vulkan renderer, and swapchain.
-- `src/math.bend`: vector and camera primitives adapted from Bend3D; see the [third-party notice](src/vendor/NOTICE.md).
+- `src/spatial.bend`: sparse solid cuboids, spatial trees, sphere subtraction, shared-face connectivity, and exposed rectangles.
+- `src/world.bend`: body ownership, transactional edits, configurable budget, and vertical motion.
+- `src/district.bend`: deterministic district generation and real spatial replication.
+- `src/render.bend`: camera and spatial picking.
+- `src/input.bend`, `src/demo.bend`, `src/main.bend`: controls, HUD, application loop, and repeatable workloads.
+- `src/vulkan/`: per-body transport/mesh caches, dirty mesh uploads, transform draws, and Vulkan presentation.
+- `src/math.bend`: vector/camera primitives adapted from Bend3D; see the [third-party notice](src/vendor/NOTICE.md).
 
-The broader engine design remains exploratory; this demo uses a bounded dense lattice rather than implementing the proposed sparse world:
+See the [sparse storage decision](docs/adr/0001-sparse-cuboid-world.md), [world model glossary](CONTEXT.md), and [earlier architecture exploration](docs/architecture.md). Irregular destruction can grow the number of stored regions and surfaces; the suite measures this representation rather than promising an arbitrary-world scale limit.
 
-- [Architecture and implementation sequence](docs/architecture.md)
-- [Demo baseline research](docs/research/demo-baseline.md)
-- [World model glossary](CONTEXT.md)
-
-Earlier CPU/CUDA renderer experiments and measurements remain in `docs/` as historical research. All project documentation is maintained in English.
+The original bounded demo and earlier renderer experiments remain documented in the [Vulkan validation archive](docs/vulkan-renderer.md). The project is listed in [Awesome Bend's community demos](https://github.com/777genius/awesome-bend#community-demos). All project documentation is maintained in English.

@@ -1,42 +1,64 @@
 # Stress and scale benchmark
 
-Run the throughput suite after installing the demo's build dependencies:
-
 ```sh
 make benchmark-stress
 ```
 
-The runner writes one raw CSV and stderr log per case, plus `build/stress/report.json`. A short diagnostic run is:
+The suite runs **12 workloads**, with 30 warm-up frames and 180 measured frames each. It writes raw CSV samples, stderr logs, and `build/stress/report.json`. A smaller run:
 
 ```sh
 make build
-python3 scripts/benchmark_stress.py --cases demo comb-4x --warmup 10 --frames 60 --output build/stress-pilot
+python3 scripts/benchmark_stress.py --cases district-camera district-bridge district-fragments --warmup 10 --frames 60 --output build/stress-pilot
 ```
 
-The default suite runs 30 warm-up frames and 180 measured frames per case. Static-view cases request one carve every 30 frames during measurement. Camera and aim workloads leave the world unchanged so geometry cache behavior can be measured separately from edits.
+## Real world scale
 
-| Case | World | Render copies | View workload |
-| --- | --- | ---: | --- |
-| `demo` | Original 4,640-solid scene | 1 | Fixed |
-| `dense` | Upper half filled, with supports below | 1 | Fixed |
-| `full` | All 19,200 lattice cells filled | 1 | Fixed |
-| `comb` | Floor joined to alternating vertical columns | 1 | Fixed |
-| `comb-4x` | Same comb scene | 4 | Fixed |
-| `comb-16x` | Same comb scene | 16 | Fixed |
-| `comb-camera` | Same comb scene | 1 | Orbiting camera; aim disabled |
-| `comb-camera-16x` | Same comb scene | 16 | Orbiting camera; aim disabled |
-| `comb-aim` | Same comb scene | 1 | Fixed camera; pointer sweeps removable cells |
-| `comb-aim-16x` | Same comb scene | 16 | Fixed camera; pointer sweeps removable cells |
+Each district occupies a 64 × 64 × 32 meter content envelope at 10 cm resolution. Its 2,261,844 occupied cells are compressed into 3,338 solid regions, forming 154 anchored assemblies and 19,942 exposed surface rectangles. Districts are placed 64 meters apart on a square grid. Every district contributes independently editable material and bodies.
 
-The camera advances by 1.5° per frame on a six-meter orbit. The pointer advances five pixels per frame across a 240-pixel span, repeating every 48 frames. Both paths use frame indices rather than elapsed time. Each moving-view case records the actual camera and aim values and fails if the camera does not move, the aim does not sweep removable targets, or edits occur. Its `edit_every_frames` is zero even when the command-line default is 30.
+| Cases | Districts | Occupied cells | Workload |
+| --- | ---: | ---: | --- |
+| `district`, `district-4`, `district-16` | 1 / 4 / 16 | 2.26 / 9.05 / 36.19 million | Fixed overview, aim disabled |
+| `district-camera`, `district-camera-4`, `district-camera-16` | 1 / 4 / 16 | Same real scale | Orbit sized to the whole district grid, aim disabled |
+| `district-aim`, `district-aim-16` | 1 / 16 | 2.26 / 36.19 million | Fixed camera; pointer sweeps the machinery racks |
+| `district-carve` | 1 | 2.26 million initially | Cuts through shared floor/column region boundaries |
+| `district-bridge` | 1 | 2.26 million initially | Sever the two bridge fuses and let the detached bridge fall |
+| `district-fragments`, `district-fragments-4` | 1 / 4 | 2.26 / 9.05 million initially | Detach and follow 128 / 512 simultaneously falling bodies |
 
-The world stays within the current 40 × 24 × 20 lattice. The dense and full cases increase traversal and edit work. The comb exposes many surface rectangles. Render copies draw the same faces at the same positions, increasing render work without adding simulated cells or bodies. `face_inputs_per_rebuild` counts input rectangles times copies. The renderer reuses native scene geometry and uploads only dynamic overlays while the face records, including body offsets, remain unchanged. Camera and aim changes leave the world mesh cached; aim preview, ring, and HUD geometry are updated separately. Edits and moving bodies can trigger a full geometry rebuild and upload. This suite characterizes the current bounded implementation, rather than establishing an unbounded world scale limit.
+The former small dense/comb scenes and overlapping render copies are retired. Their archived results characterize the earlier renderer; they are not direct throughput baselines for these larger worlds.
 
-The stress runner requests Vulkan immediate presentation, falling back to mailbox. It fails if neither is available, records the selected mode, and does not silently publish FIFO-paced throughput. It does not change the presentation mode of `make run`.
+## Repeatable workloads
 
-`throughput_fps` is measured frames divided by the sum of their full frame intervals. Frame p50/p95/p99, accepted edit latency, initialization, solid count, surface rectangle count, maximum body count, view changes, and stage timings are reported per case. `acquire_wait_fraction` is the share of frame time inside swapchain image acquisition. Fence waits and presentation may still apply backpressure; these are wall-clock CPU intervals, not GPU timestamps. The suite checks completion, sample accounting, edit acceptance, actual view changes, and an unpaced mode. It has no FPS acceptance threshold, because its purpose is to show the throughput curve and bottlenecks.
+Physics advances by exactly 1/60 second per benchmark frame. Camera paths, pointer positions, cut scheduling, and support coordinates depend on frame indices. Interactive motion still uses elapsed time.
 
-Use `--cases`, `--warmup`, `--frames`, `--edit-every`, and `--output` to select a smaller or larger run. `--edit-every 0` measures steady rendering without carving. The previous fixed-duration replay has been retired; its historical results remain in the [Vulkan validation archive](vulkan-renderer.md).
+- **Camera:** 0.5° per frame, with radius and center determined by district count.
+- **Aim:** five pixels per frame across a 440-pixel span, viewing the rack field. Picking uses body bounds and the sparse spatial trees.
+- **Carve:** one cut at each requested interval, beginning at the first measured frame. Up to 75 distinct floor/column junctions are cut. These edits cross the regions' shared faces.
+- **Bridge:** two cuts at the requested interval. The first preserves a path to an anchor; the second detaches exactly one bridge. Total removed material is 56 cells.
+- **Fragments:** eight support cuts per district per frame for the first 16 measured frames. Each is a normal, timed sphere edit. Motion continues while the camera follows the most recently detached body, including its vertical translation. The burst produces 128 or 512 bodies before the first ones land.
+
+`--edit-every` controls carve/bridge cases; zero disables their edits. Fragment bursts always use their fixed schedule. Use `--cases`, `--warmup`, `--frames`, `--body-budget`, `--timeout`, and `--output` to select a run. The default body budget is 2,048. Moving-view cases require at least four measured frames; 17 or more are needed to observe the full simultaneous fragment population.
+
+## Measurements and validation
+
+The runner requests Vulkan **immediate** presentation, falling back to **mailbox**, and fails if neither is available. Interactive presentation is unchanged. Frame throughput includes Bend simulation, picking, editing, native transport, Vulkan work, and X11 synchronization. CPU fence/acquisition/presentation waits can include GPU or compositor backpressure; these are wall-clock intervals, not GPU timestamps.
+
+Reports include frame percentiles, throughput, initialization, voxel and region counts, body counts, simultaneous moving bodies, view samples, accepted edit latency, each edit phase, and native render stages. Cache telemetry records rebuilt meshes, visible bodies, arena vertices, and uploaded bytes. The native arena retains a slot for each body mesh; body transforms and camera changes affect draw commands. Overlays still upload each frame.
+
+Validation checks:
+
+- Every expected frame, timing stage, edit batch, and latency sample is present and accounted for.
+- Inventory matches the requested number of real districts; cell counts never increase during destruction.
+- Reported anchors, fragments, moving bodies, and live meshes agree.
+- Camera/aim/follow workloads actually move or hit removable material as specified.
+- Frames without edits rebuild zero body meshes after the initial frame, including while fragments fall.
+- Edits rebuild only affected bodies, and bridge/fragment workloads produce the required components.
+- The body budget is respected and cuts are accepted.
+
+There is no FPS acceptance threshold. The purpose is to reveal scaling and bottlenecks. The [district validation report](validation/demolition-district/report.json) records a full run on the development machine.
+
+## Historical measurements
+
+The previous fixed-duration replay is archived in [Vulkan validation](vulkan-renderer.md). The following comparison used the former comb scene and overlapping render copies, before sparse districts were implemented.
 
 ## Camera and aim cache comparison (2026-09-24)
 
