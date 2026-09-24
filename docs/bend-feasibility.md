@@ -2,7 +2,7 @@
 
 ## Compiler updates
 
-The current project pin is **Bend 2.0.26** following the 2026-09-23 update. The project was previously updated to **Bend 2.0.25** on 2026-09-22. The 2.0.16 observations below are historical; they have not been relabeled as checks of the newer compilers. See [demo validation](demo-validation.md) for current validation.
+The current project pin is **Bend 2.0.27** following the 2026-09-24 update. The project was previously updated to **Bend 2.0.26** on 2026-09-23 and **Bend 2.0.25** on 2026-09-22. The 2.0.16 observations below are historical; they have not been relabeled as checks of the newer compilers. See [Vulkan validation](vulkan-renderer.md) for the current renderer and [demo validation](demo-validation.md) for earlier results.
 
 Checked on 2026-09-21. **Bend 2.0.16** is installed locally; upstream was inspected at commit `a49524265bdfa5753a4bf38e25f0574a705dd868`. Compatibility of the complete demo scene with the local version has not yet been checked. Numbers in the upstream shader guide are the authors' measurements on other machines, not this engine's budget. EFFECTS/SHADERS themselves warn that they were written by AI and await human review; APIs were additionally checked against Base and source code.
 

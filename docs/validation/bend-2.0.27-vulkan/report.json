@@ -1,0 +1,577 @@
+{
+  "metadata": {
+    "date": "2026-09-24T17:29:44+0400",
+    "bend": "bend 2.0.27",
+    "git_revision": "524a6a105ec04fe4df4dcd4accdd34f1cf53e97e",
+    "working_tree_dirty": true,
+    "resolution": [
+      640,
+      360
+    ],
+    "backend": "Bend CPU gameplay, Vulkan 1.3/Xlib presentation",
+    "source_sha256": {
+      "src/demo.bend": "1eb60f12ef1cfe7abeceb74d450ea572d9544c40acc1157ff90602a7a63f61dc",
+      "src/input.bend": "46324a26f9f2a030fec7e658f9964c9d53ae90aa4bc4643ac2d0a399a6fadee9",
+      "src/main.bend": "de332e95c5f6f83a358aa4512c5b84146fda4b079ad36bcf940dfd97122c223b",
+      "src/math.bend": "d0bb14f3683971acb6245e26a19d49d5be586cc92508401938036ac5de4e40d3",
+      "src/platform/micros.c": "02d9b16f7bda3cd99d27305d2dfda210e16c357defc4e6bb8ec671db07795d4a",
+      "src/platform/micros.js": "a71a462f96ad6184bf93827f5749ba70ca3af3f9bc70d2f4a0ff4e6cbf9d3302",
+      "src/platform.bend": "9cf0b7449ec4c99cea9f6991e0e8ced069286bd7e27f49d57763ce3f6743d79a",
+      "src/probe.bend": "7111414a865ebc936893a8e142e936fc8a9ef42fb811bba0063c53b21cf3f802",
+      "src/render.bend": "41669390c3b17948234ca682f295404fb01e5cf2c7fb2d20a8a1a2640a68ab11",
+      "src/vendor/LICENSE": "0beb288abd3d067e231f3fbe7df1f8ee37344061fc67f22018150a19e4b26c35",
+      "src/vendor/NOTICE.md": "1dd0caf5c92a9fb91659cbabcf3e92b8fcb79a886fad8ef4ba254e96f3770a3c",
+      "src/vulkan/bridge.c": "525714620b8dca8b8eed9cc885906580ceceb4346215fa939c197d8a84ec8186",
+      "src/vulkan/bridge.js": "6e6af7db48eb3caf6caea509beb4b3bea938d76ef3b2d567265d360aaa18998d",
+      "src/vulkan/native.cpp": "d7e6c6e55afb7fa1a5b0dcd608071820e20dd934dd653f209b35521f93dc01ee",
+      "src/vulkan/native.h": "5dc0b316a7d5ee420697cdeb8f83d2b3f3b3e2a34f58d04017338ed7ed4bde8e",
+      "src/vulkan/scene.frag": "53f2ae0d055d8888093f943c8c34e5cdab1a44a3264eab12d0af871a344e9447",
+      "src/vulkan/scene.vert": "54812ea6837ff194cd5596087acd5618eb7c72633c8d68c19e0597ad3c65664b",
+      "src/vulkan.bend": "825b02e89ea8181b319a115befedcd5a47abdf0ad997621bc492808a481aff6e",
+      "src/world.bend": "eac65ccba090aac94c398e660e5fb003b285b7d37186898df364a5ed30b86619",
+      "scripts/benchmark.py": "aea377421aa133bceeb2c84dcd9029b944a7d7aae4f50805f474d6263a171788",
+      "scripts/benchmark_lookups.py": "211a7fa1eb7e47f0730ca8fe20176605f052d569842abc4ec4d4dcb950f7bd21",
+      "scripts/benchmark_parser.py": "5c21b9f4492f4858692fb4dae2ba026d386b76d40afbbb1671f328d00b902c56",
+      "scripts/build.sh": "ab7a241b13d6af9b3510af2be5e6cb350a33bb3907576229b345692a245386cf",
+      "scripts/lookup-bench.bend": "cd3b613233d9253bb0a8d2cd4ac4c275d2ee921ea07744574fac7983981d77aa",
+      "scripts/run.sh": "5f3c7a297e7ef8382e9bd1ca0a3d198c9d304699cfc5b96c17be1133f7f97d4d",
+      "scripts/test.sh": "421f50a886c448a02ff453416b57870ba2e95f3f0b797295d78b4e4442520149"
+    },
+    "timing_scope": "Full frame intervals include CPU simulation/edit, Bend scene preparation, Vulkan scene and HUD mesh upload/draw/present, and X11 event synchronization. The frame effect is one combined stage."
+  },
+  "runs": [
+    {
+      "run": 1,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "raw_frame_samples": 9278,
+      "warmup_frame_samples": 682,
+      "frames": {
+        "samples": 8596,
+        "p50_ms": 6.942,
+        "p95_ms": 7.785,
+        "p99_ms": 9.523,
+        "max_ms": 46.545,
+        "mean_ms": 6.980747208003723,
+        "total_ms": 60006.503
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 44.729,
+        "p95_ms": 49.167,
+        "p99_ms": 50.665,
+        "max_ms": 50.665,
+        "mean_ms": 42.05421212121212,
+        "total_ms": 1387.789
+      },
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 11.538,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 11.027,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 10.55,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 11.135,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 10.132,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 10.513,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "max_bodies": 1,
+      "stages": {
+        "carving": {
+          "samples": 8596,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 8.932,
+          "mean_ms": 0.025202768729641695,
+          "total_ms": 216.643
+        },
+        "connectivity": {
+          "samples": 8596,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 17.799,
+          "mean_ms": 0.05530607259190321,
+          "total_ms": 475.411
+        },
+        "surface_generation": {
+          "samples": 8596,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 20.302,
+          "mean_ms": 0.06479839460214053,
+          "total_ms": 557.007
+        },
+        "edit_finalization": {
+          "samples": 8596,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.007,
+          "mean_ms": 1.5355979525360635e-05,
+          "total_ms": 0.132
+        },
+        "update_other": {
+          "samples": 8596,
+          "p50_ms": 0.022,
+          "p95_ms": 0.035,
+          "p99_ms": 0.052,
+          "max_ms": 33.188,
+          "mean_ms": 0.03210504885993486,
+          "total_ms": 275.975
+        },
+        "scene_preparation": {
+          "samples": 8596,
+          "p50_ms": 0.168,
+          "p95_ms": 0.247,
+          "p99_ms": 0.336,
+          "max_ms": 0.6,
+          "mean_ms": 0.16258911121451838,
+          "total_ms": 1397.616
+        },
+        "vulkan_frame_effect": {
+          "samples": 8596,
+          "p50_ms": 6.736,
+          "p95_ms": 7.551,
+          "p99_ms": 8.714,
+          "max_ms": 14.707,
+          "mean_ms": 6.62151372731503,
+          "total_ms": 56918.532
+        },
+        "overhead": {
+          "samples": 8596,
+          "p50_ms": 0.018,
+          "p95_ms": 0.027,
+          "p99_ms": 0.044,
+          "max_ms": 0.199,
+          "mean_ms": 0.019216728711028388,
+          "total_ms": 165.187
+        }
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 6.748,
+          "p95_ms": 8.096,
+          "p99_ms": 8.932,
+          "max_ms": 8.932,
+          "mean_ms": 6.564939393939394,
+          "total_ms": 216.643
+        },
+        "connectivity": {
+          "samples": 33,
+          "p50_ms": 14.884,
+          "p95_ms": 17.454,
+          "p99_ms": 17.799,
+          "max_ms": 17.799,
+          "mean_ms": 14.40639393939394,
+          "total_ms": 475.411
+        },
+        "surface_generation": {
+          "samples": 33,
+          "p50_ms": 18.409,
+          "p95_ms": 20.131,
+          "p99_ms": 20.302,
+          "max_ms": 20.302,
+          "mean_ms": 16.878999999999998,
+          "total_ms": 557.007
+        },
+        "edit_finalization": {
+          "samples": 33,
+          "p50_ms": 0.004,
+          "p95_ms": 0.005,
+          "p99_ms": 0.007,
+          "max_ms": 0.007,
+          "mean_ms": 0.004,
+          "total_ms": 0.132
+        }
+      },
+      "instrumentation_pass": true,
+      "instrumentation_errors": [],
+      "attempts_pass": true,
+      "workload_pass": true,
+      "performance_pass": true,
+      "pass": true
+    },
+    {
+      "run": 2,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "raw_frame_samples": 9277,
+      "warmup_frame_samples": 683,
+      "frames": {
+        "samples": 8594,
+        "p50_ms": 6.928,
+        "p95_ms": 8.062,
+        "p99_ms": 9.756,
+        "max_ms": 47.171,
+        "mean_ms": 6.982357225971608,
+        "total_ms": 60006.378
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 42.942,
+        "p95_ms": 50.693,
+        "p99_ms": 51.26,
+        "max_ms": 51.26,
+        "mean_ms": 38.650969696969696,
+        "total_ms": 1275.482
+      },
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 7.417,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 7.263,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 8.225,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 7.935,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 7.73,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 7.664,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "max_bodies": 1,
+      "stages": {
+        "carving": {
+          "samples": 8594,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 8.839,
+          "mean_ms": 0.023912031649988365,
+          "total_ms": 205.5
+        },
+        "connectivity": {
+          "samples": 8594,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 18.817,
+          "mean_ms": 0.05156539446125204,
+          "total_ms": 443.153
+        },
+        "surface_generation": {
+          "samples": 8594,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 21.315,
+          "mean_ms": 0.057571677914824294,
+          "total_ms": 494.771
+        },
+        "edit_finalization": {
+          "samples": 8594,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.005,
+          "mean_ms": 1.4545031417267861e-05,
+          "total_ms": 0.125
+        },
+        "update_other": {
+          "samples": 8594,
+          "p50_ms": 0.023,
+          "p95_ms": 0.037,
+          "p99_ms": 0.053,
+          "max_ms": 37.848,
+          "mean_ms": 0.03532906679078427,
+          "total_ms": 303.618
+        },
+        "scene_preparation": {
+          "samples": 8594,
+          "p50_ms": 0.188,
+          "p95_ms": 0.288,
+          "p99_ms": 0.364,
+          "max_ms": 0.857,
+          "mean_ms": 0.18286688387246916,
+          "total_ms": 1571.558
+        },
+        "vulkan_frame_effect": {
+          "samples": 8594,
+          "p50_ms": 6.701,
+          "p95_ms": 7.796,
+          "p99_ms": 9.175,
+          "max_ms": 18.74,
+          "mean_ms": 6.610809634628811,
+          "total_ms": 56813.298
+        },
+        "overhead": {
+          "samples": 8594,
+          "p50_ms": 0.019,
+          "p95_ms": 0.029,
+          "p99_ms": 0.047,
+          "max_ms": 0.206,
+          "mean_ms": 0.020287991622061904,
+          "total_ms": 174.355
+        }
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 6.865,
+          "p95_ms": 8.521,
+          "p99_ms": 8.839,
+          "max_ms": 8.839,
+          "mean_ms": 6.2272727272727275,
+          "total_ms": 205.5
+        },
+        "connectivity": {
+          "samples": 33,
+          "p50_ms": 14.972,
+          "p95_ms": 17.961,
+          "p99_ms": 18.817,
+          "max_ms": 18.817,
+          "mean_ms": 13.428878787878789,
+          "total_ms": 443.153
+        },
+        "surface_generation": {
+          "samples": 33,
+          "p50_ms": 16.895,
+          "p95_ms": 20.953,
+          "p99_ms": 21.315,
+          "max_ms": 21.315,
+          "mean_ms": 14.993060606060606,
+          "total_ms": 494.771
+        },
+        "edit_finalization": {
+          "samples": 33,
+          "p50_ms": 0.004,
+          "p95_ms": 0.005,
+          "p99_ms": 0.005,
+          "max_ms": 0.005,
+          "mean_ms": 0.003787878787878788,
+          "total_ms": 0.125
+        }
+      },
+      "instrumentation_pass": true,
+      "instrumentation_errors": [],
+      "attempts_pass": true,
+      "workload_pass": true,
+      "performance_pass": true,
+      "pass": true
+    },
+    {
+      "run": 3,
+      "exit_code": 0,
+      "complete_window": true,
+      "expected_accepted_cuts": 33,
+      "raw_frame_samples": 9261,
+      "warmup_frame_samples": 687,
+      "frames": {
+        "samples": 8574,
+        "p50_ms": 6.933,
+        "p95_ms": 8.16,
+        "p99_ms": 10.478,
+        "max_ms": 43.448,
+        "mean_ms": 6.9986751807791,
+        "total_ms": 60006.641
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 42.537,
+        "p95_ms": 49.846,
+        "p99_ms": 50.517,
+        "max_ms": 50.517,
+        "mean_ms": 38.92312121212121,
+        "total_ms": 1284.463
+      },
+      "protected_and_empty_attempts": [
+        {
+          "latency_ms": 7.691,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 13.03,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 12.735,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 13.245,
+          "status": 2,
+          "kind": 113
+        },
+        {
+          "latency_ms": 12.665,
+          "status": 2,
+          "kind": 112
+        },
+        {
+          "latency_ms": 12.134,
+          "status": 2,
+          "kind": 113
+        }
+      ],
+      "max_bodies": 1,
+      "stages": {
+        "carving": {
+          "samples": 8574,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 9.161,
+          "mean_ms": 0.024060881735479357,
+          "total_ms": 206.298
+        },
+        "connectivity": {
+          "samples": 8574,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 18.464,
+          "mean_ms": 0.050045836249125265,
+          "total_ms": 429.093
+        },
+        "surface_generation": {
+          "samples": 8574,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 19.52,
+          "mean_ms": 0.05698635409377187,
+          "total_ms": 488.601
+        },
+        "edit_finalization": {
+          "samples": 8574,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.021,
+          "mean_ms": 1.632843480289247e-05,
+          "total_ms": 0.14
+        },
+        "update_other": {
+          "samples": 8574,
+          "p50_ms": 0.023,
+          "p95_ms": 0.036,
+          "p99_ms": 0.055,
+          "max_ms": 41.874,
+          "mean_ms": 0.036646022859808725,
+          "total_ms": 314.20300000000003
+        },
+        "scene_preparation": {
+          "samples": 8574,
+          "p50_ms": 0.182,
+          "p95_ms": 0.272,
+          "p99_ms": 0.343,
+          "max_ms": 0.648,
+          "mean_ms": 0.17506752974107767,
+          "total_ms": 1501.029
+        },
+        "vulkan_frame_effect": {
+          "samples": 8574,
+          "p50_ms": 6.708,
+          "p95_ms": 7.902,
+          "p99_ms": 9.432,
+          "max_ms": 21.672,
+          "mean_ms": 6.635572894798227,
+          "total_ms": 56893.402
+        },
+        "overhead": {
+          "samples": 8574,
+          "p50_ms": 0.019,
+          "p95_ms": 0.029,
+          "p99_ms": 0.047,
+          "max_ms": 0.215,
+          "mean_ms": 0.020279332866806624,
+          "total_ms": 173.875
+        }
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 6.693,
+          "p95_ms": 8.758,
+          "p99_ms": 9.161,
+          "max_ms": 9.161,
+          "mean_ms": 6.251454545454545,
+          "total_ms": 206.298
+        },
+        "connectivity": {
+          "samples": 33,
+          "p50_ms": 14.505,
+          "p95_ms": 17.067,
+          "p99_ms": 18.464,
+          "max_ms": 18.464,
+          "mean_ms": 13.002818181818183,
+          "total_ms": 429.093
+        },
+        "surface_generation": {
+          "samples": 33,
+          "p50_ms": 16.498,
+          "p95_ms": 19.43,
+          "p99_ms": 19.52,
+          "max_ms": 19.52,
+          "mean_ms": 14.806090909090909,
+          "total_ms": 488.601
+        },
+        "edit_finalization": {
+          "samples": 33,
+          "p50_ms": 0.004,
+          "p95_ms": 0.005,
+          "p99_ms": 0.021,
+          "max_ms": 0.021,
+          "mean_ms": 0.004242424242424243,
+          "total_ms": 0.14
+        }
+      },
+      "instrumentation_pass": true,
+      "instrumentation_errors": [],
+      "attempts_pass": true,
+      "workload_pass": true,
+      "performance_pass": true,
+      "pass": true
+    }
+  ],
+  "acceptance_pass": true,
+  "note": "The Vulkan effect includes scene and HUD presentation; visual and input checks are separate."
+}
