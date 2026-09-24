@@ -6,7 +6,7 @@ A native Linux demo of small, destructible voxels, implemented in Bend 2 with Vu
 
 ## Run
 
-Requires **Bend 2.0.26**, Linux/X11 or XWayland, a Vulkan 1.3 graphics driver with Xlib surface support, Vulkan and X11 development headers, `glslc`, and `g++`. The benchmark also requires Python 3.
+Requires **Bend 2.0.27**, Linux/X11 or XWayland, a Vulkan 1.3 graphics driver with Xlib surface support, Vulkan and X11 development headers, `glslc`, and `g++`. The benchmark also requires Python 3.
 
 ```sh
 make run

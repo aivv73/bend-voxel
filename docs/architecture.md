@@ -30,7 +30,7 @@ flowchart TD
 
 ## 2. Verified foundation and limitations
 
-Sources were inspected at commit `a49524265bdfa5753a4bf38e25f0574a705dd868`, rather than the moving `main` branch. The initial compiler was `bend 2.0.16`; the current project pin is `bend 2.0.26`. See [demo validation](demo-validation.md) for executable checks and compiler-specific measurements. Language and environment details are in [bend-feasibility.md](bend-feasibility.md).
+Sources were inspected at commit `a49524265bdfa5753a4bf38e25f0574a705dd868`, rather than the moving `main` branch. The initial compiler was `bend 2.0.16`; the current project pin is `bend 2.0.27`. See [Vulkan validation](vulkan-renderer.md) for current executable checks and [demo validation](demo-validation.md) for earlier compiler-specific measurements. Language and environment details are in [bend-feasibility.md](bend-feasibility.md).
 
 [Bend3D](https://github.com/bendlang/bend/blob/a49524265bdfa5753a4bf38e25f0574a705dd868/demos/app_slash_boss_3d/bend3d.bend) provides vectors, a camera, materials, lighting, triangle projection, and rasterization through screen cells. `Frame.show` calls `Frame.node!`; this path has a root size of 2048 and 64-pixel cells. `Mesh.raster` discards a triangle if any vertex fails the near-plane test. It is a rasterizer, not a voxel storage or destruction system.
 

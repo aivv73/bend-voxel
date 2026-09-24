@@ -4,7 +4,7 @@ This is a historical research record. Its CPU/CUDA renderer recommendations and 
 
 ## Subsequent compiler updates
 
-The current project pin is **Bend 2.0.26** following the 2026-09-23 update. The project was previously updated to **Bend 2.0.25** on 2026-09-22. Checks below retain their original compiler-version labels. See [demo validation](../demo-validation.md) for current engine results.
+The current project pin is **Bend 2.0.27** following the 2026-09-24 update. The project was previously updated to **Bend 2.0.26** on 2026-09-23 and **Bend 2.0.25** on 2026-09-22. Checks below retain their original compiler-version labels. See [Vulkan validation](../vulkan-renderer.md) for current engine results.
 
 ## Recheck on 2026-09-23
 
@@ -123,7 +123,7 @@ These are checker results, not native/CUDA execution or performance results. The
 
 ## Recommended next work
 
-The Slash Boss-style [stage probe and snapshots](../profiling.md), portal-style [controlled CPU/CUDA sweep](controlled-cpu-cuda.md), and [owner-lookup audit](../validation/lookup-audit/report.json) have been completed. For the current Bend 2.0.26 demo:
+The Slash Boss-style [stage probe and snapshots](../profiling.md), portal-style [controlled CPU/CUDA sweep](controlled-cpu-cuda.md), and [owner-lookup audit](../validation/lookup-audit/report.json) have been completed. For the then-current Bend 2.0.26 CUDA demo:
 
 1. Profile and improve the existing face builder and the measured scene preparation, rendering and render-cell disposal stages, one change at a time. Keep the current replay, snapshots and end-to-end CUDA acceptance gate. [Latest split-stage measurements](../demo-validation.md#surface-generation-timing-2026-09-23).
 2. Add generated edit traces or proof lemmas only when a specific regression or engine rule calls for them; keep fixed-clock image and state checks alongside performance experiments. [Snapshot protocol](../profiling.md#snapshots).

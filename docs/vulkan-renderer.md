@@ -9,7 +9,7 @@ make run
 make benchmark
 ```
 
-The build requires Bend 2.0.26, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. The benchmark opens a window and runs three independent 65-second replays: five seconds warm-up and sixty seconds measured. It retains each frame and edit sample under `build/benchmarks/` and checks the same 33 accepted cuts, six protected/empty attempts, 33.3 ms frame p95, 100 ms accepted-cut p95, and 250 ms cut maximum gates as the original demo. One diagnostic pass can be requested with `python3 scripts/benchmark.py --runs 1 --output build/vulkan-pilot` after `make build`.
+The build requires Bend 2.0.27, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. The benchmark opens a window and runs three independent 65-second replays: five seconds warm-up and sixty seconds measured. It retains each frame and edit sample under `build/benchmarks/` and checks the same 33 accepted cuts, six protected/empty attempts, 33.3 ms frame p95, 100 ms accepted-cut p95, and 250 ms cut maximum gates as the original demo. One diagnostic pass can be requested with `python3 scripts/benchmark.py --runs 1 --output build/vulkan-pilot` after `make build`.
 
 ## Frame path
 
@@ -19,11 +19,23 @@ The build requires Bend 2.0.26, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surf
 4. Vulkan 1.3 dynamic rendering draws triangles with depth testing, brush lines, and screen-space bitmap text into the same Xlib swapchain image. The backend handles acquire, submission, presentation, and resize recreation. It uses a present wait semaphore per swapchain image, following [Khronos's swapchain reuse guidance](https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html).
 5. The X11 adapter synchronizes the X server and sends key, mouse, focus, and close events back to Bend. Pointer positions are mapped to the demo's 640 × 360 logical space after resize.
 
-The native effect returns the same Bend state it received. The effect depends on Bend 2.0.26's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, or `Face` definitions require reviewing that bridge.
+The native effect returns the same Bend state it received. The effect depends on Bend 2.0.27's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, or `Face` definitions require reviewing that bridge.
 
 ## Validation
 
-`make test` checks world behavior, input and picking, timed edits, and benchmark sample accounting. A finite Vulkan window run, pointer cut, reset, and 800 × 450 resize were inspected on the local GTX 1660/XWayland desktop. The pointer cut removed 16 voxels and reset restored all 4,640. Earlier fixed-scene Vulkan and Bend3D image comparisons remain in the archived [prototype report](validation/vulkan-prototype/report.json).
+### Bend 2.0.27 update (2026-09-24)
+
+The compiler and build pin were updated to [Bend 2.0.27](https://github.com/bendlang/bend/releases/tag/v2.0.27). `make build` and `make test` passed without source changes to the native bridge. A fresh three-run `make benchmark` replay exercised the Bend state traversal and Vulkan effect; every run passed instrumentation, workload, and performance checks, including 33 accepted cuts and six protected/empty attempts per run.
+
+| Run | Frame p95 (ms) | Accepted-cut p95 (ms) | Cut maximum (ms) |
+| --- | ---: | ---: | ---: |
+| 1 | 7.785 | 49.167 | 50.665 |
+| 2 | 8.062 | 50.693 | 51.260 |
+| 3 | 8.160 | 49.846 | 50.517 |
+
+The results establish that the updated binary completes the measured replay on the tested desktop; they are not a controlled compiler-speed comparison or a new pixel-parity check. [Report and source hashes](validation/bend-2.0.27-vulkan/report.json); raw samples: [run 1](validation/bend-2.0.27-vulkan/run-1.csv.gz), [run 2](validation/bend-2.0.27-vulkan/run-2.csv.gz), [run 3](validation/bend-2.0.27-vulkan/run-3.csv.gz).
+
+`make test` checks world behavior, input and picking, timed edits, and benchmark sample accounting. Earlier renderer validation inspected a finite Vulkan window run, pointer cut, reset, and 800 × 450 resize on the local GTX 1660/XWayland desktop. The pointer cut removed 16 voxels and reset restored all 4,640. Earlier fixed-scene Vulkan and Bend3D image comparisons remain in the archived [prototype report](validation/vulkan-prototype/report.json).
 
 Live [Bend3D](validation/vulkan-renderer/initial-bend.png) and [Vulkan](validation/vulkan-renderer/initial-vulkan.png) captures of the initial state use the same default camera. The captures were taken at different times and use different text drawing methods. They are a visual diagnostic, not a synchronized pixel parity gate. The Vulkan HUD was also checked in repeated captures without input and after an 800 × 450 resize.
 
