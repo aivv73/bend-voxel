@@ -56,7 +56,7 @@ def main():
             'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sources},
             'timing_scope': 'Frame throughput includes Bend simulation and edits, scene preparation, native geometry expansion, upload, Vulkan submission/presentation, and X11 synchronization. Fence and acquisition waits include GPU/presentation backpressure; these CPU wall-clock intervals are not GPU timestamps.',
-            'scale_scope': 'Scene cases vary solid density and exposed surface within the fixed 40x24x20 lattice. N-x cases repeat faces at the same positions. The renderer can reuse unchanged scene geometry and upload only overlays; scene changes rebuild and upload all copies. No case multiplies simulated voxel cells.',
+            'scale_scope': 'Scene cases vary solid density and exposed surface within the fixed 40x24x20 lattice. N-x cases repeat faces at the same positions. The renderer caches the world mesh by face records, independent of camera and aim, and uploads only dynamic overlays on a hit. Face or body-offset changes rebuild and upload all copies. No case multiplies simulated voxel cells.',
         },
         'cases': [],
     }
