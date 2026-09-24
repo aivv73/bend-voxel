@@ -153,9 +153,30 @@ float view_depth(Vec3 p,const VoxelVkFrame& f) {
   float sy=std::sin(f.yaw),cy=std::cos(f.yaw),sp=std::sin(f.pitch),cp=std::cos(f.pitch);
   return dot(p-Vec3{f.eye[0],f.eye[1],f.eye[2]},{sy*cp,sp,cy*cp});
 }
-Geometry geometry(const VoxelVkFrame& frame) {
-  Geometry g;
-  quad(g,{-6,0,-6},{-6,0,6},{6,0,6},{6,0,-6},{.12f,.19f,.24f});
+struct GeometryCache {
+  Geometry geometry;
+  std::vector<VoxelVkFace> faces;
+  float eye[3]{},aim[3]{};
+  uint32_t aim_kind=0,copies=0;
+  bool valid=false;
+};
+// Face vertices depend on world faces, eye position and aim. The HUD and ring
+// also depend on text and orientation, so they are rebuilt after this check.
+bool same_scene(const GeometryCache& cache,const VoxelVkFrame& frame,uint32_t copies) {
+  if (!cache.valid || cache.copies!=copies || cache.aim_kind!=frame.aim_kind ||
+      cache.faces.size()!=frame.face_count ||
+      std::memcmp(cache.eye,frame.eye,sizeof cache.eye) ||
+      std::memcmp(cache.aim,frame.aim,sizeof cache.aim)) return false;
+  for (uint32_t i=0;i<frame.face_count;i++) {
+    const auto& a=cache.faces[i];
+    const auto& b=frame.faces[i];
+    if (a.index!=b.index || a.side!=b.side || a.length!=b.length ||
+        a.rows!=b.rows || a.owner!=b.owner || a.offset!=b.offset) return false;
+  }
+  return true;
+}
+Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_reused) {
+  Geometry& g=cache.geometry;
   uint32_t copies=1;
   if (const char* value=std::getenv("VOXEL_STRESS_COPIES")) {
     char* end=nullptr;
@@ -164,8 +185,26 @@ Geometry geometry(const VoxelVkFrame& frame) {
       throw std::runtime_error("VOXEL_STRESS_COPIES must be 1..64");
     copies=uint32_t(parsed);
   }
-  for (uint32_t copy=0;copy<copies;copy++)
-    for (uint32_t i=0;i<frame.face_count;i++) face(g,frame.faces[i],frame);
+  scene_reused=same_scene(cache,frame,copies);
+  if (scene_reused) {
+    g.vertices.resize(g.triangles);
+  } else {
+    g.vertices.clear();
+    g.triangles=0;
+    quad(g,{-6,0,-6},{-6,0,6},{6,0,6},{6,0,-6},{.12f,.19f,.24f});
+    for (uint32_t copy=0;copy<copies;copy++)
+      for (uint32_t i=0;i<frame.face_count;i++) face(g,frame.faces[i],frame);
+    cache.faces.clear();
+    cache.faces.reserve(frame.face_count);
+    for (uint32_t i=0;i<frame.face_count;i++) cache.faces.push_back(frame.faces[i]);
+    std::memcpy(cache.eye,frame.eye,sizeof cache.eye);
+    std::memcpy(cache.aim,frame.aim,sizeof cache.aim);
+    cache.aim_kind=frame.aim_kind;
+    cache.copies=copies;
+    cache.valid=true;
+  }
+  g.lines=0;
+  g.hud=0;
   if (frame.aim_kind) {
     Vec3 p={frame.aim[0],frame.aim[1],frame.aim[2]};
     Vec3 color=rgb(frame.aim_kind==1?16768872u:16552594u);
@@ -218,6 +257,7 @@ class Renderer {
   VkCommandBuffer command=VK_NULL_HANDLE;
   VkFence fence=VK_NULL_HANDLE;
   VkSemaphore acquired=VK_NULL_HANDLE;
+  GeometryCache geometry_cache;
 
   uint32_t memory_type(uint32_t bits,VkMemoryPropertyFlags flags) {
     VkPhysicalDeviceMemoryProperties p{}; vkGetPhysicalDeviceMemoryProperties(physical,&p);
@@ -372,8 +412,8 @@ class Renderer {
     lines=pipeline(VK_PRIMITIVE_TOPOLOGY_LINE_LIST,false);
     hud_pipeline=pipeline(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,false);
   }
-  void ensure_vertices(VkDeviceSize bytes) {
-    if (bytes<=capacity) return;
+  bool ensure_vertices(VkDeviceSize bytes) {
+    if (bytes<=capacity) return false;
     if (mapped) vkUnmapMemory(device,vertex_memory);
     if (vertices) vkDestroyBuffer(device,vertices,nullptr);
     if (vertex_memory) vkFreeMemory(device,vertex_memory,nullptr);
@@ -390,6 +430,7 @@ class Renderer {
     check(vkAllocateMemory(device,&ai,nullptr,&vertex_memory),"allocate vertex buffer");
     check(vkBindBufferMemory(device,vertices,vertex_memory,0),"bind vertex buffer");
     check(vkMapMemory(device,vertex_memory,0,capacity,0,&mapped),"map vertex buffer");
+    return true;
   }
   void barrier(VkImage image,VkImageAspectFlags aspect,VkImageLayout old_layout,
     VkImageLayout new_layout,VkPipelineStageFlags src,VkPipelineStageFlags dst,
@@ -487,14 +528,19 @@ public:
   bool matches(Display* d,::Window w) const { return d==display&&w==window; }
   void render(const VoxelVkFrame& frame,VoxelVkTimings& timings) {
     auto start=Clock::now();
-    Geometry g=geometry(frame);
+    bool scene_reused=false;
+    Geometry& g=geometry(frame,geometry_cache,scene_reused);
     auto after_geometry=Clock::now();
     timings.geometry_us=microseconds(start,after_geometry);
     check(vkWaitForFences(device,1,&fence,VK_TRUE,UINT64_MAX),"wait for frame fence");
     auto after_fence=Clock::now();
     timings.fence_wait_us=microseconds(after_geometry,after_fence);
-    ensure_vertices(g.vertices.size()*sizeof(Vertex));
-    std::memcpy(mapped,g.vertices.data(),g.vertices.size()*sizeof(Vertex));
+    bool new_buffer=ensure_vertices(g.vertices.size()*sizeof(Vertex));
+    // The fence above protects the single mapped buffer. On a scene cache hit,
+    // its triangle prefix is still present; only the HUD and ring need upload.
+    size_t first=(scene_reused && !new_buffer)?g.triangles:0;
+    std::memcpy(static_cast<Vertex*>(mapped)+first,g.vertices.data()+first,
+      (g.vertices.size()-first)*sizeof(Vertex));
     auto after_upload=Clock::now();
     timings.vertex_upload_us=microseconds(after_fence,after_upload);
     uint32_t index=0;

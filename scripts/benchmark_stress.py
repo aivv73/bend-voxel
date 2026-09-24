@@ -56,7 +56,7 @@ def main():
             'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sources},
             'timing_scope': 'Frame throughput includes Bend simulation and edits, scene preparation, native geometry expansion, upload, Vulkan submission/presentation, and X11 synchronization. Fence and acquisition waits include GPU/presentation backpressure; these CPU wall-clock intervals are not GPU timestamps.',
-            'scale_scope': 'Scene cases vary solid density and exposed surface within the fixed 40x24x20 lattice. N-x cases repeat face expansion and drawing at the same positions to stress CPU geometry, upload and GPU overdraw; they do not multiply simulated voxel cells.',
+            'scale_scope': 'Scene cases vary solid density and exposed surface within the fixed 40x24x20 lattice. N-x cases repeat faces at the same positions. The renderer can reuse unchanged scene geometry and upload only overlays; scene changes rebuild and upload all copies. No case multiplies simulated voxel cells.',
         },
         'cases': [],
     }
@@ -89,7 +89,7 @@ def main():
         result.update({'name': name, 'render_copies': copies,
                        'present_mode': modes[0] if modes else None})
         if 'surface_rectangles' in result:
-            result['face_visits'] = result['surface_rectangles'] * copies
+            result['face_inputs_per_rebuild'] = result['surface_rectangles'] * copies
         report['cases'].append(result)
         print(json.dumps({key: result.get(key) for key in
                           ('name', 'pass', 'solid_cells_start', 'surface_rectangles',
