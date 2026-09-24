@@ -62,6 +62,39 @@ class StressParserTests(unittest.TestCase):
         self.assertEqual(summary['preview_frames'], 14)
         self.assertTrue(summarize_views(aim, 'camera', 2, 14)[1])
 
+    def district_rows(self):
+        return (ROWS.replace(',5400,0', ',2443284,0').replace(',5380,0', ',2443264,0') +
+                'world,2443284,154,3434,1,2048\n'
+                'mesh_cache,0,154,154,100,119658,3000000\n'
+                'mesh_cache,1,1,154,100,119658,16000\n'
+                'bodies,0,154,0,0,0.000000\n'
+                'bodies,1,154,0,0,0.000000\n'
+                'view,0,1,20,30,3,-0.3,0,0,0,0\n'
+                'view,1,1,20,30,3,-0.3,0,0,0,0\n')
+
+    def test_real_inventory_and_body_cache(self):
+        result = parse_stress(io.StringIO(self.district_rows()), 0, 1, 1, 1,
+                              'carve', world_scale=1)
+        self.assertTrue(result['pass'], result['errors'])
+        self.assertEqual(result['meshes_rebuilt'], 1)
+        self.assertEqual(result['initial_solid_cells'], 2443284)
+        for old, new in (('world,2443284', 'world,5400'),
+                         ('bodies,1,154', 'bodies,1,0'),
+                         ('mesh_cache,1,1,154', 'mesh_cache,1,154,154')):
+            result = parse_stress(io.StringIO(self.district_rows().replace(old, new)),
+                                  0, 1, 1, 1, 'carve', world_scale=1)
+            self.assertFalse(result['pass'])
+
+    def test_unedited_frames_cannot_rebuild_world(self):
+        rows = self.district_rows().replace('2443264', '2443284')
+        rows = rows.replace('stage,2500,100,100,100,0,0,0,1100,100',
+                            'stage,2500,0,0,0,0,300,0,1100,100')
+        rows = '\n'.join(row for row in rows.splitlines()
+                         if not row.startswith(('edit,', 'cut,')))
+        result = parse_stress(io.StringIO(rows), 0, 1, 1, 0, 'carve', world_scale=1)
+        self.assertFalse(result['pass'])
+        self.assertTrue(any('Unedited geometry rebuilt' in error for error in result['errors']))
+
 
 if __name__ == '__main__':
     unittest.main()

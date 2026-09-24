@@ -23,15 +23,23 @@ typedef struct {
 #endif
 
 typedef struct {
-  u32 index, side, length, rows, owner;
-  float offset;
+  float lo[3], hi[3];  // Integer cell coordinates; zero thickness on side / 2.
+  u32 side, material;
 } VoxelVkFace;
+
+typedef struct {
+  u32 id, revision, anchored, face_count;
+  float offset, lo[3], hi[3];
+  const VoxelVkFace* faces;
+} VoxelVkBody;
+
 typedef struct {
   float eye[3], yaw, pitch, aim[3];
-  u32 aim_kind, face_count;
-  const VoxelVkFace* faces;
+  u32 aim_kind, body_count;
+  const VoxelVkBody* bodies;
   const char* hud;
 } VoxelVkFrame;
+
 typedef struct {
   u32 geometry_us, fence_wait_us, vertex_upload_us, acquire_us;
   u32 command_record_us, submit_present_us;
@@ -42,7 +50,15 @@ typedef void (*VoxelVkRelease)(void);
 static void* voxel_vk_library;
 static VoxelVkRender voxel_vk_render_fn;
 static VoxelVkRelease voxel_vk_release_fn;
-static VoxelVkFace* voxel_vk_faces;
+// Bend owns the world. This transport cache copies a body's faces only when
+// its geometry identity changes; camera, aim and motion never traverse faces.
+typedef struct {
+  VoxelVkFace* faces;
+  u32 revision, count, seen, valid;
+} VoxelVkTransport;
+static VoxelVkTransport* voxel_vk_cache;
+static u32 voxel_vk_cache_capacity, voxel_vk_generation;
+static VoxelVkBody* voxel_vk_bodies;
 static u32 voxel_vk_capacity;
 
 static u64 voxel_vk_tick(void) {
@@ -68,58 +84,106 @@ static float voxel_vk_float(Term t) {
   return out;
 }
 
-static void voxel_vk_append(VoxelVkFace face, u32* count) {
-  if (*count >= 50000) err_fail("Vulkan face limit exceeded");
-  if (*count == voxel_vk_capacity) {
-    voxel_vk_capacity = voxel_vk_capacity ? voxel_vk_capacity * 2 : 512;
-    voxel_vk_faces = io_mem(realloc(voxel_vk_faces, voxel_vk_capacity * sizeof *voxel_vk_faces));
+static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term faces) {
+  if (id >= voxel_vk_cache_capacity) {
+    u32 previous=voxel_vk_cache_capacity;
+    size_t capacity=previous ? previous : 256;
+    while (id >= capacity) capacity*=2;
+    if (capacity>UINT32_MAX) err_fail("Vulkan body ID overflow");
+    voxel_vk_cache=io_mem(realloc(voxel_vk_cache,capacity*sizeof *voxel_vk_cache));
+    memset(voxel_vk_cache+previous,0,(capacity-previous)*sizeof *voxel_vk_cache);
+    voxel_vk_cache_capacity=(u32)capacity;
   }
-  voxel_vk_faces[(*count)++] = face;
+  VoxelVkTransport* entry=&voxel_vk_cache[id];
+  entry->seen=voxel_vk_generation;
+  if (entry->valid && entry->revision==revision) return entry;
+  free(entry->faces); entry->faces=NULL; entry->count=0;
+  size_t capacity=0;
+  while (term_aux(faces)==CID_CON) {
+    Loc link=term_peek(e,faces);
+    Term face=e.mem[link];
+    if (term_aux(face)!=CID_SPATIAL_FACE) err_fail("bad Vulkan face");
+    Loc at=term_peek(e,face);
+    if (entry->count==capacity) {
+      capacity=capacity ? capacity*2 : 64;
+      if (capacity>UINT32_MAX) err_fail("Vulkan face count overflow");
+      entry->faces=io_mem(realloc(entry->faces,capacity*sizeof *entry->faces));
+    }
+    VoxelVkFace* out=&entry->faces[entry->count++];
+    for (u32 i=0;i<3;i++) {
+      out->lo[i]=voxel_vk_float(e.mem[at+i]);
+      out->hi[i]=voxel_vk_float(e.mem[at+3+i]);
+    }
+    out->side=(u32)e.mem[at+6]; out->material=(u32)e.mem[at+7];
+    faces=e.mem[link+1];
+  }
+  if (term_aux(faces)!=CID_NIL) err_fail("bad Vulkan face list");
+  entry->revision=revision; entry->valid=1;
+  return entry;
 }
 
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
-  if (term_aux(state) != CID_DEMO_STATE || term_aux(aim) != CID_RENDER_AIM)
+  if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
     err_fail("bad Vulkan scene state");
-  // Bend flattens nested Data fields in Type constructors. With the pinned
-  // compiler, State is World(6), Control(Camera(5) + 9), pending, last.
-  if (cid_arity(CID_DEMO_STATE)!=22 || cid_arity(CID_WORLD_WORLD)!=6 ||
+  // With Bend 2.0.27: State = World(8), Control(Camera(5) + 9), pending, last.
+  if (cid_arity(CID_DEMO_STATE)!=24 || cid_arity(CID_WORLD_WORLD)!=8 ||
       cid_arity(CID_INPUT_CONTROL)!=14 || cid_arity(CID_RENDER_AIM)!=5 ||
-      cid_arity(CID_WORLD_BODY)!=5 || cid_arity(CID_WORLD_FACE)!=4)
+      cid_arity(CID_WORLD_BODY)!=7 || cid_arity(CID_SPATIAL_FACE)!=8 ||
+      cid_arity(CID_SPATIAL_LEAF)!=7 || cid_arity(CID_SPATIAL_BRANCH)!=9)
     err_fail("Bend Vulkan state layout changed");
-  Loc st = term_peek(e, state);
-  Loc al = term_peek(e, aim);
-  VoxelVkFrame frame = {0};
-  for (u32 i=0;i<3;i+=1) {
-    frame.eye[i]=voxel_vk_float(e.mem[st+6+i]);
+  Loc st=term_peek(e,state),al=term_peek(e,aim);
+  VoxelVkFrame frame={0};
+  for (u32 i=0;i<3;i++) {
+    frame.eye[i]=voxel_vk_float(e.mem[st+8+i]);
     frame.aim[i]=voxel_vk_float(e.mem[al+i]);
   }
-  frame.yaw = voxel_vk_float(e.mem[st+9]);
-  frame.pitch = voxel_vk_float(e.mem[st+10]);
-  frame.aim_kind = (u32)e.mem[al+4];
-  frame.hud = hud;
-  Term bodies = e.mem[st+1];
-  while (term_aux(bodies) == CID_CON) {
-    Loc cell = term_peek(e, bodies);
-    Term body = e.mem[cell];
-    if (term_aux(body) != CID_WORLD_BODY) err_fail("bad Vulkan body");
-    Loc at = term_peek(e, body);
-    u32 owner = (u32)e.mem[at];
-    float offset = voxel_vk_float(e.mem[at + 1]);
-    Term faces = e.mem[at + 4];
-    while (term_aux(faces) == CID_CON) {
-      Loc link = term_peek(e, faces);
-      Term face = e.mem[link];
-      if (term_aux(face) != CID_WORLD_FACE) err_fail("bad Vulkan face");
-      Loc fl = term_peek(e, face);
-      voxel_vk_append((VoxelVkFace){(u32)e.mem[fl], (u32)e.mem[fl + 1],
-        (u32)e.mem[fl + 2], (u32)e.mem[fl + 3], owner, offset}, &frame.face_count);
-      faces = e.mem[link + 1];
+  frame.yaw=voxel_vk_float(e.mem[st+11]);
+  frame.pitch=voxel_vk_float(e.mem[st+12]);
+  frame.aim_kind=(u32)e.mem[al+4]; frame.hud=hud;
+  voxel_vk_generation++;
+  u32 anchored=0,moving=0,translated=0;
+  float minimum_offset=0;
+  Term bodies=e.mem[st];
+  while (term_aux(bodies)==CID_CON) {
+    Loc link=term_peek(e,bodies);
+    Term body=e.mem[link];
+    if (term_aux(body)!=CID_WORLD_BODY) err_fail("bad Vulkan body");
+    Loc at=term_peek(e,body);
+    if (frame.body_count==voxel_vk_capacity) {
+      voxel_vk_capacity=voxel_vk_capacity ? voxel_vk_capacity*2 : 256;
+      voxel_vk_bodies=io_mem(realloc(voxel_vk_bodies,voxel_vk_capacity*sizeof *voxel_vk_bodies));
     }
-    if (term_aux(faces) != CID_NIL) err_fail("bad Vulkan face list");
-    bodies = e.mem[cell + 1];
+    VoxelVkBody* out=&voxel_vk_bodies[frame.body_count++];
+    out->id=(u32)e.mem[at]; out->revision=(u32)e.mem[at+1];
+    out->offset=voxel_vk_float(e.mem[at+2]);
+    // Bool fields are unboxed 0/1 in the pinned compiler.
+    out->anchored=(u32)e.mem[at+4];
+    anchored+=out->anchored;
+    moving+=voxel_vk_float(e.mem[at+3])!=0;
+    translated+=out->offset!=0;
+    if (out->offset<minimum_offset) minimum_offset=out->offset;
+    Term tree=e.mem[at+5];
+    if (term_aux(tree)!=CID_SPATIAL_LEAF && term_aux(tree)!=CID_SPATIAL_BRANCH)
+      err_fail("empty Vulkan body");
+    Loc bounds=term_peek(e,tree);
+    for (u32 i=0;i<3;i++) {
+      out->lo[i]=voxel_vk_float(e.mem[bounds+i]);
+      out->hi[i]=voxel_vk_float(e.mem[bounds+3+i]);
+    }
+    VoxelVkTransport* entry=voxel_vk_transport(out->id,out->revision,e,e.mem[at+6]);
+    out->face_count=entry->count; out->faces=entry->faces;
+    bodies=e.mem[link+1];
   }
-  if (term_aux(bodies) != CID_NIL) err_fail("bad Vulkan body list");
-  frame.faces = voxel_vk_faces;
+  if (term_aux(bodies)!=CID_NIL) err_fail("bad Vulkan body list");
+  for (u32 i=0;i<voxel_vk_cache_capacity;i++) {
+    VoxelVkTransport* entry=&voxel_vk_cache[i];
+    if (entry->valid && entry->seen!=voxel_vk_generation) {
+      free(entry->faces); memset(entry,0,sizeof *entry);
+    }
+  }
+  if (getenv("VOXEL_STRESS_SCENE"))
+    fprintf(stdout,"bodies,%u,%u,%u,%u,%.6f\n",voxel_vk_generation-1,anchored,moving,translated,minimum_offset);
+  frame.bodies=voxel_vk_bodies;
   return frame;
 }
 
@@ -213,7 +277,11 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   VoxelVkFrame frame = voxel_vk_scene(e, f[1], f[2], hud);
   static int stress_scene_logged;
   if (getenv("VOXEL_STRESS_SCENE") && !stress_scene_logged++)
-    fprintf(stdout,"surface,%u\n",frame.face_count);
+    {
+    u32 faces=0;
+    for (u32 i=0;i<frame.body_count;i++) faces+=frame.bodies[i].face_count;
+    fprintf(stdout,"surface,%u\n",faces);
+  }
   const char* view = getenv("VOXEL_STRESS_VIEW");
   if (view && strcmp(view,"0") != 0) {
     static u32 view_frame;
@@ -223,8 +291,8 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   }
   static u32 trace_frames;
   if (getenv("VOXEL_VULKAN_TRACE") && trace_frames++<10)
-    fprintf(stderr,"vulkan frame eye %.3f %.3f %.3f yaw %.3f pitch %.3f faces %u aim %u\n",
-      frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw,frame.pitch,frame.face_count,frame.aim_kind);
+    fprintf(stderr,"vulkan frame eye %.3f %.3f %.3f yaw %.3f pitch %.3f bodies %u aim %u\n",
+      frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw,frame.pitch,frame.body_count,frame.aim_kind);
   char error[512] = {0};
   u64 prepared = profile ? voxel_vk_tick() : 0;
   VoxelVkTimings timings = {0};
@@ -258,8 +326,9 @@ Term vulkan_release_run(Env e, Term* f, IoWork* work) {
   voxel_vk_library = NULL;
   voxel_vk_render_fn = NULL;
   voxel_vk_release_fn = NULL;
-  free(voxel_vk_faces);
-  voxel_vk_faces = NULL;
+  for (u32 i=0;i<voxel_vk_cache_capacity;i++) free(voxel_vk_cache[i].faces);
+  free(voxel_vk_cache); voxel_vk_cache=NULL; voxel_vk_cache_capacity=0;
+  free(voxel_vk_bodies); voxel_vk_bodies=NULL;
   voxel_vk_capacity = 0;
   return f[0];
 }

@@ -7,14 +7,20 @@ extern "C" {
 #endif
 
 typedef struct {
-  uint32_t index, side, length, rows, owner;
-  float offset;
+  float lo[3], hi[3];  // Integer cell coordinates; zero thickness on side / 2.
+  uint32_t side, material;
 } VoxelVkFace;
 
 typedef struct {
-  float eye[3], yaw, pitch, aim[3];
-  uint32_t aim_kind, face_count;
+  uint32_t id, revision, anchored, face_count;
+  float offset, lo[3], hi[3];
   const VoxelVkFace* faces;
+} VoxelVkBody;
+
+typedef struct {
+  float eye[3], yaw, pitch, aim[3];
+  uint32_t aim_kind, body_count;
+  const VoxelVkBody* bodies;
   const char* hud;
 } VoxelVkFrame;
 

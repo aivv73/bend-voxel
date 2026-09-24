@@ -8,7 +8,7 @@ import ./probe.bend as Probe
 
 type Sample is Data:
   Sample{stamp: U32, status: U32, kind: U32, carveUs: U32, connectivityUs: U32, surfaceUs: U32, finalizeUs: U32}
-type State is Type:
+type State is Data:
   State{world: W.World, control: I.Control, pending: List<&2, Sample>, lastCut: U32}
 def initial() -> State:
   State{W.initial(), I.initial(), Nil{}, 0}
@@ -20,8 +20,7 @@ def selected(kind: U32, w: W.World, point: R.Vec) -> W.World:
     case 1:
       W.carve(w, point)
     case _:
-      W.World{a, bs, n, count, _, _} = w
-      W.World{a, bs, n, count, 0, 2}
+      W.status(w,2)
 def pending.add(status: U32, kind: U32, stamp: U32, p: List<&2,Sample>) -> List<&2,Sample>:
   Sample{stamp,status,kind,0,0,0,0} <> p
 def status(s: U32) -> String:
@@ -31,24 +30,24 @@ def status(s: U32) -> String:
     case 2:
       "NO REMOVABLE TARGET"
     case 3:
-      "FRAGMENT LIMIT REACHED - RESET TO CONTINUE"
+      "BODY BUDGET REACHED - CUT REJECTED"
     case _:
       "READY"
 def apply.aim(aim: V.Aim, w: W.World, c: I.Control, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
   V.Aim{point, _, +kind} = aim
-  W.use.world(State, selected(kind, w, point), a => bs => n => count => r => +status =>
-    State{W.World{a, bs, n, count, r, status}, c, pending.add(status, kind, stamp, p), last})
+  W.use.world(State, selected(kind, w, point), bs => n => count => r => +status => next => budget => districts =>
+    State{W.World{bs, n, count, r, status, next, budget, districts}, c, pending.add(status, kind, stamp, p), last})
 def apply.cut(doit: Bool, w: W.World, +c: I.Control, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
   match doit:
     case False{}:
       State{w, c, p, last}
     case True{}:
-      W.World{a, +bs, n, count, r, status} = w
-      apply.aim(I.aim(c, bs), W.World{a, bs, n, count, r, status}, c, p, last, stamp)
+      W.World{+bs, n, count, r, status, next, budget, districts} = w
+      apply.aim(I.aim(c, bs), W.World{bs, n, count, r, status, next, budget, districts}, c, p, last, stamp)
 def apply.reset(reset: Bool, cut: Bool, w: W.World, c: I.Control, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
   match reset:
     case True{}:
-      State{W.initial(), I.reset.state(c), Nil{}, 0}
+      State{W.reset(w), I.reset.state(c), Nil{}, 0}
     case False{}:
       apply.cut(cut, w, c, p, last, stamp)
 def event.control(+c: I.Control, w: W.World, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
@@ -76,9 +75,9 @@ def target(kind: U32) -> String:
       "PROTECTED FLOOR"
     case _:
       "NO TARGET"
-def hud(n: U32, count: U32, removed: U32, s: U32, kind: U32, frameUs: U32, cutUs: U32) -> String:
-  "BEND VOXEL / FIRST DEMO\n" ++
-  "VOXELS " ++ U32.show(n) ++ "  BODIES " ++ U32.show(count) ++ "/64  REMOVED " ++ U32.show(removed) ++ "\n" ++
+def hud(n: U32, count: U32, budget: U32, removed: U32, s: U32, kind: U32, frameUs: U32, cutUs: U32) -> String:
+  "BEND VOXEL / DEMOLITION DISTRICT\n" ++
+  "VOXELS " ++ U32.show(n) ++ "  BODIES " ++ U32.show(count) ++ "/" ++ U32.show(budget) ++ "  REMOVED " ++ U32.show(removed) ++ "\n" ++
   "FRAME " ++ U32.show((frameUs / 1000 : U32)) ++ " MS  CUT " ++ U32.show((cutUs / 1000 : U32)) ++ " MS\n" ++
   target(kind) ++ "\n" ++ status(s) ++ "\n" ++
   "WASD MOVE  QE UP/DOWN  RMB LOOK  LMB CUT  R RESET  ESC RELEASE"
@@ -142,5 +141,5 @@ def events.close(es: List<Event>) -> Bool:
     case _ <> rest: events.close(rest)
 def sample.measured(r: Probe.EditResult, c: I.Control, p: List<&2,Sample>, last: U32, kind: U32, stamp: U32) -> State:
   Probe.EditResult{w,cut,connectivity,surface,finalize} = r
-  W.use.world(State,w,a => bs => n => count => r => +status =>
-    State{W.World{a,bs,n,count,r,status},c,Sample{stamp,status,kind,cut,connectivity,surface,finalize} <> p,last})
+  W.use.world(State,w,bs => n => count => r => +status => next => budget => districts =>
+    State{W.World{bs,n,count,r,status,next,budget,districts},c,Sample{stamp,status,kind,cut,connectivity,surface,finalize} <> p,last})

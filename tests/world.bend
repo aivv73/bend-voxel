@@ -1,126 +1,126 @@
 import Base
 import ../src/world.bend as W
+import ../src/spatial.bend as S
+import ../src/district.bend as D
 import ../src/math.bend as R
-import ../src/render.bend as V
-import ../src/input.bend as I
 
 def check(ok: Bool, label: String) -> IO(Unit):
   match ok:
-    case True{}:
-      IO.print("PASS " ++ label)
-    case False{}:
-      IO.die(Unit, 1, "FAIL " ++ label)
-def area.faces(fs: List<&2,W.Face>) -> U32:
+    case True{}: IO.print("PASS " ++ label)
+    case False{}: IO.die(Unit,1,"FAIL " ++ label)
+def inspect(+w: W.World, n: U32, c: U32, status: U32, label: String) -> IO(W.World):
+  W.World{_,actualN,actualC,_,actualS,_,_,_} = w
+  do IO<W.World>:
+    Unit <- check((U32.is_eq(n,actualN) && U32.is_eq(c,actualC) && U32.is_eq(status,actualS)),label)
+    IO.pure(W.World,w)
+def fixture(+t: S.Tree, budget: U32, offset: F32, speed: F32) -> W.World:
+  W.from.bodies([W.Body{1,0,offset,speed,S.anchored(t),t,S.faces(t)}],budget,1)
+def bar(budget: U32, offset: F32, speed: F32) -> W.World:
+  fixture(S.Leaf{D.box(0.0,100.0,0.0,11.0,1.0,1.0,2)},budget,offset,speed)
+@unsafe
+def components(t: S.Tree) -> U32:
+  match t:
+    case S.Empty{}: 0
+    case t: components.next(S.component(t))
+@unsafe
+def components.next(c: S.Component) -> U32:
+  S.Component{remaining,_} = c
+  (1 + components(remaining) : U32)
+def area(fs: List<&2,S.Face>) -> U32:
   match fs:
     case Nil{}: 0
-    case W.Face{_,_,len,rows} <> rest: (len * rows + area.faces(rest) : U32)
-def area.bodies(bs: List<&2,W.Body>) -> U32:
-  match bs:
-    case Nil{}: 0
-    case W.Body{_,_,_,_,fs} <> rest: (area.faces(fs) + area.bodies(rest) : U32)
-def area.sides(n: Nat, +side: U32, +i: U32, +owner: U32, a: Array<U32>, +count: U32) -> Array<U32> & U32:
+    case S.Face{l,h,+s,_} <> rest:
+      +d = R.Vec.sub(h,l)
+      +u = ((s / 2 + 1) % 3 : U32)
+      +v = ((s / 2 + 2) % 3 : U32)
+      (F32.to_u32((S.axis(d,u) * S.axis(d,v) : F32)) + area(rest) : U32)
+def dense.sides(n: Nat, +s: U32, +p: R.Vec, +t: S.Tree) -> U32:
   match n:
-    case 0n: (a,count)
+    case 0n: 0
     case 1n+k:
-      W.pair(Array<U32>,U32,Array<U32> & U32,Array.get(U32,a,W.neighbor(i,side)),a => other =>
-        area.sides(k,(side + 1 : U32),i,owner,a,(count + R.word(((owner > 0 : U32) && U32.is_ne(owner,other)),1,0) : U32)))
-def area.grid(n: Nat, +i: U32, a: Array<U32>, count: U32) -> U32:
+      +a = (s / 2 : U32)
+      +q = S.put(p,a,(S.axis(p,a) + R.pick(U32.is_eq((s % 2 : U32),0),(0.0 - 1.0 : F32),1.0) : F32))
+      (R.word((S.contains(t,p) && Bool.not(S.contains(t,q))),1,0) + dense.sides(k,(s + 1 : U32),p,t) : U32)
+def dense.area(n: Nat, +i: U32, +t: S.Tree) -> U32:
   match n:
-    case 0n: count
+    case 0n: 0
     case 1n+k:
-      W.pair(Array<U32>,U32,U32,Array.get(U32,a,i),a => owner =>
-        W.pair(Array<U32>,U32,U32,area.sides(6n,0,i,owner,a,count),a => count => area.grid(k,(i + 1 : U32),a,count)))
-def verify.mesh(w: W.World) -> IO(Unit):
-  W.World{a,bs,_,_,_,_} = w
-  check(U32.is_eq(area.grid(19200n,0,a,0),area.bodies(bs)),"merged mesh preserves exposed voxel-face area")
-def inspect(w: W.World, +n0: U32, +c0: U32, +s0: U32, label: String) -> IO(W.World):
-  W.World{a, bs, +n, +c, r, +s} = w
-  do IO<W.World>:
-    Unit <- check((U32.is_eq(n,n0) && U32.is_eq(c,c0) && U32.is_eq(s,s0)), label)
-    IO.pure(W.World, W.World{a, bs, n, c, r, s})
-def sever(w: W.World, +x: F32) -> W.World:
-  w = W.carve(w, R.Vec{(x - 0.15 : F32), 1.05, (0.0 - 0.15 : F32)})
-  w = W.carve(w, R.Vec{(x - 0.15 : F32), 1.05, 0.15})
-  w = W.carve(w, R.Vec{(x + 0.15 : F32), 1.05, (0.0 - 0.15 : F32)})
-  W.carve(w, R.Vec{(x + 0.15 : F32), 1.05, 0.15})
-def anchors(n: Nat, +i: U32, a: Array<U32>, +count: U32) -> U32:
+      +p = {R.Vec{(U32.to_f32((i % 8 : U32)) + 0.5 : F32),
+        (U32.to_f32((i / 8 % 8 : U32)) + 0.5 : F32),(U32.to_f32((i / 64 : U32)) + 0.5 : F32)} : R.Vec}
+      (dense.sides(6n,0,p,t) + dense.area(k,(i + 1 : U32),t) : U32)
+def dense.cut(n: Nat, +i: U32, +old: S.Tree, +fresh: S.Tree, +p: R.Vec) -> Bool:
   match n:
-    case 0n: count
+    case 0n: True{}
     case 1n+k:
-      W.pair(Array<U32>, U32, U32, Array.get(U32,a,i), a => owner =>
-        anchors(k,(i + 1 : U32),a,(count + R.word((U32.is_eq(owner,1) && U32.is_eq((i / 40 % 24 : U32),0)),1,0) : U32)))
-def landed(bs: List<&2,W.Body>) -> Bool:
+      +q = {R.Vec{(U32.to_f32((i % 8 : U32)) + 0.5 : F32),
+        (U32.to_f32((i / 8 % 8 : U32)) + 0.5 : F32),(U32.to_f32((i / 64 : U32)) + 0.5 : F32)} : R.Vec}
+      +d = R.Vec.sub(q,p)
+      (U32.is_eq(R.word(S.contains(fresh,q),1,0),R.word((S.contains(old,q) && (R.Vec.dot(d,d) > 4.00001 : F32)),1,0)) && dense.cut(k,(i + 1 : U32),old,fresh,p))
+def motion(bs: List<&2,W.Body>, +offset: F32, +speed: F32) -> Bool:
   match bs:
     case Nil{}: True{}
-    case W.Body{id, offset, speed, bottom, _} <> rest:
-      ((U32.is_eq(id,1) || ((F32.abs((offset + bottom : F32)) < 0.00001) && (F32.abs(speed) < 0.00001) : F32)) && landed(rest))
-def inheritance(bs: List<&2,W.Body>) -> Bool:
+    case W.Body{_,_,o,v,_,_,_} <> rest:
+      ((F32.abs((o - offset : F32)) < 0.0001 : F32) && (F32.abs((v - speed : F32)) < 0.0001 : F32) && motion(rest,offset,speed))
+def moving(w: W.World, offset: F32, speed: F32) -> Bool:
+  W.World{bs,_,_,_,_,_,_,_} = w
+  motion(bs,offset,speed)
+def many(n: Nat, +i: U32) -> List<&2,W.Body>:
+  match n:
+    case 0n: Nil{}
+    case 1n+k:
+      +t = {S.Leaf{D.box((U32.to_f32(i) * 2.0 : F32),100.0,0.0,1.0,1.0,1.0,2)} : S.Tree}
+      W.Body{i,0,0.0,0.0,False{},t,S.faces(t)} <> many(k,(i + 1 : U32))
+def disjoint.box(+b: S.Box, rest: List<&2,S.Box>) -> Bool:
+  match b rest:
+    case _ Nil{}: True{}
+    case S.Box{bl,bh,_} S.Box{l,h,_} <> tail:
+      +lo = S.maximum(bl,l)
+      +hi = S.minimum(bh,h)
+      (Bool.not(((S.axis(lo,0) < S.axis(hi,0)) && (S.axis(lo,1) < S.axis(hi,1)) && (S.axis(lo,2) < S.axis(hi,2)) : F32)) && disjoint.box(b,tail))
+def disjoint(bs: List<&2,S.Box>) -> Bool:
   match bs:
     case Nil{}: True{}
-    case W.Body{_, _, speed, _, _} <> rest:
-      ((F32.abs((speed + 0.981 : F32)) < 0.0001 : F32) && inheritance(rest))
-def verify.landed(w: W.World) -> IO(Unit):
-  W.World{a, bs, _, _, _, _} = w
-  do IO<Unit>:
-    Unit <- check(landed(bs), "floor clamp and zero velocity")
-    check(U32.is_eq(anchors(19200n,0,a,0),72), "all protected anchors remain")
-def fixture.two(+second: U32, owner: U32) -> W.World:
-  a = Array.new(U32,15n,0)
-  a = Array.set(U32,a,40,2)
-  W.rebuild(Array.set(U32,a,second,owner),Nil{},2,0)
-def fixture.singles(n: Nat, +j: U32, a: Array<U32>) -> Array<U32>:
-  match n:
-    case 0n: a
-    case 1n+k:
-      +i = ((j % 7 * 5 + 2) + 40 * (j / 7 % 3 * 5 + 5) + 960 * (j / 21 * 5 + 2) : U32)
-      fixture.singles(k,(j + 1 : U32),Array.set(U32,a,i,2))
-def fixture.bar(n: Nat, +j: U32, a: Array<U32>) -> Array<U32>:
-  match n:
-    case 0n: a
-    case 1n+k:
-      fixture.bar(k,(j + 1 : U32),Array.set(U32,a,(j + 40 * 22 + 960 * 19 : U32),2))
-def fixture.cap() -> W.World:
-  W.rebuild(fixture.bar(11n,0,fixture.singles(63n,0,Array.new(U32,15n,0))),Nil{},74,0)
-def fixture.vertical(n: Nat, +y: U32, a: Array<U32>) -> Array<U32>:
-  match n:
-    case 0n: a
-    case 1n+k:
-      fixture.vertical(k,(y + 1 : U32),Array.set(U32,a,(10 + y * 40 + 10 * 960 : U32),2))
-def verify.inherit(w: W.World) -> IO(Unit):
-  W.World{_, bs, n, c, _, _} = w
-  check((U32.is_eq(n,3) && U32.is_eq(c,2) && inheritance(bs)), "split moving body preserves velocity")
-def verify.resume(w: W.World) -> IO(Unit):
-  W.World{_, bs, _, _, _, _} = w
-  check(Bool.not(landed(bs)), "removing landed body's bottom resumes fall")
-def verify.lookup(bs: List<&2,W.Body>, id: U32, +expected: F32, label: String) -> IO(Unit):
-  W.vec(IO(Unit),W.body.find(bs,id),x => y => z =>
-    check((F32.is_eq(x,expected) && F32.is_eq(y,(expected * 2.0 : F32)) && F32.is_eq(z,(expected * 3.0 : F32))),label))
-def verify.lookups() -> IO(Unit):
-  +bs = {[W.Body{7,1.0,2.0,3.0,Nil{}},W.Body{2,2.0,4.0,6.0,Nil{}},W.Body{9,3.0,6.0,9.0,Nil{}},W.Body{7,4.0,8.0,12.0,Nil{}}] : List<&2,W.Body>}
-  do IO<Unit>:
-    Unit <- verify.lookup(Nil{},7,0.0,"empty body lookup returns zero")
-    Unit <- verify.lookup(bs,7,1.0,"body lookup preserves first match")
-    Unit <- verify.lookup(bs,2,2.0,"middle body lookup preserves all fields")
-    Unit <- verify.lookup(bs,9,3.0,"later body lookup preserves all fields")
-    verify.lookup(bs,0,0.0,"missing body lookup returns zero")
+    case b <> +tail: (disjoint.box(b,tail) && disjoint(tail))
+def falling.bodies(bs: List<&2,W.Body>) -> Bool:
+  match bs:
+    case Nil{}: False{}
+    case W.Body{_,_,o,v,_,_,_} <> _: ((o < (0.0 - 10.0)) && (v < 0.0) : F32)
+def falling(w: W.World) -> Bool:
+  W.World{bs,_,_,_,_,_,_,_} = w
+  falling.bodies(bs)
+def connected.assemblies(bs: List<&2,D.Assembly>) -> Bool:
+  match bs:
+    case Nil{}: True{}
+    case D.Assembly{+t} <> rest: (U32.is_eq(components(t),1) && disjoint(S.boxes(t,Nil{})) && connected.assemblies(rest))
 def main() -> IO(Unit):
+  +solid = {S.Leaf{D.box(0.0,0.0,0.0,8.0,8.0,8.0,2)} : S.Tree}
+  +p = {R.Vec{3.5,4.5,2.5} : R.Vec}
+  +cut = S.cut(solid,p,4.00001)
+  +partial = S.build([D.box(0.0,0.0,0.0,4.0,4.0,4.0,2),D.box(4.0,1.0,1.0,2.0,2.0,2.0,3)])
   do IO<Unit>:
-    Unit <- verify.lookups()
-    w : W.World <- inspect(W.initial(),4640,0,1,"initial scene")
-    w : W.World <- inspect(W.carve(w,R.Vec{(0.0 - 1.0 : F32),1.05,0.3}),4622,0,1,"partial cut")
-    w : W.World <- inspect(sever(w,(0.0 - 1.0 : F32)),4524,0,1,"one support remains")
-    w : W.World <- inspect(sever(w,1.0),4408,1,1,"last support detaches")
-    Unit <- verify.landed(W.step(w,2.0))
-    Unit <- verify.mesh(W.initial())
-    Unit <- verify.mesh(sever(W.initial(),1.0))
-    w : W.World <- inspect(fixture.two(41,2),2,1,1,"face connectivity")
-    w : W.World <- inspect(fixture.two(81,2),2,2,1,"edge contact is not connectivity")
-    w : W.World <- inspect(fixture.two(41,3),2,2,1,"different owners do not merge")
-    w : W.World <- inspect(fixture.cap(),74,64,1,"64 body fixture")
-    w : W.World <- inspect(W.carve(w,W.xyz(19125)),74,64,3,"over-cap cut rolls back")
-    w : W.World <- inspect(W.carve(w,W.xyz(2122)),73,63,1,"removing body frees slot")
-    w : W.World <- inspect(W.carve(w,W.xyz(19125)),68,64,1,"split at cap commits")
-    Unit <- verify.inherit(W.carve(W.step(W.rebuild(fixture.vertical(8n,10,Array.new(U32,15n,0)),Nil{},8,0),0.1),R.Vec{(0.0 - 0.95 : F32),1.30095,0.05}))
-    Unit <- verify.resume(W.carve(W.step(W.rebuild(fixture.vertical(6n,5,Array.new(U32,15n,0)),Nil{},6,0),2.0),R.Vec{(0.0 - 0.95 : F32),0.05,0.05}))
-    w : W.World <- inspect(W.carve(W.initial(),R.Vec{20.0,20.0,20.0}),4640,0,2,"empty cut changes nothing")
-    IO.print("ALL WORLD CHECKS PASSED")
+    Unit <- check(U32.is_eq(S.count(S.Leaf{D.box(0.0,0.0,0.0,257.0,257.0,257.0,2)}),16974593),"large cuboid cell counts use exact integer arithmetic")
+    Unit <- check(dense.cut(512n,0,solid,cut,p),"sparse sphere agrees with every dense reference cell")
+    Unit <- check(U32.is_eq(area(S.faces(cut)),dense.area(512n,0,cut)),"carved surface area agrees with dense exposed faces")
+    Unit <- check(U32.is_eq(area(S.faces(partial)),dense.area(512n,0,partial)),"partial material boundary hides exactly shared faces")
+    Unit <- check(U32.is_eq(components(S.build([D.box(0.0,0.0,0.0,1.0,1.0,1.0,2),D.box(1.0,1.0,0.0,1.0,1.0,1.0,2)])),2),"edge contact stays disconnected")
+    Unit <- check(connected.assemblies(D.district()),"generated regions do not overlap and all assemblies are six-connected")
+    w : W.World <- inspect(W.initial(),2443284,0,1,"district has more than two million real voxels")
+    w : W.World <- inspect(W.carve(w,R.Vec{(0.0 - 15.9 : F32),16.25,(0.0 - 19.95 : F32)}),2443256,0,1,"first bridge fuse retains anchor path across regions")
+    w : W.World <- inspect(W.carve(w,R.Vec{15.9,16.25,(0.0 - 19.95 : F32)}),2443228,1,1,"last bridge fuse detaches one fragment")
+    w : W.World <- inspect(W.step(w,10.0),2443228,1,1,"falling bridge preserves all remaining cells")
+    w : W.World <- inspect(W.carve(w,R.Vec{1000.0,1.0,1000.0}),2443228,1,2,"air cut is a no-op")
+    w : W.World <- inspect(W.configured(4,2048),9773136,0,1,"four districts multiply simulated cells")
+    w : W.World <- inspect(W.configured(16,2048),39092544,0,1,"sixteen districts multiply simulated cells")
+    w : W.World <- inspect(W.carve(fixture(S.Leaf{D.box((0.0 - 80.0 : F32),100.0,0.0,2.0,2.0,2.0,1)},10,0.0,0.0),R.Vec{(0.0 - 7.9 : F32),10.1,0.1}),8,0,2,"explicit elevated anchor is protected")
+    w : W.World <- inspect(W.carve(fixture(S.build([D.box((0.0 - 40.0 : F32),10.0,0.0,2.0,1.0,1.0,1),D.box((0.0 - 38.0 : F32),10.0,0.0,12.0,1.0,1.0,2)]),10,0.0,0.0),R.Vec{(0.0 - 3.15 : F32),1.05,0.05}),9,1,1,"signed coordinates and cross-region severing")
+    w : W.World <- inspect(W.carve(bar(1,0.0,0.0),R.Vec{0.55,10.05,0.05}),11,1,3,"body budget overflow rolls back mass and ownership")
+    w : W.World <- inspect(W.carve(bar(2,0.0,0.0),R.Vec{0.55,10.05,0.05}),6,2,1,"configured body budget admits the same split")
+    w : W.World <- inspect(W.carve(bar(2,(0.0 - 1.0 : F32),(0.0 - 2.0 : F32)),R.Vec{0.55,9.05,0.05}),6,2,1,"moving fragment can be split again")
+    Unit <- check(moving(w,(0.0 - 1.0 : F32),(0.0 - 2.0 : F32)),"split fragments inherit position and velocity")
+    Unit <- check(moving(W.step(bar(2,0.0,0.0),10.0),(0.0 - 10.0 : F32),0.0),"falling body stops at ground")
+    w : W.World <- inspect(W.from.bodies(many(512n,1),1024,1),512,512,1,"512 independent bodies exceed the removed 64-body cap")
+    w : W.World <- inspect(W.step(w,0.1),512,512,1,"512 bodies move without losing material")
+    w : W.World <- inspect(W.carve(fixture(S.Leaf{D.box(0.0,0.0,0.0,1.0,1.0,1.0,2)},10,0.0,0.0),R.Vec{0.05,0.05,0.05}),0,0,1,"ground-level cells are removable without explicit anchor material")
+    w : W.World <- inspect(W.carve(fixture(S.Leaf{D.box(0.0,100.0,0.0,1.0,10.0,1.0,2)},10,(0.0 - 10.0 : F32),0.0),R.Vec{0.05,0.15,0.05}),6,1,1,"removing the lowest cells updates the landing bound")
+    Unit <- check(falling(W.step(w,0.1)),"landed fragment resumes falling after its bottom is cut")
+    IO.print("ALL SPARSE WORLD CHECKS PASSED")

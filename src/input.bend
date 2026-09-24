@@ -51,8 +51,8 @@ def step(c: Control, +dt: F32) -> Control:
   +dx = (held(keys, 8) - held(keys, 4) : F32)
   +dz = (held(keys, 1) - held(keys, 2) : F32)
   +dy = (held(keys, 32) - held(keys, 16) : F32)
-  +speed = (2.0 * dt / R.max(1.0, F32.sqrt((dx * dx + dy * dy + dz * dz : F32))) : F32)
-  Control{V.Camera{R.Vec{R.clamp((x + (0.0 - F32.cos(yaw) * dx + F32.sin(yaw) * dz) * speed : F32), (0.0 - 6.0 : F32), 6.0), R.clamp((y + dy * speed : F32), 0.15, 6.0), R.clamp((z + (F32.sin(yaw) * dx + F32.cos(yaw) * dz) * speed : F32), (0.0 - 6.0 : F32), 6.0)}, yaw, pitch}, keys, mx, my, look, left, focus, False{}, False{}, quit}
+  +speed = (12.0 * dt / R.max(1.0, F32.sqrt((dx * dx + dy * dy + dz * dz : F32))) : F32)
+  Control{V.Camera{R.Vec{(x + (0.0 - F32.cos(yaw) * dx + F32.sin(yaw) * dz) * speed : F32), R.max(0.15,(y + dy * speed : F32)), (z + (F32.sin(yaw) * dx + F32.cos(yaw) * dz) * speed : F32)}, yaw, pitch}, keys, mx, my, look, left, focus, False{}, False{}, quit}
 def aim(+c: Control, bs: List<&2, W.Body>) -> V.Aim:
   Control{cam, _, mx, my, look, _, focus, _, _, _} = c
   V.aim((focus && Bool.not(look)), bs, cam, mx, my)

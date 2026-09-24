@@ -1,6 +1,6 @@
 # Lookup audit and one measured change
 
-This is a historical audit. The replay code referenced below was removed when the stress suite became the sole runnable application benchmark.
+This is a historical audit. The replay and lookup microbenchmark code referenced below has been retired. The sparse district no longer uses per-cell owner lookup or `body.find`. To reproduce this audit, check out the pre-district revision `48221d9` before following its commands. The stress suite is the sole runnable application benchmark.
 
 ## Audit
 

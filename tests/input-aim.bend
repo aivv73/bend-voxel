@@ -2,6 +2,8 @@ import Base
 import ../src/input.bend as I
 import ../src/render.bend as V
 import ../src/world.bend as W
+import ../src/spatial.bend as S
+import ../src/district.bend as D
 import ../src/math.bend as R
 
 def check(ok: Bool, label: String) -> IO(Unit):
@@ -27,7 +29,7 @@ def moved(c: I.Control) -> Bool:
   I.Control{cam,_,_,_,_,_,_,_,_,_} = c
   V.Camera{p,_,_} = cam
   R.Vec{_,y,_} = p
-  (F32.abs((y - 4.4 : F32)) < 0.0001 : F32)
+  (F32.abs((y - 36.0 : F32)) < 0.0001 : F32)
 def main() -> IO(Unit):
   +held = I.mouse(320,180,0,True{},I.initial())
   +released = I.key(27,True{},I.key(119,True{},I.initial()))
@@ -41,6 +43,9 @@ def main() -> IO(Unit):
     Unit <- check(focused(I.mouse(320,180,0,True{},released)),"click restores focus")
     Unit <- check(U32.is_eq(keys(I.key(0,False{},I.key(119,True{},I.initial()))),0),"focus loss clears movement")
     Unit <- check(reset(I.mouse(600,15,0,True{},I.initial())),"reset button")
-    Unit <- check(moved(I.step(I.key(101,True{},I.initial()),0.5)),"movement is two meters per second")
-    Unit <- check(hit(V.ray.face(1,40,800,3,0.0,1,R.Vec{1.8,4.0,(0.0 - 0.95 : F32)},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},14.0,0}),1,1.9),"merged face far-end picking")
+    Unit <- check(moved(I.step(I.key(101,True{},I.initial()),0.5)),"movement is twelve meters per second")
+    Unit <- check(hit(V.ray.tree(S.Leaf{D.box((0.0 - 320.0 : F32),0.0,(0.0 - 320.0 : F32),640.0,4.0,640.0,2)},0.0,R.Vec{31.9,4.0,31.9},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),1,3.6),"large sparse slab far-end picking")
+    Unit <- check(hit(V.ray.tree(S.Leaf{D.box((0.0 - 40.0 : F32),20.0,0.0,10.0,10.0,10.0,2)},(0.0 - 1.0 : F32),R.Vec{(0.0 - 3.5 : F32),5.0,0.5},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),1,3.0),"picking uses moving body local coordinates")
+    Unit <- check(hit(V.ray.tree(S.Leaf{D.box(0.0,0.0,0.0,10.0,10.0,10.0,1)},0.0,R.Vec{0.5,5.0,0.5},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),2,4.0),"spatial picking identifies explicit anchors")
+    Unit <- check(hit(V.ray.tree(S.Leaf{D.box(0.0,0.0,0.0,10.0,10.0,10.0,2)},0.0,R.Vec{2.0,5.0,0.5},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),0,256.0),"parallel ray outside bounds misses")
     IO.print("ALL INPUT AND AIM CHECKS PASSED")
