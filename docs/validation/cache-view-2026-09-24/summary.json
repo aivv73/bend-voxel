@@ -1,0 +1,258 @@
+{
+  "protocol": {
+    "machine": {
+      "cpu": "AMD Ryzen 5 1600 Six-Core Processor",
+      "gpu": "NVIDIA GeForce GTX 1660"
+    },
+    "renderer_commits": {
+      "20": "dde3bc1",
+      "world": "9222273"
+    },
+    "harness_commits": {
+      "20": "a05ac886dd25e8f3b7060554bc00c182892dea10",
+      "world": "bcd0a3ef8fe8eda56fcfee94d1f701b7ad5a8dcc"
+    },
+    "source_files_differing": [
+      "src/vulkan/native.cpp"
+    ],
+    "order": [
+      "20-run-1",
+      "world-run-1",
+      "world-run-2",
+      "20-run-2"
+    ],
+    "command": "python3 scripts/benchmark_stress.py --cases comb-camera comb-camera-16x comb-aim comb-aim-16x --warmup 30 --frames 180 --output <directory>",
+    "warmup_frames": 30,
+    "measured_frames_per_run": 180,
+    "runs_per_variant": 2,
+    "edits_per_run": 0,
+    "presentation_mode": "immediate",
+    "timing": "CPU wall-clock end-to-end frame intervals; stage intervals are not GPU timestamps"
+  },
+  "cases": [
+    {
+      "name": "comb-camera",
+      "20": {
+        "throughput_fps": 596.348,
+        "run_fps": [
+          609.512,
+          583.741
+        ],
+        "frame_p50_ms": 1.52,
+        "frame_p95_ms": 2.828,
+        "scene_preparation_p50_ms": 0.005,
+        "geometry_generation_p50_ms": 0.942,
+        "vertex_upload_p50_ms": 0.06,
+        "view": [
+          {
+            "camera_positions": 180,
+            "aim_positions": 0,
+            "target_frames": 0,
+            "preview_frames": 0
+          },
+          {
+            "camera_positions": 180,
+            "aim_positions": 0,
+            "target_frames": 0,
+            "preview_frames": 0
+          }
+        ]
+      },
+      "world": {
+        "throughput_fps": 1428.299,
+        "run_fps": [
+          1433.258,
+          1423.375
+        ],
+        "frame_p50_ms": 0.603,
+        "frame_p95_ms": 1.252,
+        "scene_preparation_p50_ms": 0.003,
+        "geometry_generation_p50_ms": 0.164,
+        "vertex_upload_p50_ms": 0.01,
+        "view": [
+          {
+            "camera_positions": 180,
+            "aim_positions": 0,
+            "target_frames": 0,
+            "preview_frames": 0
+          },
+          {
+            "camera_positions": 180,
+            "aim_positions": 0,
+            "target_frames": 0,
+            "preview_frames": 0
+          }
+        ]
+      },
+      "world_vs_20_throughput_ratio": 2.395
+    },
+    {
+      "name": "comb-camera-16x",
+      "20": {
+        "throughput_fps": 65.316,
+        "run_fps": [
+          65.329,
+          65.302
+        ],
+        "frame_p50_ms": 15.259,
+        "frame_p95_ms": 16.346,
+        "scene_preparation_p50_ms": 0.007,
+        "geometry_generation_p50_ms": 12.375,
+        "vertex_upload_p50_ms": 2.16,
+        "view": [
+          {
+            "camera_positions": 180,
+            "aim_positions": 0,
+            "target_frames": 0,
+            "preview_frames": 0
+          },
+          {
+            "camera_positions": 180,
+            "aim_positions": 0,
+            "target_frames": 0,
+            "preview_frames": 0
+          }
+        ]
+      },
+      "world": {
+        "throughput_fps": 253.334,
+        "run_fps": [
+          252.228,
+          254.45
+        ],
+        "frame_p50_ms": 3.895,
+        "frame_p95_ms": 5.601,
+        "scene_preparation_p50_ms": 0.007,
+        "geometry_generation_p50_ms": 0.358,
+        "vertex_upload_p50_ms": 0.023,
+        "view": [
+          {
+            "camera_positions": 180,
+            "aim_positions": 0,
+            "target_frames": 0,
+            "preview_frames": 0
+          },
+          {
+            "camera_positions": 180,
+            "aim_positions": 0,
+            "target_frames": 0,
+            "preview_frames": 0
+          }
+        ]
+      },
+      "world_vs_20_throughput_ratio": 3.879
+    },
+    {
+      "name": "comb-aim",
+      "20": {
+        "throughput_fps": 223.399,
+        "run_fps": [
+          217.426,
+          229.709
+        ],
+        "frame_p50_ms": 4.368,
+        "frame_p95_ms": 5.325,
+        "scene_preparation_p50_ms": 2.763,
+        "geometry_generation_p50_ms": 0.955,
+        "vertex_upload_p50_ms": 0.07,
+        "view": [
+          {
+            "camera_positions": 1,
+            "aim_positions": 46,
+            "target_frames": 174,
+            "preview_frames": 174
+          },
+          {
+            "camera_positions": 1,
+            "aim_positions": 46,
+            "target_frames": 174,
+            "preview_frames": 174
+          }
+        ]
+      },
+      "world": {
+        "throughput_fps": 267.893,
+        "run_fps": [
+          267.794,
+          267.992
+        ],
+        "frame_p50_ms": 3.616,
+        "frame_p95_ms": 4.515,
+        "scene_preparation_p50_ms": 2.66,
+        "geometry_generation_p50_ms": 0.482,
+        "vertex_upload_p50_ms": 0.009,
+        "view": [
+          {
+            "camera_positions": 1,
+            "aim_positions": 46,
+            "target_frames": 174,
+            "preview_frames": 174
+          },
+          {
+            "camera_positions": 1,
+            "aim_positions": 46,
+            "target_frames": 174,
+            "preview_frames": 174
+          }
+        ]
+      },
+      "world_vs_20_throughput_ratio": 1.199
+    },
+    {
+      "name": "comb-aim-16x",
+      "20": {
+        "throughput_fps": 53.814,
+        "run_fps": [
+          53.363,
+          54.272
+        ],
+        "frame_p50_ms": 18.393,
+        "frame_p95_ms": 19.466,
+        "scene_preparation_p50_ms": 2.782,
+        "geometry_generation_p50_ms": 12.589,
+        "vertex_upload_p50_ms": 2.18,
+        "view": [
+          {
+            "camera_positions": 1,
+            "aim_positions": 46,
+            "target_frames": 174,
+            "preview_frames": 174
+          },
+          {
+            "camera_positions": 1,
+            "aim_positions": 46,
+            "target_frames": 174,
+            "preview_frames": 174
+          }
+        ]
+      },
+      "world": {
+        "throughput_fps": 229.942,
+        "run_fps": [
+          230.281,
+          229.605
+        ],
+        "frame_p50_ms": 3.997,
+        "frame_p95_ms": 6.607,
+        "scene_preparation_p50_ms": 2.675,
+        "geometry_generation_p50_ms": 0.482,
+        "vertex_upload_p50_ms": 0.011,
+        "view": [
+          {
+            "camera_positions": 1,
+            "aim_positions": 46,
+            "target_frames": 174,
+            "preview_frames": 174
+          },
+          {
+            "camera_positions": 1,
+            "aim_positions": 46,
+            "target_frames": 174,
+            "preview_frames": 174
+          }
+        ]
+      },
+      "world_vs_20_throughput_ratio": 4.273
+    }
+  ]
+}
