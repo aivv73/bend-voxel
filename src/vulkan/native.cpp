@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 #include "native.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -28,6 +29,10 @@ Vec3 rgb(uint32_t word) { return {float((word>>16)&255)/255,float((word>>8)&255)
 Vec3 quantize(Vec3 c) { return {std::floor(c.x*255)/255,std::floor(c.y*255)/255,std::floor(c.z*255)/255}; }
 struct Vertex { Vec3 position,color; };
 struct Geometry { std::vector<Vertex> vertices; uint32_t triangles=0,lines=0,hud=0; };
+using Clock=std::chrono::steady_clock;
+uint32_t microseconds(Clock::time_point start,Clock::time_point end) {
+  return uint32_t(std::chrono::duration_cast<std::chrono::microseconds>(end-start).count());
+}
 void quad(Geometry& g,Vec3 a,Vec3 b,Vec3 c,Vec3 d,Vec3 color) {
   color=quantize(color);
   for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color});
@@ -451,13 +456,22 @@ public:
     if (instance) vkDestroyInstance(instance,nullptr);
   }
   bool matches(Display* d,::Window w) const { return d==display&&w==window; }
-  void render(const VoxelVkFrame& frame) {
+  void render(const VoxelVkFrame& frame,VoxelVkTimings& timings) {
+    auto start=Clock::now();
     Geometry g=geometry(frame);
+    auto after_geometry=Clock::now();
+    timings.geometry_us=microseconds(start,after_geometry);
     check(vkWaitForFences(device,1,&fence,VK_TRUE,UINT64_MAX),"wait for frame fence");
+    auto after_fence=Clock::now();
+    timings.fence_wait_us=microseconds(after_geometry,after_fence);
     ensure_vertices(g.vertices.size()*sizeof(Vertex));
     std::memcpy(mapped,g.vertices.data(),g.vertices.size()*sizeof(Vertex));
+    auto after_upload=Clock::now();
+    timings.vertex_upload_us=microseconds(after_fence,after_upload);
     uint32_t index=0;
     VkResult acquire=vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,acquired,VK_NULL_HANDLE,&index);
+    auto after_acquire=Clock::now();
+    timings.acquire_us=microseconds(after_upload,after_acquire);
     if (acquire==VK_ERROR_OUT_OF_DATE_KHR) {
       check(vkDeviceWaitIdle(device),"wait for swapchain recreation");
       clear_swapchain(); make_swapchain(); return;
@@ -507,6 +521,8 @@ public:
       VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
       VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,0);
     check(vkEndCommandBuffer(command),"end command buffer");
+    auto after_record=Clock::now();
+    timings.command_record_us=microseconds(after_acquire,after_record);
     check(vkResetFences(device,1,&fence),"reset frame fence");
     VkPipelineStageFlags wait_stage=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo submit{VK_STRUCTURE_TYPE_SUBMIT_INFO};
@@ -519,6 +535,7 @@ public:
     present.waitSemaphoreCount=1; present.pWaitSemaphores=&finished[index];
     present.swapchainCount=1; present.pSwapchains=&swapchain; present.pImageIndices=&index;
     VkResult result=vkQueuePresentKHR(queue,&present);
+    timings.submit_present_us=microseconds(after_record,Clock::now());
     if (result==VK_ERROR_OUT_OF_DATE_KHR||result==VK_SUBOPTIMAL_KHR) {
       check(vkDeviceWaitIdle(device),"wait for swapchain recreation");
       clear_swapchain(); make_swapchain();
@@ -529,13 +546,14 @@ std::unique_ptr<Renderer> renderer;
 }
 
 extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkFrame* frame,
-  char* error,size_t error_cap) {
+  VoxelVkTimings* timings,char* error,size_t error_cap) {
   try {
-    if (!frame || !display || !window) throw std::runtime_error("invalid Vulkan frame");
+    if (!frame || !display || !window || !timings) throw std::runtime_error("invalid Vulkan frame");
+    *timings={};
     if (!renderer) renderer=std::make_unique<Renderer>(static_cast<Display*>(display),window);
     if (!renderer->matches(static_cast<Display*>(display),window))
       throw std::runtime_error("Vulkan renderer window changed");
-    renderer->render(*frame);
+    renderer->render(*frame,*timings);
     return 1;
   } catch (const std::exception& e) {
     if (error_cap) {

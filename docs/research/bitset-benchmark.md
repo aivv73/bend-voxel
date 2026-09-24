@@ -10,6 +10,8 @@ The bitset variant passed `make test`, including connectivity, fragmentation, ca
 
 The table pools the two measured runs of each variant and uses the benchmark parser's nearest-rank percentiles. Connectivity and cut values are from accepted edits only. [Combined report with source hashes and per-run statistics](../validation/bitset-2026-09-24/report.json); raw CSV: [array 1](../validation/bitset-2026-09-24/array-1.csv.gz), [bitset 1](../validation/bitset-2026-09-24/bitset-1.csv.gz), [bitset 2](../validation/bitset-2026-09-24/bitset-2.csv.gz), [array 2](../validation/bitset-2026-09-24/array-2.csv.gz).
 
+All four frame medians were 16.666–16.679 ms, consistent with roughly 60 Hz FIFO presentation in **both** array and bitset runs. A separate run paced near 144 Hz is not a baseline for this comparison. Connectivity is timed inside the edit before presentation, whereas accepted-cut latency ends after presentation and includes display pacing. The connectivity intervals provide the more direct evidence about the visited-cell implementation.
+
 | Measure | Array p50 / p95 | Bitset p50 / p95 | Change at p50 / p95 |
 | --- | ---: | ---: | ---: |
 | Connectivity | 8.439 / 15.898 ms | 12.338 / 26.922 ms | +46% / +69% |
@@ -21,6 +23,6 @@ Per-run connectivity p50 was 8.756 and 8.383 ms for the array, versus 15.280 and
 
 ## Decision
 
-Keep the existing `Array<U32>` for this bounded world. The tested package bitset reduced raw visited-state payload but made connectivity and accepted cuts slower. The experiment measures the complete public-API substitution; it does not separate bit packing, bounds checking, `Result` handling, `U32`/`Nat` conversion, compiler lowering, or allocation cost. A specialized `U32`-indexed bitset would be a different implementation and needs its own benchmark if memory pressure becomes important.
+Keep the existing `Array<U32>` for this bounded world. The tested package bitset reduced raw visited-state payload but increased the directly timed connectivity interval; end-to-end accepted cuts were also slower in these same roughly 60 Hz runs. The experiment measures the complete public-API substitution; it does not separate bit packing, bounds checking, `Result` handling, `U32`/`Nat` conversion, compiler lowering, or allocation cost. A specialized `U32`-indexed bitset would be a different implementation and needs its own benchmark if memory pressure becomes important.
 
 The replay was subject to normal desktop load and display pacing; measured frame p50 was near 16.67 ms in all four runs. The ABBA order limits simple time drift but does not eliminate environmental noise. The recorded source hashes and raw samples define the result's scope.

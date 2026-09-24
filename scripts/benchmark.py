@@ -32,8 +32,9 @@ def main():
         'working_tree_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT)),
         'resolution': [640, 360],
         'backend': 'Bend CPU gameplay, Vulkan 1.3/Xlib presentation',
+        'present_mode': 'VK_PRESENT_MODE_FIFO_KHR',
         'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
-        'timing_scope': 'Full frame intervals include CPU simulation/edit, Bend scene preparation, Vulkan scene and HUD mesh upload/draw/present, and X11 event synchronization. The frame effect is one combined stage.'
+        'timing_scope': 'Full frame intervals include CPU simulation/edit, Bend scene preparation, Vulkan scene and HUD mesh upload/draw/present, X11 event synchronization, and FIFO display pacing. The Vulkan effect has nested CPU wall-clock substage timings, not GPU execution timings.'
     }
     results = []
     for number in range(1, args.runs + 1):
@@ -45,13 +46,15 @@ def main():
                                   stderr=subprocess.PIPE, text=True, timeout=180)
         (out / f'run-{number}.stderr').write_text(proc.stderr)
         with path.open() as stream:
-            result = {'run': number, **parse_run(stream, proc.returncode)}
+            result = {'run': number, **parse_run(stream, proc.returncode, require_vulkan_detail=True)}
         results.append(result)
-        print(json.dumps({k: result[k] for k in ('run', 'frames', 'cuts', 'instrumentation_pass',
-                                                 'workload_pass', 'performance_pass')}, indent=2), flush=True)
+        summary = {k: result[k] for k in ('run', 'frames', 'cuts', 'instrumentation_pass',
+                                          'workload_pass', 'performance_pass')}
+        summary['vulkan_mean_ms'] = {name: stage['mean_ms'] for name, stage in result['vulkan_stages'].items()}
+        print(json.dumps(summary, indent=2), flush=True)
     report = {'metadata': metadata, 'runs': results,
               'acceptance_pass': args.runs == 3 and all(r['pass'] for r in results),
-              'note': 'The Vulkan effect includes scene and HUD presentation; visual and input checks are separate.'}
+              'note': 'FIFO presentation can pace frame intervals to display refresh. Image acquisition measures CPU wait for a swapchain image, not GPU execution. Visual and input checks are separate.'}
     (out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     print(f'Report: {out / "report.json"}', flush=True)
     sys.exit(0 if report['acceptance_pass'] else 1)

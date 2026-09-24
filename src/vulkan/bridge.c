@@ -5,6 +5,7 @@
 #endif
 
 #include <dlfcn.h>
+#include <time.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
@@ -31,14 +32,24 @@ typedef struct {
   const VoxelVkFace* faces;
   const char* hud;
 } VoxelVkFrame;
+typedef struct {
+  u32 geometry_us, fence_wait_us, vertex_upload_us, acquire_us;
+  u32 command_record_us, submit_present_us;
+} VoxelVkTimings;
 
-typedef int (*VoxelVkRender)(void*, unsigned long, const VoxelVkFrame*, char*, size_t);
+typedef int (*VoxelVkRender)(void*, unsigned long, const VoxelVkFrame*, VoxelVkTimings*, char*, size_t);
 typedef void (*VoxelVkRelease)(void);
 static void* voxel_vk_library;
 static VoxelVkRender voxel_vk_render_fn;
 static VoxelVkRelease voxel_vk_release_fn;
 static VoxelVkFace* voxel_vk_faces;
 static u32 voxel_vk_capacity;
+
+static u64 voxel_vk_tick(void) {
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  return (u64)now.tv_sec * 1000000000ull + (u64)now.tv_nsec;
+}
 
 static void voxel_vk_load(void) {
   if (voxel_vk_library) return;
@@ -192,6 +203,9 @@ static Term voxel_vk_events(Env e, BendWin* win) {
 }
 
 Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
+  const char* bench = getenv("VOXEL_BENCH");
+  int profile = bench && strcmp(bench, "1") == 0;
+  u64 start = profile ? voxel_vk_tick() : 0;
   io_sync();
   voxel_vk_load();
   BendWin* win = (BendWin*)(intptr_t)io_hand_v(f[0]);
@@ -203,12 +217,30 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
     fprintf(stderr,"vulkan frame eye %.3f %.3f %.3f yaw %.3f pitch %.3f faces %u aim %u\n",
       frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw,frame.pitch,frame.face_count,frame.aim_kind);
   char error[512] = {0};
-  int ok = voxel_vk_render_fn(win->dpy, win->win, &frame, error, sizeof error);
+  u64 prepared = profile ? voxel_vk_tick() : 0;
+  VoxelVkTimings timings = {0};
+  int ok = voxel_vk_render_fn(win->dpy, win->win, &frame, &timings, error, sizeof error);
   if (!ok) err_fail(error[0] ? error : "Vulkan frame failed");
+  u64 rendered = profile ? voxel_vk_tick() : 0;
   free(hud);
   voxel_vk_pump(win);
   XSync(win->dpy, False);
-  return io_tup(e, f[0], io_tup(e, f[1], voxel_vk_events(e, win)));
+  Term events = voxel_vk_events(e, win);
+  if (profile) {
+    u64 ended = voxel_vk_tick();
+    u64 render_us = (rendered - prepared) / 1000;
+    u64 detailed = (u64)timings.geometry_us + timings.fence_wait_us +
+      timings.vertex_upload_us + timings.acquire_us + timings.command_record_us +
+      timings.submit_present_us;
+    static u32 profile_frame;
+    fprintf(stdout, "vulkan_stage,%u,%llu,%u,%u,%u,%u,%u,%u,%llu,%llu\n",
+      profile_frame++, (unsigned long long)((prepared - start) / 1000),
+      timings.geometry_us, timings.fence_wait_us, timings.vertex_upload_us,
+      timings.acquire_us, timings.command_record_us, timings.submit_present_us,
+      (unsigned long long)(render_us >= detailed ? render_us - detailed : 0),
+      (unsigned long long)((ended - rendered) / 1000));
+  }
+  return io_tup(e, f[0], io_tup(e, f[1], events));
 }
 
 Term vulkan_release_run(Env e, Term* f, IoWork* work) {
