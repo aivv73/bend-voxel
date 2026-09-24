@@ -1,0 +1,371 @@
+{
+  "date": "2026-09-24T18:31:57.317806+04:00",
+  "baseline_revision": "ac415e9776be80f9f3a20e654e5f1f60cd1d9732",
+  "bend": "bend 2.0.27",
+  "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+  "cpu_model": "AMD Ryzen 5 1600 Six-Core Processor",
+  "backend": "Bend CPU gameplay, Vulkan 1.3/Xlib presentation",
+  "order": "array, bitset, bitset, array",
+  "warmup_seconds_per_run": 5,
+  "measured_seconds_per_run": 60,
+  "accepted_cuts_per_run": 33,
+  "bitset_package_hash": "0x9ee2e9a299991dcc089fe22c7f3ceb5f",
+  "variant_patch_sha256": "3b9dc2cab0a527bb2cf739261db6a423f8c061479c2adcc7815c41fb3d8db0bd",
+  "per_event_states_match": true,
+  "event_state_fields": [
+    "event type",
+    "status",
+    "kind",
+    "frame solids",
+    "frame bodies"
+  ],
+  "runs": [
+    {
+      "order": 1,
+      "variant": "array",
+      "number": 1,
+      "raw_csv_sha256": "bde0524bc5240516aede009448204fcb980535a2d22973aeab1273270da4453e",
+      "world_source_sha256": "eac65ccba090aac94c398e660e5fb003b285b7d37186898df364a5ed30b86619",
+      "frames": {
+        "samples": 3601,
+        "p50_ms": 16.666,
+        "p95_ms": 18.216,
+        "p99_ms": 21.026,
+        "max_ms": 47.247,
+        "mean_ms": 16.665369064148848,
+        "total_ms": 60011.994
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 29.746,
+        "p95_ms": 48.698,
+        "p99_ms": 50.16,
+        "max_ms": 50.16,
+        "mean_ms": 33.776636363636364,
+        "total_ms": 1114.629
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 6.252,
+          "p95_ms": 8.704,
+          "p99_ms": 9.241,
+          "max_ms": 9.241,
+          "mean_ms": 6.222848484848485,
+          "total_ms": 205.354
+        },
+        "connectivity": {
+          "samples": 33,
+          "p50_ms": 8.756,
+          "p95_ms": 16.695,
+          "p99_ms": 18.356,
+          "max_ms": 18.356,
+          "mean_ms": 10.747757575757575,
+          "total_ms": 354.676
+        },
+        "surface_generation": {
+          "samples": 33,
+          "p50_ms": 10.807,
+          "p95_ms": 21.097,
+          "p99_ms": 21.625,
+          "max_ms": 21.625,
+          "mean_ms": 13.33339393939394,
+          "total_ms": 440.002
+        },
+        "edit_finalization": {
+          "samples": 33,
+          "p50_ms": 0.005,
+          "p95_ms": 0.006,
+          "p99_ms": 0.007,
+          "max_ms": 0.007,
+          "mean_ms": 0.004484848484848485,
+          "total_ms": 0.148
+        }
+      },
+      "instrumentation_pass": true,
+      "workload_pass": true,
+      "performance_pass": true,
+      "max_bodies": 1
+    },
+    {
+      "order": 2,
+      "variant": "bitset",
+      "number": 1,
+      "raw_csv_sha256": "7c87c5127a4112cc688359bede35865fa08682c8447ac1adc41c42a8c58ead7f",
+      "world_source_sha256": "2df6d13aa0ce9cb20b59b3a8a9e069c7cdc15275abdf36d9315153312ee26663",
+      "frames": {
+        "samples": 3601,
+        "p50_ms": 16.679,
+        "p95_ms": 18.293,
+        "p99_ms": 21.5,
+        "max_ms": 51.55,
+        "mean_ms": 16.6669483476812,
+        "total_ms": 60017.681
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 45.403,
+        "p95_ms": 65.312,
+        "p99_ms": 66.117,
+        "max_ms": 66.117,
+        "mean_ms": 50.07018181818182,
+        "total_ms": 1652.316
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 6.244,
+          "p95_ms": 8.974,
+          "p99_ms": 10.425,
+          "max_ms": 10.425,
+          "mean_ms": 6.389484848484849,
+          "total_ms": 210.853
+        },
+        "connectivity": {
+          "samples": 33,
+          "p50_ms": 15.28,
+          "p95_ms": 26.922,
+          "p99_ms": 27.319,
+          "max_ms": 27.319,
+          "mean_ms": 16.265848484848487,
+          "total_ms": 536.773
+        },
+        "surface_generation": {
+          "samples": 33,
+          "p50_ms": 10.866,
+          "p95_ms": 20.472,
+          "p99_ms": 21.135,
+          "max_ms": 21.135,
+          "mean_ms": 12.660333333333334,
+          "total_ms": 417.791
+        },
+        "edit_finalization": {
+          "samples": 33,
+          "p50_ms": 0.003,
+          "p95_ms": 0.005,
+          "p99_ms": 0.006,
+          "max_ms": 0.006,
+          "mean_ms": 0.0035454545454545456,
+          "total_ms": 0.117
+        }
+      },
+      "instrumentation_pass": true,
+      "workload_pass": true,
+      "performance_pass": true,
+      "max_bodies": 1
+    },
+    {
+      "order": 3,
+      "variant": "bitset",
+      "number": 2,
+      "raw_csv_sha256": "f2389af885dadf0b6dca85c2fd60344551b4042d7124db3f5cc45eafd624051f",
+      "world_source_sha256": "2df6d13aa0ce9cb20b59b3a8a9e069c7cdc15275abdf36d9315153312ee26663",
+      "frames": {
+        "samples": 3601,
+        "p50_ms": 16.67,
+        "p95_ms": 18.174,
+        "p99_ms": 22.988,
+        "max_ms": 54.583,
+        "mean_ms": 16.666570119411276,
+        "total_ms": 60016.319
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 31.345,
+        "p95_ms": 53.859,
+        "p99_ms": 55.944,
+        "max_ms": 55.944,
+        "mean_ms": 34.480909090909094,
+        "total_ms": 1137.8700000000001
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 6.021,
+          "p95_ms": 10.565,
+          "p99_ms": 10.96,
+          "max_ms": 10.96,
+          "mean_ms": 6.219242424242424,
+          "total_ms": 205.23499999999999
+        },
+        "connectivity": {
+          "samples": 33,
+          "p50_ms": 12.205,
+          "p95_ms": 27.334,
+          "p99_ms": 30.654,
+          "max_ms": 30.654,
+          "mean_ms": 14.508454545454546,
+          "total_ms": 478.779
+        },
+        "surface_generation": {
+          "samples": 33,
+          "p50_ms": 9.448,
+          "p95_ms": 21.22,
+          "p99_ms": 22.02,
+          "max_ms": 22.02,
+          "mean_ms": 11.06378787878788,
+          "total_ms": 365.105
+        },
+        "edit_finalization": {
+          "samples": 33,
+          "p50_ms": 0.004,
+          "p95_ms": 0.006,
+          "p99_ms": 0.006,
+          "max_ms": 0.006,
+          "mean_ms": 0.004363636363636364,
+          "total_ms": 0.14400000000000002
+        }
+      },
+      "instrumentation_pass": true,
+      "workload_pass": true,
+      "performance_pass": true,
+      "max_bodies": 1
+    },
+    {
+      "order": 4,
+      "variant": "array",
+      "number": 2,
+      "raw_csv_sha256": "2c877983d0570ac678ca21e288e1d3ec8723eff0785880c8ff53be8a04d52f6c",
+      "world_source_sha256": "eac65ccba090aac94c398e660e5fb003b285b7d37186898df364a5ed30b86619",
+      "frames": {
+        "samples": 3601,
+        "p50_ms": 16.675,
+        "p95_ms": 18.178,
+        "p99_ms": 20.587,
+        "max_ms": 44.9,
+        "mean_ms": 16.666941405165232,
+        "total_ms": 60017.656
+      },
+      "cuts": {
+        "samples": 33,
+        "p50_ms": 29.274,
+        "p95_ms": 42.424,
+        "p99_ms": 48.641,
+        "max_ms": 48.641,
+        "mean_ms": 31.031757575757577,
+        "total_ms": 1024.048
+      },
+      "active_edits": {
+        "carving": {
+          "samples": 33,
+          "p50_ms": 5.073,
+          "p95_ms": 9.564,
+          "p99_ms": 14.011,
+          "max_ms": 14.011,
+          "mean_ms": 5.541121212121212,
+          "total_ms": 182.857
+        },
+        "connectivity": {
+          "samples": 33,
+          "p50_ms": 8.383,
+          "p95_ms": 14.641,
+          "p99_ms": 15.73,
+          "max_ms": 15.73,
+          "mean_ms": 9.309939393939395,
+          "total_ms": 307.228
+        },
+        "surface_generation": {
+          "samples": 33,
+          "p50_ms": 11.719,
+          "p95_ms": 15.9,
+          "p99_ms": 16.386,
+          "max_ms": 16.386,
+          "mean_ms": 11.851939393939393,
+          "total_ms": 391.114
+        },
+        "edit_finalization": {
+          "samples": 33,
+          "p50_ms": 0.003,
+          "p95_ms": 0.005,
+          "p99_ms": 0.02,
+          "max_ms": 0.02,
+          "mean_ms": 0.004,
+          "total_ms": 0.132
+        }
+      },
+      "instrumentation_pass": true,
+      "workload_pass": true,
+      "performance_pass": true,
+      "max_bodies": 1
+    }
+  ],
+  "aggregate": {
+    "array": {
+      "connectivity": {
+        "samples": 66,
+        "p50_ms": 8.439,
+        "p95_ms": 15.898,
+        "p99_ms": 18.356,
+        "max_ms": 18.356,
+        "mean_ms": 10.028848484848485,
+        "total_ms": 661.904
+      },
+      "carving": {
+        "samples": 66,
+        "p50_ms": 5.481,
+        "p95_ms": 8.704,
+        "p99_ms": 14.011,
+        "max_ms": 14.011,
+        "mean_ms": 5.881984848484849,
+        "total_ms": 388.211
+      },
+      "surface_generation": {
+        "samples": 66,
+        "p50_ms": 10.91,
+        "p95_ms": 20.74,
+        "p99_ms": 21.625,
+        "max_ms": 21.625,
+        "mean_ms": 12.592666666666666,
+        "total_ms": 831.116
+      },
+      "cut": {
+        "samples": 66,
+        "p50_ms": 29.564,
+        "p95_ms": 46.984,
+        "p99_ms": 50.16,
+        "max_ms": 50.16,
+        "mean_ms": 32.40419696969697,
+        "total_ms": 2138.677
+      }
+    },
+    "bitset": {
+      "connectivity": {
+        "samples": 66,
+        "p50_ms": 12.338,
+        "p95_ms": 26.922,
+        "p99_ms": 30.654,
+        "max_ms": 30.654,
+        "mean_ms": 15.387151515151515,
+        "total_ms": 1015.552
+      },
+      "carving": {
+        "samples": 66,
+        "p50_ms": 6.021,
+        "p95_ms": 9.133,
+        "p99_ms": 10.96,
+        "max_ms": 10.96,
+        "mean_ms": 6.304363636363637,
+        "total_ms": 416.088
+      },
+      "surface_generation": {
+        "samples": 66,
+        "p50_ms": 10.054,
+        "p95_ms": 20.472,
+        "p99_ms": 22.02,
+        "max_ms": 22.02,
+        "mean_ms": 11.862060606060606,
+        "total_ms": 782.896
+      },
+      "cut": {
+        "samples": 66,
+        "p50_ms": 40.088,
+        "p95_ms": 64.319,
+        "p99_ms": 66.117,
+        "max_ms": 66.117,
+        "mean_ms": 42.27554545454546,
+        "total_ms": 2790.186
+      }
+    }
+  },
+  "note": "The standard benchmark runner exits 1 for --runs 1 because only three runs qualify for acceptance_pass. Every individual run passed instrumentation, workload and performance checks."
+}

@@ -1,0 +1,99 @@
+diff --git a/src/world.bend b/src/world.bend
+index 0eed72a..d6d510d 100644
+--- a/src/world.bend
++++ b/src/world.bend
+@@ -1,5 +1,7 @@
+ import Base
+ import ./math.bend as R
++import 0x9ee2e9a299991dcc089fe22c7f3ceb5f/src/containers/bitset.bend as BS
++import 0x9ee2e9a299991dcc089fe22c7f3ceb5f/src/containers/types/bitset.bend as BE
+ 
+ # The original 40 x 24 x 20 lattice holds owner IDs (0 air, 1 anchored,
+ # 2..65 fragments). Bodies translate vertically, preserving local cell IDs.
+@@ -112,7 +114,7 @@ def faces.sides(n: Nat, +side: U32, +i: U32, +owner: U32, a: Array<U32>, fs: Lis
+           faces.sides(k,(side + 1 : U32),i,owner,a,fs)))
+ 
+ type Flood is Type:
+-  Flood{source: Array<U32>, seen: Array<U32>, todo: List<U32>, members: List<&2, U32>, anchored: Bool, bottom: F32}
++  Flood{source: Array<U32>, seen: BS.Bitset, todo: List<U32>, members: List<&2, U32>, anchored: Bool, bottom: F32}
+ def faces.cells(ids: List<&2, U32>, +owner: U32, a: Array<U32>, fs: List<&2, Face>) -> Array<U32> & List<&2, Face>:
+   match ids:
+     case Nil{}:
+@@ -123,18 +125,32 @@ def faces.cells(ids: List<&2, U32>, +owner: U32, a: Array<U32>, fs: List<&2, Fac
+       )
+ 
+ # Flood marks cells at enqueue time; at most 19,200 are visited.
++def seen.get.finish(s: BS.Bitset, r: Result<&2, &2, BE.Error, Bool>) -> BS.Bitset & Bool:
++  match r:
++    case Done{v}: (s, v)
++    case Fail{_}: (s, False{})
++def seen.get(s: BS.Bitset, +i: U32) -> BS.Bitset & Bool:
++  pair(BS.Bitset, Result<&2, &2, BE.Error, Bool>, BS.Bitset & Bool, BS.get(s, U32.to_nat(i)), s => r =>
++    seen.get.finish(s, r))
++def seen.set.finish(s: BS.Bitset, r: Result<&2, &2, BE.Error, Unit>) -> BS.Bitset:
++  match r:
++    case Done{_}: s
++    case Fail{_}: s
++def seen.set(s: BS.Bitset, +i: U32) -> BS.Bitset:
++  pair(BS.Bitset, Result<&2, &2, BE.Error, Unit>, BS.Bitset, BS.set(s, U32.to_nat(i)), s => r =>
++    seen.set.finish(s, r))
+ def flood.offer.go(ok: Bool, +i: U32, f: Flood) -> Flood:
+   match ok:
+     case False{}:
+       f
+     case True{}:
+       Flood{a, seen, todo, members, anchor, bottom} = f
+-      Flood{a, Array.set(U32, seen, i, 1), i <> todo, members, anchor, bottom}
++      Flood{a, seen.set(seen, i), i <> todo, members, anchor, bottom}
+ def flood.offer(+i: U32, +owner: U32, f: Flood) -> Flood:
+   Flood{a, seen, todo, members, anchor, bottom} = f
+   pair(Array<U32>, U32, Flood, Array.get(U32, a, i), a => o =>
+-    pair(Array<U32>, U32, Flood, Array.get(U32, seen, i), seen => v =>
+-      flood.offer.go((U32.is_eq(o, owner) && U32.is_eq(v, 0)), i, Flood{a, seen, todo, members, anchor, bottom})
++    pair(BS.Bitset, Bool, Flood, seen.get(seen, i), seen => v =>
++      flood.offer.go((U32.is_eq(o, owner) && Bool.not(v)), i, Flood{a, seen, todo, members, anchor, bottom})
+     )
+   )
+ def vec(-C: Type, v: R.Vec, k: F32 -> F32 -> F32 -> C) -> C:
+@@ -181,10 +197,10 @@ def body.find(bs: List<&2, Body>, id: U32) -> R.Vec:
+ type PendingBody is Data:
+   PendingBody{id: U32, owner: U32, offset: F32, speed: F32, bottom: F32, members: List<&2, U32>}
+ type Rebuild is Type:
+-  Rebuild{source: Array<U32>, seen: Array<U32>, output: Array<U32>, bodies: List<&2, PendingBody>, next: U32}
++  Rebuild{source: Array<U32>, seen: BS.Bitset, output: Array<U32>, bodies: List<&2, PendingBody>, next: U32}
+ type Classified is Type:
+   Classified{source: Array<U32>, output: Array<U32>, bodies: List<&2, PendingBody>, count: U32, removed: U32, fragments: U32}
+-def use.flood(-C: Type, f: Flood, k: Array<U32> -> Array<U32> -> List<U32> -> List<&2, U32> -> Bool -> F32 -> C) -> C:
++def use.flood(-C: Type, f: Flood, k: Array<U32> -> BS.Bitset -> List<U32> -> List<&2, U32> -> Bool -> F32 -> C) -> C:
+   Flood{a, b, c, d, e, f} = f
+   k(a, b, c, d, e, f)
+ def rebuild.one(doit: Bool, +i: U32, +owner: U32, +old: List<&2, Body>, r: Rebuild) -> Rebuild:
+@@ -194,7 +210,7 @@ def rebuild.one(doit: Bool, +i: U32, +owner: U32, +old: List<&2, Body>, r: Rebui
+     case True{}:
+       Rebuild{a, seen, out, bs, next} = r
+       +next = next
+-      use.flood(Rebuild, flood.run(Flood{a, Array.set(U32, seen, i, 1), [i], Nil{}, False{}, 100.0}, owner), a => seen => unused2 => members => +anchored => bottom =>
++      use.flood(Rebuild, flood.run(Flood{a, seen.set(seen, i), [i], Nil{}, False{}, 100.0}, owner), a => seen => unused2 => members => +anchored => bottom =>
+         +members = members
+         +newid = R.word(anchored, 1, next)
+         vec(Rebuild, body.find(old, owner), offset => speed => unused2 =>
+@@ -208,15 +224,15 @@ def rebuild.scan(n: Nat, +i: U32, +old: List<&2, Body>, r: Rebuild) -> Rebuild:
+     case 1n+k:
+       Rebuild{a, seen, out, bs, next} = r
+       pair(Array<U32>, U32, Rebuild, Array.get(U32, a, i), a => +owner =>
+-        pair(Array<U32>, U32, Rebuild, Array.get(U32, seen, i), seen => marked =>
+-          rebuild.scan(k, (i + 1 : U32), old, rebuild.one(((owner > 0 : U32) && U32.is_eq(marked, 0)), i, owner, old, Rebuild{a, seen, out, bs, next}))
++        pair(BS.Bitset, Bool, Rebuild, seen.get(seen, i), seen => marked =>
++          rebuild.scan(k, (i + 1 : U32), old, rebuild.one(((owner > 0 : U32) && Bool.not(marked)), i, owner, old, Rebuild{a, seen, out, bs, next}))
+         )
+       )
+-def use.rebuild(-C: Type, r: Rebuild, k: Array<U32> -> Array<U32> -> Array<U32> -> List<&2, PendingBody> -> U32 -> C) -> C:
++def use.rebuild(-C: Type, r: Rebuild, k: Array<U32> -> BS.Bitset -> Array<U32> -> List<&2, PendingBody> -> U32 -> C) -> C:
+   Rebuild{a, b, c, d, e} = r
+   k(a, b, c, d, e)
+ def rebuild.classify(a: Array<U32>, old: List<&2, Body>, count: U32, removed: U32) -> Classified:
+-  use.rebuild(Classified, rebuild.scan(19200n, 0, old, Rebuild{a, Array.new(U32, 15n, 0), Array.new(U32, 15n, 0), Nil{}, 2}), source => unused1 => out => bs => next =>
++  use.rebuild(Classified, rebuild.scan(19200n, 0, old, Rebuild{a, BS.new(32768n), Array.new(U32, 15n, 0), Nil{}, 2}), source => unused1 => out => bs => next =>
+     Classified{source, out, bs, count, removed, (next - 2 : U32)}
+   )
+ def faces.bodies(bs: List<&2, PendingBody>, a: Array<U32>) -> Array<U32> & List<&2, Body>:
