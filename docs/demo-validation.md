@@ -1,4 +1,4 @@
-> Historical Bend3D CPU/CUDA renderer validation. The current application uses Vulkan; see [Vulkan renderer](vulkan-renderer.md).
+> Historical Bend3D CPU/CUDA renderer validation. The replay benchmark described here is retired. The current application uses Vulkan and the [stress benchmark](stress-benchmark.md).
 
 # First demo validation
 

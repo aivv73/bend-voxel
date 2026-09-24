@@ -41,21 +41,19 @@ The scene contains 4,640 ten-centimeter voxels. Connectivity uses shared faces. 
 
 ```sh
 make test
-make benchmark
+make benchmark-stress
 ```
 
-The benchmark opens the Vulkan window and runs the same scripted destruction and camera sequence three times. Each run has a five-second warm-up and sixty-second measurement. Raw samples and the report are saved under `build/benchmarks/`; a failed acceptance gate returns a nonzero exit code.
+The stress benchmark opens the Vulkan window and measures six scenes with increasing density, exposed surface, and render copies. It uses an unpaced presentation mode and saves raw samples and a report under `build/stress/`. The suite checks workload completion and sample accounting; it has no fixed FPS gate. See the [stress benchmark guide](docs/stress-benchmark.md) for workloads and timing limits.
 
-On the Ryzen 5 1600 / GTX 1660 Linux desktop, the Bend 2.0.27 Vulkan replay passed all three runs: frame p95 was **7.8–8.2 ms** (limit 33.3 ms), and accepted-cut p95 was **49–51 ms** (limit 100 ms). These results cover the fixed 640 × 360 workload on that machine. See the [Vulkan validation](docs/vulkan-renderer.md), [full report](docs/validation/bend-2.0.27-vulkan/report.json), and [profiling guide](docs/profiling.md).
-
-For throughput and scale measurements, run `make benchmark-stress`. It uses larger and more exposed scenes, render overdraw multipliers, and an unpaced Vulkan presentation mode; results go to `build/stress/`. See the [stress benchmark guide](docs/stress-benchmark.md) for workloads and timing limits.
+The earlier 65-second replay results remain in the [Vulkan validation archive](docs/vulkan-renderer.md) and its [report](docs/validation/bend-2.0.27-vulkan/report.json). That replay is no longer a runnable benchmark.
 
 ## Implementation
 
 - `src/world.bend`: voxel ownership, carving, connectivity, atomic cap enforcement, vertical motion, and cached surface rectangles.
 - `src/render.bend`: camera geometry and face picking used by gameplay.
 - `src/input.bend`: controls, movement, and focus handling.
-- `src/demo.bend`: gameplay state, HUD content, and timed replay.
+- `src/demo.bend`: gameplay state, HUD content, and timing samples.
 - `src/main.bend` and `src/vulkan/`: application loop, native Vulkan renderer, and swapchain.
 - `src/math.bend`: vector and camera primitives adapted from Bend3D; see the [third-party notice](src/vendor/NOTICE.md).
 
