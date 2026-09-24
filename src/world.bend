@@ -235,6 +235,25 @@ def rebuild(a: Array<U32>, old: List<&2, Body>, count: U32, removed: U32) -> Wor
 def initial() -> World:
   rebuild(initial.fill(19200n, 0, Array.new(U32, 15n, 0)), Nil{}, 4640, 0)
 
+# Stress scenes retain the fixed lattice and a single anchored body. The comb
+# exposes many small faces; dense scenes exercise whole-world traversal.
+def stress.cell(+i: U32, +scene: U32) -> U32:
+  +x = (i % 40 : U32)
+  +y = (i / 40 % 24 : U32)
+  +z = (i / 960 : U32)
+  +dense = R.word(((y >= 12 : U32) || ((y < 12 : U32) && ((x >= 7 && x < 13 || x >= 27 && x < 33 : U32) && (z >= 7 && z < 13 : U32)))), 1, 0)
+  +comb = R.word((U32.is_eq(y, 0) || (U32.is_eq((x % 2 : U32), 0) && U32.is_eq((z % 2 : U32), 0))), 1, 0)
+  R.word(U32.is_eq(scene, 1), initial.cell(i), R.word(U32.is_eq(scene, 2), dense, R.word(U32.is_eq(scene, 3), 1, comb)))
+def stress.fill(n: Nat, +i: U32, +scene: U32, a: Array<U32>, +count: U32) -> Array<U32> & U32:
+  match n:
+    case 0n: (a, count)
+    case 1n+k:
+      +cell = stress.cell(i, scene)
+      stress.fill(k, (i + 1 : U32), scene, Array.set(U32, a, i, cell), (count + cell : U32))
+def stress(scene: U32) -> World:
+  pair(Array<U32>, U32, World, stress.fill(19200n, 0, scene, Array.new(U32, 15n, 0), 0), a => count =>
+    rebuild(a, Nil{}, count, 0))
+
 def inside(+index: U32, +offset: F32, +p: R.Vec) -> Bool:
   +v = R.Vec.sub(R.Vec.add(xyz(index), R.Vec{0.0, offset, 0.0}), p)
   (R.Vec.dot(v, v) <= 0.0400001 : F32)

@@ -212,6 +212,9 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   u64 len = 0;
   char* hud = io_cstr(e, f[3], &len);
   VoxelVkFrame frame = voxel_vk_scene(e, f[1], f[2], hud);
+  static int stress_scene_logged;
+  if (getenv("VOXEL_STRESS_SCENE") && !stress_scene_logged++)
+    fprintf(stdout,"surface,%u\n",frame.face_count);
   static u32 trace_frames;
   if (getenv("VOXEL_VULKAN_TRACE") && trace_frames++<10)
     fprintf(stderr,"vulkan frame eye %.3f %.3f %.3f yaw %.3f pitch %.3f faces %u aim %u\n",

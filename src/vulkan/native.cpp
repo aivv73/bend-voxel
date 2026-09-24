@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <memory>
@@ -154,7 +156,16 @@ float view_depth(Vec3 p,const VoxelVkFrame& f) {
 Geometry geometry(const VoxelVkFrame& frame) {
   Geometry g;
   quad(g,{-6,0,-6},{-6,0,6},{6,0,6},{6,0,-6},{.12f,.19f,.24f});
-  for (uint32_t i=0;i<frame.face_count;i++) face(g,frame.faces[i],frame);
+  uint32_t copies=1;
+  if (const char* value=std::getenv("VOXEL_STRESS_COPIES")) {
+    char* end=nullptr;
+    unsigned long parsed=std::strtoul(value,&end,10);
+    if (!*value || *end || parsed<1 || parsed>64)
+      throw std::runtime_error("VOXEL_STRESS_COPIES must be 1..64");
+    copies=uint32_t(parsed);
+  }
+  for (uint32_t copy=0;copy<copies;copy++)
+    for (uint32_t i=0;i<frame.face_count;i++) face(g,frame.faces[i],frame);
   if (frame.aim_kind) {
     Vec3 p={frame.aim[0],frame.aim[1],frame.aim[2]};
     Vec3 color=rgb(frame.aim_kind==1?16768872u:16552594u);
@@ -321,7 +332,25 @@ class Renderer {
     ci.imageSharingMode=VK_SHARING_MODE_EXCLUSIVE; ci.preTransform=caps.currentTransform;
     ci.compositeAlpha=(caps.supportedCompositeAlpha&VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
       ?VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR:VkCompositeAlphaFlagBitsKHR(caps.supportedCompositeAlpha&-caps.supportedCompositeAlpha);
-    ci.presentMode=VK_PRESENT_MODE_FIFO_KHR; ci.clipped=VK_TRUE;
+    ci.presentMode=VK_PRESENT_MODE_FIFO_KHR;
+    if (const char* requested=std::getenv("VOXEL_STRESS_PRESENT")) {
+      if (std::strcmp(requested,"unpaced"))
+        throw std::runtime_error("VOXEL_STRESS_PRESENT must be unpaced");
+      uint32_t mode_count=0;
+      check(vkGetPhysicalDeviceSurfacePresentModesKHR(physical,surface,&mode_count,nullptr),
+        "query present modes");
+      std::vector<VkPresentModeKHR> modes(mode_count);
+      check(vkGetPhysicalDeviceSurfacePresentModesKHR(physical,surface,&mode_count,modes.data()),
+        "query present modes");
+      if (std::find(modes.begin(),modes.end(),VK_PRESENT_MODE_IMMEDIATE_KHR)!=modes.end())
+        ci.presentMode=VK_PRESENT_MODE_IMMEDIATE_KHR;
+      else if (std::find(modes.begin(),modes.end(),VK_PRESENT_MODE_MAILBOX_KHR)!=modes.end())
+        ci.presentMode=VK_PRESENT_MODE_MAILBOX_KHR;
+      else throw std::runtime_error("unpaced Vulkan present mode unavailable");
+      std::fprintf(stderr,"stress_present_mode,%s\n",
+        ci.presentMode==VK_PRESENT_MODE_IMMEDIATE_KHR?"immediate":"mailbox");
+    }
+    ci.clipped=VK_TRUE;
     check(vkCreateSwapchainKHR(device,&ci,nullptr,&swapchain),"create swapchain");
     check(vkGetSwapchainImagesKHR(device,swapchain,&n,nullptr),"get swapchain images");
     images.resize(n);
