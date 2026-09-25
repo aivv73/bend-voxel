@@ -9,7 +9,7 @@ The smallest material cell in the local grid of the world or an individual body.
 _Avoid_: Minecraft block, physical body.
 
 **Material**:
-A substance with visual and physical properties, such as stone, wood, or metal.
+A substance category assigned to voxels with visual and physical properties. Its identity remains the same when a voxel body detaches.
 
 **Static world**:
 The stationary part of the environment connected to the level's anchors.

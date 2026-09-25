@@ -2,6 +2,7 @@
 #include <X11/Xlib.h>
 #include <vulkan/vulkan.h>
 #include "native.h"
+#include "material.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -25,9 +26,15 @@ void check(VkResult result, const char* what) {
 struct Vec3 { float x,y,z; };
 Vec3 operator+(Vec3 a,Vec3 b) { return {a.x+b.x,a.y+b.y,a.z+b.z}; }
 Vec3 operator-(Vec3 a,Vec3 b) { return {a.x-b.x,a.y-b.y,a.z-b.z}; }
-Vec3 operator*(Vec3 a,float k) { return {a.x*k,a.y*k,a.z*k}; }
 float dot(Vec3 a,Vec3 b) { return a.x*b.x+a.y*b.y+a.z*b.z; }
 Vec3 rgb(uint32_t word) { return {float((word>>16)&255)/255,float((word>>8)&255)/255,float(word&255)/255}; }
+Vec3 shaded_rgb(uint32_t word,uint32_t side) {
+  Vec3 encoded=rgb(word);
+  auto linear=material::decode({encoded.x,encoded.y,encoded.z});
+  float amount=material::light(side);
+  auto shaded=material::encode({linear.r*amount,linear.g*amount,linear.b*amount});
+  return {shaded.r,shaded.g,shaded.b};
+}
 Vec3 quantize(Vec3 c) { return {std::floor(c.x*255)/255,std::floor(c.y*255)/255,std::floor(c.z*255)/255}; }
 struct Vertex { Vec3 position,color; };
 struct Geometry { std::vector<Vertex> vertices; uint32_t triangles=0,lines=0,hud=0; };
@@ -106,18 +113,16 @@ void face_quad(Geometry& g,const VoxelVkFace& f,Vec3 color,float offset=0) {
   if (f.side%2) quad(g,vector(p[0]),vector(p[1]),vector(p[2]),vector(p[3]),color);
   else quad(g,vector(p[3]),vector(p[2]),vector(p[1]),vector(p[0]),color);
 }
-float shade(uint32_t side) { return side==3?1.f:side<2?.78f:.62f; }
 void face(Geometry& g,const VoxelVkFace& f,bool anchored) {
-  if (f.side>=6 || !f.material) throw std::runtime_error("invalid Bend face");
+  if (f.side>=6) throw std::runtime_error("invalid Bend face");
   uint32_t a=f.side/2;
   for (uint32_t i=0;i<3;i++) {
     if (!std::isfinite(f.lo[i]) || !std::isfinite(f.hi[i]) ||
         (i==a ? f.hi[i]!=f.lo[i] : f.hi[i]<=f.lo[i]))
       throw std::runtime_error("invalid Bend face bounds");
   }
-  uint32_t color=f.material==1?0x4bc1a4:!anchored?0xad94db:
-    f.material==3?0x668fac:f.material==4?0xd9954f:0xd19d68;
-  face_quad(g,f,rgb(color)*shade(f.side));
+  auto color=material::surface(f.material,!anchored,f.side);
+  face_quad(g,f,{color.r,color.g,color.b});
 }
 bool near_aim(const VoxelVkBody& body,const VoxelVkFrame& frame) {
   for (uint32_t i=0;i<3;i++) {
@@ -127,7 +132,7 @@ bool near_aim(const VoxelVkBody& body,const VoxelVkFrame& frame) {
   return true;
 }
 void preview_face(Geometry& g,const VoxelVkFace& f,const VoxelVkBody& body,const VoxelVkFrame& frame) {
-  if (f.material==1) return;
+  if (f.material==material::foundation_id) return;
   uint32_t a=f.side/2,u=(a+1)%3,v=(a+2)%3;
   float aim[3]={frame.aim[0]*10,(frame.aim[1]-body.offset)*10,frame.aim[2]*10};
   float cell_a=f.lo[a]+(f.side%2?-.5f:.5f);
@@ -146,7 +151,7 @@ void preview_face(Geometry& g,const VoxelVkFace& f,const VoxelVkBody& body,const
     preview.lo[u]=float(x); preview.hi[u]=float(x+1);
     preview.lo[v]=float(y); preview.hi[v]=float(y+1);
     preview.lo[a]=preview.hi[a]=f.lo[a]+(f.side%2?.01f:-.01f);
-    face_quad(g,preview,rgb(0xffdf68)*shade(f.side),body.offset);
+    face_quad(g,preview,shaded_rgb(0xffdf68,f.side),body.offset);
   }
 }
 Vec3 ring_point(Vec3 p,uint32_t axis,float angle) {
@@ -211,7 +216,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   Geometry& g=cache.geometry;
   cache.generation++; cache.dirty.clear(); cache.draws.clear(); cache.rebuilt=0;
   if (!cache.scene_vertices) {
-    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},{.12f,.19f,.24f});
+    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},rgb(0x1e303d));
     cache.scene_vertices=6; cache.dirty.push_back({0,6});
   }
   for (uint32_t i=0;i<frame.body_count;i++) {
@@ -349,6 +354,10 @@ class Renderer {
     stages[0].stage=VK_SHADER_STAGE_VERTEX_BIT; stages[0].module=vs; stages[0].pName="main";
     stages[1].sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     stages[1].stage=VK_SHADER_STAGE_FRAGMENT_BIT; stages[1].module=fs; stages[1].pName="main";
+    uint32_t srgb_attachment=(format==VK_FORMAT_B8G8R8A8_SRGB || format==VK_FORMAT_R8G8B8A8_SRGB);
+    VkSpecializationMapEntry transfer_entry{0,0,sizeof(srgb_attachment)};
+    VkSpecializationInfo transfer{1,&transfer_entry,sizeof(srgb_attachment),&srgb_attachment};
+    stages[1].pSpecializationInfo=&transfer;
     VkVertexInputBindingDescription binding{0,sizeof(Vertex),VK_VERTEX_INPUT_RATE_VERTEX};
     VkVertexInputAttributeDescription attrs[2]={{0,0,VK_FORMAT_R32G32B32_SFLOAT,offsetof(Vertex,position)},
       {1,0,VK_FORMAT_R32G32B32_SFLOAT,offsetof(Vertex,color)}};
@@ -400,9 +409,19 @@ class Renderer {
     if (!n) throw std::runtime_error("no Vulkan surface formats");
     std::vector<VkSurfaceFormatKHR> formats(n);
     check(vkGetPhysicalDeviceSurfaceFormatsKHR(physical,surface,&n,formats.data()),"query surface formats");
-    VkSurfaceFormatKHR chosen=formats[0];
-    for (auto f:formats) if (f.format==VK_FORMAT_B8G8R8A8_UNORM &&
-      f.colorSpace==VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) { chosen=f; break; }
+    VkSurfaceFormatKHR chosen{};
+    for (auto preferred:{VK_FORMAT_B8G8R8A8_UNORM,VK_FORMAT_R8G8B8A8_UNORM,
+        VK_FORMAT_B8G8R8A8_SRGB,VK_FORMAT_R8G8B8A8_SRGB}) {
+      for (auto f:formats) if (f.format==preferred &&
+        f.colorSpace==VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) { chosen=f; break; }
+      if (chosen.format!=VK_FORMAT_UNDEFINED) break;
+    }
+    if (chosen.format==VK_FORMAT_UNDEFINED && formats.size()==1 &&
+        formats[0].format==VK_FORMAT_UNDEFINED &&
+        formats[0].colorSpace==VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+      chosen={VK_FORMAT_B8G8R8A8_UNORM,VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+    if (chosen.format==VK_FORMAT_UNDEFINED)
+      throw std::runtime_error("sRGB display swapchain format unavailable");
     format=chosen.format;
     uint32_t image_count=std::max(2u,caps.minImageCount);
     if (caps.maxImageCount) image_count=std::min(image_count,caps.maxImageCount);
@@ -619,7 +638,12 @@ public:
     VkRenderingAttachmentInfo color{VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO};
     color.imageView=views[index]; color.imageLayout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     color.loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR; color.storeOp=VK_ATTACHMENT_STORE_OP_STORE;
-    color.clearValue.color={{float(0x12)/255,float(0x20)/255,float(0x2e)/255,1}};
+    auto background=rgb(0x12202e);
+    if (format==VK_FORMAT_B8G8R8A8_SRGB || format==VK_FORMAT_R8G8B8A8_SRGB) {
+      auto linear=material::decode({background.x,background.y,background.z});
+      background={linear.r,linear.g,linear.b};
+    }
+    color.clearValue.color={{background.x,background.y,background.z,1}};
     VkRenderingAttachmentInfo z{VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO};
     z.imageView=depth_view; z.imageLayout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     z.loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR; z.storeOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;

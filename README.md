@@ -33,7 +33,7 @@ make build
 | R or RESET | Restore the scene and camera |
 | Escape | Release controls; click the scene to resume |
 
-Green material marks protected anchors; concrete is tan, frames are blue, machinery and bridge fuses are orange, and detached geometry is purple. The floor is indestructible. Bodies fall vertically and stop at the floor. Rotation, body collisions, stacking, and reattachment are not implemented. The camera travels at 12 m/s without collision or horizontal bounds.
+Green foundation material marks protected anchors; concrete is tan, frames are blue, and machinery and bridge fuses are orange. The material palette is authored in OKLCH. Detached bodies retain their material hue with a lighter, softer appearance. The floor is indestructible. Bodies fall vertically and stop at the floor. Rotation, body collisions, stacking, and reattachment are not implemented. The camera travels at 12 m/s without collision or horizontal bounds.
 
 ```sh
 VOXEL_DISTRICTS=4 ./scripts/run.sh
