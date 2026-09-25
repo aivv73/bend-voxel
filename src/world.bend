@@ -2,7 +2,10 @@ import Base
 import ./math.bend as R
 import ./spatial.bend as S
 import ./district.bend as District
+import ./showcase.bend as Showcase
 
+# The world stores 0 in districts for the showcase; positive values select
+# the original district grid used by the stress workloads.
 # Each body owns a sparse spatial tree and immutable local-space faces.
 # IDs remain stable until an edit changes that body's geometry. Translation
 # never changes geometry identity. Unrelated bodies survive an edit verbatim.
@@ -52,11 +55,15 @@ def from.bodies(+bs: List<&2,Body>, budget: U32, districts: U32) -> World:
   World{bs,bodies.solids(bs),bodies.fragments(bs),0,1,bodies.next(bs),budget,districts}
 def configured(+districts: U32, budget: U32) -> World:
   from.bodies(assemblies(District.generate(districts),1),budget,districts)
+def showcase(budget: U32) -> World:
+  from.bodies(assemblies(Showcase.generate(),1),budget,0)
 def initial() -> World:
-  configured(1,2048)
+  showcase(2048)
 def reset(w: World) -> World:
   World{_,_,_,_,_,_,budget,districts} = w
-  configured(districts,budget)
+  match districts:
+    case 0: showcase(budget)
+    case _: configured(districts,budget)
 def status(w: World, status: U32) -> World:
   World{bs,n,c,_,_,next,budget,districts} = w
   World{bs,n,c,0,status,next,budget,districts}

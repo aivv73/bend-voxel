@@ -11,6 +11,8 @@ type Aim is Data:
 
 def camera() -> Camera:
   Camera{R.Vec{44.0, 30.0, 48.0}, (0.0 - 2.40 : F32), (0.0 - 0.34 : F32)}
+def camera.showcase() -> Camera:
+  Camera{R.Vec{160.0, 145.0, 500.0}, 3.1415927, (0.0 - 0.40 : F32)}
 def cam(+c: Camera) -> R.Cam:
   Camera{eye, +yaw, +pitch} = c
   +sy = F32.sin(yaw)

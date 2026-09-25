@@ -7,10 +7,12 @@ type Control is Data:
   Control{camera: V.Camera, keys: U32, mx: U32, my: U32, looking: Bool, left: Bool, focused: Bool, cut: Bool, reset: Bool, quit: Bool}
 def initial() -> Control:
   Control{V.camera(), 0, 320, 180, False{}, False{}, True{}, False{}, False{}, False{}}
+def showcase() -> Control:
+  Control{V.camera.showcase(), 0, 320, 180, False{}, False{}, True{}, False{}, False{}, False{}}
 def key.bit(+key: U32, code: U32, bit: U32) -> U32:
   R.word(U32.is_eq(key, code), bit, 0)
 def key.mask(+key: U32) -> U32:
-  (key.bit(key, 119, 1) .|. key.bit(key, 115, 2) .|. key.bit(key, 97, 4) .|. key.bit(key, 100, 8) .|. key.bit(key, 113, 16) .|. key.bit(key, 101, 32) .|. key.bit(key, 114, 64) : U32)
+  (key.bit(key, 119, 1) .|. key.bit(key, 115, 2) .|. key.bit(key, 97, 4) .|. key.bit(key, 100, 8) .|. key.bit(key, 113, 16) .|. key.bit(key, 101, 32) .|. key.bit(key, 114, 64) .|. key.bit(key, 16, 128) : U32)
 def key(+code: U32, +down: Bool, c: Control) -> Control:
   Control{cam, +keys, mx, my, look, left, +focus, _, _, quit} = c
   +mask = key.mask(code)
@@ -51,13 +53,18 @@ def step(c: Control, +dt: F32) -> Control:
   +dx = (held(keys, 8) - held(keys, 4) : F32)
   +dz = (held(keys, 1) - held(keys, 2) : F32)
   +dy = (held(keys, 32) - held(keys, 16) : F32)
-  +speed = (12.0 * dt / R.max(1.0, F32.sqrt((dx * dx + dy * dy + dz * dz : F32))) : F32)
+  +speed = (12.0 * R.pick(((keys .&. 128 : U32) > 0 : U32),5.0,1.0) * dt /
+    R.max(1.0, F32.sqrt((dx * dx + dy * dy + dz * dz : F32))) : F32)
   Control{V.Camera{R.Vec{(x + (0.0 - F32.cos(yaw) * dx + F32.sin(yaw) * dz) * speed : F32), R.max(0.15,(y + dy * speed : F32)), (z + (F32.sin(yaw) * dx + F32.cos(yaw) * dz) * speed : F32)}, yaw, pitch}, keys, mx, my, look, left, focus, False{}, False{}, quit}
 def aim(+c: Control, bs: List<&2, W.Body>) -> V.Aim:
   Control{cam, _, mx, my, look, _, focus, _, _, _} = c
   V.aim((focus && Bool.not(look)), bs, cam, mx, my)
 
 # Keep held-button latches when resetting so one press remains one action.
-def reset.state(c: Control) -> Control:
+def reset.camera(showcase: Bool) -> V.Camera:
+  match showcase:
+    case True{}: V.camera.showcase()
+    case False{}: V.camera()
+def reset.state(c: Control, showcase: Bool) -> Control:
   Control{_,keys,_,_,_,left,focus,_,_,quit} = c
-  Control{V.camera(),keys,320,180,False{},left,focus,False{},False{},quit}
+  Control{reset.camera(showcase),keys,320,180,False{},left,focus,False{},False{},quit}

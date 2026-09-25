@@ -2,6 +2,8 @@ import Base
 import ../src/world.bend as W
 import ../src/spatial.bend as S
 import ../src/district.bend as D
+import ../src/showcase.bend as Showcase
+import ../src/showcase_assets.bend as Assets
 import ../src/math.bend as R
 
 def check(ok: Bool, label: String) -> IO(Unit):
@@ -12,6 +14,12 @@ def inspect(+w: W.World, n: U32, c: U32, status: U32, label: String) -> IO(W.Wor
   W.World{_,actualN,actualC,_,actualS,_,_,_} = w
   do IO<W.World>:
     Unit <- check((U32.is_eq(n,actualN) && U32.is_eq(c,actualC) && U32.is_eq(status,actualS)),label)
+    IO.pure(W.World,w)
+def inspect.showcase(+w: W.World, label: String) -> IO(W.World):
+  W.World{bs,n,fragments,_,_,_,_,scene} = w
+  do IO<W.World>:
+    Unit <- check(((n > 80000000 : U32) && U32.is_eq(W.bodies.count(bs),1009) &&
+      U32.is_eq(fragments,0) && U32.is_eq(scene,0)),label)
     IO.pure(W.World,w)
 def fixture(+t: S.Tree, budget: U32, offset: F32, speed: F32) -> W.World:
   W.from.bodies([W.Body{1,0,offset,speed,S.anchored(t),t,S.faces(t)}],budget,1)
@@ -81,6 +89,22 @@ def disjoint(bs: List<&2,S.Box>) -> Bool:
   match bs:
     case Nil{}: True{}
     case b <> +tail: (disjoint.box(b,tail) && disjoint(tail))
+def disjoint.across(bs: List<&2,S.Box>, +other: List<&2,S.Box>) -> Bool:
+  match bs:
+    case Nil{}: True{}
+    case b <> rest: (disjoint.box(b,other) && disjoint.across(rest,other))
+def disjoint.trees(+a: S.Tree, +b: S.Tree) -> Bool:
+  (Bool.not(S.overlaps(S.bounds(a),S.bounds(b))) ||
+    disjoint.across(S.boxes(a,Nil{}),S.boxes(b,Nil{})))
+def disjoint.assembly(+a: D.Assembly, rest: List<&2,D.Assembly>) -> Bool:
+  match a rest:
+    case _ Nil{}: True{}
+    case D.Assembly{+t} D.Assembly{u} <> tail:
+      (disjoint.trees(t,u) && disjoint.assembly(a,tail))
+def disjoint.assemblies(bs: List<&2,D.Assembly>) -> Bool:
+  match bs:
+    case Nil{}: True{}
+    case a <> +tail: (disjoint.assembly(a,tail) && disjoint.assemblies(tail))
 def falling.bodies(bs: List<&2,W.Body>) -> Bool:
   match bs:
     case Nil{}: False{}
@@ -104,7 +128,24 @@ def main() -> IO(Unit):
     Unit <- check(U32.is_eq(area(S.faces(partial)),dense.area(512n,0,partial)),"partial material boundary hides exactly shared faces")
     Unit <- check(U32.is_eq(components(S.build([D.box(0.0,0.0,0.0,1.0,1.0,1.0,2),D.box(1.0,1.0,0.0,1.0,1.0,1.0,2)])),2),"edge contact stays disconnected")
     Unit <- check(connected.assemblies(D.district()),"generated regions do not overlap and all assemblies are six-connected")
-    w : W.World <- inspect(W.initial(),2443284,0,1,"district has more than two million real voxels")
+    Unit <- check(connected.assemblies([D.Assembly{Showcase.ground()}]),"showcase ground is connected and disjoint")
+    Unit <- check(disjoint(S.boxes(Showcase.foundry(),Nil{})),"showcase foundry boxes are disjoint")
+    Unit <- check(U32.is_eq(components(Showcase.foundry()),1),"showcase foundry is connected")
+    Unit <- check(connected.assemblies([D.Assembly{Showcase.landmark()}]),"showcase landmark is connected and disjoint")
+    Unit <- check(connected.assemblies([D.Assembly{Assets.beacon()}]),"Blender beacon is connected and disjoint")
+    Unit <- check(connected.assemblies([D.Assembly{Assets.cargo_pod()}]),"Blender cargo pod is connected and disjoint")
+    Unit <- check(connected.assemblies([D.Assembly{Assets.gateway()}]),"Blender gateway is connected and disjoint")
+    Unit <- check(connected.assemblies(Showcase.tile(0)),"foundry tile is connected and disjoint")
+    Unit <- check(connected.assemblies(Showcase.tile(1)),"observatory tile is connected and disjoint")
+    Unit <- check(connected.assemblies(Showcase.tile(2)),"transit tile is connected and disjoint")
+    Unit <- check(connected.assemblies(Showcase.tile(3)),"stackyard tile is connected and disjoint")
+    Unit <- check((disjoint.assemblies(Showcase.tile(0)) &&
+      disjoint.assemblies(Showcase.tile(1)) &&
+      disjoint.assemblies(Showcase.tile(2)) &&
+      disjoint.assemblies(Showcase.tile(3))),"showcase bodies have no overlapping voxels")
+    showcase : W.World <- inspect.showcase(W.initial(),"36-tile showcase has real voxels and bodies")
+    showcase : W.World <- inspect.showcase(W.reset(showcase),"showcase reset preserves scene selection")
+    w : W.World <- inspect(W.configured(1,2048),2443284,0,1,"district has more than two million real voxels")
     w : W.World <- inspect(W.carve(w,R.Vec{(0.0 - 15.9 : F32),16.25,(0.0 - 19.95 : F32)}),2443256,0,1,"first bridge fuse retains anchor path across regions")
     w : W.World <- inspect(W.carve(w,R.Vec{15.9,16.25,(0.0 - 19.95 : F32)}),2443228,1,1,"last bridge fuse detaches one fragment")
     w : W.World <- inspect(W.step(w,10.0),2443228,1,1,"falling bridge preserves all remaining cells")

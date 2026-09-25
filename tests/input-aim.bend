@@ -30,6 +30,19 @@ def moved(c: I.Control) -> Bool:
   V.Camera{p,_,_} = cam
   R.Vec{_,y,_} = p
   (F32.abs((y - 36.0 : F32)) < 0.0001 : F32)
+def sprinted(c: I.Control) -> Bool:
+  I.Control{cam,_,_,_,_,_,_,_,_,_} = c
+  V.Camera{p,_,_} = cam
+  R.Vec{_,y,_} = p
+  (F32.abs((y - 60.0 : F32)) < 0.0001 : F32)
+def showcase.camera(c: I.Control) -> Bool:
+  I.Control{cam,_,_,_,_,_,_,_,_,_} = c
+  V.Camera{p,_,pitch} = cam
+  R.Vec{x,y,z} = p
+  (((F32.abs((x - 160.0 : F32)) < 0.0001) &&
+    (F32.abs((y - 145.0 : F32)) < 0.0001) &&
+    (F32.abs((z - 500.0 : F32)) < 0.0001) &&
+    (F32.abs((pitch + 0.4 : F32)) < 0.0001)) : F32)
 def main() -> IO(Unit):
   +held = I.mouse(320,180,0,True{},I.initial())
   +released = I.key(27,True{},I.key(119,True{},I.initial()))
@@ -44,6 +57,9 @@ def main() -> IO(Unit):
     Unit <- check(U32.is_eq(keys(I.key(0,False{},I.key(119,True{},I.initial()))),0),"focus loss clears movement")
     Unit <- check(reset(I.mouse(600,15,0,True{},I.initial())),"reset button")
     Unit <- check(moved(I.step(I.key(101,True{},I.initial()),0.5)),"movement is twelve meters per second")
+    Unit <- check(sprinted(I.step(I.key(16,True{},I.key(101,True{},I.initial())),0.5)),"shift enables fast travel")
+    Unit <- check(showcase.camera(I.showcase()),"showcase starts at the overview camera")
+    Unit <- check(showcase.camera(I.reset.state(I.showcase(),True{})),"showcase reset restores its camera")
     Unit <- check(hit(V.ray.tree(S.Leaf{D.box((0.0 - 320.0 : F32),0.0,(0.0 - 320.0 : F32),640.0,4.0,640.0,2)},0.0,R.Vec{31.9,4.0,31.9},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),1,3.6),"large sparse slab far-end picking")
     Unit <- check(hit(V.ray.tree(S.Leaf{D.box((0.0 - 40.0 : F32),20.0,0.0,10.0,10.0,10.0,2)},(0.0 - 1.0 : F32),R.Vec{(0.0 - 3.5 : F32),5.0,0.5},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),1,3.0),"picking uses moving body local coordinates")
     Unit <- check(hit(V.ray.tree(S.Leaf{D.box(0.0,0.0,0.0,10.0,10.0,10.0,1)},0.0,R.Vec{0.5,5.0,0.5},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),2,4.0),"spatial picking identifies explicit anchors")
