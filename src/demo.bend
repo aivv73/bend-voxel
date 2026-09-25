@@ -11,7 +11,7 @@ type Sample is Data:
 type State is Data:
   State{world: W.World, control: I.Control, pending: List<&2, Sample>, lastCut: U32}
 def initial() -> State:
-  State{W.initial(), I.initial(), Nil{}, 0}
+  State{W.initial(), I.showcase(), Nil{}, 0}
 def state.world(-T: Type, s: State, k: W.World -> I.Control -> List<&2, Sample> -> U32 -> T) -> T:
   State{w, c, p, t} = s
   k(w, c, p, t)
@@ -47,7 +47,9 @@ def apply.cut(doit: Bool, w: W.World, +c: I.Control, p: List<&2, Sample>, last: 
 def apply.reset(reset: Bool, cut: Bool, w: W.World, c: I.Control, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
   match reset:
     case True{}:
-      State{W.reset(w), I.reset.state(c), Nil{}, 0}
+      W.use.world(State,w,bs => n => count => r => status => next => budget => +districts =>
+        State{W.reset(W.World{bs,n,count,r,status,next,budget,districts}),
+          I.reset.state(c,U32.is_eq(districts,0)),Nil{},0})
     case False{}:
       apply.cut(cut, w, c, p, last, stamp)
 def event.control(+c: I.Control, w: W.World, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
@@ -75,12 +77,16 @@ def target(kind: U32) -> String:
       "PROTECTED FLOOR"
     case _:
       "NO TARGET"
-def hud(n: U32, count: U32, budget: U32, removed: U32, s: U32, kind: U32, frameUs: U32, cutUs: U32) -> String:
-  "BEND VOXEL / DEMOLITION DISTRICT\n" ++
+def scene.title(+districts: U32) -> String:
+  match districts:
+    case 0: "BEND VOXEL / MATERIAL WORKS YARD"
+    case _: "BEND VOXEL / DEMOLITION DISTRICT"
+def hud(n: U32, count: U32, budget: U32, removed: U32, s: U32, kind: U32, frameUs: U32, cutUs: U32, districts: U32) -> String:
+  scene.title(districts) ++ "\n" ++
   "VOXELS " ++ U32.show(n) ++ "  BODIES " ++ U32.show(count) ++ "/" ++ U32.show(budget) ++ "  REMOVED " ++ U32.show(removed) ++ "\n" ++
   "FRAME " ++ U32.show((frameUs / 1000 : U32)) ++ " MS  CUT " ++ U32.show((cutUs / 1000 : U32)) ++ " MS\n" ++
   target(kind) ++ "\n" ++ status(s) ++ "\n" ++
-  "WASD MOVE  QE UP/DOWN  RMB LOOK  LMB CUT  R RESET  ESC RELEASE"
+  "WASD MOVE  QE UP/DOWN  SHIFT FAST  RMB LOOK  LMB CUT  R RESET  ESC RELEASE"
 def pending.last(p: List<&2, Sample>, +end: U32, last: U32) -> U32:
   match p:
     case Nil{}:

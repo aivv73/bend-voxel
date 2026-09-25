@@ -15,10 +15,10 @@ def aim.kind(a: V.Aim) -> U32:
 
 def ready(s: D.State, frameUs: U32) -> D.State & V.Aim & String:
   D.State{w, +c, pending, +last} = s
-  W.World{+bs, +solids, +count, +removed, +status, next, +budget, districts} = w
+  W.World{+bs, +solids, +count, +removed, +status, next, +budget, +districts} = w
   +aim = I.aim(c, bs)
   (D.State{W.World{bs, solids, count, removed, status, next, budget, districts}, c, pending, last},
-    aim, D.hud(solids, count, budget, removed, status, aim.kind(aim), frameUs, last))
+    aim, D.hud(solids, count, budget, removed, status, aim.kind(aim), frameUs, last, districts))
 
 def show(r: D.State & V.Aim & String, win: Window) -> IO(Window & D.State & List<Event>):
   (state, aim, hud) = r
@@ -221,11 +221,19 @@ def stress.start(win: Window, +scene: U32, +warmup: U32, measured: U32, every: U
     stress.loop(win, D.State{world, I.initial(), Nil{}, 0},
       Stress{epoch, 0, (warmup + measured : U32), scene, warmup, every, mode}, epoch, 0)
 
+def interactive.world(+districts: U32, budget: U32) -> W.World:
+  match districts:
+    case 0: W.showcase(budget)
+    case _: W.configured(districts,budget)
+def interactive.control(+districts: U32) -> I.Control:
+  match districts:
+    case 0: I.showcase()
+    case _: I.initial()
 def start.stress(on: Bool, win: Window, now: U32, frames: U32,
-  scene: U32, warmup: U32, measured: U32, every: U32, mode: U32, districts: U32, budget: U32) -> IO(Unit):
+  scene: U32, warmup: U32, measured: U32, every: U32, mode: U32, +districts: U32, budget: U32) -> IO(Unit):
   match on:
     case True{}: stress.start(win, scene, warmup, measured, every, mode, budget)
-    case False{}: loop(win,D.State{W.configured(districts,budget),I.initial(),Nil{},0},now,frames)
+    case False{}: loop(win,D.State{interactive.world(districts,budget),interactive.control(districts),Nil{},0},now,frames)
 
 def configuration.budget.go(ok: Bool) -> IO(Unit):
   match ok:
@@ -257,4 +265,4 @@ def main() -> IO(Unit):
     +now : U32 <- P.micros()
     start.stress((stressId > 0 : U32), win, now, number(frames),
       stressId, number(stressWarmup), number(stressMeasured), number(stressEdit), number(stressView),
-      R.word(U32.is_eq(districts,0),1,districts),R.word(U32.is_eq(budget,0),2048,budget))
+      districts,R.word(U32.is_eq(budget,0),2048,budget))

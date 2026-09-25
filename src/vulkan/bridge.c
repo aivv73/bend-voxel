@@ -192,6 +192,7 @@ static const u32 voxel_vk_keys[][2] = {
   {XK_BackSpace,127},{XK_Up,63232},{XK_Down,63233},{XK_Left,63234},
   {XK_Right,63235},{XK_Insert,63271},{XK_Delete,63272},{XK_Home,63273},
   {XK_End,63275},{XK_Page_Up,63276},{XK_Page_Down,63277},
+  {XK_Shift_L,16},{XK_Shift_R,16},
 };
 static u32 voxel_vk_key(XKeyEvent* ev) {
   char chars[8]; KeySym sym = 0;
