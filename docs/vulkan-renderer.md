@@ -15,11 +15,17 @@ The build requires Bend 2.0.27, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surf
 
 1. Bend updates the world and computes the camera aim and HUD text.
 2. The pinned native effect reads the current cached `Body` and merged `Face` values from Bend's heap. It passes a flat face list, camera, aim, and HUD to `libvoxel_vulkan.so`.
-3. The native renderer caches world-face triangles until face records or body offsets change. It adds affected voxel cells near the brush and three twelve-segment rings each frame.
+3. The native renderer caches world-face triangles by body ID, revision, and anchor status; translation changes only the draw transform. It adds affected voxel cells near the brush and three twelve-segment rings each frame.
 4. Vulkan 1.3 dynamic rendering draws triangles with depth testing, brush lines, and screen-space bitmap text into the same Xlib swapchain image. The backend handles acquire, submission, presentation, and resize recreation. It uses a present wait semaphore per swapchain image, following [Khronos's swapchain reuse guidance](https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html).
 5. The X11 adapter synchronizes the X server and sends key, mouse, focus, and close events back to Bend. Pointer positions are mapped to the demo's 640 × 360 logical space after resize.
 
 The native effect returns the same Bend state it received. The effect depends on Bend 2.0.27's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, or `Face` definitions require reviewing that bridge.
+
+## Material colors
+
+`src/material.bend` names the four stable voxel IDs and defines which one marks protected foundations. `src/vulkan/material.hpp` gives each ID an OKLCH base color. The renderer builds sRGB swatches once for each material, face direction, and anchor state. Detached bodies get a lightness/chroma adjustment in OKLCH, so their material hue remains visible. Side shading multiplies linear RGB before sRGB encoding. Out-of-gamut colors keep lightness and hue while chroma is reduced to fit sRGB.
+
+The common UNORM swapchain receives encoded sRGB vertex colors directly. If the driver supplies an sRGB attachment instead, the fragment shader decodes those colors before Vulkan's automatic attachment encoding. HUD, brush, and floor colors remain flat sRGB colors. The palette is static in this version; changing its definitions requires a rebuild.
 
 ## Validation
 

@@ -1,10 +1,11 @@
 import Base
 import ./math.bend as R
+import ./material.bend as M
 
 # Bounds are half-open, integral cell coordinates (one cell = 0.1 meters).
 # Signed F32 integers are exact over the supported +/- 2^23-cell range.
-# Leaves are disjoint solid cuboids; air occupies no storage. Material 1 is
-# an explicit protected anchor. The tree is both storage and spatial index.
+# Leaves are disjoint solid cuboids; air occupies no storage. Foundation
+# material marks explicit protected anchors. The tree is also a spatial index.
 type Box is Data:
   Box{lo: R.Vec, hi: R.Vec, material: U32}
 type Tree is Data:
@@ -65,7 +66,7 @@ def leaves(t: Tree) -> U32:
 def anchored(t: Tree) -> Bool:
   match t:
     case Empty{}: False{}
-    case Leaf{Box{_,_,m}}: U32.is_eq(m,1)
+    case Leaf{Box{_,_,m}}: M.is_anchor(m)
     case Branch{_,a,b}: (anchored(a) || anchored(b))
 def boxes(t: Tree, tail: List<&2,Box>) -> List<&2,Box>:
   match t:
@@ -216,6 +217,7 @@ def cut.go(hit: Bool, t: Tree, +p: R.Vec, +r2: F32) -> Tree:
   match hit t:
     case False{} _: t
     case True{} Empty{}: Empty{}
+    # Material 1 is foundation(); match it before the editable leaf path.
     case True{} Leaf{Box{l,h,1}}: Leaf{Box{l,h,1}}
     case True{} Leaf{+b}: cut.leaf((distance(p,b,True{}) <= r2 : F32),b,p,r2)
     case True{} Branch{_,a,b}: branch(cut(a,p,r2),cut(b,p,r2))

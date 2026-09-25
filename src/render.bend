@@ -2,6 +2,7 @@ import Base
 import ./math.bend as R
 import ./world.bend as W
 import ./spatial.bend as S
+import ./material.bend as M
 
 type Camera is Data:
   Camera{eye: R.Vec, yaw: F32, pitch: F32}
@@ -58,7 +59,7 @@ def ray.leaf(r: Interval, material: U32, +o: R.Vec, +d: R.Vec, +best: Aim) -> Ai
   Aim{_,limit,_} = best
   +t = R.pick((near >= 0.0 : F32),near,far)
   aim.choose(((t >= 0.0) && (t < limit) : F32),R.Vec.add(o,R.Vec.scale(d,t)),t,
-    R.word(U32.is_eq(material,1),2,1),best)
+    R.word(M.is_anchor(material),2,1),best)
 @unsafe
 def ray.tree.go(on: Bool, t: S.Tree, +offset: F32, +o: R.Vec, +d: R.Vec, best: Aim) -> Aim:
   match on t:

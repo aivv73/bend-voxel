@@ -1,6 +1,35 @@
 #include "../src/vulkan/native.cpp"
 #include <cassert>
 
+static void expect_material_palette() {
+  constexpr uint32_t original[]={0x4bc1a4,0xd19d68,0x668fac,0xd9954f};
+  for (uint32_t id=1;id<=4;id++) {
+    assert(material::find(id).id==id);
+    auto top=material::surface(id,false,3);
+    float expected[3]={float((original[id-1]>>16)&255)/255,
+      float((original[id-1]>>8)&255)/255,float(original[id-1]&255)/255};
+    assert(std::abs(top.r-expected[0])<0.002f);
+    assert(std::abs(top.g-expected[1])<0.002f);
+    assert(std::abs(top.b-expected[2])<0.002f);
+    auto detached=material::surface(id,true,3);
+    assert(detached.r!=top.r || detached.g!=top.g || detached.b!=top.b);
+    auto side=material::surface(id,false,0);
+    assert(side.r<top.r && side.g<top.g && side.b<top.b);
+  }
+  auto concrete=material::surface(2,true,3);
+  auto frame=material::surface(3,true,3);
+  assert(std::abs(concrete.r-frame.r)+std::abs(concrete.g-frame.g)+
+    std::abs(concrete.b-frame.b)>0.25f);
+  assert(material::in_gamut(material::to_linear({0.7f,0.5f,30.0f})));
+  auto roundtrip=material::encode(material::decode({0.2f,0.5f,0.8f}));
+  assert(std::abs(roundtrip.r-0.2f)<0.00001f);
+  assert(std::abs(roundtrip.g-0.5f)<0.00001f);
+  assert(std::abs(roundtrip.b-0.8f)<0.00001f);
+  bool rejected=false;
+  try { material::surface(5,false,3); } catch (const std::runtime_error&) { rejected=true; }
+  assert(rejected);
+}
+
 static void expect_fresh(const VoxelVkFrame& frame,GeometryCache& cache,uint32_t rebuilt) {
   bool reused=false;
   const auto& actual=geometry(frame,cache,reused);
@@ -23,6 +52,7 @@ static void expect_fresh(const VoxelVkFrame& frame,GeometryCache& cache,uint32_t
 }
 
 int main() {
+  expect_material_palette();
   VoxelVkFace faces[]={{{-400,20,-10},{400,20,10},3,2},{{-1,0,10},{1,20,10},5,3}};
   VoxelVkBody bodies[]={
     {1,0,1,1,0,{-400,0,-10},{400,20,10},faces},
@@ -42,6 +72,10 @@ int main() {
   expect_fresh(frame,cache,0);
   frame.aim_kind=0;
   expect_fresh(frame,cache,0);
+  bodies[1].anchored=1;
+  expect_fresh(frame,cache,1);
+  bodies[1].anchored=0;
+  expect_fresh(frame,cache,1);
   bodies[1].offset=-.7f;
   expect_fresh(frame,cache,0);
   assert(cache.dirty.empty());
@@ -68,6 +102,9 @@ int main() {
   VoxelVkFace invalid=faces[0]; invalid.side=6;
   Geometry g;
   bool rejected=false;
+  try { face(g,invalid,true); } catch (const std::runtime_error&) { rejected=true; }
+  assert(rejected);
+  invalid=faces[0]; invalid.material=0; rejected=false;
   try { face(g,invalid,true); } catch (const std::runtime_error&) { rejected=true; }
   assert(rejected);
   std::puts("ALL NATIVE BODY CACHE CHECKS PASSED");
