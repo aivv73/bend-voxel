@@ -67,6 +67,8 @@ class StressParserTests(unittest.TestCase):
                 'world,2443284,154,3434,1,2048\n'
                 'mesh_cache,0,154,154,100,119658,3000000\n'
                 'mesh_cache,1,1,154,100,119658,16000\n'
+                'lod_cache,0,0,0,0,100,0\n'
+                'lod_cache,1,0,0,0,100,0\n'
                 'bodies,0,154,0,0,0.000000\n'
                 'bodies,1,154,0,0,0.000000\n'
                 'view,0,1,20,30,3,-0.3,0,0,0,0\n'
@@ -80,7 +82,8 @@ class StressParserTests(unittest.TestCase):
         self.assertEqual(result['initial_solid_cells'], 2443284)
         for old, new in (('world,2443284', 'world,5400'),
                          ('bodies,1,154', 'bodies,1,0'),
-                         ('mesh_cache,1,1,154', 'mesh_cache,1,154,154')):
+                         ('mesh_cache,1,1,154', 'mesh_cache,1,154,154'),
+                         ('lod_cache,1,0,0,0,100,0', 'lod_cache,1,1,200,0,100,0')):
             result = parse_stress(io.StringIO(self.district_rows().replace(old, new)),
                                   0, 1, 1, 1, 'carve', world_scale=1)
             self.assertFalse(result['pass'])

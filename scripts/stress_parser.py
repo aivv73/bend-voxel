@@ -136,7 +136,8 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     views = [row for row in rows if row and row[0] == 'view']
     view_summary, view_errors = summarize_views(views, view_mode, warmup, measured)
     errors.extend(view_errors)
-    ordinary = [row for row in rows if row and row[0] not in ('init', 'surface', 'view', 'world', 'mesh_cache', 'bodies')]
+    ordinary = [row for row in rows if row and row[0] not in
+                ('init', 'surface', 'view', 'world', 'mesh_cache', 'lod_cache', 'bodies')]
     errors.extend(validate_samples(ordinary))
     frames = [row for row in ordinary if row[0] == 'frame']
     stages = [row for row in ordinary if row[0] == 'stage']
@@ -204,6 +205,7 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
     errors = []
     inventory = [row for row in rows if row and row[0] == 'world']
     cache_rows = [row for row in rows if row and row[0] == 'mesh_cache']
+    lod_rows = [row for row in rows if row and row[0] == 'lod_cache']
     body_rows = [row for row in rows if row and row[0] == 'bodies']
     try:
         if len(inventory) != 1 or len(inventory[0]) != 6:
@@ -211,16 +213,19 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
         solids, assemblies, regions, districts, budget = map(int, inventory[0][1:])
         if (solids, assemblies, regions, districts) != (2443284 * scale, 154 * scale, 3434 * scale, scale):
             raise ValueError('world inventory does not match real district scale')
-        if len(cache_rows) != len(frames) or len(body_rows) != len(frames):
-            raise ValueError('missing mesh cache or body samples')
-        caches, bodies = [], []
-        for i, (cache_row, body_row) in enumerate(zip(cache_rows, body_rows)):
-            if len(cache_row) != 7 or len(body_row) != 6:
-                raise ValueError('invalid mesh cache/body row width')
+        if (len(cache_rows) != len(frames) or len(lod_rows) != len(frames)
+                or len(body_rows) != len(frames)):
+            raise ValueError('missing mesh cache, LOD cache or body samples')
+        caches, lods, bodies = [], [], []
+        for i, (cache_row, lod_row, body_row) in enumerate(zip(cache_rows, lod_rows, body_rows)):
+            if len(cache_row) != 7 or len(lod_row) != 7 or len(body_row) != 6:
+                raise ValueError('invalid mesh cache/LOD/body row width')
             cache = list(map(int, cache_row[1:]))
+            lod = list(map(int, lod_row[1:]))
             body = [*map(int, body_row[1:5]), float(body_row[5])]
-            if cache[0] != i or body[0] != i or any(v < 0 for v in cache + body[1:4]):
-                raise ValueError('invalid mesh cache/body index or counts')
+            if (cache[0] != i or lod[0] != i or body[0] != i or
+                    any(v < 0 for v in cache + lod + body[1:4])):
+                raise ValueError('invalid mesh cache/LOD/body index or counts')
             if not math.isfinite(body[4]) or body[4] > 0:
                 raise ValueError('invalid body translation')
             if body[1] + frames[i][3] != cache[2] or body[2] > frames[i][3] or body[3] > frames[i][3]:
@@ -229,9 +234,15 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
                 errors.append(f'Unedited geometry rebuilt at frame {i}')
             if i and cache[1] > edit_frames.get(i, 0) * 2:
                 errors.append(f'An edit rebuilt unrelated body geometry at frame {i}')
+            if i and i not in edit_frames and lod[3] != 0:
+                errors.append(f'Unedited proxy rebuilt at frame {i}')
             if cache[3] > cache[2]:
-                errors.append(f'Draw count exceeds live bodies at frame {i}')
+                errors.append(f'Visible body count exceeds live bodies at frame {i}')
+            if (lod[1] > lod[4] or lod[2] > cache[3] or lod[2] > body[1] or
+                    lod[4] != cache[3] - lod[2] + lod[1] or lod[5] > cache[4]):
+                errors.append(f'LOD draw, body or vertex counts disagree at frame {i}')
             caches.append(cache)
+            lods.append(lod)
             bodies.append(body)
         times = {frame[0]: i for i, frame in enumerate(frames)}
         actual_edits = Counter(times[int(edit[1])] for edit in edits)
@@ -256,6 +267,9 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
         if mode in ('static', 'camera', 'aim') and (frames[-1][2] != solids or frames[-1][3] != 0):
             errors.append('View-only workload mutated the world')
         measured_cache = caches[warmup:]
+        measured_lod = lods[warmup:]
+        if scale == 16 and mode in ('static', 'camera') and not max(row[2] for row in measured_lod):
+            errors.append('Distant overview did not select any LOD proxies')
         return {
             'initial_solid_cells': solids,
             'initial_assemblies': assemblies,
@@ -268,6 +282,14 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
             'upload_mib': {key.replace('_ms', '_mib'): value for key, value in
                 stats([row[5] / 1048576 for row in measured_cache]).items()},
             'visible_bodies_max': max(row[3] for row in measured_cache),
+            'lod_proxy_draws_max': max(row[1] for row in measured_lod),
+            'lod_proxied_bodies_max': max(row[2] for row in measured_lod),
+            'lod_proxied_bodies_mean': sum(row[2] for row in measured_lod) / len(measured_lod),
+            'lod_proxy_rebuilds': sum(row[3] for row in measured_lod),
+            'draw_calls_max': max(row[4] for row in measured_lod),
+            'draw_calls_mean': sum(row[4] for row in measured_lod) / len(measured_lod),
+            'visible_bodies_mean': sum(row[3] for row in measured_cache) / len(measured_cache),
+            'proxy_vertices_max': max(row[5] for row in measured_lod),
         }, errors
     except (ValueError, IndexError, KeyError) as exc:
         return {}, [f'Invalid district samples: {exc}']

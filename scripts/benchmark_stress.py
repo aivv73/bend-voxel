@@ -111,7 +111,8 @@ def main():
         print(json.dumps({key: result.get(key) for key in
                           ('name', 'pass', 'solid_cells_start', 'surface_rectangles',
                            'districts', 'max_bodies', 'max_moving_bodies', 'present_mode', 'throughput_fps',
-                           'acquire_wait_fraction', 'errors')}, indent=2), flush=True)
+                           'visible_bodies_mean', 'draw_calls_mean', 'lod_proxied_bodies_mean',
+                           'lod_proxy_rebuilds', 'acquire_wait_fraction', 'errors')}, indent=2), flush=True)
     report['pass'] = all(case['pass'] for case in report['cases'])
     (out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     print(f'Report: {out / "report.json"}', flush=True)
