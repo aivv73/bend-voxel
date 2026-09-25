@@ -42,7 +42,7 @@ Physics advances by exactly 1/60 second per benchmark frame. Camera paths, point
 
 The runner requests Vulkan **immediate** presentation, falling back to **mailbox**, and fails if neither is available. Interactive presentation is unchanged. Frame throughput includes Bend simulation, picking, editing, native transport, Vulkan work, and X11 synchronization. CPU fence/acquisition/presentation waits can include GPU or compositor backpressure; these are wall-clock intervals, not GPU timestamps.
 
-Reports include frame percentiles, throughput, initialization, voxel and region counts, body counts, simultaneous moving bodies, view samples, accepted edit latency, each edit phase, and native render stages. Cache telemetry records rebuilt meshes, visible bodies, arena vertices, and uploaded bytes. The native arena retains a slot for each body mesh; body transforms and camera changes affect draw commands. Overlays still upload each frame.
+Reports include frame percentiles, throughput, initialization, voxel and region counts, body counts, simultaneous moving bodies, view samples, accepted edit latency, each edit phase, and native render stages. Cache telemetry records rebuilt meshes, visible bodies, arena vertices, uploaded bytes, proxy draws, proxied bodies, proxy rebuilds, and actual draw calls. The native arena retains a slot for each body mesh and eligible render tile proxy; body transforms and camera changes affect draw commands. Overlays still upload each frame.
 
 Validation checks:
 
@@ -51,10 +51,13 @@ Validation checks:
 - Reported anchors, fragments, moving bodies, and live meshes agree.
 - Camera/aim/follow workloads actually move or hit removable material as specified.
 - Frames without edits rebuild zero body meshes after the initial frame, including while fragments fall.
+- Frames without edits rebuild zero render proxies after the initial frame; the 16-district overview and camera workloads must select proxies.
 - Edits rebuild only affected bodies, and bridge/fragment workloads produce the required components.
 - The body budget is respected and cuts are accepted.
 
 There is no FPS acceptance threshold. The purpose is to reveal scaling and bottlenecks. The [district validation report](validation/demolition-district/report.json) records a full run on the development machine.
+
+The [render LOD validation](validation/render-lod-2026-09-25/README.md) compares the world-only mesh cache with the distant render proxies on the 16-district overview, camera, and aim workloads, and records a complete 12-workload run with raw samples.
 
 ## Historical measurements
 

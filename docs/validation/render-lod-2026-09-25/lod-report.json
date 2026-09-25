@@ -1,0 +1,2760 @@
+{
+  "metadata": {
+    "date": "2026-09-25T20:57:16+0400",
+    "bend": "bend 2.0.27",
+    "git_revision": "9ce55b7f2e3b95b5bbbea84aeebe3ef6b4d1c12e",
+    "working_tree_dirty": true,
+    "resolution": [
+      640,
+      360
+    ],
+    "warmup_frames": 30,
+    "measured_frames": 180,
+    "edit_every_frames": 30,
+    "body_budget": 2048,
+    "source_sha256": {
+      "src/demo.bend": "6e50ba43b4c1654c280f36ee4b776ad5a1ccdb0f5b5dd638cae0a36e8cd88c94",
+      "src/district.bend": "9a2e89d29a2b404bfb400091b66871880fbd405545593cf7473e11d488f34fc1",
+      "src/input.bend": "9c5b17853bc47b4ce8cf8193980ea52e40f2c5e250d52f37940e915475f97141",
+      "src/main.bend": "ca308eafd7f7927fc3d25be4b3a4e4ea229c986c9ab8f8704f3793236b3fce8c",
+      "src/material.bend": "7487b39f557fd5e344af03fca79ffed1046de5fd446b25024156eaa20f4f37cd",
+      "src/math.bend": "d0bb14f3683971acb6245e26a19d49d5be586cc92508401938036ac5de4e40d3",
+      "src/platform/micros.c": "02d9b16f7bda3cd99d27305d2dfda210e16c357defc4e6bb8ec671db07795d4a",
+      "src/platform/micros.js": "a71a462f96ad6184bf93827f5749ba70ca3af3f9bc70d2f4a0ff4e6cbf9d3302",
+      "src/platform.bend": "9cf0b7449ec4c99cea9f6991e0e8ced069286bd7e27f49d57763ce3f6743d79a",
+      "src/probe.bend": "7111414a865ebc936893a8e142e936fc8a9ef42fb811bba0063c53b21cf3f802",
+      "src/render.bend": "ed55302a0110997403f9eb334b62e209a5559e6dbd72b33ce67e76732e8bacc2",
+      "src/spatial.bend": "b70eac5964cbcdd8d2791d2ad8b7b99ca2d23ba4b15ebcd14efddfd092503564",
+      "src/vendor/LICENSE": "0beb288abd3d067e231f3fbe7df1f8ee37344061fc67f22018150a19e4b26c35",
+      "src/vendor/NOTICE.md": "1dd0caf5c92a9fb91659cbabcf3e92b8fcb79a886fad8ef4ba254e96f3770a3c",
+      "src/vulkan/bridge.c": "f38adbaa5e753120ae2038286ecb99ddd1221f689be5f23c6d747fbc1c711d3f",
+      "src/vulkan/bridge.js": "6e6af7db48eb3caf6caea509beb4b3bea938d76ef3b2d567265d360aaa18998d",
+      "src/vulkan/material.hpp": "0fee80f292b314fa54f233f12d626fcdd3300e172adca38923b5023bd2fdb9e6",
+      "src/vulkan/native.cpp": "3941666e3d0b6f6c6ff3f599464e657735820a732a8b954f1efe73703b5cd5a0",
+      "src/vulkan/native.h": "02f3452c8c1c0a504939077ff63776b3f67db735221ee45acefe4dce427306c1",
+      "src/vulkan/scene.frag": "fbc88c9356dde8ffcea7bbd21dca003f2bb02560eb3d798b2b9fb4e751decdec",
+      "src/vulkan/scene.vert": "54812ea6837ff194cd5596087acd5618eb7c72633c8d68c19e0597ad3c65664b",
+      "src/vulkan.bend": "825b02e89ea8181b319a115befedcd5a47abdf0ad997621bc492808a481aff6e",
+      "src/world.bend": "e0ba5163561b00ea970ee7390340fd4d415012655ead981bbb1813e16a5b00be",
+      "scripts/benchmark_stress.py": "31d72df0b2bd5d72b46d61d58f43d46d640ab88a303e1b16da41d9cecfb38759",
+      "scripts/build.sh": "ab7a241b13d6af9b3510af2be5e6cb350a33bb3907576229b345692a245386cf",
+      "scripts/run.sh": "5f3c7a297e7ef8382e9bd1ca0a3d198c9d304699cfc5b96c17be1133f7f97d4d",
+      "scripts/stress_parser.py": "f414a80abe2a5fa38571e305d9373dd84964d15e3b8950f5a0d0f79b669c354c",
+      "scripts/test.sh": "b3e5d83d892d55ebb36f3918e91d12d44b8d3738482501e7d29cd232254301e9"
+    },
+    "timing_scope": "Frame throughput includes Bend simulation and edits, scene preparation, native geometry expansion, upload, Vulkan submission/presentation, and X11 synchronization. Fence and acquisition waits include GPU/presentation backpressure; these CPU wall-clock intervals are not GPU timestamps.",
+    "scale_scope": "Each district contains 2,443,284 real editable 10 cm cells at distinct signed coordinates. Scale cases contain 1, 4, or 16 districts. Sparse solid cuboids compress occupancy; there are no render copies. Physics advances exactly 1/60 second per frame. Fragment workloads sever eight supports per district per frame for sixteen frames, then follow falling fragments."
+  },
+  "cases": [
+    {
+      "initial_solid_cells": 2443284,
+      "initial_assemblies": 154,
+      "initial_regions": 3434,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 0,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.3223114013671875,
+        "p95_mib": 0.3223114013671875,
+        "p99_mib": 0.3223114013671875,
+        "max_mib": 0.3223114013671875,
+        "mean_mib": 0.3222221374511719,
+        "total_mib": 57.99998474121094
+      },
+      "visible_bodies_max": 70,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 70,
+      "draw_calls_mean": 70.0,
+      "visible_bodies_mean": 70.0,
+      "proxy_vertices_max": 4608,
+      "pass": true,
+      "errors": [],
+      "scene": 1,
+      "initialization_ms": 24.396,
+      "surface_rectangles": 20374,
+      "solid_cells_start": 2443284,
+      "solid_cells_end": 2443284,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.107572,
+      "throughput_fps": 1673.2978842077864,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.543,
+        "p95_ms": 1.044,
+        "p99_ms": 1.448,
+        "max_ms": 1.612,
+        "mean_ms": 0.5976222222222223,
+        "total_ms": 107.572
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.007,
+          "p95_ms": 0.015,
+          "p99_ms": 0.024,
+          "max_ms": 0.028,
+          "mean_ms": 0.007811111111111111,
+          "total_ms": 1.406
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.004,
+          "p95_ms": 0.008,
+          "p99_ms": 0.029,
+          "max_ms": 0.163,
+          "mean_ms": 0.005055555555555555,
+          "total_ms": 0.91
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.526,
+          "p95_ms": 1.013,
+          "p99_ms": 1.415,
+          "max_ms": 1.595,
+          "mean_ms": 0.5775,
+          "total_ms": 103.95
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.006,
+          "p95_ms": 0.014,
+          "p99_ms": 0.038,
+          "max_ms": 0.043,
+          "mean_ms": 0.007255555555555556,
+          "total_ms": 1.306
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.013,
+          "p95_ms": 0.035,
+          "p99_ms": 0.145,
+          "max_ms": 0.153,
+          "mean_ms": 0.01786111111111111,
+          "total_ms": 3.215
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.166,
+          "p95_ms": 0.257,
+          "p99_ms": 0.389,
+          "max_ms": 0.391,
+          "mean_ms": 0.18406666666666666,
+          "total_ms": 33.132
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.094,
+          "p99_ms": 0.168,
+          "max_ms": 0.473,
+          "mean_ms": 0.01998888888888889,
+          "total_ms": 3.598
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.014,
+          "p95_ms": 0.022,
+          "p99_ms": 0.067,
+          "max_ms": 0.072,
+          "mean_ms": 0.01587777777777778,
+          "total_ms": 2.858
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.018,
+          "p95_ms": 0.038,
+          "p99_ms": 0.056,
+          "max_ms": 0.077,
+          "mean_ms": 0.021466666666666665,
+          "total_ms": 3.864
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.029,
+          "p95_ms": 0.064,
+          "p99_ms": 0.084,
+          "max_ms": 0.097,
+          "mean_ms": 0.03575,
+          "total_ms": 6.435
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.149,
+          "p95_ms": 0.202,
+          "p99_ms": 0.875,
+          "max_ms": 1.263,
+          "mean_ms": 0.16136666666666666,
+          "total_ms": 29.046
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.032,
+          "max_ms": 0.065,
+          "mean_ms": 0.008388888888888888,
+          "total_ms": 1.51
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.07,
+          "p95_ms": 0.442,
+          "p99_ms": 0.766,
+          "max_ms": 0.861,
+          "mean_ms": 0.10401111111111112,
+          "total_ms": 18.722
+        }
+      },
+      "acquire_wait_fraction": 0.03592012791432715,
+      "view": {},
+      "edits": 0,
+      "edit_latency": {
+        "samples": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p99_ms": null,
+        "max_ms": null,
+        "mean_ms": null,
+        "total_ms": 0
+      },
+      "name": "district",
+      "districts": 1,
+      "view_mode": "static",
+      "edit_every_frames": 0,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 9773136,
+      "initial_assemblies": 616,
+      "initial_regions": 13736,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 0,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.319976806640625,
+        "p95_mib": 0.320526123046875,
+        "p99_mib": 0.3212127685546875,
+        "max_mib": 0.3212127685546875,
+        "mean_mib": 0.32006301879882815,
+        "total_mib": 57.61134338378906
+      },
+      "visible_bodies_max": 490,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 490,
+      "draw_calls_mean": 490.0,
+      "visible_bodies_mean": 490.0,
+      "proxy_vertices_max": 18432,
+      "pass": true,
+      "errors": [],
+      "scene": 2,
+      "initialization_ms": 91.51,
+      "surface_rectangles": 81496,
+      "solid_cells_start": 9773136,
+      "solid_cells_end": 9773136,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.222917,
+      "throughput_fps": 807.4754280741263,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 1.178,
+        "p95_ms": 1.718,
+        "p99_ms": 2.519,
+        "max_ms": 2.576,
+        "mean_ms": 1.2384277777777777,
+        "total_ms": 222.917
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.016,
+          "p95_ms": 0.038,
+          "p99_ms": 0.06,
+          "max_ms": 0.079,
+          "mean_ms": 0.02056111111111111,
+          "total_ms": 3.701
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.004,
+          "p95_ms": 0.008,
+          "p99_ms": 0.01,
+          "max_ms": 0.01,
+          "mean_ms": 0.0042944444444444445,
+          "total_ms": 0.773
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 1.149,
+          "p95_ms": 1.689,
+          "p99_ms": 2.494,
+          "max_ms": 2.519,
+          "mean_ms": 1.2062444444444445,
+          "total_ms": 217.124
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.006,
+          "p95_ms": 0.014,
+          "p99_ms": 0.019,
+          "max_ms": 0.021,
+          "mean_ms": 0.007327777777777778,
+          "total_ms": 1.319
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.021,
+          "p95_ms": 0.053,
+          "p99_ms": 0.092,
+          "max_ms": 0.098,
+          "mean_ms": 0.02791666666666667,
+          "total_ms": 5.025
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.173,
+          "p95_ms": 0.457,
+          "p99_ms": 0.515,
+          "max_ms": 0.825,
+          "mean_ms": 0.22564444444444445,
+          "total_ms": 40.616
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.547,
+          "p95_ms": 0.666,
+          "p99_ms": 0.931,
+          "max_ms": 1.092,
+          "mean_ms": 0.48951111111111106,
+          "total_ms": 88.112
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.013,
+          "p95_ms": 0.024,
+          "p99_ms": 0.032,
+          "max_ms": 0.059,
+          "mean_ms": 0.014677777777777777,
+          "total_ms": 2.642
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.02,
+          "p95_ms": 0.045,
+          "p99_ms": 0.054,
+          "max_ms": 0.059,
+          "mean_ms": 0.024283333333333337,
+          "total_ms": 4.371
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.057,
+          "p95_ms": 0.132,
+          "p99_ms": 0.186,
+          "max_ms": 0.201,
+          "mean_ms": 0.07228888888888889,
+          "total_ms": 13.012
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.134,
+          "p95_ms": 0.251,
+          "p99_ms": 0.705,
+          "max_ms": 1.517,
+          "mean_ms": 0.16357777777777777,
+          "total_ms": 29.444
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.01,
+          "max_ms": 0.01,
+          "mean_ms": 0.007583333333333333,
+          "total_ms": 1.365
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.113,
+          "p95_ms": 0.328,
+          "p99_ms": 1.301,
+          "max_ms": 1.366,
+          "mean_ms": 0.17129444444444444,
+          "total_ms": 30.833000000000002
+        }
+      },
+      "acquire_wait_fraction": 0.019608194978400034,
+      "view": {},
+      "edits": 0,
+      "edit_latency": {
+        "samples": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p99_ms": null,
+        "max_ms": null,
+        "mean_ms": null,
+        "total_ms": 0
+      },
+      "name": "district-4",
+      "districts": 4,
+      "view_mode": "static",
+      "edit_every_frames": 0,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 39092544,
+      "initial_assemblies": 2464,
+      "initial_regions": 54944,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 0,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.324920654296875,
+        "p95_mib": 0.3250579833984375,
+        "p99_mib": 0.325469970703125,
+        "max_mib": 0.325469970703125,
+        "mean_mib": 0.3248863220214844,
+        "total_mib": 58.47953796386719
+      },
+      "visible_bodies_max": 2317,
+      "lod_proxy_draws_max": 13,
+      "lod_proxied_bodies_max": 1664,
+      "lod_proxied_bodies_mean": 1664.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 666,
+      "draw_calls_mean": 666.0,
+      "visible_bodies_mean": 2317.0,
+      "proxy_vertices_max": 73728,
+      "pass": true,
+      "errors": [],
+      "scene": 3,
+      "initialization_ms": 343.903,
+      "surface_rectangles": 325984,
+      "solid_cells_start": 39092544,
+      "solid_cells_end": 39092544,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.684084,
+      "throughput_fps": 263.12558106899155,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 3.736,
+        "p95_ms": 6.752,
+        "p99_ms": 7.093,
+        "max_ms": 7.185,
+        "mean_ms": 3.8004666666666664,
+        "total_ms": 684.084
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.102,
+          "p95_ms": 0.218,
+          "p99_ms": 0.258,
+          "max_ms": 0.271,
+          "mean_ms": 0.11102777777777778,
+          "total_ms": 19.985
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.012,
+          "p99_ms": 0.024,
+          "max_ms": 0.044,
+          "mean_ms": 0.0077222222222222215,
+          "total_ms": 1.39
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 3.619,
+          "p95_ms": 6.514,
+          "p99_ms": 7.003,
+          "max_ms": 7.121,
+          "mean_ms": 3.6675611111111115,
+          "total_ms": 660.1610000000001
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.013,
+          "p95_ms": 0.022,
+          "p99_ms": 0.042,
+          "max_ms": 0.064,
+          "mean_ms": 0.014155555555555557,
+          "total_ms": 2.548
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.114,
+          "p95_ms": 0.194,
+          "p99_ms": 0.256,
+          "max_ms": 0.343,
+          "mean_ms": 0.1207388888888889,
+          "total_ms": 21.733
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.407,
+          "p95_ms": 1.153,
+          "p99_ms": 1.401,
+          "max_ms": 1.402,
+          "mean_ms": 0.5513444444444444,
+          "total_ms": 99.242
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 2.466,
+          "p95_ms": 2.934,
+          "p99_ms": 3.078,
+          "max_ms": 3.232,
+          "mean_ms": 2.239733333333333,
+          "total_ms": 403.152
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.021,
+          "p95_ms": 0.053,
+          "p99_ms": 0.084,
+          "max_ms": 0.087,
+          "mean_ms": 0.025744444444444445,
+          "total_ms": 4.634
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.035,
+          "p95_ms": 0.068,
+          "p99_ms": 0.097,
+          "max_ms": 0.105,
+          "mean_ms": 0.03972222222222222,
+          "total_ms": 7.15
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.109,
+          "p95_ms": 0.229,
+          "p99_ms": 0.283,
+          "max_ms": 0.302,
+          "mean_ms": 0.1276111111111111,
+          "total_ms": 22.97
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.192,
+          "p95_ms": 0.296,
+          "p99_ms": 1.166,
+          "max_ms": 2.553,
+          "mean_ms": 0.22295555555555555,
+          "total_ms": 40.132
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.017,
+          "max_ms": 0.05,
+          "mean_ms": 0.007861111111111112,
+          "total_ms": 1.415
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.12,
+          "p95_ms": 3.065,
+          "p99_ms": 3.481,
+          "max_ms": 3.528,
+          "mean_ms": 0.3188166666666667,
+          "total_ms": 57.387
+        }
+      },
+      "acquire_wait_fraction": 0.01045193280357383,
+      "view": {},
+      "edits": 0,
+      "edit_latency": {
+        "samples": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p99_ms": null,
+        "max_ms": null,
+        "mean_ms": null,
+        "total_ms": 0
+      },
+      "name": "district-16",
+      "districts": 16,
+      "view_mode": "static",
+      "edit_every_frames": 0,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 2443284,
+      "initial_assemblies": 154,
+      "initial_regions": 3434,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 0,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.3223114013671875,
+        "p95_mib": 0.3223114013671875,
+        "p99_mib": 0.3223114013671875,
+        "max_mib": 0.3223114013671875,
+        "mean_mib": 0.32219772338867186,
+        "total_mib": 57.99559020996094
+      },
+      "visible_bodies_max": 152,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 152,
+      "draw_calls_mean": 93.83333333333333,
+      "visible_bodies_mean": 93.83333333333333,
+      "proxy_vertices_max": 4608,
+      "pass": true,
+      "errors": [],
+      "scene": 1,
+      "initialization_ms": 30.071,
+      "surface_rectangles": 20374,
+      "solid_cells_start": 2443284,
+      "solid_cells_end": 2443284,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.105873,
+      "throughput_fps": 1700.1501799325606,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.498,
+        "p95_ms": 1.116,
+        "p99_ms": 1.482,
+        "max_ms": 2.322,
+        "mean_ms": 0.5881833333333334,
+        "total_ms": 105.873
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.007,
+          "p95_ms": 0.017,
+          "p99_ms": 0.022,
+          "max_ms": 0.022,
+          "mean_ms": 0.007611111111111112,
+          "total_ms": 1.37
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.003,
+          "p95_ms": 0.008,
+          "p99_ms": 0.011,
+          "max_ms": 0.012,
+          "mean_ms": 0.003927777777777777,
+          "total_ms": 0.707
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.481,
+          "p95_ms": 1.102,
+          "p99_ms": 1.468,
+          "max_ms": 2.274,
+          "mean_ms": 0.5699888888888889,
+          "total_ms": 102.598
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.005,
+          "p95_ms": 0.013,
+          "p99_ms": 0.025,
+          "max_ms": 0.026,
+          "mean_ms": 0.006655555555555555,
+          "total_ms": 1.198
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.016,
+          "p95_ms": 0.045,
+          "p99_ms": 0.053,
+          "max_ms": 0.082,
+          "mean_ms": 0.01956111111111111,
+          "total_ms": 3.521
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.147,
+          "p95_ms": 0.365,
+          "p99_ms": 0.714,
+          "max_ms": 0.721,
+          "mean_ms": 0.1828888888888889,
+          "total_ms": 32.92
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.03,
+          "p99_ms": 0.152,
+          "max_ms": 0.192,
+          "mean_ms": 0.014294444444444445,
+          "total_ms": 2.573
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.011,
+          "p95_ms": 0.018,
+          "p99_ms": 0.024,
+          "max_ms": 0.027,
+          "mean_ms": 0.01198888888888889,
+          "total_ms": 2.158
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.017,
+          "p95_ms": 0.033,
+          "p99_ms": 0.05,
+          "max_ms": 0.055,
+          "mean_ms": 0.019716666666666667,
+          "total_ms": 3.549
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.029,
+          "p95_ms": 0.064,
+          "p99_ms": 0.107,
+          "max_ms": 0.131,
+          "mean_ms": 0.034194444444444444,
+          "total_ms": 6.155
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.132,
+          "p95_ms": 0.211,
+          "p99_ms": 0.728,
+          "max_ms": 1.436,
+          "mean_ms": 0.15236666666666665,
+          "total_ms": 27.426
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.01,
+          "max_ms": 0.011,
+          "mean_ms": 0.007916666666666667,
+          "total_ms": 1.425
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.07,
+          "p95_ms": 0.444,
+          "p99_ms": 0.838,
+          "max_ms": 0.9,
+          "mean_ms": 0.11860555555555556,
+          "total_ms": 21.349
+        }
+      },
+      "acquire_wait_fraction": 0.03352129438100365,
+      "view": {
+        "camera_positions": 180,
+        "aim_positions": 0,
+        "target_frames": 0,
+        "preview_frames": 0
+      },
+      "edits": 0,
+      "edit_latency": {
+        "samples": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p99_ms": null,
+        "max_ms": null,
+        "mean_ms": null,
+        "total_ms": 0
+      },
+      "name": "district-camera",
+      "districts": 1,
+      "view_mode": "camera",
+      "edit_every_frames": 0,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 9773136,
+      "initial_assemblies": 616,
+      "initial_regions": 13736,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 0,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.319976806640625,
+        "p95_mib": 0.3206634521484375,
+        "p99_mib": 0.3212127685546875,
+        "max_mib": 0.3212127685546875,
+        "mean_mib": 0.32006988525390623,
+        "total_mib": 57.612579345703125
+      },
+      "visible_bodies_max": 559,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 559,
+      "draw_calls_mean": 520.4555555555555,
+      "visible_bodies_mean": 520.4555555555555,
+      "proxy_vertices_max": 18432,
+      "pass": true,
+      "errors": [],
+      "scene": 2,
+      "initialization_ms": 91.979,
+      "surface_rectangles": 81496,
+      "solid_cells_start": 9773136,
+      "solid_cells_end": 9773136,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.228007,
+      "throughput_fps": 789.4494467275127,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 1.206,
+        "p95_ms": 2.247,
+        "p99_ms": 2.637,
+        "max_ms": 3.73,
+        "mean_ms": 1.2667055555555555,
+        "total_ms": 228.007
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.018,
+          "p95_ms": 0.038,
+          "p99_ms": 0.06,
+          "max_ms": 0.064,
+          "mean_ms": 0.020905555555555556,
+          "total_ms": 3.763
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.004,
+          "p95_ms": 0.008,
+          "p99_ms": 0.012,
+          "max_ms": 0.021,
+          "mean_ms": 0.004855555555555556,
+          "total_ms": 0.874
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 1.177,
+          "p95_ms": 2.22,
+          "p99_ms": 2.61,
+          "max_ms": 3.701,
+          "mean_ms": 1.2328,
+          "total_ms": 221.904
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.007,
+          "p95_ms": 0.015,
+          "p99_ms": 0.019,
+          "max_ms": 0.031,
+          "mean_ms": 0.008144444444444444,
+          "total_ms": 1.466
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.03,
+          "p95_ms": 0.062,
+          "p99_ms": 0.08,
+          "max_ms": 0.089,
+          "mean_ms": 0.03475555555555555,
+          "total_ms": 6.256
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.182,
+          "p95_ms": 0.432,
+          "p99_ms": 0.632,
+          "max_ms": 1.033,
+          "mean_ms": 0.22225,
+          "total_ms": 40.005
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.56,
+          "p95_ms": 0.667,
+          "p99_ms": 0.726,
+          "max_ms": 0.727,
+          "mean_ms": 0.4971555555555556,
+          "total_ms": 89.488
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.014,
+          "p95_ms": 0.029,
+          "p99_ms": 0.035,
+          "max_ms": 0.043,
+          "mean_ms": 0.014866666666666667,
+          "total_ms": 2.676
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.022,
+          "p95_ms": 0.05,
+          "p99_ms": 0.067,
+          "max_ms": 0.076,
+          "mean_ms": 0.02557777777777778,
+          "total_ms": 4.604
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.065,
+          "p95_ms": 0.142,
+          "p99_ms": 0.168,
+          "max_ms": 0.177,
+          "mean_ms": 0.07583333333333334,
+          "total_ms": 13.65
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.148,
+          "p95_ms": 0.235,
+          "p99_ms": 0.727,
+          "max_ms": 1.52,
+          "mean_ms": 0.17035,
+          "total_ms": 30.663
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.007,
+          "p95_ms": 0.009,
+          "p99_ms": 0.01,
+          "max_ms": 0.022,
+          "mean_ms": 0.007527777777777777,
+          "total_ms": 1.355
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.096,
+          "p95_ms": 0.43,
+          "p99_ms": 1.489,
+          "max_ms": 2.722,
+          "mean_ms": 0.1748777777777778,
+          "total_ms": 31.478
+        }
+      },
+      "acquire_wait_fraction": 0.020192362515185937,
+      "view": {
+        "camera_positions": 180,
+        "aim_positions": 0,
+        "target_frames": 0,
+        "preview_frames": 0
+      },
+      "edits": 0,
+      "edit_latency": {
+        "samples": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p99_ms": null,
+        "max_ms": null,
+        "mean_ms": null,
+        "total_ms": 0
+      },
+      "name": "district-camera-4",
+      "districts": 4,
+      "view_mode": "camera",
+      "edit_every_frames": 0,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 39092544,
+      "initial_assemblies": 2464,
+      "initial_regions": 54944,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 0,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.324920654296875,
+        "p95_mib": 0.3250579833984375,
+        "p99_mib": 0.325469970703125,
+        "max_mib": 0.325469970703125,
+        "mean_mib": 0.3248924255371094,
+        "total_mib": 58.48063659667969
+      },
+      "visible_bodies_max": 2317,
+      "lod_proxy_draws_max": 13,
+      "lod_proxied_bodies_max": 1664,
+      "lod_proxied_bodies_mean": 1587.5944444444444,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 800,
+      "draw_calls_mean": 711.4611111111111,
+      "visible_bodies_mean": 2286.5,
+      "proxy_vertices_max": 73728,
+      "pass": true,
+      "errors": [],
+      "scene": 3,
+      "initialization_ms": 344.417,
+      "surface_rectangles": 325984,
+      "solid_cells_start": 39092544,
+      "solid_cells_end": 39092544,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.681189,
+      "throughput_fps": 264.2438442194457,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 3.754,
+        "p95_ms": 6.789,
+        "p99_ms": 7.072,
+        "max_ms": 7.09,
+        "mean_ms": 3.784383333333333,
+        "total_ms": 681.189
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.082,
+          "p95_ms": 0.163,
+          "p99_ms": 0.222,
+          "max_ms": 0.244,
+          "mean_ms": 0.10323333333333334,
+          "total_ms": 18.582
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.012,
+          "p99_ms": 0.025,
+          "max_ms": 0.043,
+          "mean_ms": 0.00775,
+          "total_ms": 1.395
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 3.611,
+          "p95_ms": 6.611,
+          "p99_ms": 6.883,
+          "max_ms": 7.028,
+          "mean_ms": 3.6602,
+          "total_ms": 658.836
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.013,
+          "p95_ms": 0.02,
+          "p99_ms": 0.038,
+          "max_ms": 0.042,
+          "mean_ms": 0.0132,
+          "total_ms": 2.376
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.125,
+          "p95_ms": 0.189,
+          "p99_ms": 0.21,
+          "max_ms": 0.234,
+          "mean_ms": 0.12729444444444443,
+          "total_ms": 22.913
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.421,
+          "p95_ms": 0.788,
+          "p99_ms": 1.005,
+          "max_ms": 1.008,
+          "mean_ms": 0.5266388888888889,
+          "total_ms": 94.795
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 2.377,
+          "p95_ms": 2.907,
+          "p99_ms": 3.028,
+          "max_ms": 3.03,
+          "mean_ms": 2.2568722222222224,
+          "total_ms": 406.237
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.024,
+          "p95_ms": 0.04,
+          "p99_ms": 0.054,
+          "max_ms": 0.056,
+          "mean_ms": 0.02467222222222222,
+          "total_ms": 4.441
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.035,
+          "p95_ms": 0.059,
+          "p99_ms": 0.078,
+          "max_ms": 0.082,
+          "mean_ms": 0.039544444444444445,
+          "total_ms": 7.118
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.126,
+          "p95_ms": 0.243,
+          "p99_ms": 0.282,
+          "max_ms": 0.338,
+          "mean_ms": 0.14022222222222222,
+          "total_ms": 25.24
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.188,
+          "p95_ms": 0.283,
+          "p99_ms": 0.861,
+          "max_ms": 1.574,
+          "mean_ms": 0.2178,
+          "total_ms": 39.204
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.024,
+          "max_ms": 0.027,
+          "mean_ms": 0.007711111111111112,
+          "total_ms": 1.3880000000000001
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.121,
+          "p95_ms": 3.091,
+          "p99_ms": 3.334,
+          "max_ms": 3.393,
+          "mean_ms": 0.3062722222222222,
+          "total_ms": 55.129
+        }
+      },
+      "acquire_wait_fraction": 0.010449376017522303,
+      "view": {
+        "camera_positions": 180,
+        "aim_positions": 0,
+        "target_frames": 0,
+        "preview_frames": 0
+      },
+      "edits": 0,
+      "edit_latency": {
+        "samples": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p99_ms": null,
+        "max_ms": null,
+        "mean_ms": null,
+        "total_ms": 0
+      },
+      "name": "district-camera-16",
+      "districts": 16,
+      "view_mode": "camera",
+      "edit_every_frames": 0,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 2443284,
+      "initial_assemblies": 154,
+      "initial_regions": 3434,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 0,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.3284912109375,
+        "p95_mib": 0.32958984375,
+        "p99_mib": 0.335906982421875,
+        "max_mib": 0.335906982421875,
+        "mean_mib": 0.3290367126464844,
+        "total_mib": 59.22660827636719
+      },
+      "visible_bodies_max": 60,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 60,
+      "draw_calls_mean": 60.0,
+      "visible_bodies_mean": 60.0,
+      "proxy_vertices_max": 4608,
+      "pass": true,
+      "errors": [],
+      "scene": 1,
+      "initialization_ms": 28.046,
+      "surface_rectangles": 20374,
+      "solid_cells_start": 2443284,
+      "solid_cells_end": 2443284,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.105345,
+      "throughput_fps": 1708.6715079026058,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.552,
+        "p95_ms": 0.899,
+        "p99_ms": 1.344,
+        "max_ms": 1.926,
+        "mean_ms": 0.58525,
+        "total_ms": 105.345
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.006,
+          "p95_ms": 0.012,
+          "p99_ms": 0.026,
+          "max_ms": 0.182,
+          "mean_ms": 0.008038888888888889,
+          "total_ms": 1.447
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.013,
+          "p95_ms": 0.031,
+          "p99_ms": 0.09,
+          "max_ms": 0.097,
+          "mean_ms": 0.01688888888888889,
+          "total_ms": 3.04
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.521,
+          "p95_ms": 0.869,
+          "p99_ms": 1.32,
+          "max_ms": 1.898,
+          "mean_ms": 0.5543055555555556,
+          "total_ms": 99.775
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.005,
+          "p95_ms": 0.009,
+          "p99_ms": 0.016,
+          "max_ms": 0.019,
+          "mean_ms": 0.006016666666666667,
+          "total_ms": 1.083
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.015,
+          "p95_ms": 0.028,
+          "p99_ms": 0.049,
+          "max_ms": 0.078,
+          "mean_ms": 0.017833333333333333,
+          "total_ms": 3.21
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.174,
+          "p95_ms": 0.266,
+          "p99_ms": 0.399,
+          "max_ms": 0.406,
+          "mean_ms": 0.1939944444444444,
+          "total_ms": 34.919
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.012,
+          "p99_ms": 0.085,
+          "max_ms": 0.254,
+          "mean_ms": 0.011594444444444444,
+          "total_ms": 2.0869999999999997
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.012,
+          "p95_ms": 0.022,
+          "p99_ms": 0.044,
+          "max_ms": 0.051,
+          "mean_ms": 0.013538888888888889,
+          "total_ms": 2.437
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.017,
+          "p95_ms": 0.048,
+          "p99_ms": 0.076,
+          "max_ms": 0.08,
+          "mean_ms": 0.022122222222222224,
+          "total_ms": 3.982
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.029,
+          "p95_ms": 0.06,
+          "p99_ms": 0.081,
+          "max_ms": 0.085,
+          "mean_ms": 0.03443333333333334,
+          "total_ms": 6.198
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.129,
+          "p95_ms": 0.178,
+          "p99_ms": 0.701,
+          "max_ms": 1.453,
+          "mean_ms": 0.1475,
+          "total_ms": 26.55
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.01,
+          "max_ms": 0.011,
+          "mean_ms": 0.007827777777777777,
+          "total_ms": 1.409
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.072,
+          "p95_ms": 0.182,
+          "p99_ms": 0.503,
+          "max_ms": 0.655,
+          "mean_ms": 0.09693333333333333,
+          "total_ms": 17.448
+        }
+      },
+      "acquire_wait_fraction": 0.037799610802600976,
+      "view": {
+        "camera_positions": 1,
+        "aim_positions": 88,
+        "target_frames": 180,
+        "preview_frames": 172
+      },
+      "edits": 0,
+      "edit_latency": {
+        "samples": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p99_ms": null,
+        "max_ms": null,
+        "mean_ms": null,
+        "total_ms": 0
+      },
+      "name": "district-aim",
+      "districts": 1,
+      "view_mode": "aim",
+      "edit_every_frames": 0,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 39092544,
+      "initial_assemblies": 2464,
+      "initial_regions": 54944,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 0,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.3316497802734375,
+        "p95_mib": 0.3327484130859375,
+        "p99_mib": 0.3390655517578125,
+        "max_mib": 0.3390655517578125,
+        "mean_mib": 0.33186187744140627,
+        "total_mib": 59.735137939453125
+      },
+      "visible_bodies_max": 61,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 61,
+      "draw_calls_mean": 61.0,
+      "visible_bodies_mean": 61.0,
+      "proxy_vertices_max": 73728,
+      "pass": true,
+      "errors": [],
+      "scene": 3,
+      "initialization_ms": 339.005,
+      "surface_rectangles": 325984,
+      "solid_cells_start": 39092544,
+      "solid_cells_end": 39092544,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.175199,
+      "throughput_fps": 1027.4031244470573,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.829,
+        "p95_ms": 1.526,
+        "p99_ms": 1.997,
+        "max_ms": 2.879,
+        "mean_ms": 0.9733277777777778,
+        "total_ms": 175.199
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.0,
+          "max_ms": 0.0,
+          "mean_ms": 0.0,
+          "total_ms": 0.0
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.053,
+          "p95_ms": 0.191,
+          "p99_ms": 0.403,
+          "max_ms": 0.403,
+          "mean_ms": 0.07658333333333334,
+          "total_ms": 13.785
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.103,
+          "p95_ms": 0.219,
+          "p99_ms": 0.31,
+          "max_ms": 0.319,
+          "mean_ms": 0.11684444444444445,
+          "total_ms": 21.032
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.655,
+          "p95_ms": 1.207,
+          "p99_ms": 1.487,
+          "max_ms": 2.702,
+          "mean_ms": 0.7716666666666667,
+          "total_ms": 138.9
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.006,
+          "p95_ms": 0.017,
+          "p99_ms": 0.028,
+          "max_ms": 0.156,
+          "mean_ms": 0.008233333333333334,
+          "total_ms": 1.482
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.05,
+          "p95_ms": 0.13,
+          "p99_ms": 0.225,
+          "max_ms": 0.226,
+          "mean_ms": 0.06628333333333333,
+          "total_ms": 11.931
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.303,
+          "p95_ms": 0.533,
+          "p99_ms": 0.787,
+          "max_ms": 0.926,
+          "mean_ms": 0.34470555555555554,
+          "total_ms": 62.047
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.011,
+          "p99_ms": 0.013,
+          "max_ms": 0.032,
+          "mean_ms": 0.00936111111111111,
+          "total_ms": 1.6849999999999998
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.011,
+          "p95_ms": 0.018,
+          "p99_ms": 0.031,
+          "max_ms": 0.032,
+          "mean_ms": 0.012494444444444445,
+          "total_ms": 2.249
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.017,
+          "p95_ms": 0.032,
+          "p99_ms": 0.064,
+          "max_ms": 0.191,
+          "mean_ms": 0.020722222222222222,
+          "total_ms": 3.73
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.028,
+          "p95_ms": 0.064,
+          "p99_ms": 0.091,
+          "max_ms": 0.092,
+          "mean_ms": 0.033383333333333334,
+          "total_ms": 6.009
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.133,
+          "p95_ms": 0.2,
+          "p99_ms": 0.698,
+          "max_ms": 1.587,
+          "mean_ms": 0.15532222222222222,
+          "total_ms": 27.958
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.01,
+          "max_ms": 0.015,
+          "mean_ms": 0.007861111111111112,
+          "total_ms": 1.415
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.075,
+          "p95_ms": 0.514,
+          "p99_ms": 0.704,
+          "max_ms": 0.732,
+          "mean_ms": 0.1119388888888889,
+          "total_ms": 20.149
+        }
+      },
+      "acquire_wait_fraction": 0.021290075856597354,
+      "view": {
+        "camera_positions": 1,
+        "aim_positions": 88,
+        "target_frames": 180,
+        "preview_frames": 172
+      },
+      "edits": 0,
+      "edit_latency": {
+        "samples": 0,
+        "p50_ms": null,
+        "p95_ms": null,
+        "p99_ms": null,
+        "max_ms": null,
+        "mean_ms": null,
+        "total_ms": 0
+      },
+      "name": "district-aim-16",
+      "districts": 16,
+      "view_mode": "aim",
+      "edit_every_frames": 0,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 2443284,
+      "initial_assemblies": 154,
+      "initial_regions": 3434,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 6,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.323272705078125,
+        "p95_mib": 0.323822021484375,
+        "p99_mib": 0.52459716796875,
+        "max_mib": 0.5403900146484375,
+        "mean_mib": 0.3289344787597656,
+        "total_mib": 59.20820617675781
+      },
+      "visible_bodies_max": 70,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 70,
+      "draw_calls_mean": 70.0,
+      "visible_bodies_mean": 70.0,
+      "proxy_vertices_max": 4608,
+      "pass": true,
+      "errors": [],
+      "scene": 1,
+      "initialization_ms": 24.901,
+      "surface_rectangles": 20374,
+      "solid_cells_start": 2443284,
+      "solid_cells_end": 2443068,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.132697,
+      "throughput_fps": 1356.4737710724432,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.532,
+        "p95_ms": 1.152,
+        "p99_ms": 6.377,
+        "max_ms": 7.328,
+        "mean_ms": 0.7372055555555556,
+        "total_ms": 132.697
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.386,
+          "max_ms": 0.437,
+          "mean_ms": 0.011944444444444443,
+          "total_ms": 2.15
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.81,
+          "max_ms": 0.956,
+          "mean_ms": 0.021961111111111112,
+          "total_ms": 3.953
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 4.41,
+          "max_ms": 4.945,
+          "mean_ms": 0.10791111111111111,
+          "total_ms": 19.424
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.156,
+          "max_ms": 0.162,
+          "mean_ms": 0.004166666666666667,
+          "total_ms": 0.75
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.007,
+          "p95_ms": 0.015,
+          "p99_ms": 0.022,
+          "max_ms": 0.026,
+          "mean_ms": 0.007538888888888888,
+          "total_ms": 1.357
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.003,
+          "p95_ms": 0.007,
+          "p99_ms": 0.011,
+          "max_ms": 0.023,
+          "mean_ms": 0.0037722222222222224,
+          "total_ms": 0.679
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.516,
+          "p95_ms": 1.019,
+          "p99_ms": 1.3,
+          "max_ms": 1.591,
+          "mean_ms": 0.5737166666666667,
+          "total_ms": 103.269
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.005,
+          "p95_ms": 0.014,
+          "p99_ms": 0.018,
+          "max_ms": 0.02,
+          "mean_ms": 0.006194444444444444,
+          "total_ms": 1.115
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.015,
+          "p95_ms": 0.04,
+          "p99_ms": 0.052,
+          "max_ms": 0.11,
+          "mean_ms": 0.018944444444444444,
+          "total_ms": 3.41
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.162,
+          "p95_ms": 0.307,
+          "p99_ms": 0.395,
+          "max_ms": 0.567,
+          "mean_ms": 0.18860555555555555,
+          "total_ms": 33.949
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.012,
+          "p99_ms": 0.127,
+          "max_ms": 0.228,
+          "mean_ms": 0.012255555555555556,
+          "total_ms": 2.206
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.011,
+          "p95_ms": 0.021,
+          "p99_ms": 0.047,
+          "max_ms": 0.065,
+          "mean_ms": 0.012672222222222224,
+          "total_ms": 2.281
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.017,
+          "p95_ms": 0.041,
+          "p99_ms": 0.065,
+          "max_ms": 0.072,
+          "mean_ms": 0.020516666666666666,
+          "total_ms": 3.693
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.027,
+          "p95_ms": 0.062,
+          "p99_ms": 0.075,
+          "max_ms": 0.105,
+          "mean_ms": 0.033805555555555554,
+          "total_ms": 6.085
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.131,
+          "p95_ms": 0.185,
+          "p99_ms": 0.739,
+          "max_ms": 1.23,
+          "mean_ms": 0.15049444444444443,
+          "total_ms": 27.089
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.009,
+          "max_ms": 0.03,
+          "mean_ms": 0.008016666666666667,
+          "total_ms": 1.443
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.079,
+          "p95_ms": 0.46,
+          "p99_ms": 0.68,
+          "max_ms": 0.76,
+          "mean_ms": 0.12012222222222223,
+          "total_ms": 21.622
+        }
+      },
+      "acquire_wait_fraction": 0.027830320203169626,
+      "view": {
+        "camera_positions": 1,
+        "aim_positions": 0,
+        "target_frames": 0,
+        "preview_frames": 0
+      },
+      "edits": 6,
+      "edit_latency": {
+        "samples": 6,
+        "p50_ms": 4.79,
+        "p95_ms": 7.315,
+        "p99_ms": 7.315,
+        "max_ms": 7.315,
+        "mean_ms": 5.130833333333333,
+        "total_ms": 30.785
+      },
+      "name": "district-carve",
+      "districts": 1,
+      "view_mode": "carve",
+      "edit_every_frames": 30,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 2443284,
+      "initial_assemblies": 154,
+      "initial_regions": 3434,
+      "body_budget": 2048,
+      "max_moving_bodies": 1,
+      "max_translated_bodies": 1,
+      "minimum_body_offset_m": -16.0,
+      "meshes_rebuilt": 4,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.3214874267578125,
+        "p95_mib": 0.322998046875,
+        "p99_mib": 0.4077301025390625,
+        "max_mib": 0.430938720703125,
+        "mean_mib": 0.3227729797363281,
+        "total_mib": 58.09913635253906
+      },
+      "visible_bodies_max": 3,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 3,
+      "draw_calls_mean": 2.511111111111111,
+      "visible_bodies_mean": 2.511111111111111,
+      "proxy_vertices_max": 4608,
+      "pass": true,
+      "errors": [],
+      "scene": 1,
+      "initialization_ms": 25.944,
+      "surface_rectangles": 20374,
+      "solid_cells_start": 2443284,
+      "solid_cells_end": 2443228,
+      "max_bodies": 1,
+      "measured_frames": 180,
+      "measured_seconds": 0.103581,
+      "throughput_fps": 1737.7704405248066,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.485,
+        "p95_ms": 0.963,
+        "p99_ms": 1.884,
+        "max_ms": 2.016,
+        "mean_ms": 0.57545,
+        "total_ms": 103.581
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.301,
+          "max_ms": 0.311,
+          "mean_ms": 0.0034,
+          "total_ms": 0.612
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.194,
+          "max_ms": 0.223,
+          "mean_ms": 0.002316666666666667,
+          "total_ms": 0.41700000000000004
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.54,
+          "max_ms": 0.666,
+          "mean_ms": 0.006699999999999999,
+          "total_ms": 1.206
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.055,
+          "max_ms": 0.066,
+          "mean_ms": 0.0006722222222222222,
+          "total_ms": 0.121
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.007,
+          "p95_ms": 0.013,
+          "p99_ms": 0.019,
+          "max_ms": 0.023,
+          "mean_ms": 0.007861111111111112,
+          "total_ms": 1.415
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.004,
+          "p95_ms": 0.007,
+          "p99_ms": 0.009,
+          "max_ms": 0.01,
+          "mean_ms": 0.0038833333333333337,
+          "total_ms": 0.6990000000000001
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.469,
+          "p95_ms": 0.905,
+          "p99_ms": 1.052,
+          "max_ms": 2.001,
+          "mean_ms": 0.5441888888888888,
+          "total_ms": 97.954
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.005,
+          "p95_ms": 0.012,
+          "p99_ms": 0.015,
+          "max_ms": 0.047,
+          "mean_ms": 0.006427777777777778,
+          "total_ms": 1.157
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.015,
+          "p95_ms": 0.035,
+          "p99_ms": 0.049,
+          "max_ms": 0.052,
+          "mean_ms": 0.01867777777777778,
+          "total_ms": 3.362
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.146,
+          "p95_ms": 0.24,
+          "p99_ms": 0.382,
+          "max_ms": 0.383,
+          "mean_ms": 0.1663222222222222,
+          "total_ms": 29.938
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.01,
+          "p99_ms": 0.017,
+          "max_ms": 0.027,
+          "mean_ms": 0.009272222222222222,
+          "total_ms": 1.6689999999999998
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.012,
+          "p95_ms": 0.017,
+          "p99_ms": 0.029,
+          "max_ms": 0.034,
+          "mean_ms": 0.012327777777777778,
+          "total_ms": 2.219
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.017,
+          "p95_ms": 0.035,
+          "p99_ms": 0.042,
+          "max_ms": 0.146,
+          "mean_ms": 0.01965,
+          "total_ms": 3.537
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.023,
+          "p95_ms": 0.043,
+          "p99_ms": 0.082,
+          "max_ms": 0.087,
+          "mean_ms": 0.02643888888888889,
+          "total_ms": 4.759
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.13,
+          "p95_ms": 0.211,
+          "p99_ms": 0.655,
+          "max_ms": 1.33,
+          "mean_ms": 0.1476,
+          "total_ms": 26.568
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.011,
+          "max_ms": 0.08,
+          "mean_ms": 0.008233333333333334,
+          "total_ms": 1.482
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.078,
+          "p95_ms": 0.309,
+          "p99_ms": 0.552,
+          "max_ms": 0.623,
+          "mean_ms": 0.12757222222222223,
+          "total_ms": 22.963
+        }
+      },
+      "acquire_wait_fraction": 0.03414718915631245,
+      "view": {
+        "camera_positions": 1,
+        "aim_positions": 0,
+        "target_frames": 0,
+        "preview_frames": 0
+      },
+      "edits": 2,
+      "edit_latency": {
+        "samples": 2,
+        "p50_ms": 1.631,
+        "p95_ms": 1.873,
+        "p99_ms": 1.873,
+        "max_ms": 1.873,
+        "mean_ms": 1.752,
+        "total_ms": 3.504
+      },
+      "name": "district-bridge",
+      "districts": 1,
+      "view_mode": "bridge",
+      "edit_every_frames": 30,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 2443284,
+      "initial_assemblies": 154,
+      "initial_regions": 3434,
+      "body_budget": 2048,
+      "max_moving_bodies": 128,
+      "max_translated_bodies": 128,
+      "minimum_body_offset_m": -1.2,
+      "meshes_rebuilt": 256,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.3316497802734375,
+        "p95_mib": 0.474884033203125,
+        "p99_mib": 0.476806640625,
+        "max_mib": 0.477081298828125,
+        "mean_mib": 0.34431610107421873,
+        "total_mib": 61.976898193359375
+      },
+      "visible_bodies_max": 221,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 16,
+      "draw_calls_max": 221,
+      "draw_calls_mean": 126.50555555555556,
+      "visible_bodies_mean": 126.50555555555556,
+      "proxy_vertices_max": 4608,
+      "pass": true,
+      "errors": [],
+      "scene": 1,
+      "initialization_ms": 25.775,
+      "surface_rectangles": 20374,
+      "solid_cells_start": 2443284,
+      "solid_cells_end": 2441236,
+      "max_bodies": 128,
+      "measured_frames": 180,
+      "measured_seconds": 0.138902,
+      "throughput_fps": 1295.8776691480325,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.565,
+        "p95_ms": 2.263,
+        "p99_ms": 2.602,
+        "max_ms": 3.289,
+        "mean_ms": 0.7716777777777777,
+        "total_ms": 138.902
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 1.166,
+          "p99_ms": 1.38,
+          "max_ms": 1.932,
+          "mean_ms": 0.10969999999999999,
+          "total_ms": 19.746
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.038,
+          "p99_ms": 0.044,
+          "max_ms": 0.053,
+          "mean_ms": 0.0034333333333333334,
+          "total_ms": 0.618
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.127,
+          "p99_ms": 0.147,
+          "max_ms": 0.188,
+          "mean_ms": 0.011477777777777778,
+          "total_ms": 2.066
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.176,
+          "p99_ms": 0.234,
+          "max_ms": 0.249,
+          "mean_ms": 0.01647222222222222,
+          "total_ms": 2.965
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.012,
+          "p95_ms": 0.049,
+          "p99_ms": 0.062,
+          "max_ms": 0.081,
+          "mean_ms": 0.017216666666666665,
+          "total_ms": 3.0989999999999998
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.016,
+          "p95_ms": 0.039,
+          "p99_ms": 0.054,
+          "max_ms": 0.31,
+          "mean_ms": 0.020066666666666667,
+          "total_ms": 3.612
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.531,
+          "p95_ms": 1.007,
+          "p99_ms": 1.185,
+          "max_ms": 1.6,
+          "mean_ms": 0.5854277777777778,
+          "total_ms": 105.377
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.005,
+          "p95_ms": 0.02,
+          "p99_ms": 0.028,
+          "max_ms": 0.077,
+          "mean_ms": 0.007883333333333334,
+          "total_ms": 1.419
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.018,
+          "p95_ms": 0.045,
+          "p99_ms": 0.084,
+          "max_ms": 0.105,
+          "mean_ms": 0.02344444444444444,
+          "total_ms": 4.22
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.17,
+          "p95_ms": 0.327,
+          "p99_ms": 0.414,
+          "max_ms": 0.44,
+          "mean_ms": 0.20407222222222224,
+          "total_ms": 36.733000000000004
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.01,
+          "p99_ms": 0.12,
+          "max_ms": 0.367,
+          "mean_ms": 0.011866666666666664,
+          "total_ms": 2.1359999999999997
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.012,
+          "p95_ms": 0.021,
+          "p99_ms": 0.04,
+          "max_ms": 0.083,
+          "mean_ms": 0.01363888888888889,
+          "total_ms": 2.455
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.017,
+          "p95_ms": 0.04,
+          "p99_ms": 0.05,
+          "max_ms": 0.069,
+          "mean_ms": 0.020638888888888887,
+          "total_ms": 3.715
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.032,
+          "p95_ms": 0.065,
+          "p99_ms": 0.095,
+          "max_ms": 0.096,
+          "mean_ms": 0.038761111111111114,
+          "total_ms": 6.977
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.13,
+          "p95_ms": 0.174,
+          "p99_ms": 0.659,
+          "max_ms": 1.217,
+          "mean_ms": 0.14616111111111113,
+          "total_ms": 26.309
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.01,
+          "max_ms": 0.029,
+          "mean_ms": 0.00805,
+          "total_ms": 1.449
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.077,
+          "p95_ms": 0.269,
+          "p99_ms": 0.632,
+          "max_ms": 0.787,
+          "mean_ms": 0.11038333333333333,
+          "total_ms": 19.869
+        }
+      },
+      "acquire_wait_fraction": 0.02674547522713856,
+      "view": {
+        "camera_positions": 46,
+        "aim_positions": 46,
+        "target_frames": 180,
+        "preview_frames": 180
+      },
+      "edits": 128,
+      "edit_latency": {
+        "samples": 128,
+        "p50_ms": 1.484,
+        "p95_ms": 2.299,
+        "p99_ms": 2.576,
+        "max_ms": 3.181,
+        "mean_ms": 1.536671875,
+        "total_ms": 196.694
+      },
+      "name": "district-fragments",
+      "districts": 1,
+      "view_mode": "fragments",
+      "edit_every_frames": 1,
+      "present_mode": "immediate"
+    },
+    {
+      "initial_solid_cells": 9773136,
+      "initial_assemblies": 616,
+      "initial_regions": 13736,
+      "body_budget": 2048,
+      "max_moving_bodies": 512,
+      "max_translated_bodies": 512,
+      "minimum_body_offset_m": -1.2,
+      "meshes_rebuilt": 1024,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.33453369140625,
+        "p95_mib": 0.5999908447265625,
+        "p99_mib": 0.6009521484375,
+        "max_mib": 0.6019134521484375,
+        "mean_mib": 0.35797271728515623,
+        "total_mib": 64.43508911132812
+      },
+      "visible_bodies_max": 132,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 16,
+      "draw_calls_max": 132,
+      "draw_calls_mean": 124.72222222222223,
+      "visible_bodies_mean": 124.72222222222223,
+      "proxy_vertices_max": 18432,
+      "pass": true,
+      "errors": [],
+      "scene": 2,
+      "initialization_ms": 89.187,
+      "surface_rectangles": 81496,
+      "solid_cells_start": 9773136,
+      "solid_cells_end": 9764944,
+      "max_bodies": 512,
+      "measured_frames": 180,
+      "measured_seconds": 0.495661,
+      "throughput_fps": 363.15142809299095,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.685,
+        "p95_ms": 22.751,
+        "p99_ms": 25.843,
+        "max_ms": 27.755,
+        "mean_ms": 2.7536722222222223,
+        "total_ms": 495.661
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 17.47,
+          "p99_ms": 19.63,
+          "max_ms": 21.56,
+          "mean_ms": 1.5891777777777778,
+          "total_ms": 286.052
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.141,
+          "p99_ms": 0.169,
+          "max_ms": 0.181,
+          "mean_ms": 0.01305,
+          "total_ms": 2.349
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 1.008,
+          "p99_ms": 1.324,
+          "max_ms": 1.346,
+          "mean_ms": 0.09523333333333334,
+          "total_ms": 17.142
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 2.492,
+          "p99_ms": 3.378,
+          "max_ms": 3.58,
+          "mean_ms": 0.23423333333333332,
+          "total_ms": 42.162
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.04,
+          "p95_ms": 0.201,
+          "p99_ms": 0.27,
+          "max_ms": 0.332,
+          "mean_ms": 0.062127777777777775,
+          "total_ms": 11.183
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.052,
+          "p95_ms": 0.116,
+          "p99_ms": 0.158,
+          "max_ms": 0.193,
+          "mean_ms": 0.06088333333333333,
+          "total_ms": 10.959
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.579,
+          "p95_ms": 1.178,
+          "p99_ms": 1.698,
+          "max_ms": 1.821,
+          "mean_ms": 0.6845611111111112,
+          "total_ms": 123.221
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.006,
+          "p95_ms": 0.069,
+          "p99_ms": 0.185,
+          "max_ms": 0.197,
+          "mean_ms": 0.014405555555555555,
+          "total_ms": 2.593
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.042,
+          "p95_ms": 0.103,
+          "p99_ms": 0.137,
+          "max_ms": 0.14,
+          "mean_ms": 0.05198888888888889,
+          "total_ms": 9.358
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.23,
+          "p95_ms": 0.455,
+          "p99_ms": 0.637,
+          "max_ms": 0.663,
+          "mean_ms": 0.2645777777777778,
+          "total_ms": 47.624
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.01,
+          "p99_ms": 0.028,
+          "max_ms": 0.029,
+          "mean_ms": 0.009377777777777778,
+          "total_ms": 1.688
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.012,
+          "p95_ms": 0.029,
+          "p99_ms": 0.038,
+          "max_ms": 0.049,
+          "mean_ms": 0.014172222222222223,
+          "total_ms": 2.551
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.017,
+          "p95_ms": 0.035,
+          "p99_ms": 0.061,
+          "max_ms": 0.061,
+          "mean_ms": 0.0203,
+          "total_ms": 3.654
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.031,
+          "p95_ms": 0.064,
+          "p99_ms": 0.088,
+          "max_ms": 0.091,
+          "mean_ms": 0.03663888888888889,
+          "total_ms": 6.595
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.129,
+          "p95_ms": 0.199,
+          "p99_ms": 0.691,
+          "max_ms": 1.306,
+          "mean_ms": 0.14979444444444445,
+          "total_ms": 26.963
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.026,
+          "max_ms": 0.028,
+          "mean_ms": 0.00813888888888889,
+          "total_ms": 1.465
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.072,
+          "p95_ms": 0.449,
+          "p99_ms": 0.79,
+          "max_ms": 0.808,
+          "mean_ms": 0.12105,
+          "total_ms": 21.789
+        }
+      },
+      "acquire_wait_fraction": 0.007371973990287717,
+      "view": {
+        "camera_positions": 46,
+        "aim_positions": 46,
+        "target_frames": 180,
+        "preview_frames": 180
+      },
+      "edits": 512,
+      "edit_latency": {
+        "samples": 512,
+        "p50_ms": 12.034,
+        "p95_ms": 22.325,
+        "p99_ms": 24.649,
+        "max_ms": 27.481,
+        "mean_ms": 12.173134765624999,
+        "total_ms": 6232.6449999999995
+      },
+      "name": "district-fragments-4",
+      "districts": 4,
+      "view_mode": "fragments",
+      "edit_every_frames": 1,
+      "present_mode": "immediate"
+    }
+  ],
+  "pass": true
+}

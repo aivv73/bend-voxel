@@ -21,6 +21,12 @@ The build requires Bend 2.0.27, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surf
 
 The native effect returns the same Bend state it received. The effect depends on Bend 2.0.27's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, or `Face` definitions require reviewing that bridge.
 
+## Render LOD
+
+The native renderer keeps full meshes for every body and groups small anchored bodies into 64 m render tiles. A distant tile can use one draw containing a bounding box for each member, colored by that member's largest exposed material. A tile switches to its proxy below an 80-pixel projected diameter and returns to full meshes above 100 pixels. The gap prevents rapid switching near the threshold. Aimed-at tiles and all detached or large bodies use full meshes.
+
+Proxy meshes are cached by member body IDs and revisions. Camera movement and aim changes select meshes without rebuilding them; edits and detachments update only affected tiles. This LOD changes rendering alone: Bend still simulates, cuts, and picks the full-resolution world. Both full and proxy meshes occupy the renderer's vertex arena, so LOD trades some memory for fewer distant draw calls. The box proxies simplify small open structures at a distance; they are meant for the demo's overview scale rather than close inspection.
+
 ## Material colors
 
 `src/material.bend` names the four stable voxel IDs and defines which one marks protected foundations. `src/vulkan/material.hpp` gives each ID an OKLCH base color. The renderer builds sRGB swatches once for each material, face direction, and anchor state. Detached bodies get a lightness/chroma adjustment in OKLCH, so their material hue remains visible. Side shading multiplies linear RGB before sRGB encoding. Out-of-gamut colors keep lightness and hue while chroma is reduced to fit sRGB.

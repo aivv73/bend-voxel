@@ -4,6 +4,7 @@
 #include "native.h"
 #include "material.hpp"
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
@@ -13,6 +14,7 @@
 #include <cstring>
 #include <fstream>
 #include <memory>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -158,19 +160,26 @@ Vec3 ring_point(Vec3 p,uint32_t axis,float angle) {
   float c=.2f*std::cos(angle),s=.2f*std::sin(angle);
   return axis==0?p+Vec3{0,c,s}:axis==1?p+Vec3{c,0,s}:p+Vec3{c,s,0};
 }
-Vec3 view_position(Vec3 p,const VoxelVkFrame& f) {
-  float sy=std::sin(f.yaw),cy=std::cos(f.yaw),sp=std::sin(f.pitch),cp=std::cos(f.pitch);
+struct ViewBasis {
+  float sy,cy,sp,cp;
+  explicit ViewBasis(const VoxelVkFrame& f):sy(std::sin(f.yaw)),cy(std::cos(f.yaw)),
+    sp(std::sin(f.pitch)),cp(std::cos(f.pitch)) {}
+};
+Vec3 view_position(Vec3 p,const VoxelVkFrame& f,const ViewBasis& basis) {
+  float sy=basis.sy,cy=basis.cy,sp=basis.sp,cp=basis.cp;
   Vec3 d=p-Vec3{f.eye[0],f.eye[1],f.eye[2]};
   return {dot(d,{-cy,0,sy}),dot(d,{-sy*sp,cp,-cy*sp}),dot(d,{sy*cp,sp,cy*cp})};
 }
-float view_depth(Vec3 p,const VoxelVkFrame& f) { return view_position(p,f).z; }
-bool visible(const VoxelVkBody& body,const VoxelVkFrame& frame) {
+float view_depth(Vec3 p,const VoxelVkFrame& f,const ViewBasis& basis) {
+  return view_position(p,f,basis).z;
+}
+bool visible(const VoxelVkBody& body,const VoxelVkFrame& frame,const ViewBasis& basis) {
   unsigned outside=31;
   for (unsigned corner=0;corner<8;corner++) {
     Vec3 p={(corner&1?body.hi[0]:body.lo[0])*.1f,
       (corner&2?body.hi[1]:body.lo[1])*.1f+body.offset,
       (corner&4?body.hi[2]:body.lo[2])*.1f};
-    auto v=view_position(p,frame);
+    auto v=view_position(p,frame,basis);
     unsigned mask=(v.z<.05f?1u:0u)|(v.x*1.25f>v.z?2u:0u)|
       (-v.x*1.25f>v.z?4u:0u)|(v.y*(400.f/180)>v.z?8u:0u)|
       (-v.y*(400.f/180)>v.z?16u:0u);
@@ -181,12 +190,101 @@ bool visible(const VoxelVkBody& body,const VoxelVkFrame& frame) {
 struct Range { uint32_t first,count; };
 struct Draw { uint32_t first,count; float offset; };
 struct Mesh { uint32_t revision,anchored,first,count,seen; };
+struct Proxy {
+  std::vector<uint64_t> members;
+  uint32_t first,count,seen;
+  bool selected;
+};
+struct BodyIdentity { uint32_t id,revision,anchored; };
+struct ProxyGroup {
+  std::vector<uint32_t> bodies;
+  std::vector<uint64_t> members;
+  std::array<float,3> lo,hi;
+  bool selected=false;
+  uint32_t visible_bodies=0;
+  ProxyGroup():lo{INFINITY,INFINITY,INFINITY},hi{-INFINITY,-INFINITY,-INFINITY} {}
+};
+// Render tiles are independent of the world's cuboid and component boundaries.
+// A 64 m tile groups small static objects, while large structures and all
+// detached bodies retain their full meshes.
+bool proxy_eligible(const VoxelVkBody& body) {
+  if (!body.anchored || body.offset!=0 || !body.face_count) return false;
+  for (uint32_t axis=0;axis<3;axis++)
+    if (body.hi[axis]-body.lo[axis]>35.f) return false;
+  return true;
+}
+uint64_t proxy_key(const VoxelVkBody& body) {
+  int32_t x=int32_t(std::floor(((body.lo[0]+body.hi[0])*.5f+320.f)/640.f));
+  int32_t z=int32_t(std::floor(((body.lo[2]+body.hi[2])*.5f+320.f)/640.f));
+  return (uint64_t(uint32_t(x))<<32)|uint32_t(z);
+}
+void proxy_add(ProxyGroup& group,const VoxelVkBody& body,uint32_t index) {
+  group.bodies.push_back(index);
+  group.members.push_back((uint64_t(body.id)<<32)|body.revision);
+  for (uint32_t axis=0;axis<3;axis++) {
+    group.lo[axis]=std::min(group.lo[axis],body.lo[axis]);
+    group.hi[axis]=std::max(group.hi[axis],body.hi[axis]);
+  }
+}
+float proxy_pixels(const ProxyGroup& group,const VoxelVkFrame& frame,const ViewBasis& basis) {
+  Vec3 center={(group.lo[0]+group.hi[0])*.05f,
+    (group.lo[1]+group.hi[1])*.05f,(group.lo[2]+group.hi[2])*.05f};
+  Vec3 half={(group.hi[0]-group.lo[0])*.05f,
+    (group.hi[1]-group.lo[1])*.05f,(group.hi[2]-group.lo[2])*.05f};
+  float radius=std::sqrt(dot(half,half));
+  float depth=view_depth(center,frame,basis)-radius;
+  return depth<=.05f ? INFINITY : 800.f*radius/depth;
+}
+bool proxy_near_aim(const ProxyGroup& group,const VoxelVkFrame& frame) {
+  if (!frame.aim_kind) return false;
+  for (uint32_t axis=0;axis<3;axis++)
+    if (frame.aim[axis]*10.f<group.lo[axis]-2.f ||
+        frame.aim[axis]*10.f>group.hi[axis]+2.f) return false;
+  return true;
+}
+bool proxy_visible(const ProxyGroup& group,const VoxelVkFrame& frame,const ViewBasis& basis) {
+  VoxelVkBody bounds{};
+  for (uint32_t axis=0;axis<3;axis++) {
+    bounds.lo[axis]=group.lo[axis]; bounds.hi[axis]=group.hi[axis];
+  }
+  return visible(bounds,frame,basis);
+}
+uint32_t proxy_material(const VoxelVkBody& body) {
+  std::array<float,5> area{};
+  for (uint32_t i=0;i<body.face_count;i++) {
+    const auto& f=body.faces[i];
+    material::find(f.material);
+    if (f.side>=6) throw std::runtime_error("invalid Bend face");
+    uint32_t u=(f.side/2+1)%3,v=(f.side/2+2)%3;
+    area[f.material]+=(f.hi[u]-f.lo[u])*(f.hi[v]-f.lo[v]);
+  }
+  return uint32_t(std::max_element(area.begin()+1,area.end())-area.begin());
+}
+void proxy_box(Geometry& mesh,const VoxelVkBody& body) {
+  uint32_t m=proxy_material(body);
+  for (uint32_t side=0;side<6;side++) {
+    VoxelVkFace f{};
+    for (uint32_t axis=0;axis<3;axis++) {
+      f.lo[axis]=body.lo[axis]; f.hi[axis]=body.hi[axis];
+    }
+    uint32_t axis=side/2;
+    f.lo[axis]=f.hi[axis]=side%2 ? body.hi[axis] : body.lo[axis];
+    f.side=side; f.material=m;
+    face(mesh,f,true);
+  }
+}
 struct GeometryCache {
   Geometry geometry;
   std::unordered_map<uint32_t,Mesh> meshes;
+  std::unordered_map<uint64_t,Proxy> proxies;
+  std::vector<BodyIdentity> group_world;
+  std::map<uint64_t,ProxyGroup> groups;
+  std::vector<ProxyGroup*> group_for_body;
   std::vector<Range> free,dirty;
   std::vector<Draw> draws;
-  uint32_t scene_vertices=0,generation=0,rebuilt=0;
+  uint32_t scene_vertices=0,generation=0,rebuilt=0,proxy_rebuilt=0;
+  uint32_t proxy_draws=0,proxied_bodies=0,visible_bodies=0;
+  size_t proxy_vertices=0;
   void release(Range range) {
     free.push_back(range);
     std::sort(free.begin(),free.end(),[](Range a,Range b){return a.first<b.first;});
@@ -210,24 +308,56 @@ struct GeometryCache {
     return first;
   }
 };
-// Geometry identity consists of body ID + revision. Camera, aim, culling and
-// transforms affect only draws/overlays. Dirty ranges upload edited meshes.
+// Full meshes use body ID + revision + anchor status. Proxy groups use their
+// member IDs and revisions; camera, aim, culling, and transforms only select
+// draws/overlays. Dirty ranges upload edited meshes and changed proxies.
 Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_reused) {
   Geometry& g=cache.geometry;
+  ViewBasis basis(frame);
   cache.generation++; cache.dirty.clear(); cache.draws.clear(); cache.rebuilt=0;
+  cache.proxy_rebuilt=cache.proxy_draws=cache.proxied_bodies=cache.visible_bodies=0;
+  cache.proxy_vertices=0;
   if (!cache.scene_vertices) {
     quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},rgb(0x1e303d));
     cache.scene_vertices=6; cache.dirty.push_back({0,6});
   }
+  bool world_changed=cache.group_world.size()!=frame.body_count;
   for (uint32_t i=0;i<frame.body_count;i++) {
-    auto it=cache.meshes.find(frame.bodies[i].id);
+    const auto& body=frame.bodies[i];
+    auto it=cache.meshes.find(body.id);
     if (it!=cache.meshes.end()) it->second.seen=cache.generation;
+    if (!world_changed) {
+      const auto& old=cache.group_world[i];
+      world_changed=old.id!=body.id || old.revision!=body.revision || old.anchored!=body.anchored;
+    }
   }
   for (auto it=cache.meshes.begin();it!=cache.meshes.end();) {
     if (it->second.seen!=cache.generation) {
       cache.release({it->second.first,it->second.count});
       it=cache.meshes.erase(it);
     } else ++it;
+  }
+  if (world_changed) {
+    cache.group_world.clear(); cache.groups.clear();
+    cache.group_for_body.assign(frame.body_count,nullptr);
+    for (uint32_t i=0;i<frame.body_count;i++) {
+      const auto& body=frame.bodies[i];
+      cache.group_world.push_back({body.id,body.revision,body.anchored});
+      if (proxy_eligible(body)) proxy_add(cache.groups[proxy_key(body)],body,i);
+    }
+    for (auto it=cache.groups.begin();it!=cache.groups.end();) {
+      if (it->second.bodies.size()<4) { it=cache.groups.erase(it); continue; }
+      std::sort(it->second.members.begin(),it->second.members.end());
+      for (auto index:it->second.bodies) cache.group_for_body[index]=&it->second;
+      ++it;
+    }
+  }
+  for (auto it=cache.groups.begin();it!=cache.groups.end();++it) {
+    it->second.visible_bodies=0;
+    auto prior=cache.proxies.find(it->first);
+    bool was_selected=prior!=cache.proxies.end() && prior->second.selected;
+    it->second.selected=proxy_pixels(it->second,frame,basis)<(was_selected?100.f:80.f) &&
+      !proxy_near_aim(it->second,frame);
   }
   g.vertices.resize(cache.scene_vertices);
   for (uint32_t i=0;i<frame.body_count;i++) {
@@ -244,7 +374,42 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
       cache.meshes[b.id]={b.revision,b.anchored,first,mesh.triangles,cache.generation};
     }
     const auto& mesh=cache.meshes.at(b.id);
-    if (visible(b,frame)) cache.draws.push_back({mesh.first,mesh.count,b.offset});
+    if (visible(b,frame,basis)) {
+      cache.visible_bodies++;
+      auto group=cache.group_for_body[i];
+      if (!group || !group->selected)
+        cache.draws.push_back({mesh.first,mesh.count,b.offset});
+      else group->visible_bodies++;
+    }
+  }
+  for (auto& [key,group]:cache.groups) {
+    auto it=cache.proxies.find(key);
+    if (it==cache.proxies.end() || it->second.members!=group.members) {
+      if (it!=cache.proxies.end()) cache.release({it->second.first,it->second.count});
+      Geometry mesh;
+      for (auto index:group.bodies) proxy_box(mesh,frame.bodies[index]);
+      uint32_t first=cache.allocate(mesh.triangles);
+      g.vertices.resize(cache.scene_vertices);
+      std::copy(mesh.vertices.begin(),mesh.vertices.end(),g.vertices.begin()+first);
+      cache.dirty.push_back({first,mesh.triangles}); cache.proxy_rebuilt++;
+      cache.proxies[key]={group.members,first,mesh.triangles,
+        cache.generation,group.selected};
+      it=cache.proxies.find(key);
+    } else {
+      it->second.seen=cache.generation;
+      it->second.selected=group.selected;
+    }
+    cache.proxy_vertices+=it->second.count;
+    if (group.selected && group.visible_bodies && proxy_visible(group,frame,basis)) {
+      cache.draws.push_back({it->second.first,it->second.count,0});
+      cache.proxy_draws++; cache.proxied_bodies+=group.visible_bodies;
+    }
+  }
+  for (auto it=cache.proxies.begin();it!=cache.proxies.end();) {
+    if (it->second.seen!=cache.generation) {
+      cache.release({it->second.first,it->second.count});
+      it=cache.proxies.erase(it);
+    } else ++it;
   }
   scene_reused=cache.dirty.empty();
   g.triangles=cache.scene_vertices; g.lines=0; g.hud=0;
@@ -257,7 +422,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
     Vec3 color=rgb(frame.aim_kind==1?16768872u:16552594u);
     for (uint32_t axis=0;axis<3;axis++) for (uint32_t i=0;i<12;i++) {
       Vec3 a=ring_point(p,axis,float(i)*.5235988f),b=ring_point(p,axis,float(i+1)*.5235988f);
-      if (view_depth(a,frame)>=.05f && view_depth(b,frame)>=.05f) line(g,a,b,color);
+      if (view_depth(a,frame,basis)>=.05f && view_depth(b,frame,basis)>=.05f) line(g,a,b,color);
     }
   }
   add_hud(g,frame.hud);
@@ -613,8 +778,12 @@ public:
     if (std::getenv("VOXEL_STRESS_SCENE")) {
       static uint32_t cache_frame;
       std::fprintf(stdout,"mesh_cache,%u,%u,%u,%zu,%u,%zu\n",cache_frame++,
-        geometry_cache.rebuilt,frame.body_count,geometry_cache.draws.size(),
+        geometry_cache.rebuilt,frame.body_count,size_t(geometry_cache.visible_bodies),
         geometry_cache.scene_vertices,uploaded_vertices*sizeof(Vertex));
+      std::fprintf(stdout,"lod_cache,%u,%u,%u,%u,%zu,%zu\n",cache_frame-1,
+        geometry_cache.proxy_draws,geometry_cache.proxied_bodies,
+        geometry_cache.proxy_rebuilt,geometry_cache.draws.size(),
+        geometry_cache.proxy_vertices);
     }
     timings.vertex_upload_us=microseconds(after_fence,after_upload);
     uint32_t index=0;

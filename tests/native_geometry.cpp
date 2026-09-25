@@ -44,6 +44,13 @@ static void expect_fresh(const VoxelVkFrame& frame,GeometryCache& cache,uint32_t
     assert(std::memcmp(actual.vertices.data()+a.first,expected.vertices.data()+b.first,
       a.count*sizeof(Vertex))==0);
   }
+  assert(cache.proxies.size()==fresh.proxies.size());
+  for (const auto& [key,a]:cache.proxies) {
+    const auto& b=fresh.proxies.at(key);
+    assert(a.members==b.members && a.count==b.count);
+    assert(std::memcmp(actual.vertices.data()+a.first,expected.vertices.data()+b.first,
+      a.count*sizeof(Vertex))==0);
+  }
   assert(actual.lines==expected.lines && actual.hud==expected.hud);
   auto overlays=actual.vertices.size()-cache.scene_vertices;
   assert(overlays==expected.vertices.size()-fresh.scene_vertices);
@@ -51,8 +58,68 @@ static void expect_fresh(const VoxelVkFrame& frame,GeometryCache& cache,uint32_t
     expected.vertices.data()+fresh.scene_vertices,overlays*sizeof(Vertex))==0);
 }
 
+static void expect_render_lod() {
+  VoxelVkFace faces[5]{};
+  VoxelVkBody bodies[5]{};
+  for (uint32_t i=0;i<5;i++) {
+    faces[i].lo[0]=float(i*4); faces[i].hi[0]=float(i*4+2);
+    faces[i].lo[1]=0; faces[i].hi[1]=20;
+    faces[i].lo[2]=faces[i].hi[2]=10;
+    faces[i].side=5; faces[i].material=2;
+    bodies[i].id=i+1; bodies[i].anchored=1; bodies[i].revision=1;
+    bodies[i].face_count=1; bodies[i].faces=faces+i;
+    bodies[i].lo[0]=faces[i].lo[0]; bodies[i].hi[0]=faces[i].hi[0];
+    bodies[i].lo[1]=0; bodies[i].hi[1]=20;
+    bodies[i].lo[2]=0; bodies[i].hi[2]=10;
+  }
+  VoxelVkFrame frame{};
+  frame.eye[0]=.9f; frame.eye[1]=1; frame.eye[2]=50;
+  frame.yaw=3.14159265f;
+  frame.body_count=5; frame.bodies=bodies;
+  GeometryCache cache;
+  expect_fresh(frame,cache,5);
+  assert(cache.proxy_draws==1 && cache.proxied_bodies==5);
+  assert(cache.draws.size()==1 && cache.proxy_rebuilt==1);
+  frame.eye[2]=14.7f; // Between the 80 and 100 pixel thresholds.
+  expect_fresh(frame,cache,0);
+  assert(cache.proxy_draws==1 && cache.proxy_rebuilt==0);
+  frame.eye[2]=11;
+  expect_fresh(frame,cache,0);
+  assert(cache.proxy_draws==0 && cache.draws.size()==5);
+  frame.eye[2]=14.7f;
+  expect_fresh(frame,cache,0);
+  assert(cache.proxy_draws==0 && cache.proxy_rebuilt==0);
+  frame.eye[2]=50;
+  expect_fresh(frame,cache,0);
+  assert(cache.proxy_draws==1);
+  frame.aim_kind=1; frame.aim[0]=.1f; frame.aim[1]=1; frame.aim[2]=.5f;
+  expect_fresh(frame,cache,0);
+  assert(cache.proxy_draws==0 && cache.draws.size()==5);
+  frame.aim_kind=0;
+  bodies[0].anchored=0; bodies[0].revision++;
+  expect_fresh(frame,cache,1);
+  assert(cache.proxy_rebuilt==1 && cache.proxy_draws==1);
+  assert(cache.proxied_bodies==4 && cache.draws.size()==2);
+  bodies[1].revision++; faces[1].material=3;
+  expect_fresh(frame,cache,1);
+  assert(cache.proxy_rebuilt==1 && cache.proxy_draws==1);
+  assert(cache.proxied_bodies==4);
+  bodies[4].id=6; bodies[4].revision++;
+  expect_fresh(frame,cache,1);
+  assert(cache.proxy_rebuilt==1 && cache.proxy_draws==1);
+  frame.body_count=4; frame.bodies=bodies+1;
+  expect_fresh(frame,cache,0);
+  assert(cache.proxy_rebuilt==0 && cache.proxy_draws==1);
+  assert(cache.proxied_bodies==4 && cache.draws.size()==1);
+  frame.body_count=3;
+  expect_fresh(frame,cache,0);
+  assert(cache.proxies.empty() && cache.proxy_draws==0);
+  assert(cache.draws.size()==3);
+}
+
 int main() {
   expect_material_palette();
+  expect_render_lod();
   VoxelVkFace faces[]={{{-400,20,-10},{400,20,10},3,2},{{-1,0,10},{1,20,10},5,3}};
   VoxelVkBody bodies[]={
     {1,0,1,1,0,{-400,0,-10},{400,20,10},faces},
