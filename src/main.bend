@@ -9,6 +9,7 @@ import ./math.bend as R
 import ./probe.bend as Probe
 import ./spatial.bend as S
 import ./resolution.bend as Resolution
+import ./atelier_workload.bend as AtelierWorkload
 
 def aim.kind(a: V.Aim) -> U32:
   V.Aim{_, _, kind} = a
@@ -72,7 +73,7 @@ def number(r: Result<&1, &1, U32 & String, String>) -> U32:
     case Done{text}: D.env.read(U32.read(text))
 
 # All replay coordinates are real world meters and independent of frame rate.
-def stress.point(+ordinal: U32, mode: U32, +districts: U32) -> R.Vec:
+def stress.district.point(+ordinal: U32, mode: U32, +districts: U32) -> R.Vec:
   match mode:
     case 4:
       R.Vec{R.pick(U32.is_eq(ordinal,0),(0.0 - 15.9 : F32),15.9),16.25,(0.0 - 19.95 : F32)}
@@ -86,6 +87,10 @@ def stress.point(+ordinal: U32, mode: U32, +districts: U32) -> R.Vec:
       R.Vec{(0.0 - 27.6 + U32.to_f32((ordinal % 5 : U32)) * 6.3 : F32),
         (6.35 + U32.to_f32((ordinal / 25 : U32)) * 6.0 : F32),
         (2.4 + U32.to_f32((ordinal / 5 % 5 : U32)) * 5.8 : F32)}
+def stress.point(+ordinal: U32, mode: U32, +districts: U32) -> R.Vec:
+  match districts:
+    case 0: AtelierWorkload.point(ordinal)
+    case _: stress.district.point(ordinal,mode,districts)
 def stress.request(+w: W.World, ordinal: U32, mode: U32) -> Probe.Request:
   W.World{_,_,_,_,_,_,_,districts} = w
   Probe.Request{w,stress.point(ordinal,mode,districts),True{}}
@@ -109,12 +114,34 @@ def stress.edit(on: Bool, +state: D.State, ordinal: U32, +mode: U32) -> IO(D.Sta
     case True{}:
       +batch = stress.batch.size(state,mode)
       stress.edit.batch(U32.to_nat(batch),state,(ordinal * batch : U32),mode)
-def stress.edit.due(+index: U32, +warmup: U32, every: U32, +mode: U32) -> Bool:
+def stress.edit.due(+index: U32, +warmup: U32, every: U32, +mode: U32, +scene: U32) -> Bool:
   match every:
     case 0: False{}
     case +period:
       ((index >= warmup : U32) && U32.is_eq(((index - warmup) % period : U32),0) &&
-        ((index - warmup) / period < R.word(U32.is_eq(mode,4),2,R.word(U32.is_eq(mode,5),16,75)) : U32))
+        ((index - warmup) / period < R.word(U32.is_eq(scene,4),6,
+          R.word(U32.is_eq(mode,4),2,R.word(U32.is_eq(mode,5),16,75))) : U32))
+def stress.atelier.camera(+index: U32, s: D.State) -> D.State:
+  D.State{w,c,p,last} = s
+  I.Control{V.Camera{_,_,_,+viewportW,+viewportH},_,_,_,_,_,_,_,_,_} = c
+  +angle = (U32.to_f32((index % 720 : U32)) * 0.008726646 : F32)
+  +eye = {R.Vec{(24.0 * F32.sin(angle) : F32),11.0,(24.0 * F32.cos(angle) : F32)} : R.Vec}
+  D.State{w,I.Control{V.Camera{eye,(3.14159265 + angle : F32),(0.0 - 0.28 : F32),viewportW,viewportH},
+    0,(viewportW / 2 : U32),(viewportH / 2 : U32),False{},False{},False{},False{},False{},False{}},p,last}
+def stress.atelier.aim(+index: U32, s: D.State) -> D.State:
+  D.State{w,c,p,last} = s
+  I.Control{V.Camera{_,_,_,+viewportW,+viewportH},_,_,_,_,_,_,_,_,_} = c
+  +mx = ((80 + index * 5 % 480) * viewportW / 640 : U32)
+  D.State{w,I.Control{V.camera.showcase.size(viewportW,viewportH),
+    0,mx,(viewportH / 2 : U32),False{},False{},True{},False{},False{},False{}},p,last}
+def stress.atelier.night(s: D.State) -> D.State:
+  D.State{w,c,p,last} = s
+  I.Control{cam,_,mx,my,look,left,focus,cut,reset,quit} = c
+  D.State{w,I.Control{cam,256,mx,my,look,left,False{},cut,reset,quit},p,last}
+def stress.atelier.fixed(s: D.State) -> D.State:
+  D.State{w,c,p,last} = s
+  I.Control{cam,keys,mx,my,look,left,_,cut,reset,quit} = c
+  D.State{w,I.Control{cam,keys,mx,my,look,left,False{},cut,reset,quit},p,last}
 def stress.camera(+index: U32, s: D.State) -> D.State:
   D.State{+w,c,p,last} = s
   W.World{_,_,_,_,_,_,_,districts} = w
@@ -152,13 +179,25 @@ def stress.follow(s: D.State) -> D.State:
   +eye = R.Vec.add(stress.follow.body(bs),R.Vec{0.0,3.0,5.0})
   D.State{w,I.Control{V.Camera{eye,3.14159265,(0.0 - 0.5404195 : F32),viewportW,viewportH},
     0,(viewportW / 2 : U32),(viewportH / 2 : U32),False{},False{},True{},False{},False{},False{}},p,last}
-def stress.view(mode: U32, index: U32, s: D.State) -> D.State:
+def stress.view.atelier(mode: U32, index: U32, s: D.State) -> D.State:
+  match mode:
+    case 1: stress.atelier.camera(index,s)
+    case 2: stress.atelier.aim(index,s)
+    case 6: stress.atelier.night(s)
+    case _: stress.atelier.fixed(s)
+def stress.view.district(mode: U32, index: U32, s: D.State) -> D.State:
   match mode:
     case 1: stress.camera(index,s)
     case 2: stress.aim(index,s)
     case 4: stress.bridge(s)
     case 5: stress.follow(s)
     case _: stress.camera(90,s)
+def stress.view.scene(atelier: Bool, mode: U32, index: U32, s: D.State) -> D.State:
+  match atelier:
+    case True{}: stress.view.atelier(mode,index,s)
+    case False{}: stress.view.district(mode,index,s)
+def stress.view(scene: U32, mode: U32, index: U32, s: D.State) -> D.State:
+  stress.view.scene(U32.is_eq(scene,4),mode,index,s)
 type Stress is Data:
   Stress{epoch: U32, index: U32, total: U32, scene: U32, warmup: U32, every: U32, mode: U32}
 def stress.done(done: Bool, win: Window, state: D.State, config: Stress, end: U32, frameUs: U32,
@@ -202,9 +241,9 @@ def stress.loop(win: Window, state: D.State, config: Stress, +previousEnd: U32, 
   Stress{epoch, +index, total, +scene, +warmup, +every, +mode} = config
   do IO<Unit>:
     +now : U32 <- P.micros()
-    updated : D.State <- stress.edit(stress.edit.due(index,warmup,every,mode),
+    updated : D.State <- stress.edit(stress.edit.due(index,warmup,every,mode,scene),
       D.advance(state,(1.0 / 60.0 : F32)), ((index - warmup) / R.word(U32.is_eq(every,0),1,every) : U32), mode)
-    viewed : D.State <- IO.pure(D.State, stress.view(mode, index, updated))
+    viewed : D.State <- IO.pure(D.State, stress.view(scene, mode, index, updated))
     +updateEnd : U32 <- P.micros()
     sceneState : D.State & V.Aim & String <- IO.pure(D.State & V.Aim & String, ready(viewed, frameUs))
     +sceneEnd : U32 <- P.micros()
@@ -216,17 +255,6 @@ def stress.inventory(w: W.World) -> IO(Unit):
   W.World{+bs,n,_,_,_,_,budget,districts} = w
   IO.print("world," ++ U32.show(n) ++ "," ++ U32.show(W.bodies.count(bs)) ++ "," ++
     U32.show(W.bodies.regions(bs)) ++ "," ++ U32.show(districts) ++ "," ++ U32.show(budget))
-def stress.start(win: Window, +scene: U32, +warmup: U32, measured: U32, every: U32, mode: U32, budget: U32,
-  width: U32, height: U32) -> IO(Unit):
-  do IO<Unit>:
-    +start : U32 <- P.micros()
-    +world : W.World <- IO.pure(W.World, W.configured(R.word(U32.is_eq(scene,2),4,R.word(U32.is_eq(scene,3),16,1)),budget))
-    +epoch : U32 <- P.micros()
-    Unit <- IO.print("init," ++ U32.show(scene) ++ "," ++ U32.show((epoch - start : U32)))
-    Unit <- stress.inventory(world)
-    stress.loop(win, D.State{world, I.initial.size(width,height), Nil{}, 0},
-      Stress{epoch, 0, (warmup + measured : U32), scene, warmup, every, mode}, epoch, 0)
-
 def interactive.world(+districts: U32, budget: U32) -> W.World:
   match districts:
     case 0: W.showcase(budget)
@@ -235,6 +263,17 @@ def interactive.control(+districts: U32, width: U32, height: U32) -> I.Control:
   match districts:
     case 0: I.showcase.size(width,height)
     case _: I.initial.size(width,height)
+def stress.start(win: Window, +scene: U32, +warmup: U32, measured: U32, every: U32, mode: U32, budget: U32,
+  width: U32, height: U32) -> IO(Unit):
+  do IO<Unit>:
+    +start : U32 <- P.micros()
+    +world : W.World <- IO.pure(W.World, interactive.world(R.word(U32.is_eq(scene,4),0,
+      R.word(U32.is_eq(scene,2),4,R.word(U32.is_eq(scene,3),16,1))),budget))
+    +epoch : U32 <- P.micros()
+    Unit <- IO.print("init," ++ U32.show(scene) ++ "," ++ U32.show((epoch - start : U32)))
+    Unit <- stress.inventory(world)
+    stress.loop(win, D.State{world, interactive.control(R.word(U32.is_eq(scene,4),0,1),width,height), Nil{}, 0},
+      Stress{epoch, 0, (warmup + measured : U32), scene, warmup, every, mode}, epoch, 0)
 def start.stress(on: Bool, win: Window, now: U32, frames: U32,
   scene: U32, warmup: U32, measured: U32, every: U32, mode: U32, +districts: U32, budget: U32,
   width: U32, height: U32) -> IO(Unit):

@@ -4,7 +4,7 @@ An interactive destructible voxel world built with [Bend 2](https://github.com/b
 
 ![Light Atelier](docs/validation/light-atelier/day.png)
 
-The 44 × 34 meter showcase opens close to its editable 10 cm voxel sculptures. [Its Blender source and voxelization workflow](docs/showcase.md) let you replace or extend the exhibits. Hold L to compare the night lighting. The demolition district remains available through `VOXEL_DISTRICTS=1`, `4`, or `16` and supplies the repeatable stress workloads.
+The 44 × 34 meter showcase opens close to its editable 10 cm voxel sculptures. [Its Blender source and voxelization workflow](docs/showcase.md) let you replace or extend the exhibits. Hold L to compare the night lighting. The benchmark exercises this scene by default. The demolition district remains available through `VOXEL_DISTRICTS=1`, `4`, or `16` for scale and fragment workloads.
 
 ## Quick start
 
@@ -58,9 +58,12 @@ In the earlier district, the bridge is 16 meters above ground between the northe
 ```sh
 make test
 make benchmark-stress
+make benchmark-faces
 ```
 
-The stress suite opens the Vulkan window and measures real scale, camera motion, aim sweeps, cuts across region boundaries, bridge severing, and 128/512 falling bodies. It uses unpaced presentation, records mesh-cache behavior, and saves samples and a report under `build/stress/`. See the [stress benchmark guide](docs/stress-benchmark.md).
+The default benchmark opens the Vulkan window and measures the Light Atelier in daylight and at night, camera motion, aim sweeps, and six edits across the sculptures. It checks shadow-map refreshes and mesh-cache behavior and saves samples and a report under `build/stress/`. The district scale, bridge, and 128/512-body fragment cases remain selectable with `--cases`. See the [benchmark guide](docs/stress-benchmark.md).
+
+`make benchmark-faces` runs a headless diagnostic over the same six cuts. It reports surface-stage time, including Bend vertex construction, and full face-builder work counts separately for Suzanne, Oculus, and Twist under `build/faces/`.
 
 ## Implementation
 

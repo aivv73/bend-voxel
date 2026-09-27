@@ -48,6 +48,6 @@ Commit the source `.blend` and generated [atelier_assets.bend](../src/atelier_as
 
 ## Scale workloads and earlier assets
 
-The demolition district remains available with `VOXEL_DISTRICTS=1`, `4`, or `16`; its [stress suite](stress-benchmark.md) still measures world scale, view changes, destruction, and falling bodies. The earlier [showcase_assets.blend](../assets/showcase_assets.blend) and `make export-showcase-assets` retain the beacon, cargo pod, and gateway import examples. Their repeated-layout footprint limits still apply. Earlier yard screenshots are preserved under `docs/validation/material-works-yard/`.
+The [default benchmark](stress-benchmark.md) measures this scene's daylight and night rendering, view changes, picking, edits, and shadow refreshes. The demolition district remains available with `VOXEL_DISTRICTS=1`, `4`, or `16`; its optional benchmark cases still measure world scale, destruction, and falling bodies. The earlier [showcase_assets.blend](../assets/showcase_assets.blend) and `make export-showcase-assets` retain the beacon, cargo pod, and gateway import examples. Their repeated-layout footprint limits still apply. Earlier yard screenshots are preserved under `docs/validation/material-works-yard/`.
 
 See the [Light Atelier validation record](validation/light-atelier/README.md) for captures and checks.

@@ -78,18 +78,19 @@ def status(w: World, status: U32) -> World:
   World{bs,n,c,0,status,next,budget,districts}
 
 type Pending is Data:
-  Pending{body: Body, tree: S.Tree}
+  Pending{body: Body, tree: S.Tree, window: S.Box}
 type Prepared is Data:
   Prepared{unchanged: List<&2,Body>, changed: List<&2,Pending>, removed: U32}
-def prepare.add(same: Bool, b: Body, t: S.Tree, removed: U32, r: Prepared) -> Prepared:
+def prepare.add(same: Bool, b: Body, t: S.Tree, window: S.Box, removed: U32, r: Prepared) -> Prepared:
   match same r:
     case True{} Prepared{bs,dirty,n}: Prepared{b <> bs,dirty,n}
-    case False{} Prepared{bs,dirty,n}: Prepared{bs,Pending{b,t} <> dirty,(n + removed : U32)}
+    case False{} Prepared{bs,dirty,n}: Prepared{bs,Pending{b,t,window} <> dirty,(n + removed : U32)}
 def prepare.body(+b: Body, +p: R.Vec, r: Prepared) -> Prepared:
   Body{_,_,offset,_,_,+t,_,_} = b
-  +candidate = S.cut(t,R.Vec.scale(R.Vec.sub(p,R.Vec{0.0,offset,0.0}),10.0),4.00001)
+  +local = R.Vec.scale(R.Vec.sub(p,R.Vec{0.0,offset,0.0}),10.0)
+  +candidate = S.cut(t,local,4.00001)
   +removed = (S.count(t) - S.count(candidate) : U32)
-  prepare.add(U32.is_eq(removed,0),b,candidate,removed,r)
+  prepare.add(U32.is_eq(removed,0),b,candidate,S.cut.window(local,4.00001),removed,r)
 def prepare.bs(bs: List<&2,Body>, +p: R.Vec) -> Prepared:
   match bs:
     case Nil{}: Prepared{Nil{},Nil{},0}
@@ -101,18 +102,23 @@ def carve.prepare(+w: World, p: R.Vec) -> Edit:
   Edit{w,prepare.bs(bs,p)}
 
 type Classified is Data:
-  Classified{unchanged: List<&2,Body>, dirty: List<&2,Body>, next: U32}
+  Classified{unchanged: List<&2,Body>, dirty: List<&2,Body>, jobs: List<&2,SurfaceJob>, next: U32}
+type SurfaceJob is Data:
+  SurfaceJob{oldFaces: List<&2,S.Face>, window: S.Box}
 @unsafe
-def classify.component(r: S.Component, +offset: F32, +speed: F32, state: Classified) -> Classified:
+def classify.component(r: S.Component, +offset: F32, +speed: F32,
+  +oldFaces: List<&2,S.Face>, +window: S.Box, state: Classified) -> Classified:
   S.Component{rest,+t} = r
-  Classified{same,dirty,+next} = state
-  classify.tree(rest,offset,speed,
-    Classified{same,Body{next,0,offset,speed,S.anchored(t),t,Nil{},Nil{}} <> dirty,(next + 1 : U32)})
+  Classified{same,dirty,jobs,+next} = state
+  classify.tree(rest,offset,speed,oldFaces,window,
+    Classified{same,Body{next,0,offset,speed,S.anchored(t),t,Nil{},Nil{}} <> dirty,
+      SurfaceJob{oldFaces,window} <> jobs,(next + 1 : U32)})
 @unsafe
-def classify.tree(t: S.Tree, offset: F32, speed: F32, state: Classified) -> Classified:
+def classify.tree(t: S.Tree, offset: F32, speed: F32,
+  oldFaces: List<&2,S.Face>, window: S.Box, state: Classified) -> Classified:
   match t:
     case S.Empty{}: state
-    case t: classify.component(S.component(t),offset,speed,state)
+    case t: classify.component(S.component(t),offset,speed,oldFaces,window,state)
 @unsafe
 def classify.next(r: Classified, rest: List<&2,Pending>) -> Classified:
   classify.bs(rest,r)
@@ -120,23 +126,33 @@ def classify.next(r: Classified, rest: List<&2,Pending>) -> Classified:
 def classify.bs(ps: List<&2,Pending>, state: Classified) -> Classified:
   match ps:
     case Nil{}: state
-    case Pending{Body{_,_,o,v,_,_,_,_},t} <> rest:
-      classify.next(classify.tree(t,o,v,state),rest)
+    case Pending{Body{_,_,o,v,_,_,fs,_},t,window} <> rest:
+      classify.next(classify.tree(t,o,v,fs,window,state),rest)
 type EditClassification is Data:
   EditClassification{old: World, classified: Classified, removed: U32}
 def carve.classify.prepared(+w: World, prepared: Prepared) -> EditClassification:
   World{_,_,_,_,_,next,_,_} = w
   Prepared{bs,dirty,removed} = prepared
-  EditClassification{w,classify.bs(dirty,Classified{bs,Nil{},next}),removed}
+  EditClassification{w,classify.bs(dirty,Classified{bs,Nil{},Nil{},next}),removed}
 def carve.classify(edit: Edit) -> EditClassification:
   Edit{w,p} = edit
   carve.classify.prepared(w,p)
 type EditSurfaces is Data:
   EditSurfaces{old: World, bodies: List<&2,Body>, next: U32, removed: U32}
+def mesh.local(b: Body, job: SurfaceJob) -> Body:
+  Body{id,r,o,v,a,+t,_,_} = b
+  SurfaceJob{oldFaces,window} = job
+  +fs = S.faces.patch(t,oldFaces,window)
+  Body{id,r,o,v,a,t,fs,Mesh.vertices(fs)}
+def meshes.local(bs: List<&2,Body>, jobs: List<&2,SurfaceJob>) -> List<&2,Body>:
+  match bs jobs:
+    case Nil{} _: Nil{}
+    case b <> rest job <> more: mesh.local(b,job) <> meshes.local(rest,more)
+    case bs Nil{}: meshes(bs)
 def carve.surfaces(edit: EditClassification) -> EditSurfaces:
-  EditClassification{w,Classified{same,dirty,next},removed} = edit
+  EditClassification{w,Classified{same,dirty,jobs,next},removed} = edit
   # Edits rebuild only new bodies; per-body forks cost more for this short list.
-  EditSurfaces{w,S.append(Body,meshes(dirty),same),next,removed}
+  EditSurfaces{w,S.append(Body,meshes.local(dirty,jobs),same),next,removed}
 def carve.commit(ok: Bool, old: World, bs: List<&2,Body>, next: U32, +removed: U32) -> World:
   match ok:
     case False{}: status(old,3)

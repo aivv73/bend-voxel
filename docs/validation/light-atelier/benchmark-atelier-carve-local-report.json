@@ -1,0 +1,293 @@
+{
+  "metadata": {
+    "date": "2026-09-27T19:51:25+0400",
+    "bend": "bend 2.0.31",
+    "git_revision": "6effc95ad6ef45f51124f27c5eee072ded360e6f",
+    "working_tree_dirty": true,
+    "resolution": [
+      640,
+      360
+    ],
+    "warmup_frames": 30,
+    "measured_frames": 180,
+    "edit_every_frames": 30,
+    "body_budget": 2048,
+    "source_sha256": {
+      "src/atelier_assets.bend": "1714a57497353ab1044bbaa5dc25c899945f3af971d0008bdddae28588a0e35f",
+      "src/atelier_workload.bend": "4cab774a42c549145e845269c51f86f1b1d2dff9a615853c0cff5fd1ee49d13f",
+      "src/demo.bend": "304e7abdbd979728992a401af82e38a0ba86aa16c2bb2b6b416551e9f397c53d",
+      "src/district.bend": "9a2e89d29a2b404bfb400091b66871880fbd405545593cf7473e11d488f34fc1",
+      "src/face_audit.bend": "ee049e4a0182e4bb06390a03ba41f8dcd75bbd3682c326ffcf9e74c75836110d",
+      "src/face_profile.bend": "d754497470a39eb0cafd4e336f8c086a00a65acde2b41b55bfdec5db43b6690e",
+      "src/input.bend": "c36718739a1fc4975f16ce2a60e827280f3fc6e84b91371b854288bdc5cad487",
+      "src/main.bend": "45e442703a3a741515fbdd9f8a08876093056a1096411f895c53d73a1af78d3d",
+      "src/material.bend": "2f6b2cac5f56f0d243c2bf65b80726a4b1fe41ca3c0f54e77a2caac90f11a4f1",
+      "src/math.bend": "d0bb14f3683971acb6245e26a19d49d5be586cc92508401938036ac5de4e40d3",
+      "src/platform/micros.c": "ea0f981e6c48480626d0a0d4f991bfe37c825e6785a322d2076fd771b753e8a1",
+      "src/platform/micros.js": "a71a462f96ad6184bf93827f5749ba70ca3af3f9bc70d2f4a0ff4e6cbf9d3302",
+      "src/platform.bend": "9cf0b7449ec4c99cea9f6991e0e8ced069286bd7e27f49d57763ce3f6743d79a",
+      "src/probe.bend": "7111414a865ebc936893a8e142e936fc8a9ef42fb811bba0063c53b21cf3f802",
+      "src/render.bend": "090869ef7d3ade1b72dfe719010569549d67a86a41ab309f94021454583195b3",
+      "src/resolution.bend": "ab61d66c118b645d0b38a7c5430fd01242584b1967413a7b8b4d3beb8c978805",
+      "src/showcase.bend": "4325423203def18ca28382d0444045dd7c8cea69ceadb4e2b8dacb44439a2e59",
+      "src/showcase_assets.bend": "17e88789e356c3fceda5048bfbc21d99c7e6fe7f7bf3d341c0f6dc8485edebf4",
+      "src/spatial.bend": "377b7e2e0dc1343ec732e69f1e6c6c2d2001dc4a2fc1534ef771da4538f62d6f",
+      "src/vendor/LICENSE": "0beb288abd3d067e231f3fbe7df1f8ee37344061fc67f22018150a19e4b26c35",
+      "src/vendor/NOTICE.md": "1dd0caf5c92a9fb91659cbabcf3e92b8fcb79a886fad8ef4ba254e96f3770a3c",
+      "src/vulkan/bridge.c": "5722b56c039f1a80700d6de9e8293f1f780611217cf719ef86db0dbc59bdd2bd",
+      "src/vulkan/bridge.js": "6e6af7db48eb3caf6caea509beb4b3bea938d76ef3b2d567265d360aaa18998d",
+      "src/vulkan/material.hpp": "b88b34934d133c9063489dc3d62af859a2a28f6ed2bbbce46e06f17af849f5d3",
+      "src/vulkan/native.cpp": "d469d834f41ce63bc4fca502b7db3a947d92018e1a3d10058fe8e27e6d366129",
+      "src/vulkan/native.h": "a45ecc8555c57580c1fecca5731359a2e9188a687499c6b16e9a8ad1c50653cd",
+      "src/vulkan/scene.frag": "ed3090ac89bcc3d3ab4f85655d8cfcdb80310c605f7ee6909ace24c477fb20b5",
+      "src/vulkan/scene.vert": "d38dd30de05c11f1597f42c4cc21a3e6c4f40b0ea1375bc7871fa03bd9884fa4",
+      "src/vulkan/shadow.vert": "52ece643bb912dabdf3bb5ce8dfcf0b2467d2581db79267b8806add886038d22",
+      "src/vulkan.bend": "825b02e89ea8181b319a115befedcd5a47abdf0ad997621bc492808a481aff6e",
+      "src/world.bend": "d0daeed02342a3ddc000ef4629f60c981671928abe707af45eda5b1c98fb6d22",
+      "scripts/benchmark_faces.py": "937f7a6a7212e8fe7fda27f190617a886ec928313580af3a851df228ca64d1aa",
+      "scripts/benchmark_stress.py": "aef1dfdbcb61d80c0db2212cbd35a2c9c0e1b8fcf9917939ac666dcd0c040f92",
+      "scripts/build.sh": "5cd30a5cfa678464e5205aa07789eb9b6c8861d16ade7d218c0cf2101375173d",
+      "scripts/create_light_atelier.py": "c6b860a0ee9ebe5fe79ab3c1b87bc827bfee83a1d5c4b6bacdb2c65b063aa1d0",
+      "scripts/create_showcase_assets.py": "6eb9afab598f9f09eb5476dee810dc63b783f676949d00019aae7d4f176fec22",
+      "scripts/export_showcase_assets.py": "4fa8755fcf2500c39881e681e9ab4cdbe0b963eaee7789e6d64214a95cd90e6d",
+      "scripts/run.sh": "5f3c7a297e7ef8382e9bd1ca0a3d198c9d304699cfc5b96c17be1133f7f97d4d",
+      "scripts/stress_parser.py": "477fd36d10867435c9c5155aec74b365cd962b5c2dcf536490cac12a74530d60",
+      "scripts/test.sh": "8ba76ad8633d774675ecaaa6e1e0225ffccc4fffc6036206e285dc4ffcfd3f2f"
+    },
+    "timing_scope": "Frame throughput includes Bend simulation and edits, scene preparation, native geometry expansion, upload, Vulkan submission/presentation, and X11 synchronization. Fence and acquisition waits include GPU/presentation backpressure; these CPU wall-clock intervals are not GPU timestamps.",
+    "scene_scope": "Default cases use the six-body Light Atelier with 803,970 occupied 10 cm cells, three editable Blender sculptures, sun shadows, and a plaster courtyard. Optional district cases retain the 1/4/16 district scale and fragment workloads. Physics advances exactly 1/60 second per frame."
+  },
+  "cases": [
+    {
+      "initial_solid_cells": 803970,
+      "initial_assemblies": 6,
+      "initial_regions": 2034,
+      "body_budget": 2048,
+      "max_moving_bodies": 0,
+      "max_translated_bodies": 0,
+      "minimum_body_offset_m": 0.0,
+      "meshes_rebuilt": 6,
+      "upload_mib": {
+        "samples": 180,
+        "p50_mib": 0.3717041015625,
+        "p95_mib": 0.373626708984375,
+        "p99_mib": 0.9794082641601562,
+        "max_mib": 0.9883804321289062,
+        "mean_mib": 0.38990478515625,
+        "total_mib": 70.182861328125
+      },
+      "visible_bodies_max": 6,
+      "lod_proxy_draws_max": 0,
+      "lod_proxied_bodies_max": 0,
+      "lod_proxied_bodies_mean": 0.0,
+      "lod_proxy_rebuilds": 0,
+      "draw_calls_max": 6,
+      "draw_calls_mean": 6.0,
+      "visible_bodies_mean": 6.0,
+      "proxy_vertices_max": 0,
+      "night_frames": 0,
+      "shadow_refreshes": 7,
+      "pass": true,
+      "errors": [],
+      "scene": 4,
+      "initialization_ms": 47.858,
+      "surface_rectangles": 10341,
+      "solid_cells_start": 803970,
+      "solid_cells_end": 803819,
+      "max_bodies": 0,
+      "measured_frames": 180,
+      "measured_seconds": 0.206518,
+      "throughput_fps": 871.5947278203353,
+      "frame": {
+        "samples": 180,
+        "p50_ms": 0.642,
+        "p95_ms": 1.327,
+        "p99_ms": 22.224,
+        "max_ms": 25.675,
+        "mean_ms": 1.1473222222222221,
+        "total_ms": 206.518
+      },
+      "stages": {
+        "carving": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.328,
+          "max_ms": 0.498,
+          "mean_ms": 0.01011111111111111,
+          "total_ms": 1.82
+        },
+        "connectivity": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 2.865,
+          "max_ms": 3.376,
+          "mean_ms": 0.07338333333333333,
+          "total_ms": 13.209
+        },
+        "surface_generation": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 16.65,
+          "max_ms": 18.82,
+          "mean_ms": 0.3159666666666666,
+          "total_ms": 56.873999999999995
+        },
+        "edit_finalization": {
+          "samples": 180,
+          "p50_ms": 0.0,
+          "p95_ms": 0.0,
+          "p99_ms": 0.44,
+          "max_ms": 0.615,
+          "mean_ms": 0.01401111111111111,
+          "total_ms": 2.522
+        },
+        "update_other": {
+          "samples": 180,
+          "p50_ms": 0.003,
+          "p95_ms": 0.01,
+          "p99_ms": 0.016,
+          "max_ms": 0.017,
+          "mean_ms": 0.004494444444444445,
+          "total_ms": 0.809
+        },
+        "scene_preparation": {
+          "samples": 180,
+          "p50_ms": 0.005,
+          "p95_ms": 0.01,
+          "p99_ms": 0.015,
+          "max_ms": 0.018,
+          "mean_ms": 0.005633333333333333,
+          "total_ms": 1.014
+        },
+        "vulkan_frame_effect": {
+          "samples": 180,
+          "p50_ms": 0.625,
+          "p95_ms": 1.231,
+          "p99_ms": 2.181,
+          "max_ms": 3.351,
+          "mean_ms": 0.71475,
+          "total_ms": 128.655
+        },
+        "overhead": {
+          "samples": 180,
+          "p50_ms": 0.007,
+          "p95_ms": 0.021,
+          "p99_ms": 0.037,
+          "max_ms": 0.042,
+          "mean_ms": 0.008972222222222222,
+          "total_ms": 1.615
+        }
+      },
+      "vulkan_stages": {
+        "bridge_preparation": {
+          "samples": 180,
+          "p50_ms": 0.016,
+          "p95_ms": 0.039,
+          "p99_ms": 0.112,
+          "max_ms": 0.184,
+          "mean_ms": 0.021555555555555553,
+          "total_ms": 3.88
+        },
+        "geometry_generation": {
+          "samples": 180,
+          "p50_ms": 0.226,
+          "p95_ms": 0.514,
+          "p99_ms": 1.351,
+          "max_ms": 2.666,
+          "mean_ms": 0.27911111111111114,
+          "total_ms": 50.24
+        },
+        "fence_wait": {
+          "samples": 180,
+          "p50_ms": 0.009,
+          "p95_ms": 0.012,
+          "p99_ms": 0.07,
+          "max_ms": 0.132,
+          "mean_ms": 0.011127777777777778,
+          "total_ms": 2.003
+        },
+        "vertex_upload": {
+          "samples": 180,
+          "p50_ms": 0.016,
+          "p95_ms": 0.034,
+          "p99_ms": 0.058,
+          "max_ms": 0.064,
+          "mean_ms": 0.017727777777777776,
+          "total_ms": 3.191
+        },
+        "image_acquire": {
+          "samples": 180,
+          "p50_ms": 0.023,
+          "p95_ms": 0.048,
+          "p99_ms": 0.067,
+          "max_ms": 0.097,
+          "mean_ms": 0.027077777777777777,
+          "total_ms": 4.874
+        },
+        "command_recording": {
+          "samples": 180,
+          "p50_ms": 0.032,
+          "p95_ms": 0.076,
+          "p99_ms": 0.102,
+          "max_ms": 0.106,
+          "mean_ms": 0.038266666666666664,
+          "total_ms": 6.888
+        },
+        "submit_and_present": {
+          "samples": 180,
+          "p50_ms": 0.149,
+          "p95_ms": 0.238,
+          "p99_ms": 0.927,
+          "max_ms": 1.389,
+          "mean_ms": 0.17116111111111112,
+          "total_ms": 30.809
+        },
+        "renderer_other": {
+          "samples": 180,
+          "p50_ms": 0.008,
+          "p95_ms": 0.009,
+          "p99_ms": 0.01,
+          "max_ms": 0.027,
+          "mean_ms": 0.007833333333333333,
+          "total_ms": 1.41
+        },
+        "events_and_x11_sync": {
+          "samples": 180,
+          "p50_ms": 0.077,
+          "p95_ms": 0.483,
+          "p99_ms": 0.847,
+          "max_ms": 0.855,
+          "mean_ms": 0.1307611111111111,
+          "total_ms": 23.537
+        }
+      },
+      "acquire_wait_fraction": 0.023600848352201744,
+      "view": {
+        "camera_positions": 1,
+        "aim_positions": 0,
+        "target_frames": 0,
+        "preview_frames": 0
+      },
+      "edits": 6,
+      "edit_latency": {
+        "samples": 6,
+        "p50_ms": 9.668,
+        "p95_ms": 25.667,
+        "p99_ms": 25.667,
+        "max_ms": 25.667,
+        "mean_ms": 14.135833333333332,
+        "total_ms": 84.815
+      },
+      "name": "atelier-carve",
+      "scene_kind": "atelier",
+      "districts": 0,
+      "view_mode": "carve",
+      "edit_every_frames": 30,
+      "present_mode": "immediate"
+    }
+  ],
+  "pass": true
+}

@@ -971,6 +971,10 @@ public:
     }
     if (acquire!=VK_SUCCESS&&acquire!=VK_SUBOPTIMAL_KHR) check(acquire,"acquire swapchain image");
     bool shadow_dirty=!shadow_valid || shadow_changed(shadow_world,frame);
+    if (std::getenv("VOXEL_STRESS_SCENE")) {
+      static uint32_t lighting_frame;
+      std::fprintf(stdout,"lighting,%u,%u,%u\n",lighting_frame++,frame.night,shadow_dirty?1u:0u);
+    }
     if (shadow_dirty && std::getenv("VOXEL_VULKAN_TRACE"))
       std::fprintf(stderr,"vulkan shadow refresh bodies %u rebuilt %u\n",
         frame.body_count,geometry_cache.rebuilt);

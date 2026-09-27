@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure real sparse districts, view changes, local destruction, and moving bodies."""
+"""Measure the Light Atelier and optional demolition district stress workloads."""
 import argparse
 import hashlib
 import json
@@ -14,6 +14,11 @@ from stress_parser import parse_stress
 
 ROOT = Path(__file__).resolve().parent.parent
 CASES = {
+    'atelier': (4, 'static'),
+    'atelier-night': (4, 'night'),
+    'atelier-camera': (4, 'camera'),
+    'atelier-aim': (4, 'aim'),
+    'atelier-carve': (4, 'carve'),
     'district': (1, 'static'),
     'district-4': (2, 'static'),
     'district-16': (3, 'static'),
@@ -27,8 +32,10 @@ CASES = {
     'district-fragments': (1, 'fragments'),
     'district-fragments-4': (2, 'fragments'),
 }
-VIEW_IDS = {'static': 0, 'camera': 1, 'aim': 2, 'carve': 3, 'bridge': 4, 'fragments': 5}
-DISTRICTS = {1: 1, 2: 4, 3: 16}
+DEFAULT_CASES = [name for name in CASES if name.startswith('atelier')]
+VIEW_IDS = {'static': 0, 'camera': 1, 'aim': 2, 'carve': 3, 'bridge': 4, 'fragments': 5,
+            'night': 6}
+DISTRICTS = {1: 1, 2: 4, 3: 16, 4: 0}
 
 
 def resolution(value):
@@ -43,7 +50,7 @@ def resolution(value):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--cases', nargs='+', choices=CASES, default=list(CASES))
+    parser.add_argument('--cases', nargs='+', choices=CASES, default=DEFAULT_CASES)
     parser.add_argument('--warmup', type=int, default=30, help='frames per case')
     parser.add_argument('--frames', type=int, default=180, help='measured frames per case')
     parser.add_argument('--edit-every', type=int, default=30, help='carve/bridge interval; 0 disables those edits; fragment bursts use 1')
@@ -81,15 +88,17 @@ def main():
             'source_sha256': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sources},
             'timing_scope': 'Frame throughput includes Bend simulation, edits and body triangle construction, scene preparation, native proxy and overlay geometry, upload, Vulkan submission/presentation, and X11 synchronization. Fence and acquisition waits include GPU/presentation backpressure; these CPU wall-clock intervals are not GPU timestamps.',
-            'scale_scope': 'Each district contains 2,443,284 real editable 10 cm cells at distinct signed coordinates. Scale cases contain 1, 4, or 16 districts. Sparse solid cuboids compress occupancy; there are no render copies. Physics advances exactly 1/60 second per frame. Fragment workloads sever eight supports per district per frame for sixteen frames, then follow falling fragments.',
+            'scene_scope': 'Default cases use the six-body Light Atelier with 803,970 occupied 10 cm cells, three editable Blender sculptures, sun shadows, and a plaster courtyard. Optional district cases retain the 1/4/16 district scale and fragment workloads. Physics advances exactly 1/60 second per frame.',
+            'scale_scope': 'Each district contains 2,443,284 real editable 10 cm cells at distinct signed coordinates. Scale cases contain 1, 4, or 16 districts. Sparse solid cuboids compress occupancy; there are no render copies. Fragment workloads sever eight supports per district per frame for sixteen frames, then follow falling fragments.',
         },
         'cases': [],
     }
     for name in args.cases:
         scene, view = CASES[name]
         scale = DISTRICTS[scene]
+        scene_kind = 'atelier' if scene == 4 else 'district'
         edit_every = 1 if view == 'fragments' else args.edit_every if view in ('carve', 'bridge') else 0
-        print(f'Stress {name}: {scale} real districts, {view} workload, {args.resolution[0]}x{args.resolution[1]}', flush=True)
+        print(f'Stress {name}: {scene_kind}, {view} workload, {args.resolution[0]}x{args.resolution[1]}', flush=True)
         csv_path = out / f'{name}.csv'
         env = {**os.environ, 'VOXEL_RESOLUTION': f'{args.resolution[0]}x{args.resolution[1]}', 'VOXEL_STRESS_SCENE': str(scene),
                'VOXEL_BODY_BUDGET': str(args.body_budget), 'VOXEL_STRESS_PRESENT': 'unpaced',
@@ -110,18 +119,19 @@ def main():
         (out / f'{name}.stderr').write_text(stderr)
         with csv_path.open() as stream:
             result = parse_stress(stream, exit_code, args.warmup, args.frames,
-                                  edit_every, view, world_scale=scale, resolution=args.resolution)
+                                  edit_every, view, world_scale=scale, resolution=args.resolution,
+                                  scene_kind=scene_kind)
         modes = re.findall(r'^stress_present_mode,(immediate|mailbox)$', stderr, re.MULTILINE)
         if not modes or len(set(modes)) != 1:
             result['errors'].append('Unpaced present mode was not confirmed')
             result['pass'] = False
-        result.update({'name': name, 'districts': scale, 'view_mode': view,
+        result.update({'name': name, 'scene_kind': scene_kind, 'districts': scale, 'view_mode': view,
                        'edit_every_frames': edit_every,
                        'present_mode': modes[0] if modes else None})
         report['cases'].append(result)
         print(json.dumps({key: result.get(key) for key in
                           ('name', 'pass', 'solid_cells_start', 'surface_rectangles',
-                           'districts', 'max_bodies', 'max_moving_bodies', 'present_mode', 'throughput_fps',
+                           'scene_kind', 'max_bodies', 'max_moving_bodies', 'present_mode', 'throughput_fps',
                            'visible_bodies_mean', 'draw_calls_mean', 'lod_proxied_bodies_mean',
                            'lod_proxy_rebuilds', 'acquire_wait_fraction', 'errors')}, indent=2), flush=True)
     report['pass'] = all(case['pass'] for case in report['cases'])
