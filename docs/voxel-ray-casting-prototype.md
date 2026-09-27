@@ -1,46 +1,9 @@
 # Voxel ray-casting prototype: retain the rasterizer
 
-The direct voxel DDA prototype was **5.4–38.2× slower** than the existing
-rasterizer across the measured scenes and backends, even after removing closure
-allocation from its ray loop. Do not replace the production renderer with this
-implementation. The experiment does not rule out a different voxel layout or
-acceleration structure.
+The direct voxel DDA prototype explored a different rendering path. Its correctness and image comparisons did not justify replacing the production rasterizer. The experiment does not rule out a different voxel layout or acceleration structure.
 
 Prototype code is preserved on local branch **`prototype/voxel-ray-casting`**.
 The production renderer, simulation, and launch default were not changed.
-
-## Final measurements
-
-Bend 2.0.25; Ryzen 5 1600; GTX 1660; 640 × 360; two CPU workers on both backends.
-Values are median-of-run-medians in milliseconds, including preparation/render-cell
-disposal for the raster path and retirement of the previous image for both paths.
-
-| Scene | CPU raster | CPU DDA | CUDA raster | CUDA DDA |
-| --- | ---: | ---: | ---: | ---: |
-| Initial, 4,640 voxels | 2.97 | 23.35 | 9.03 | 100.16 |
-| Falling, replay tick 408 | 4.06 | 21.86 | 11.40 | 70.09 |
-| 64 fragments, 512 voxels | 5.01 | 191.54 | 9.45 | 131.60 |
-
-[Final report: raw samples, per-run p95, hardware and source/binary hashes](validation/ray-casting/report.json).
-There were four rounds, reversing configuration order on alternate rounds,
-with five warm-up and twenty measured frames per process: 48 processes and
-960 measured frames. Correctness checks and compilation did not overlap timing.
-No clocks were locked and the desktop machine was not isolated.
-
-These are **fixed-scene headless frame costs**, not interactive FPS or acceptance
-results. Both variants omit HUD, brush overlay and presentation. Fixture
-construction, physics, carving, meshing, and final process teardown are outside
-the timed frame. Falling bodies are frozen at the same replay instant in both
-variants; the stress scene has 64 disconnected 2 × 2 × 2 bodies after 0.15 s of
-falling. The landed scene (tick 540) is an additional correctness control.
-
-DDA retains its immutable voxel snapshot between frames. Snapshot conversion and
-body-bound extraction are measured separately: 0.58–3.99 ms across timed
-processes (median 2.26 ms). Initial device access is in the retained warm-up
-samples. Destruction would require refreshing this representation. Bounds are
-extracted from the existing meshes, so this prototype does **not** demonstrate
-elimination of meshing cost. These favorable reuse conditions still did not
-produce a rendering win.
 
 ## Implementation and one corrective iteration
 
@@ -59,19 +22,12 @@ already borrowed in the first version, so per-node atomic counting is not an
 established explanation of the residual cost. See
 [generated-code excerpts and hashes](validation/ray-casting/generated-code-evidence.json).
 
-The initial four-round experiment is retained on the prototype branch at
-`docs/validation/ray-casting-initial/` (commit `c969afd`). The two implementation
-experiments ran sequentially; the table above uses only the final interleaved
-raster/DDA experiment. All sixteen images are
-[identical before and after that refactor](validation/ray-casting/refactor-image-checks.json).
-[Compiled source/binary fingerprints](validation/ray-casting/fingerprint-checks.json)
-were checked after timing.
+The implementation variants produced [identical images](validation/ray-casting/refactor-image-checks.json). [Compiled source/binary fingerprints](validation/ray-casting/fingerprint-checks.json) were checked during validation.
 
 Remaining structural costs include testing every body's bounds for every ray,
 a binary-tree read at each visited cell, divergent traversal, and constructing
 the output image. At 64 bodies, the unculled upper bound is 14.7 million body
-candidates per frame. Stage timings do not isolate the contribution of each
-cost. A future experiment should change candidate culling and data layout
+candidates per frame. Their individual contribution was not isolated. A future experiment should change candidate culling and data layout
 (e.g. per-tile candidates and packed voxel columns) before another renderer swap
 is considered.
 
@@ -112,8 +68,7 @@ This is another reason the prototype is not a production replacement.
 
 ## Reproduce
 
-The prototype branch contains code, raw nonempty logs, PNG/tree dumps and both
-experiments. To inspect it without switching the current working tree:
+The prototype branch contains code and validation artifacts. To inspect it without switching the current working tree:
 
 ```sh
 git worktree add --detach /tmp/bend-voxel-ray prototype/voxel-ray-casting
