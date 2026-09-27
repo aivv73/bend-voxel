@@ -9,7 +9,7 @@ make run
 make benchmark-stress
 ```
 
-The build requires Bend 2.0.27, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures larger and more exposed scenes with unpaced presentation; see the [stress benchmark guide](stress-benchmark.md). The earlier 65-second acceptance replay described below is historical and is no longer runnable.
+The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures larger and more exposed scenes with unpaced presentation; see the [stress benchmark guide](stress-benchmark.md). The earlier 65-second acceptance replay described below is historical and is no longer runnable.
 
 ## Frame path
 
@@ -19,7 +19,7 @@ The build requires Bend 2.0.27, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surf
 4. Vulkan 1.3 dynamic rendering fills a depth-only sun shadow map when body geometry or position changes. The main pass samples that map while shading voxel faces with sunlight, sky ambient light, and a camera work light, then draws triangles with depth testing, brush lines, and screen-space bitmap text into the Xlib swapchain image. The backend handles acquire, submission, presentation, and resize recreation. It uses a present wait semaphore per swapchain image, following [Khronos's swapchain reuse guidance](https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html).
 5. The X11 adapter synchronizes the X server and sends key, mouse, focus, and close events back to Bend. Pointer positions are mapped to the demo's 640 × 360 logical space after resize.
 
-The native effect returns the same Bend state it received. The effect depends on Bend 2.0.27's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, or `Face` definitions require reviewing that bridge.
+The native effect returns the same Bend state it received. The effect depends on Bend 2.0.31's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, or `Face` definitions require reviewing that bridge.
 
 ## Render LOD
 
@@ -36,6 +36,10 @@ Each cached vertex carries its face direction alongside its linear base color. T
 The 2,048 × 2,048 depth-only sun map uses an orthographic projection fitted to the occupied world. A three-by-three depth comparison softens shadow edges. It is cached by body ID, revision, anchor state, and vertical offset: camera, aim, and lighting changes reuse it, while cuts, detachments, and falling bodies update it. The shadow pass draws full body meshes so the main view's LOD selection cannot change a cached shadow. The nearby work light does not cast shadows. The palette is static; changing its definitions requires a rebuild.
 
 ## Validation
+
+### Bend 2.0.31 update (2026-09-27)
+
+The project pin was updated to [Bend 2.0.31](https://github.com/bendlang/bend/releases/tag/v2.0.31). The generated C now gives imported effects module-qualified constructor IDs and uses `u64` for heap locations; the native timer and Vulkan effects were adjusted to match. `make build` and `make test` passed. A three-frame live run rendered the 1,009-body Material Works Yard. Short 24-frame stress runs for district camera motion, aim sweep, and bridge severing all passed their workload and cache checks. These are compatibility checks, not a controlled compiler performance comparison. The local smoke report is under `build/bend-2.0.31-smoke/`.
 
 ### Bend 2.0.27 update (2026-09-24)
 

@@ -4,7 +4,7 @@ The 2026-09-24 review below reflects the Vulkan renderer. Its proposed bitset tr
 
 ## Current review: collections, Hub and voxel references (2026-09-24)
 
-The project now uses Bend **2.0.27** for gameplay and Vulkan for rendering. Its three-run replay passes all acceptance gates; frame p95 is 7.785–8.160 ms and accepted-cut p95 is 49.167–50.693 ms. In the first run's 33 accepted cuts, median connectivity was 14.884 ms and surface generation 18.409 ms. These timings make further work an optional measured improvement, not a requirement to replace the renderer or world representation. [Current validation and workload](../vulkan-renderer.md#bend-2027-update-2026-09-24), [stage samples](../validation/bend-2.0.27-vulkan/report.json).
+With Bend **2.0.27**, the project's three-run replay passed all acceptance gates; frame p95 was 7.785–8.160 ms and accepted-cut p95 was 49.167–50.693 ms. In the first run's 33 accepted cuts, median connectivity was 14.884 ms and surface generation 18.409 ms. These timings made further work an optional measured improvement at the time of this review. [Validation and workload](../vulkan-renderer.md#bend-2027-update-2026-09-24), [stage samples](../validation/bend-2.0.27-vulkan/report.json).
 
 The [current awesome-bend list](https://github.com/777genius/awesome-bend) identifies both [bend-collections](https://github.com/Giulio2002/bend-collections) and [Bend2Craft](https://github.com/lennix1337/bend2craft). Its claim that BendHub lacks names and search is obsolete: the [live Hub](https://hub.bend-lang.com/) has both. On this review date, [Hub statistics](https://hub.bend-lang.com/stats.json) reported **160 package snapshots and six names**. Its live searches for [voxel](https://hub.bend-lang.com/search.json?q=voxel), [mesh](https://hub.bend-lang.com/search.json?q=mesh), [physics](https://hub.bend-lang.com/search.json?q=physics), [octree](https://hub.bend-lang.com/search.json?q=octree) and [collection](https://hub.bend-lang.com/search.json?q=collection) returned empty name and package arrays. This search result does not cover unnamed packages whose source contains those concepts. The collection library has an importable [content-hash release](https://hub.bend-lang.com/0x9ee2e9a299991dcc089fe22c7f3ceb5f/src/containers/bitset.bend) even though its name is absent from search; its [README](https://github.com/Giulio2002/bend-collections/blob/324b45776b83cfc30e1d94744528c33e0d116868/README.md) supplies the hash.
 
@@ -19,7 +19,7 @@ The [published bitset and dynamic-array imports](https://hub.bend-lang.com/0x9ee
 
 ## Subsequent compiler updates
 
-The current project pin is **Bend 2.0.27** following the 2026-09-24 update. The project was previously updated to **Bend 2.0.26** on 2026-09-23 and **Bend 2.0.25** on 2026-09-22. Checks below retain their original compiler-version labels. See [Vulkan validation](../vulkan-renderer.md) for current engine results.
+The current project pin is **Bend 2.0.31** following the 2026-09-27 update. The project was previously updated to **Bend 2.0.27** on 2026-09-24, **Bend 2.0.26** on 2026-09-23, and **Bend 2.0.25** on 2026-09-22. Checks below retain their original compiler-version labels. See [Vulkan validation](../vulkan-renderer.md) for current engine results.
 
 ## Recheck on 2026-09-23
 
