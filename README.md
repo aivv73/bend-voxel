@@ -30,8 +30,16 @@ Set `VOXEL_RESOLUTION=1280x720` before `make run` to change the render resolutio
 
 ```sh
 make test
+make proof-verdict
 make benchmark-stress
 make benchmark-faces
 ```
 
 The benchmarks need Python 3. See the [Light Atelier guide](docs/showcase.md) for Blender assets, the [benchmark guide](docs/stress-benchmark.md) for workloads and results, and the [renderer guide](docs/vulkan-renderer.md) for implementation details.
+
+`make test` checks `PROOF.bend` before running runtime/reference tests. The separate
+`make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),
+pinned in `lean-toolchain`; install it with `elan toolchain install leanprover/lean4:v4.34.0`.
+The [Bend audit](docs/bend-audit.md) records proof scope, parallelization measurements,
+and remaining native computation. Properties depending on `@unsafe` are covered
+by runtime tests, not claimed as formally proven.

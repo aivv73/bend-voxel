@@ -1,10 +1,14 @@
-.PHONY: build run test test-blender benchmark-stress benchmark-faces export-atelier-assets clean
+.PHONY: build run test proof proof-verdict test-blender benchmark-stress benchmark-faces export-atelier-assets clean
 build:
 	./scripts/build.sh
 run: build
 	./scripts/run.sh
 test:
 	./scripts/test.sh
+proof:
+	bash scripts/proof.sh
+proof-verdict:
+	bash scripts/proof.sh --verdict
 test-blender:
 	blender -b --factory-startup --python-exit-code 1 --python tests/blender_voxelize.py
 benchmark-stress: build

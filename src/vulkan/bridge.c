@@ -5,6 +5,7 @@
 #endif
 
 #include <dlfcn.h>
+#include <math.h>
 #include <time.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -33,6 +34,7 @@ typedef struct {
   u32 aim_kind, body_count, night, width, height;
   const VoxelVkBody* bodies;
   const char* hud;
+  float colors[19][3]; // Material pairs, linear surfaces, display overlays.
 } VoxelVkFrame;
 
 typedef struct {
@@ -56,6 +58,8 @@ static VoxelVkTransport* voxel_vk_cache;
 static u32 voxel_vk_cache_capacity, voxel_vk_generation;
 static VoxelVkBody* voxel_vk_bodies;
 static u32 voxel_vk_capacity;
+static float voxel_vk_colors[19][3];
+static int voxel_vk_colors_ready;
 
 static u64 voxel_vk_tick(void) {
   struct timespec now;
@@ -137,6 +141,25 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
   return entry;
 }
 
+static void voxel_vk_palette(Env e, Term colors) {
+  if (cid_arity(CID_MATH_VEC)!=3) err_fail("Bend palette vector layout changed");
+  for (u32 color=0;color<19;color++) {
+    if (term_aux(colors)!=CID_CON) err_fail("incomplete Bend color palette");
+    u64 link=term_peek(e.mem,colors);
+    Term vector=e.mem[link];
+    if (term_aux(vector)!=CID_MATH_VEC) err_fail("bad Bend palette color");
+    u64 at=term_peek(e.mem,vector);
+    for (u32 channel=0;channel<3;channel++) {
+      float value=voxel_vk_float(e.mem[at+channel]);
+      if (!isfinite(value) || value<0 || value>1) err_fail("invalid Bend palette color");
+      voxel_vk_colors[color][channel]=value;
+    }
+    colors=e.mem[link+1];
+  }
+  if (term_aux(colors)!=CID_NIL) err_fail("extra Bend palette colors");
+  voxel_vk_colors_ready=1;
+}
+
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
   if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
     err_fail("bad Vulkan scene state");
@@ -158,6 +181,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   frame.width=(u32)e.mem[st+12]; frame.height=(u32)e.mem[st+13];
   frame.night=((u32)e.mem[st+14]&256u)!=0; // Held L in Control.keys.
   frame.aim_kind=(u32)e.mem[al+4]; frame.hud=hud;
+  memcpy(frame.colors,voxel_vk_colors,sizeof frame.colors);
   voxel_vk_generation++;
   u32 anchored=0,moving=0,translated=0;
   float minimum_offset=0;
@@ -286,10 +310,18 @@ static Term voxel_vk_events(Env e, BendWin* win) {
   return list;
 }
 
+Term vulkan_colors_run(Env e, Term* f, IoWork* work) {
+  io_sync();
+  if (voxel_vk_colors_ready) err_fail("Bend palette already initialized");
+  voxel_vk_palette(e,f[1]);
+  return f[0];
+}
+
 Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   int profile = getenv("VOXEL_STRESS") != NULL;
   u64 start = profile ? voxel_vk_tick() : 0;
   io_sync();
+  if (!voxel_vk_colors_ready) err_fail("Bend palette was not initialized");
   voxel_vk_load();
   BendWin* win = (BendWin*)(intptr_t)io_hand_v(f[0]);
   u64 len = 0;
@@ -355,10 +387,12 @@ Term vulkan_release_run(Env e, Term* f, IoWork* work) {
   free(voxel_vk_cache); voxel_vk_cache=NULL; voxel_vk_cache_capacity=0;
   free(voxel_vk_bodies); voxel_vk_bodies=NULL;
   voxel_vk_capacity = 0;
+  voxel_vk_colors_ready = 0;
   return f[0];
 }
 
 static void __attribute__((constructor)) voxel_vk_effects(void) {
+  io_eff(CID_VULKAN_VULKAN_COLORS, vulkan_colors_run, 0);
   io_eff(CID_VULKAN_VULKAN_FRAME, vulkan_frame_run, 0);
   io_eff(CID_VULKAN_VULKAN_RELEASE, vulkan_release_run, 0);
 }

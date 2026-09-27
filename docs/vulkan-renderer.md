@@ -14,14 +14,14 @@ The build requires Bend 2.0.32, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surf
 ## Frame path
 
 1. Bend updates the world, builds six local-space vertices per exposed face when a body's surfaces change, and computes the camera aim and HUD text.
-2. The pinned native effect reads cached `Body`, `Face`, and `Vertex` values from Bend's heap. It copies faces and vertices only when a body revision changes, then passes them with the camera, aim, and HUD to `libvoxel_vulkan.so`.
-3. The native renderer assigns palette colors to Bend's vertices and caches full meshes by body ID, revision, and anchor status; translation changes only the draw transform. Native code still builds render-tile proxies, brush preview cells, aim rings, ground, and HUD glyphs.
+2. At startup, Bend computes the palette and passes it to the pinned native effect. On each frame, that effect reads cached `Body`, `Face`, and `Vertex` values from Bend's heap. It copies faces and vertices only when a body revision changes, then passes them with the camera, aim, HUD, and stored colors to `libvoxel_vulkan.so`.
+3. The native renderer applies Bend's palette to vertices and caches full meshes by body ID, revision, and anchor status; translation changes only the draw transform. Native code still builds render-tile proxies, brush preview cells, aim rings, ground, and HUD glyphs.
 4. Vulkan 1.3 dynamic rendering fills a depth-only sun shadow map when body geometry or position changes. The main pass samples that map while shading voxel faces with sunlight, sky ambient light, and a camera work light, then draws triangles with depth testing, brush lines, and screen-space bitmap text into the Xlib swapchain image. The backend handles acquire, submission, presentation, and resize recreation. It uses a present wait semaphore per swapchain image, following [Khronos's swapchain reuse guidance](https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html).
 5. The X11 adapter synchronizes the X server and sends key, mouse, focus, and close events back to Bend. Pointer positions are mapped to the selected logical resolution after resize.
 
 Initial body meshes are independent Bend CPU tasks. An edit keeps unchanged bodies verbatim and builds faces and vertices only for newly classified bodies. The short dirty list on edits is built sequentially.
 
-The native effect returns the same Bend state it received. The effect depends on Bend 2.0.32's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, `Face`, or `Vertex` definitions require reviewing that bridge. `VOXEL_VERIFY_BEND_MESH=1` compares rebuilt body vertices against the previous native face expansion and fails on a mismatch; it is a validation mode, not a throughput setting.
+The native effect returns the same Bend state it received. The effect depends on Bend 2.0.32's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, `Face`, `Vertex`, or palette definitions require reviewing that bridge. `VOXEL_VERIFY_BEND_MESH=1` compares rebuilt body vertices against the previous native face expansion and fails on a mismatch; it is a validation mode, not a throughput setting.
 
 ## Render LOD
 
@@ -31,7 +31,7 @@ Proxy meshes are cached by member body IDs and revisions. Camera movement and ai
 
 ## Material colors
 
-`src/material.bend` names the five stable voxel IDs and defines which one marks protected foundations. The Light Atelier adds pale plaster as ID 5. `src/vulkan/material.hpp` gives each ID an OKLCH base color. The renderer builds linear RGB base swatches once for each material and anchor state. Detached bodies get a lightness/chroma adjustment in OKLCH, so their material hue remains visible. Out-of-gamut colors keep lightness and hue while chroma is reduced to fit sRGB.
+`src/material.bend` names the five stable voxel IDs and defines which one marks protected foundations. The Light Atelier adds pale plaster as ID 5. `src/color.bend` gives each ID an OKLCH base color and computes linear RGB swatches for anchored and detached bodies. Detached bodies get a lightness/chroma adjustment in OKLCH, so their material hue remains visible. Out-of-gamut colors keep lightness and hue while chroma is reduced to fit sRGB. Bend also computes linear ground and background colors and the display colors for HUD, aim, and brush overlays. A startup effect supplies these 19 colors to the native bridge, which validates their layout and range and reuses them on every frame.
 
 Each cached vertex carries its face direction alongside its linear base color. The fragment shader applies cool sky ambient light, warm directional sunlight, and a distance-attenuated work light near the camera, then encodes for a UNORM attachment or leaves linear output for Vulkan's automatic sRGB attachment encoding. The ground receives light and shadows; HUD, aim rings, and the cut preview remain flat display colors. Holding L switches to a darker night setup with a stronger work light.
 
