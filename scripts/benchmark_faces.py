@@ -56,8 +56,8 @@ def main():
     env = os.environ.copy()
     env.pop('CUDA_HOME', None)
     version = subprocess.check_output(['bend', 'version'], text=True).strip()
-    if version != 'bend 2.0.31':
-        parser.error('this benchmark requires Bend 2.0.31')
+    if version != 'bend 2.0.32':
+        parser.error('this benchmark requires Bend 2.0.32')
     subprocess.run(['bend', 'src/face_profile.bend', '-o', str(binary)], cwd=ROOT,
                    env=env, check=True, timeout=args.timeout)
     run = subprocess.run([str(binary)], cwd=ROOT, env=env, capture_output=True,
