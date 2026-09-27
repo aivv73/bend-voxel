@@ -10,18 +10,6 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 
-#ifndef BendWin
-#define BendWin BendWin
-typedef struct {
-  Display* dpy;
-  Window win;
-  Atom del;
-  XImage* img;
-  u32 n, cap;
-  u32* evs;
-} BendWin;
-#endif
-
 typedef struct {
   float lo[3], hi[3];  // Integer cell coordinates; zero thickness on side / 2.
   u32 side, material;
@@ -109,10 +97,10 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
   free(entry->vertices); entry->vertices=NULL; entry->vertex_count=0;
   size_t capacity=0;
   while (term_aux(faces)==CID_CON) {
-    u64 link=term_peek(e,faces);
+    u64 link=term_peek(e.mem,faces);
     Term face=e.mem[link];
     if (term_aux(face)!=CID_SPATIAL_FACE) err_fail("bad Vulkan face");
-    u64 at=term_peek(e,face);
+    u64 at=term_peek(e.mem,face);
     if (entry->count==capacity) {
       capacity=capacity ? capacity*2 : 64;
       if (capacity>UINT32_MAX) err_fail("Vulkan face count overflow");
@@ -129,10 +117,10 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
   if (term_aux(faces)!=CID_NIL) err_fail("bad Vulkan face list");
   capacity=0;
   while (term_aux(vertices)==CID_CON) {
-    u64 link=term_peek(e,vertices);
+    u64 link=term_peek(e.mem,vertices);
     Term vertex=e.mem[link];
     if (term_aux(vertex)!=CID_MESH_VERTEX) err_fail("bad Bend mesh vertex");
-    u64 at=term_peek(e,vertex);
+    u64 at=term_peek(e.mem,vertex);
     if (entry->vertex_count==capacity) {
       capacity=capacity ? capacity*2 : 64;
       if (capacity>UINT32_MAX) err_fail("Vulkan vertex count overflow");
@@ -152,14 +140,14 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
   if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
     err_fail("bad Vulkan scene state");
-  // With Bend 2.0.31: State = World(7), Control(Camera(7) + 9), pending, last.
+  // With Bend 2.0.32: State = World(7), Control(Camera(7) + 9), pending, last.
   if (cid_arity(CID_DEMO_STATE)!=25 || cid_arity(CID_WORLD_WORLD)!=7 ||
       cid_arity(CID_INPUT_CONTROL)!=16 || cid_arity(CID_RENDER_AIM)!=5 ||
       cid_arity(CID_WORLD_BODY)!=8 || cid_arity(CID_SPATIAL_FACE)!=8 ||
       cid_arity(CID_MESH_VERTEX)!=5 ||
       cid_arity(CID_SPATIAL_LEAF)!=7 || cid_arity(CID_SPATIAL_BRANCH)!=9)
     err_fail("Bend Vulkan state layout changed");
-  u64 st=term_peek(e,state),al=term_peek(e,aim);
+  u64 st=term_peek(e.mem,state),al=term_peek(e.mem,aim);
   VoxelVkFrame frame={0};
   for (u32 i=0;i<3;i++) {
     frame.eye[i]=voxel_vk_float(e.mem[st+7+i]);
@@ -175,10 +163,10 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   float minimum_offset=0;
   Term bodies=e.mem[st];
   while (term_aux(bodies)==CID_CON) {
-    u64 link=term_peek(e,bodies);
+    u64 link=term_peek(e.mem,bodies);
     Term body=e.mem[link];
     if (term_aux(body)!=CID_WORLD_BODY) err_fail("bad Vulkan body");
-    u64 at=term_peek(e,body);
+    u64 at=term_peek(e.mem,body);
     if (frame.body_count==voxel_vk_capacity) {
       voxel_vk_capacity=voxel_vk_capacity ? voxel_vk_capacity*2 : 256;
       voxel_vk_bodies=io_mem(realloc(voxel_vk_bodies,voxel_vk_capacity*sizeof *voxel_vk_bodies));
@@ -195,7 +183,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
     Term tree=e.mem[at+5];
     if (term_aux(tree)!=CID_SPATIAL_LEAF && term_aux(tree)!=CID_SPATIAL_BRANCH)
       err_fail("empty Vulkan body");
-    u64 bounds=term_peek(e,tree);
+    u64 bounds=term_peek(e.mem,tree);
     for (u32 i=0;i<3;i++) {
       out->lo[i]=voxel_vk_float(e.mem[bounds+i]);
       out->hi[i]=voxel_vk_float(e.mem[bounds+3+i]);

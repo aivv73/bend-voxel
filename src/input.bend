@@ -42,6 +42,10 @@ def event(e: Event, c: Control) -> Control:
       key(code, down, c)
     case Move{x, y}:
       motion(x, y, c)
+    case Look{_, _}:
+      c
+    case Scroll{_, _, _, _}:
+      c
     case Mouse{x, y, button, down}:
       mouse(x, y, button, down, c)
     case Close{}:

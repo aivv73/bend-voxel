@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-if [[ "$(bend version 2>/dev/null)" != 'bend 2.0.31' ]]; then
-  echo 'This demo is pinned to Bend 2.0.31. Use that compiler; do not update automatically.' >&2
+if [[ "$(bend version 2>/dev/null)" != 'bend 2.0.32' ]]; then
+  echo 'This demo is pinned to Bend 2.0.32. Use that compiler; do not update automatically.' >&2
   exit 1
 fi
 mkdir -p build

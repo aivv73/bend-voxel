@@ -9,7 +9,7 @@ make run
 make benchmark-stress
 ```
 
-The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures the Light Atelier with unpaced presentation. See the [benchmark guide](stress-benchmark.md).
+The build requires Bend 2.0.32, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures the Light Atelier with unpaced presentation. See the [benchmark guide](stress-benchmark.md).
 
 ## Frame path
 
@@ -21,7 +21,7 @@ The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surf
 
 Initial body meshes are independent Bend CPU tasks. An edit keeps unchanged bodies verbatim and builds faces and vertices only for newly classified bodies. The short dirty list on edits is built sequentially.
 
-The native effect returns the same Bend state it received. The effect depends on Bend 2.0.31's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, `Face`, or `Vertex` definitions require reviewing that bridge. `VOXEL_VERIFY_BEND_MESH=1` compares rebuilt body vertices against the previous native face expansion and fails on a mismatch; it is a validation mode, not a throughput setting.
+The native effect returns the same Bend state it received. The effect depends on Bend 2.0.32's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, `Face`, or `Vertex` definitions require reviewing that bridge. `VOXEL_VERIFY_BEND_MESH=1` compares rebuilt body vertices against the previous native face expansion and fails on a mismatch; it is a validation mode, not a throughput setting.
 
 ## Render LOD
 
@@ -43,9 +43,13 @@ The 2,048 × 2,048 depth-only sun map uses an orthographic projection fitted to 
 
 `make export-atelier-assets`, `make build`, `make test`, and `make test-blender` passed. Live day/night captures were inspected at 1280 × 720, with an additional default 640 × 360 capture. A 15-cell cut and reset each rebuilt one body's mesh and refreshed the shadow map; reset restored the pre-cut scene pixels. The [validation record](validation/light-atelier/README.md) includes the Blender source preview, engine captures, counts, and runtime trace.
 
-### Resolution and compiler checks (2026-09-27)
+### Bend 2.0.31 checks (2026-09-27)
 
 `make build` and `make test` passed with resolution parsing, camera projection, reset target, and native cache checks. Invalid resolution input exits before opening a window. The project pin was updated to [Bend 2.0.31](https://github.com/bendlang/bend/releases/tag/v2.0.31). Its generated C uses module-qualified constructor IDs and `u64` heap locations; the native timer and Vulkan effects were adjusted to match.
+
+### Bend 2.0.32 update (2026-09-27)
+
+The project pin and local compiler were updated to [Bend 2.0.32](https://github.com/bendlang/bend/releases/tag/v2.0.32). Its `Event` type adds `Look` and `Scroll`; the Linux demo ignores these unused events. The native bridge now uses Bend's `BendWin` definition and passes the heap to `term_peek`. `make build`, `make test`, and `make benchmark-faces` passed. Short Light Atelier static and carve stress runs passed through the Vulkan window.
 
 ## Current boundaries
 
