@@ -138,6 +138,38 @@ void face(Geometry& g,const VoxelVkFace& f,bool anchored) {
   auto color=material::surface(f.material,!anchored);
   face_quad(g,f,{color.r,color.g,color.b});
 }
+void body_vertices(Geometry& g,const VoxelVkBody& body) {
+  if (!body.vertex_count) {
+    // The native geometry fixtures still provide faces directly.
+    for (uint32_t i=0;i<body.face_count;i++) face(g,body.faces[i],body.anchored);
+    return;
+  }
+  if (body.vertex_count!=uint64_t(body.face_count)*6)
+    throw std::runtime_error("invalid Bend body vertex count");
+  g.vertices.reserve(body.vertex_count);
+  for (uint32_t i=0;i<body.vertex_count;i++) {
+    const auto& source=body.vertices[i];
+    if (source.side>=6 || !std::isfinite(source.position[0]) ||
+        !std::isfinite(source.position[1]) || !std::isfinite(source.position[2]))
+      throw std::runtime_error("invalid Bend body vertex");
+    auto color=material::surface(source.material,!body.anchored);
+    g.vertices.push_back({vector(source.position),{color.r,color.g,color.b},source.side});
+  }
+  g.triangles=body.vertex_count;
+  if (std::getenv("VOXEL_VERIFY_BEND_MESH")) {
+    Geometry expected;
+    for (uint32_t i=0;i<body.face_count;i++) face(expected,body.faces[i],body.anchored);
+    if (expected.vertices.size()!=g.vertices.size())
+      throw std::runtime_error("Bend body mesh vertex count differs from native reference");
+    for (size_t i=0;i<g.vertices.size();i++) {
+      const auto& a=g.vertices[i];
+      const auto& b=expected.vertices[i];
+      if (a.side!=b.side || std::memcmp(&a.position,&b.position,sizeof(Vec3)) ||
+          std::memcmp(&a.color,&b.color,sizeof(Vec3)))
+        throw std::runtime_error("Bend body mesh differs from native reference");
+    }
+  }
+}
 bool near_aim(const VoxelVkBody& body,const VoxelVkFrame& frame) {
   for (uint32_t i=0;i<3;i++) {
     float p=frame.aim[i]-(i==1?body.offset:0);
@@ -426,7 +458,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
     if (it==cache.meshes.end() || it->second.revision!=b.revision || it->second.anchored!=b.anchored) {
       if (it!=cache.meshes.end()) cache.release({it->second.first,it->second.count});
       Geometry mesh;
-      for (uint32_t f=0;f<b.face_count;f++) face(mesh,b.faces[f],b.anchored);
+      body_vertices(mesh,b);
       uint32_t first=cache.allocate(mesh.triangles);
       g.vertices.resize(cache.scene_vertices);
       std::copy(mesh.vertices.begin(),mesh.vertices.end(),g.vertices.begin()+first);

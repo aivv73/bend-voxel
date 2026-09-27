@@ -3,7 +3,7 @@ import ./demo.bend as D
 import ./render.bend as V
 
 # Linux native Vulkan backend. The state remains Bend-owned; the effect reads
-# its current cached faces and returns it unchanged with window events.
+# cached faces and Bend-built vertices and returns it with window events.
 def vulkan.frame(window: Window, state: D.State, aim: V.Aim, hud: String) -> IO(Window & D.State & List<Event>):
   import "./vulkan/bridge.c"
   import "./vulkan/bridge.js"

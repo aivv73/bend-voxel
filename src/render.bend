@@ -84,7 +84,7 @@ def ray.tree(+t: S.Tree, +offset: F32, +o: R.Vec, +d: R.Vec, +best: Aim) -> Aim:
 def ray.bodies(bs: List<&2,W.Body>, +o: R.Vec, +d: R.Vec, best: Aim) -> Aim:
   match bs:
     case Nil{}: best
-    case W.Body{_,_,offset,_,_,t,_} <> rest:
+    case W.Body{_,_,offset,_,_,t,_,_} <> rest:
       ray.bodies(rest,o,d,ray.tree(t,offset,o,d,best))
 def ray.start(bs: List<&2,W.Body>, +o: R.Vec, +d: R.Vec) -> Aim:
   R.Vec{_,y,_} = o

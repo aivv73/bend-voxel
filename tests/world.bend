@@ -6,6 +6,7 @@ import ../src/showcase.bend as Showcase
 import ../src/showcase_assets.bend as Assets
 import ../src/atelier_assets.bend as Atelier
 import ../src/math.bend as R
+import ../src/mesh.bend as Mesh
 
 def check(ok: Bool, label: String) -> IO(Unit):
   match ok:
@@ -23,7 +24,8 @@ def inspect.showcase(+w: W.World, label: String) -> IO(W.World):
       U32.is_eq(fragments,0) && U32.is_eq(scene,0)),label)
     IO.pure(W.World,w)
 def fixture(+t: S.Tree, budget: U32, offset: F32, speed: F32) -> W.World:
-  W.from.bodies([W.Body{1,0,offset,speed,S.anchored(t),t,S.faces(t)}],budget,1)
+  +fs = S.faces(t)
+  W.from.bodies([W.Body{1,0,offset,speed,S.anchored(t),t,fs,Mesh.vertices(fs)}],budget,1)
 def bar(budget: U32, offset: F32, speed: F32) -> W.World:
   fixture(S.Leaf{D.box(0.0,100.0,0.0,11.0,1.0,1.0,2)},budget,offset,speed)
 @unsafe
@@ -68,7 +70,7 @@ def dense.cut(n: Nat, +i: U32, +old: S.Tree, +fresh: S.Tree, +p: R.Vec) -> Bool:
 def motion(bs: List<&2,W.Body>, +offset: F32, +speed: F32) -> Bool:
   match bs:
     case Nil{}: True{}
-    case W.Body{_,_,o,v,_,_,_} <> rest:
+    case W.Body{_,_,o,v,_,_,_,_} <> rest:
       ((F32.abs((o - offset : F32)) < 0.0001 : F32) && (F32.abs((v - speed : F32)) < 0.0001 : F32) && motion(rest,offset,speed))
 def moving(w: W.World, offset: F32, speed: F32) -> Bool:
   W.World{bs,_,_,_,_,_,_,_} = w
@@ -78,7 +80,8 @@ def many(n: Nat, +i: U32) -> List<&2,W.Body>:
     case 0n: Nil{}
     case 1n+k:
       +t = {S.Leaf{D.box((U32.to_f32(i) * 2.0 : F32),100.0,0.0,1.0,1.0,1.0,2)} : S.Tree}
-      W.Body{i,0,0.0,0.0,False{},t,S.faces(t)} <> many(k,(i + 1 : U32))
+      +fs = S.faces(t)
+      W.Body{i,0,0.0,0.0,False{},t,fs,Mesh.vertices(fs)} <> many(k,(i + 1 : U32))
 def disjoint.box(+b: S.Box, rest: List<&2,S.Box>) -> Bool:
   match b rest:
     case _ Nil{}: True{}
@@ -109,7 +112,7 @@ def disjoint.assemblies(bs: List<&2,D.Assembly>) -> Bool:
 def falling.bodies(bs: List<&2,W.Body>) -> Bool:
   match bs:
     case Nil{}: False{}
-    case W.Body{_,_,o,v,_,_,_} <> _: ((o < (0.0 - 10.0)) && (v < 0.0) : F32)
+    case W.Body{_,_,o,v,_,_,_,_} <> _: ((o < (0.0 - 10.0)) && (v < 0.0) : F32)
 def falling(w: W.World) -> Bool:
   W.World{bs,_,_,_,_,_,_,_} = w
   falling.bodies(bs)
