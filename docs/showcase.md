@@ -40,7 +40,7 @@ make build
 make test
 ```
 
-The exporter evaluates modifiers and world transforms, maps Blender X/Y/Z to engine X/Z/Y, samples closed manifold meshes at 10 cm cell centers, and merges same-material cells into disjoint cuboids. Exact grid-aligned boxes keep their exact bounds. Closed cavities remain empty; details thinner than a voxel can disappear. Blender material swatches preview the IDs; the game's colors come from `src/vulkan/material.hpp`.
+The exporter evaluates modifiers and world transforms, maps Blender X/Y/Z to engine X/Z/Y, samples closed manifold meshes at 10 cm cell centers, and merges same-material cells into disjoint cuboids. Exact grid-aligned boxes keep their exact bounds. Closed cavities remain empty; details thinner than a voxel can disappear. Blender material swatches preview the IDs; the game's colors come from `src/color.bend`.
 
 Each non-box mesh is limited to one million candidate cells, and each asset to 4,096 cuboids. Large curved meshes can cost more to carve and rebuild than their occupied-cell count suggests. Export validates closure, materials, anchor presence, bounds, and overlap; the engine tests additionally verify connectivity and the ring's open center.
 

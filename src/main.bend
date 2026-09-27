@@ -10,6 +10,7 @@ import ./probe.bend as Probe
 import ./spatial.bend as S
 import ./resolution.bend as Resolution
 import ./atelier_workload.bend as AtelierWorkload
+import ./color.bend as Color
 
 def aim.kind(a: V.Aim) -> U32:
   V.Aim{_, _, kind} = a
@@ -222,6 +223,7 @@ def main() -> IO(Unit):
     +width : U32 <- IO.pure(U32,Resolution.width(size))
     +height : U32 <- IO.pure(U32,Resolution.height(size))
     win : Window <- IO.try(Window, Window.open("Bend Voxel Vulkan - WASD / RMB look / LMB carve / R reset", width, height))
+    win : Window <- VK.vulkan.colors(win, Color.palette())
     +now : U32 <- P.micros()
     start.stress((stressOn > 0 : U32), win, now, number(frames),
       number(stressWarmup), number(stressMeasured), number(stressEdit), number(stressView),

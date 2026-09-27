@@ -2,7 +2,6 @@
 #include <X11/Xlib.h>
 #include <vulkan/vulkan.h>
 #include "native.h"
-#include "material.hpp"
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -34,13 +33,16 @@ Vec3 cross(Vec3 a,Vec3 b) {
   return {a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x};
 }
 Vec3 normalized(Vec3 v) { return v*(1.f/std::sqrt(dot(v,v))); }
-Vec3 rgb(uint32_t word) { return {float((word>>16)&255)/255,float((word>>8)&255)/255,float(word&255)/255}; }
-Vec3 linear_rgb(uint32_t word) {
-  auto encoded=rgb(word);
-  auto linear=material::decode({encoded.x,encoded.y,encoded.z});
-  return {linear.r,linear.g,linear.b};
+constexpr uint32_t MATERIAL_COUNT=5, GROUND_COLOR=10, BACKGROUND_LINEAR=11,
+  BACKGROUND_DISPLAY=12, HUD_PALE=13, HUD_CYAN=14, HUD_ACCENT=15,
+  HUD_RESET=16, AIM_PROTECTED=17, BRUSH_PREVIEW=18;
+Vec3 palette_color(const VoxelVkFrame& frame,uint32_t index) {
+  return {frame.colors[index][0],frame.colors[index][1],frame.colors[index][2]};
 }
-Vec3 quantize(Vec3 c) { return {std::floor(c.x*255)/255,std::floor(c.y*255)/255,std::floor(c.z*255)/255}; }
+Vec3 material_color(const VoxelVkFrame& frame,uint32_t id,bool detached) {
+  if (id==0 || id>MATERIAL_COUNT) throw std::runtime_error("unknown voxel material");
+  return palette_color(frame,(id-1)*2+(detached?1:0));
+}
 // Sides 0..5 are face normals; 6 marks flat HUD, brush, and line colors.
 struct Vertex { Vec3 position,color; uint32_t side; };
 struct Geometry { std::vector<Vertex> vertices; uint32_t triangles=0,lines=0,hud=0; };
@@ -49,7 +51,6 @@ uint32_t microseconds(Clock::time_point start,Clock::time_point end) {
   return uint32_t(std::chrono::duration_cast<std::chrono::microseconds>(end-start).count());
 }
 void quad(Geometry& g,Vec3 a,Vec3 b,Vec3 c,Vec3 d,Vec3 color,uint32_t side=6) {
-  if (side==6) color=quantize(color);
   for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color,side});
   g.triangles+=6;
 }
@@ -96,23 +97,28 @@ void hud_text(Geometry& g,float x,float baseline,const char* begin,size_t length
     }
   }
 }
-void add_hud(Geometry& g,const char* hud,uint32_t width,uint32_t height) {
+void add_hud(Geometry& g,const VoxelVkFrame& frame) {
+  const char* hud=frame.hud;
+  uint32_t width=frame.width,height=frame.height;
   float scale=std::min(float(width)/640.f,float(height)/360.f);
   // Keep the controls readable against the atelier's pale shadow receivers.
   Vec3 a{0,float(height)-51.f*scale,0},b{float(width),a.y,0},
     c{float(width),float(height),0},d{0,float(height),0};
-  for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,rgb(0x12202e),6});
+  for (Vec3 p:{a,b,c,a,c,d})
+    g.vertices.push_back({p,palette_color(frame,BACKGROUND_DISPLAY),6});
   g.hud+=6;
   const float ys[]={20.f*scale,38.f*scale,55.f*scale,72.f*scale,
     float(height)-35.f*scale,float(height)-13.f*scale};
-  constexpr uint32_t colors[]={0xe7e8e7,0x9fdbdd,0x9fdbdd,0xffdf68,0xe7e8e7,0x9fdbdd};
+  constexpr uint32_t colors[]={HUD_PALE,HUD_CYAN,HUD_CYAN,HUD_ACCENT,HUD_PALE,HUD_CYAN};
   if (hud) for (int row=0;row<6 && *hud;row++) {
     const char* end=std::strchr(hud,'\n');
-    hud_text(g,12.f*scale,ys[row],hud,end?size_t(end-hud):std::strlen(hud),rgb(colors[row]),scale);
+    hud_text(g,12.f*scale,ys[row],hud,end?size_t(end-hud):std::strlen(hud),
+      palette_color(frame,colors[row]),scale);
     if (!end) break;
     hud=end+1;
   }
-  hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,rgb(0x4bc1a4),scale);
+  hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,
+    palette_color(frame,HUD_RESET),scale);
 }
 Vec3 vector(const float* p) { return {p[0],p[1],p[2]}; }
 void face_quad(Geometry& g,const VoxelVkFace& f,Vec3 color,float offset=0,bool lit=true) {
@@ -127,7 +133,7 @@ void face_quad(Geometry& g,const VoxelVkFace& f,Vec3 color,float offset=0,bool l
   if (f.side%2) quad(g,vector(p[0]),vector(p[1]),vector(p[2]),vector(p[3]),color,side);
   else quad(g,vector(p[3]),vector(p[2]),vector(p[1]),vector(p[0]),color,side);
 }
-void face(Geometry& g,const VoxelVkFace& f,bool anchored) {
+void face(Geometry& g,const VoxelVkFace& f,bool anchored,const VoxelVkFrame& frame) {
   if (f.side>=6) throw std::runtime_error("invalid Bend face");
   uint32_t a=f.side/2;
   for (uint32_t i=0;i<3;i++) {
@@ -135,13 +141,12 @@ void face(Geometry& g,const VoxelVkFace& f,bool anchored) {
         (i==a ? f.hi[i]!=f.lo[i] : f.hi[i]<=f.lo[i]))
       throw std::runtime_error("invalid Bend face bounds");
   }
-  auto color=material::surface(f.material,!anchored);
-  face_quad(g,f,{color.r,color.g,color.b});
+  face_quad(g,f,material_color(frame,f.material,!anchored));
 }
-void body_vertices(Geometry& g,const VoxelVkBody& body) {
+void body_vertices(Geometry& g,const VoxelVkBody& body,const VoxelVkFrame& frame) {
   if (!body.vertex_count) {
     // The native geometry fixtures still provide faces directly.
-    for (uint32_t i=0;i<body.face_count;i++) face(g,body.faces[i],body.anchored);
+    for (uint32_t i=0;i<body.face_count;i++) face(g,body.faces[i],body.anchored,frame);
     return;
   }
   if (body.vertex_count!=uint64_t(body.face_count)*6)
@@ -152,13 +157,13 @@ void body_vertices(Geometry& g,const VoxelVkBody& body) {
     if (source.side>=6 || !std::isfinite(source.position[0]) ||
         !std::isfinite(source.position[1]) || !std::isfinite(source.position[2]))
       throw std::runtime_error("invalid Bend body vertex");
-    auto color=material::surface(source.material,!body.anchored);
-    g.vertices.push_back({vector(source.position),{color.r,color.g,color.b},source.side});
+    g.vertices.push_back({vector(source.position),
+      material_color(frame,source.material,!body.anchored),source.side});
   }
   g.triangles=body.vertex_count;
   if (std::getenv("VOXEL_VERIFY_BEND_MESH")) {
     Geometry expected;
-    for (uint32_t i=0;i<body.face_count;i++) face(expected,body.faces[i],body.anchored);
+    for (uint32_t i=0;i<body.face_count;i++) face(expected,body.faces[i],body.anchored,frame);
     if (expected.vertices.size()!=g.vertices.size())
       throw std::runtime_error("Bend body mesh vertex count differs from native reference");
     for (size_t i=0;i<g.vertices.size();i++) {
@@ -178,7 +183,7 @@ bool near_aim(const VoxelVkBody& body,const VoxelVkFrame& frame) {
   return true;
 }
 void preview_face(Geometry& g,const VoxelVkFace& f,const VoxelVkBody& body,const VoxelVkFrame& frame) {
-  if (f.material==material::foundation_id) return;
+  if (f.material==1) return;
   uint32_t a=f.side/2,u=(a+1)%3,v=(a+2)%3;
   float aim[3]={frame.aim[0]*10,(frame.aim[1]-body.offset)*10,frame.aim[2]*10};
   float cell_a=f.lo[a]+(f.side%2?-.5f:.5f);
@@ -197,7 +202,7 @@ void preview_face(Geometry& g,const VoxelVkFace& f,const VoxelVkBody& body,const
     preview.lo[u]=float(x); preview.hi[u]=float(x+1);
     preview.lo[v]=float(y); preview.hi[v]=float(y+1);
     preview.lo[a]=preview.hi[a]=f.lo[a]+(f.side%2?.01f:-.01f);
-    face_quad(g,preview,rgb(0xffdf68),body.offset,false);
+    face_quad(g,preview,palette_color(frame,BRUSH_PREVIEW),body.offset,false);
   }
 }
 Vec3 ring_point(Vec3 p,uint32_t axis,float angle) {
@@ -341,17 +346,18 @@ bool proxy_visible(const ProxyGroup& group,const VoxelVkFrame& frame,const ViewB
   return visible(bounds,frame,basis);
 }
 uint32_t proxy_material(const VoxelVkBody& body) {
-  std::array<float,material::definitions.size()+1> area{};
+  std::array<float,MATERIAL_COUNT+1> area{};
   for (uint32_t i=0;i<body.face_count;i++) {
     const auto& f=body.faces[i];
-    material::find(f.material);
+    if (f.material==0 || f.material>MATERIAL_COUNT)
+      throw std::runtime_error("unknown voxel material");
     if (f.side>=6) throw std::runtime_error("invalid Bend face");
     uint32_t u=(f.side/2+1)%3,v=(f.side/2+2)%3;
     area[f.material]+=(f.hi[u]-f.lo[u])*(f.hi[v]-f.lo[v]);
   }
   return uint32_t(std::max_element(area.begin()+1,area.end())-area.begin());
 }
-void proxy_box(Geometry& mesh,const VoxelVkBody& body) {
+void proxy_box(Geometry& mesh,const VoxelVkBody& body,const VoxelVkFrame& frame) {
   uint32_t m=proxy_material(body);
   for (uint32_t side=0;side<6;side++) {
     VoxelVkFace f{};
@@ -361,7 +367,7 @@ void proxy_box(Geometry& mesh,const VoxelVkBody& body) {
     uint32_t axis=side/2;
     f.lo[axis]=f.hi[axis]=side%2 ? body.hi[axis] : body.lo[axis];
     f.side=side; f.material=m;
-    face(mesh,f,true);
+    face(mesh,f,true,frame);
   }
 }
 struct GeometryCache {
@@ -410,7 +416,8 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   cache.proxy_rebuilt=cache.proxy_draws=cache.proxied_bodies=cache.visible_bodies=0;
   cache.proxy_vertices=0;
   if (!cache.scene_vertices) {
-    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},linear_rgb(0x1e303d),3);
+    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},
+      palette_color(frame,GROUND_COLOR),3);
     cache.scene_vertices=6; cache.dirty.push_back({0,6});
   }
   bool world_changed=cache.group_world.size()!=frame.body_count;
@@ -458,7 +465,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
     if (it==cache.meshes.end() || it->second.revision!=b.revision || it->second.anchored!=b.anchored) {
       if (it!=cache.meshes.end()) cache.release({it->second.first,it->second.count});
       Geometry mesh;
-      body_vertices(mesh,b);
+      body_vertices(mesh,b,frame);
       uint32_t first=cache.allocate(mesh.triangles);
       g.vertices.resize(cache.scene_vertices);
       std::copy(mesh.vertices.begin(),mesh.vertices.end(),g.vertices.begin()+first);
@@ -481,7 +488,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
     if (it==cache.proxies.end() || it->second.members!=group.members) {
       if (it!=cache.proxies.end()) cache.release({it->second.first,it->second.count});
       Geometry mesh;
-      for (auto index:group.bodies) proxy_box(mesh,frame.bodies[index]);
+      for (auto index:group.bodies) proxy_box(mesh,frame.bodies[index],frame);
       uint32_t first=cache.allocate(mesh.triangles);
       g.vertices.resize(cache.scene_vertices);
       std::copy(mesh.vertices.begin(),mesh.vertices.end(),g.vertices.begin()+first);
@@ -513,13 +520,13 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   }
   if (frame.aim_kind) {
     Vec3 p={frame.aim[0],frame.aim[1],frame.aim[2]};
-    Vec3 color=rgb(frame.aim_kind==1?16768872u:16552594u);
+    Vec3 color=palette_color(frame,frame.aim_kind==1?HUD_ACCENT:AIM_PROTECTED);
     for (uint32_t axis=0;axis<3;axis++) for (uint32_t i=0;i<12;i++) {
       Vec3 a=ring_point(p,axis,float(i)*.5235988f),b=ring_point(p,axis,float(i+1)*.5235988f);
       if (view_depth(a,frame,basis)>=.05f && view_depth(b,frame,basis)>=.05f) line(g,a,b,color);
     }
   }
-  add_hud(g,frame.hud,frame.width,frame.height);
+  add_hud(g,frame);
   return g;
 }
 std::vector<uint32_t> spirv(const char* path) {
@@ -1033,11 +1040,8 @@ public:
     VkRenderingAttachmentInfo color{VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO};
     color.imageView=views[index]; color.imageLayout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     color.loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR; color.storeOp=VK_ATTACHMENT_STORE_OP_STORE;
-    auto background=rgb(0x12202e);
-    if (format==VK_FORMAT_B8G8R8A8_SRGB || format==VK_FORMAT_R8G8B8A8_SRGB) {
-      auto linear=material::decode({background.x,background.y,background.z});
-      background={linear.r,linear.g,linear.b};
-    }
+    auto background=(format==VK_FORMAT_B8G8R8A8_SRGB || format==VK_FORMAT_R8G8B8A8_SRGB)
+      ? palette_color(frame,BACKGROUND_LINEAR) : palette_color(frame,BACKGROUND_DISPLAY);
     color.clearValue.color={{background.x,background.y,background.z,1}};
     VkRenderingAttachmentInfo z{VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO};
     z.imageView=depth_view; z.imageLayout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;

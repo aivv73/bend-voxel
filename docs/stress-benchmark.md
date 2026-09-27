@@ -65,3 +65,10 @@ Validation checks:
 - The body budget is respected and cuts are accepted.
 
 There is no FPS acceptance threshold. The purpose is to reveal rendering, editing, and scaling costs. Run the same cases on each revision when comparing changes, and keep generated reports under `build/`.
+
+For an alternating before/after comparison, `--binary build/saved-demo` selects a
+saved Bend executable. Both versions use the current native library and shaders;
+save those separately if they also change. Reports identify the binary by SHA-256
+and label source hashes as the current checkout. The [Bend audit](bend-audit.md)
+also documents `scripts/benchmark_parallel.py` for initialization and six-cut CPU
+comparisons with configurable thread counts and independent surface validation.

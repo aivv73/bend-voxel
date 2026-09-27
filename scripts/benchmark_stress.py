@@ -44,6 +44,8 @@ def main():
     parser.add_argument('--timeout', type=int, default=180, help='seconds per case')
     parser.add_argument('--resolution', type=resolution, default=(640, 360), help='render size WIDTHxHEIGHT (default: 640x360)')
     parser.add_argument('--output', type=Path, default=Path('build/stress'))
+    parser.add_argument('--binary', type=Path, default=Path('build/voxel-demo'),
+                        help='executable to compare; uses current native library/shaders')
     args = parser.parse_args()
     if args.warmup < 0 or args.frames < 1 or args.edit_every < 0 or args.timeout < 1:
         parser.error('warmup, edit interval and timeout must be nonnegative; frames and timeout must be positive')
@@ -53,9 +55,9 @@ def main():
         parser.error('moving view workloads need at least four measured frames')
     if args.warmup + args.frames > 5000:
         parser.error('at most 5000 total frames per case')
-    binary = ROOT / 'build/voxel-demo'
+    binary = args.binary if args.binary.is_absolute() else ROOT / args.binary
     if not binary.exists():
-        parser.error('build/voxel-demo is missing; run make build first')
+        parser.error(f'{binary} is missing; run make build first')
     out = args.output if args.output.is_absolute() else ROOT / args.output
     out.mkdir(parents=True, exist_ok=True)
     sources = [p for folder in ('src', 'scripts') for p in sorted((ROOT / folder).rglob('*'))
@@ -66,6 +68,9 @@ def main():
             'bend': subprocess.check_output(['bend', 'version'], text=True).strip(),
             'git_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
             'working_tree_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT)),
+            'binary': str(binary),
+            'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
+            'source_scope': 'source_sha256 describes the current checkout, which may differ from an explicitly selected prebuilt binary; both binaries use the current native library and shaders',
             'resolution': list(args.resolution),
             'warmup_frames': args.warmup,
             'measured_frames': args.frames,

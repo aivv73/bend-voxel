@@ -1,34 +1,20 @@
 #include "../src/vulkan/native.cpp"
 #include <cassert>
 
-static void expect_material_palette() {
-  constexpr uint32_t original[]={0x4bc1a4,0xd19d68,0x668fac,0xd9954f};
-  for (uint32_t id=1;id<=4;id++) {
-    assert(material::find(id).id==id);
-    auto top=material::surface(id,false);
-    auto encoded=material::encode(top);
-    float expected[3]={float((original[id-1]>>16)&255)/255,
-      float((original[id-1]>>8)&255)/255,float(original[id-1]&255)/255};
-    assert(std::abs(encoded.r-expected[0])<0.002f);
-    assert(std::abs(encoded.g-expected[1])<0.002f);
-    assert(std::abs(encoded.b-expected[2])<0.002f);
-    auto detached=material::surface(id,true);
-    assert(detached.r!=top.r || detached.g!=top.g || detached.b!=top.b);
-  }
-  auto concrete=material::surface(2,true);
-  auto frame=material::surface(3,true);
-  assert(std::abs(concrete.r-frame.r)+std::abs(concrete.g-frame.g)+
-    std::abs(concrete.b-frame.b)>0.25f);
-  assert(material::in_gamut(material::to_linear({0.7f,0.5f,30.0f})));
-  auto roundtrip=material::encode(material::decode({0.2f,0.5f,0.8f}));
-  assert(std::abs(roundtrip.r-0.2f)<0.00001f);
-  assert(std::abs(roundtrip.g-0.5f)<0.00001f);
-  assert(std::abs(roundtrip.b-0.8f)<0.00001f);
+static void test_colors(VoxelVkFrame& frame) {
+  for (uint32_t i=0;i<19;i++) for (uint32_t channel=0;channel<3;channel++)
+    frame.colors[i][channel]=float(i*3+channel+1)/60.f;
+}
+
+static void expect_bend_palette() {
+  VoxelVkFrame frame{};
+  test_colors(frame);
+  auto anchored=material_color(frame,2,false);
+  auto detached=material_color(frame,2,true);
+  assert(anchored.x==frame.colors[2][0] && anchored.y==frame.colors[2][1]);
+  assert(detached.x==frame.colors[3][0] && detached.z==frame.colors[3][2]);
   bool rejected=false;
-  auto plaster=material::surface(5,false);
-  assert(material::in_gamut(plaster));
-  assert(plaster.r>material::surface(2,false).r && plaster.b>material::surface(2,false).b);
-  try { material::surface(6,false); } catch (const std::runtime_error&) { rejected=true; }
+  try { material_color(frame,6,false); } catch (const std::runtime_error&) { rejected=true; }
   assert(rejected);
 }
 
@@ -44,11 +30,13 @@ static void expect_bend_body_vertices() {
   body.anchored=1; body.face_count=1; body.faces=&source;
   body.vertex_count=6; body.vertices=vertices;
   Geometry output;
-  body_vertices(output,body);
+  VoxelVkFrame frame{}; test_colors(frame);
+  body_vertices(output,body,frame);
   assert(output.triangles==6 && output.vertices.size()==6);
   for (uint32_t i=0;i<6;i++) {
     assert(output.vertices[i].position.x==float(i));
     assert(output.vertices[i].side==3);
+    assert(output.vertices[i].color.x==frame.colors[2][0]);
   }
 }
 
@@ -142,6 +130,7 @@ static void expect_render_lod() {
   frame.eye[0]=.9f; frame.eye[1]=1; frame.eye[2]=50;
   frame.yaw=3.14159265f;
   frame.body_count=5; frame.bodies=bodies;
+  test_colors(frame);
   GeometryCache cache;
   expect_fresh(frame,cache,5);
   assert(cache.proxy_draws==1 && cache.proxied_bodies==5);
@@ -195,7 +184,7 @@ static void expect_render_lod() {
 }
 
 int main() {
-  expect_material_palette();
+  expect_bend_palette();
   expect_bend_body_vertices();
   expect_shadow_bounds();
   expect_render_lod();
@@ -208,6 +197,7 @@ int main() {
   frame.eye[1]=3; frame.eye[2]=5; frame.yaw=3.14159265f;
   frame.aim[1]=2; frame.aim[2]=.05f; frame.aim_kind=1;
   frame.body_count=2; frame.bodies=bodies; frame.hud="FRAME 1";
+  test_colors(frame);
   GeometryCache cache;
   expect_fresh(frame,cache,2);
   assert(cache.geometry.vertices[0].side==3); // Ground is sunlit.
@@ -254,10 +244,10 @@ int main() {
   VoxelVkFace invalid=faces[0]; invalid.side=6;
   Geometry g;
   bool rejected=false;
-  try { face(g,invalid,true); } catch (const std::runtime_error&) { rejected=true; }
+  try { face(g,invalid,true,frame); } catch (const std::runtime_error&) { rejected=true; }
   assert(rejected);
   invalid=faces[0]; invalid.material=0; rejected=false;
-  try { face(g,invalid,true); } catch (const std::runtime_error&) { rejected=true; }
+  try { face(g,invalid,true,frame); } catch (const std::runtime_error&) { rejected=true; }
   assert(rejected);
   std::puts("ALL NATIVE BODY CACHE CHECKS PASSED");
 }
