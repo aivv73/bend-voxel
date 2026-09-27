@@ -143,7 +143,7 @@ def stress.follow.box(b: S.Box, offset: F32) -> R.Vec:
 def stress.follow.body(bs: List<&2,W.Body>) -> R.Vec:
   match bs:
     case Nil{}: R.Vec{4.4,2.0,17.4}
-    case W.Body{_,_,o,_,False{},t,_} <> _: stress.follow.box(S.bounds(t),o)
+    case W.Body{_,_,o,_,False{},t,_,_} <> _: stress.follow.box(S.bounds(t),o)
     case _ <> rest: stress.follow.body(rest)
 def stress.follow(s: D.State) -> D.State:
   D.State{+w,c,p,last} = s

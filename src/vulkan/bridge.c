@@ -28,9 +28,16 @@ typedef struct {
 } VoxelVkFace;
 
 typedef struct {
+  float position[3];
+  u32 side, material;
+} VoxelVkVertex;
+
+typedef struct {
   u32 id, revision, anchored, face_count;
   float offset, lo[3], hi[3];
   const VoxelVkFace* faces;
+  u32 vertex_count;
+  const VoxelVkVertex* vertices;
 } VoxelVkBody;
 
 typedef struct {
@@ -50,11 +57,12 @@ typedef void (*VoxelVkRelease)(void);
 static void* voxel_vk_library;
 static VoxelVkRender voxel_vk_render_fn;
 static VoxelVkRelease voxel_vk_release_fn;
-// Bend owns the world. This transport cache copies a body's faces only when
-// its geometry identity changes; camera, aim and motion never traverse faces.
+// Bend owns the world and builds body vertices. Copy both cached surface
+// representations only when geometry changes; camera and motion reuse them.
 typedef struct {
   VoxelVkFace* faces;
-  u32 revision, count, seen, valid;
+  VoxelVkVertex* vertices;
+  u32 revision, count, vertex_count, seen, valid;
 } VoxelVkTransport;
 static VoxelVkTransport* voxel_vk_cache;
 static u32 voxel_vk_cache_capacity, voxel_vk_generation;
@@ -84,7 +92,7 @@ static float voxel_vk_float(Term t) {
   return out;
 }
 
-static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term faces) {
+static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term faces, Term vertices) {
   if (id >= voxel_vk_cache_capacity) {
     u32 previous=voxel_vk_cache_capacity;
     size_t capacity=previous ? previous : 256;
@@ -98,6 +106,7 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
   entry->seen=voxel_vk_generation;
   if (entry->valid && entry->revision==revision) return entry;
   free(entry->faces); entry->faces=NULL; entry->count=0;
+  free(entry->vertices); entry->vertices=NULL; entry->vertex_count=0;
   size_t capacity=0;
   while (term_aux(faces)==CID_CON) {
     u64 link=term_peek(e,faces);
@@ -118,6 +127,24 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
     faces=e.mem[link+1];
   }
   if (term_aux(faces)!=CID_NIL) err_fail("bad Vulkan face list");
+  capacity=0;
+  while (term_aux(vertices)==CID_CON) {
+    u64 link=term_peek(e,vertices);
+    Term vertex=e.mem[link];
+    if (term_aux(vertex)!=CID_MESH_VERTEX) err_fail("bad Bend mesh vertex");
+    u64 at=term_peek(e,vertex);
+    if (entry->vertex_count==capacity) {
+      capacity=capacity ? capacity*2 : 64;
+      if (capacity>UINT32_MAX) err_fail("Vulkan vertex count overflow");
+      entry->vertices=io_mem(realloc(entry->vertices,capacity*sizeof *entry->vertices));
+    }
+    VoxelVkVertex* out=&entry->vertices[entry->vertex_count++];
+    for (u32 i=0;i<3;i++) out->position[i]=voxel_vk_float(e.mem[at+i]);
+    out->side=(u32)e.mem[at+3]; out->material=(u32)e.mem[at+4];
+    vertices=e.mem[link+1];
+  }
+  if (term_aux(vertices)!=CID_NIL || entry->vertex_count!=(size_t)entry->count*6)
+    err_fail("bad Bend mesh vertex list");
   entry->revision=revision; entry->valid=1;
   return entry;
 }
@@ -128,7 +155,8 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   // With Bend 2.0.31: State = World(8), Control(Camera(7) + 9), pending, last.
   if (cid_arity(CID_DEMO_STATE)!=26 || cid_arity(CID_WORLD_WORLD)!=8 ||
       cid_arity(CID_INPUT_CONTROL)!=16 || cid_arity(CID_RENDER_AIM)!=5 ||
-      cid_arity(CID_WORLD_BODY)!=7 || cid_arity(CID_SPATIAL_FACE)!=8 ||
+      cid_arity(CID_WORLD_BODY)!=8 || cid_arity(CID_SPATIAL_FACE)!=8 ||
+      cid_arity(CID_MESH_VERTEX)!=5 ||
       cid_arity(CID_SPATIAL_LEAF)!=7 || cid_arity(CID_SPATIAL_BRANCH)!=9)
     err_fail("Bend Vulkan state layout changed");
   u64 st=term_peek(e,state),al=term_peek(e,aim);
@@ -172,15 +200,16 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
       out->lo[i]=voxel_vk_float(e.mem[bounds+i]);
       out->hi[i]=voxel_vk_float(e.mem[bounds+3+i]);
     }
-    VoxelVkTransport* entry=voxel_vk_transport(out->id,out->revision,e,e.mem[at+6]);
+    VoxelVkTransport* entry=voxel_vk_transport(out->id,out->revision,e,e.mem[at+6],e.mem[at+7]);
     out->face_count=entry->count; out->faces=entry->faces;
+    out->vertex_count=entry->vertex_count; out->vertices=entry->vertices;
     bodies=e.mem[link+1];
   }
   if (term_aux(bodies)!=CID_NIL) err_fail("bad Vulkan body list");
   for (u32 i=0;i<voxel_vk_cache_capacity;i++) {
     VoxelVkTransport* entry=&voxel_vk_cache[i];
     if (entry->valid && entry->seen!=voxel_vk_generation) {
-      free(entry->faces); memset(entry,0,sizeof *entry);
+      free(entry->faces); free(entry->vertices); memset(entry,0,sizeof *entry);
     }
   }
   if (getenv("VOXEL_STRESS_SCENE"))
@@ -331,7 +360,10 @@ Term vulkan_release_run(Env e, Term* f, IoWork* work) {
   voxel_vk_library = NULL;
   voxel_vk_render_fn = NULL;
   voxel_vk_release_fn = NULL;
-  for (u32 i=0;i<voxel_vk_cache_capacity;i++) free(voxel_vk_cache[i].faces);
+  for (u32 i=0;i<voxel_vk_cache_capacity;i++) {
+    free(voxel_vk_cache[i].faces);
+    free(voxel_vk_cache[i].vertices);
+  }
   free(voxel_vk_cache); voxel_vk_cache=NULL; voxel_vk_cache_capacity=0;
   free(voxel_vk_bodies); voxel_vk_bodies=NULL;
   voxel_vk_capacity = 0;

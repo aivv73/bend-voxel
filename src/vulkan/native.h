@@ -12,9 +12,16 @@ typedef struct {
 } VoxelVkFace;
 
 typedef struct {
+  float position[3];
+  uint32_t side, material;
+} VoxelVkVertex;
+
+typedef struct {
   uint32_t id, revision, anchored, face_count;
   float offset, lo[3], hi[3];
   const VoxelVkFace* faces;
+  uint32_t vertex_count;
+  const VoxelVkVertex* vertices;
 } VoxelVkBody;
 
 typedef struct {

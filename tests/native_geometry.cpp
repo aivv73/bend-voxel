@@ -32,6 +32,26 @@ static void expect_material_palette() {
   assert(rejected);
 }
 
+static void expect_bend_body_vertices() {
+  VoxelVkFace source{{0,0,0},{1,0,1},3,2};
+  VoxelVkVertex vertices[6]{};
+  for (uint32_t i=0;i<6;i++) {
+    vertices[i].position[0]=float(i);
+    vertices[i].side=3;
+    vertices[i].material=2;
+  }
+  VoxelVkBody body{};
+  body.anchored=1; body.face_count=1; body.faces=&source;
+  body.vertex_count=6; body.vertices=vertices;
+  Geometry output;
+  body_vertices(output,body);
+  assert(output.triangles==6 && output.vertices.size()==6);
+  for (uint32_t i=0;i<6;i++) {
+    assert(output.vertices[i].position.x==float(i));
+    assert(output.vertices[i].side==3);
+  }
+}
+
 static void expect_fresh(const VoxelVkFrame& frame,GeometryCache& cache,uint32_t rebuilt) {
   bool reused=false;
   const auto& actual=geometry(frame,cache,reused);
@@ -176,6 +196,7 @@ static void expect_render_lod() {
 
 int main() {
   expect_material_palette();
+  expect_bend_body_vertices();
   expect_shadow_bounds();
   expect_render_lod();
   VoxelVkFace faces[]={{{-400,20,-10},{400,20,10},3,2},{{-1,0,10},{1,20,10},5,3}};

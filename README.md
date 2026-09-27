@@ -69,8 +69,9 @@ The stress suite opens the Vulkan window and measures real scale, camera motion,
 - `src/showcase.bend`, `src/atelier_assets.bend`: the sculpture courtyard and Blender-voxelized exhibits.
 - `src/district.bend`: deterministic district generation and real spatial replication.
 - `src/render.bend`: camera and spatial picking.
+- `src/mesh.bend`: body-face expansion into local-space triangle vertices.
 - `src/input.bend`, `src/demo.bend`, `src/main.bend`: controls, HUD, application loop, and repeatable workloads.
-- `src/vulkan/`: per-body transport/mesh caches, dirty mesh uploads, GPU lighting, transform draws, and Vulkan presentation.
+- `src/vulkan/`: per-body transport/mesh caches, proxy and overlay geometry, dirty mesh uploads, GPU lighting, transform draws, and Vulkan presentation.
 - `src/math.bend`: vector/camera primitives adapted from Bend3D; see the [third-party notice](src/vendor/NOTICE.md).
 
 See the [sparse storage decision](docs/adr/0001-sparse-cuboid-world.md), [world model glossary](CONTEXT.md), and [earlier architecture exploration](docs/architecture.md). Irregular destruction can grow the number of stored regions and surfaces; the suite measures this representation rather than promising an arbitrary-world scale limit.
