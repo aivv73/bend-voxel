@@ -8,6 +8,7 @@ fi
 mkdir -p build
 glslc --target-env=vulkan1.3 src/vulkan/scene.vert -o build/vulkan-scene.vert.spv
 glslc --target-env=vulkan1.3 src/vulkan/scene.frag -o build/vulkan-scene.frag.spv
+glslc --target-env=vulkan1.3 src/vulkan/shadow.vert -o build/vulkan-shadow.vert.spv
 g++ -O2 -std=c++17 -fPIC -shared -Wall -Wextra -Wno-missing-field-initializers \
   src/vulkan/native.cpp -lvulkan -lX11 -o build/libvoxel_vulkan.so
 env -u CUDA_HOME bend src/main.bend -o build/voxel-demo

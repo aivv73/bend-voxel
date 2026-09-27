@@ -5,19 +5,18 @@ static void expect_material_palette() {
   constexpr uint32_t original[]={0x4bc1a4,0xd19d68,0x668fac,0xd9954f};
   for (uint32_t id=1;id<=4;id++) {
     assert(material::find(id).id==id);
-    auto top=material::surface(id,false,3);
+    auto top=material::surface(id,false);
+    auto encoded=material::encode(top);
     float expected[3]={float((original[id-1]>>16)&255)/255,
       float((original[id-1]>>8)&255)/255,float(original[id-1]&255)/255};
-    assert(std::abs(top.r-expected[0])<0.002f);
-    assert(std::abs(top.g-expected[1])<0.002f);
-    assert(std::abs(top.b-expected[2])<0.002f);
-    auto detached=material::surface(id,true,3);
+    assert(std::abs(encoded.r-expected[0])<0.002f);
+    assert(std::abs(encoded.g-expected[1])<0.002f);
+    assert(std::abs(encoded.b-expected[2])<0.002f);
+    auto detached=material::surface(id,true);
     assert(detached.r!=top.r || detached.g!=top.g || detached.b!=top.b);
-    auto side=material::surface(id,false,0);
-    assert(side.r<top.r && side.g<top.g && side.b<top.b);
   }
-  auto concrete=material::surface(2,true,3);
-  auto frame=material::surface(3,true,3);
+  auto concrete=material::surface(2,true);
+  auto frame=material::surface(3,true);
   assert(std::abs(concrete.r-frame.r)+std::abs(concrete.g-frame.g)+
     std::abs(concrete.b-frame.b)>0.25f);
   assert(material::in_gamut(material::to_linear({0.7f,0.5f,30.0f})));
@@ -26,7 +25,7 @@ static void expect_material_palette() {
   assert(std::abs(roundtrip.g-0.5f)<0.00001f);
   assert(std::abs(roundtrip.b-0.8f)<0.00001f);
   bool rejected=false;
-  try { material::surface(5,false,3); } catch (const std::runtime_error&) { rejected=true; }
+  try { material::surface(5,false); } catch (const std::runtime_error&) { rejected=true; }
   assert(rejected);
 }
 
@@ -52,10 +51,53 @@ static void expect_fresh(const VoxelVkFrame& frame,GeometryCache& cache,uint32_t
       a.count*sizeof(Vertex))==0);
   }
   assert(actual.lines==expected.lines && actual.hud==expected.hud);
+  assert(cache.shadow_draws.size()==frame.body_count);
+  for (uint32_t i=0;i<frame.body_count;i++) {
+    const auto& draw=cache.shadow_draws[i];
+    const auto& mesh=cache.meshes.at(frame.bodies[i].id);
+    assert(draw.first==mesh.first && draw.count==mesh.count);
+    assert(draw.offset==frame.bodies[i].offset);
+  }
   auto overlays=actual.vertices.size()-cache.scene_vertices;
   assert(overlays==expected.vertices.size()-fresh.scene_vertices);
   assert(std::memcmp(actual.vertices.data()+cache.scene_vertices,
     expected.vertices.data()+fresh.scene_vertices,overlays*sizeof(Vertex))==0);
+}
+
+static Vec3 light_clip(const ShadowMatrix& matrix,Vec3 point) {
+  const auto* m=matrix.values;
+  return {m[0]*point.x+m[4]*point.y+m[8]*point.z+m[12],
+    m[1]*point.x+m[5]*point.y+m[9]*point.z+m[13],
+    m[2]*point.x+m[6]*point.y+m[10]*point.z+m[14]};
+}
+
+static void expect_shadow_bounds() {
+  VoxelVkBody bodies[2]{};
+  bodies[0].lo[0]=-300; bodies[0].lo[1]=0; bodies[0].lo[2]=-200;
+  bodies[0].hi[0]=200; bodies[0].hi[1]=460; bodies[0].hi[2]=100;
+  bodies[1].lo[0]=220; bodies[1].lo[1]=0; bodies[1].lo[2]=300;
+  bodies[1].hi[0]=260; bodies[1].hi[1]=40; bodies[1].hi[2]=360;
+  bodies[1].offset=3.5f;
+  VoxelVkFrame frame{}; frame.body_count=2; frame.bodies=bodies;
+  auto matrix=shadow_matrix(frame);
+  for (const auto& b:bodies) for (unsigned corner=0;corner<8;corner++) {
+    Vec3 point{(corner&1?b.hi[0]:b.lo[0])*.1f,
+      (corner&2?b.hi[1]:b.lo[1])*.1f+b.offset,
+      (corner&4?b.hi[2]:b.lo[2])*.1f};
+    Vec3 clip=light_clip(matrix,point);
+    assert(clip.x>-1 && clip.x<1 && clip.y>-1 && clip.y<1);
+    assert(clip.z>0 && clip.z<1);
+  }
+  Vec3 point{0,2,0},toward_sun=normalized({-.45f,.82f,.35f});
+  assert(light_clip(matrix,point+toward_sun).z<light_clip(matrix,point).z);
+  std::vector<ShadowIdentity> saved{{1,2,1,0.5f}};
+  VoxelVkBody body{}; body.id=1; body.revision=2; body.anchored=1; body.offset=.5f;
+  VoxelVkFrame current{}; current.body_count=1; current.bodies=&body;
+  assert(!shadow_changed(saved,current));
+  current.eye[0]=18; current.yaw=.5f; current.night=1; current.aim_kind=1;
+  assert(!shadow_changed(saved,current)); // View and lighting never dirty the map.
+  body.offset=.6f; assert(shadow_changed(saved,current));
+  body.offset=.5f; body.revision++; assert(shadow_changed(saved,current));
 }
 
 static void expect_render_lod() {
@@ -80,12 +122,20 @@ static void expect_render_lod() {
   expect_fresh(frame,cache,5);
   assert(cache.proxy_draws==1 && cache.proxied_bodies==5);
   assert(cache.draws.size()==1 && cache.proxy_rebuilt==1);
+  assert(cache.shadow_draws.size()==5);
+  frame.yaw=0; // Camera culls the group, but the sun can still see it.
+  expect_fresh(frame,cache,0);
+  assert(cache.draws.empty() && cache.shadow_draws.size()==5);
+  frame.yaw=3.14159265f;
+  expect_fresh(frame,cache,0);
+  assert(cache.proxy_draws==1);
   frame.eye[2]=14.7f; // Between the 80 and 100 pixel thresholds.
   expect_fresh(frame,cache,0);
   assert(cache.proxy_draws==1 && cache.proxy_rebuilt==0);
   frame.eye[2]=11;
   expect_fresh(frame,cache,0);
   assert(cache.proxy_draws==0 && cache.draws.size()==5);
+  assert(cache.shadow_draws.size()==5);
   frame.eye[2]=14.7f;
   expect_fresh(frame,cache,0);
   assert(cache.proxy_draws==0 && cache.proxy_rebuilt==0);
@@ -119,6 +169,7 @@ static void expect_render_lod() {
 
 int main() {
   expect_material_palette();
+  expect_shadow_bounds();
   expect_render_lod();
   VoxelVkFace faces[]={{{-400,20,-10},{400,20,10},3,2},{{-1,0,10},{1,20,10},5,3}};
   VoxelVkBody bodies[]={
@@ -130,11 +181,16 @@ int main() {
   frame.body_count=2; frame.bodies=bodies; frame.hud="FRAME 1";
   GeometryCache cache;
   expect_fresh(frame,cache,2);
+  assert(cache.geometry.vertices[0].side==3); // Ground is sunlit.
+  assert(cache.geometry.vertices[cache.meshes.at(1).first].side==3);
+  assert(cache.geometry.vertices[cache.meshes.at(2).first].side==5);
   auto first=cache.meshes.at(1).first;
   auto original=cache.geometry.vertices;
   assert(cache.geometry.triangles>cache.scene_vertices);
   frame.hud="FRAME 2"; frame.eye[0]=1; frame.yaw+=.2f;
   expect_fresh(frame,cache,0);
+  frame.night=1;
+  expect_fresh(frame,cache,0); // Lighting changes do not rebuild world meshes.
   frame.aim[0]=.2f;
   expect_fresh(frame,cache,0);
   frame.aim_kind=0;
