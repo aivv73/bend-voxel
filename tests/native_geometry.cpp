@@ -25,7 +25,10 @@ static void expect_material_palette() {
   assert(std::abs(roundtrip.g-0.5f)<0.00001f);
   assert(std::abs(roundtrip.b-0.8f)<0.00001f);
   bool rejected=false;
-  try { material::surface(5,false); } catch (const std::runtime_error&) { rejected=true; }
+  auto plaster=material::surface(5,false);
+  assert(material::in_gamut(plaster));
+  assert(plaster.r>material::surface(2,false).r && plaster.b>material::surface(2,false).b);
+  try { material::surface(6,false); } catch (const std::runtime_error&) { rejected=true; }
   assert(rejected);
 }
 
@@ -88,7 +91,7 @@ static void expect_shadow_bounds() {
     assert(clip.x>-1 && clip.x<1 && clip.y>-1 && clip.y<1);
     assert(clip.z>0 && clip.z<1);
   }
-  Vec3 point{0,2,0},toward_sun=normalized({-.45f,.82f,.35f});
+  Vec3 point{0,2,0},toward_sun=normalized({-.62f,.62f,.48f});
   assert(light_clip(matrix,point+toward_sun).z<light_clip(matrix,point).z);
   std::vector<ShadowIdentity> saved{{1,2,1,0.5f}};
   VoxelVkBody body{}; body.id=1; body.revision=2; body.anchored=1; body.offset=.5f;
@@ -115,6 +118,7 @@ static void expect_render_lod() {
     bodies[i].lo[2]=0; bodies[i].hi[2]=10;
   }
   VoxelVkFrame frame{};
+  frame.width=640; frame.height=360;
   frame.eye[0]=.9f; frame.eye[1]=1; frame.eye[2]=50;
   frame.yaw=3.14159265f;
   frame.body_count=5; frame.bodies=bodies;
@@ -122,6 +126,9 @@ static void expect_render_lod() {
   expect_fresh(frame,cache,5);
   assert(cache.proxy_draws==1 && cache.proxied_bodies==5);
   assert(cache.draws.size()==1 && cache.proxy_rebuilt==1);
+  faces[0].material=5; bodies[0].revision++;
+  expect_fresh(frame,cache,1);
+  assert(proxy_material(bodies[0])==5); // New plaster participates in LOD safely.
   assert(cache.shadow_draws.size()==5);
   frame.yaw=0; // Camera culls the group, but the sun can still see it.
   expect_fresh(frame,cache,0);
@@ -176,6 +183,7 @@ int main() {
     {1,0,1,1,0,{-400,0,-10},{400,20,10},faces},
     {2,0,0,1,0,{-1,0,0},{1,20,10},faces+1}};
   VoxelVkFrame frame{};
+  frame.width=640; frame.height=360;
   frame.eye[1]=3; frame.eye[2]=5; frame.yaw=3.14159265f;
   frame.aim[1]=2; frame.aim[2]=.05f; frame.aim_kind=1;
   frame.body_count=2; frame.bodies=bodies; frame.hud="FRAME 1";

@@ -1,10 +1,10 @@
 # Bend Voxel
 
-An interactive destructible voxel world built with [Bend 2](https://github.com/bendlang/bend) and a native Vulkan renderer. The default **Material Works Yard** spans 384 × 384 meters: 36 generated tiles, four OKLCH materials, a central signal needle, and editable props authored in Blender. Distant prop clusters use cached render LOD while carving, picking, and motion keep full-resolution voxels in Bend. CUDA is not required.
+An interactive destructible voxel world built with [Bend 2](https://github.com/bendlang/bend) and a native Vulkan renderer. The default **Light Atelier** puts three large Blender-voxelized sculptures in a sunlit courtyard: Suzanne, a hollow ring, and a twisted column. Pale plaster receives their cast shadows, and a slatted canopy paints shadow stripes across the floor. CUDA is not required.
 
-![Material Works Yard overview](docs/validation/material-works-yard/overview.png)
+![Light Atelier](docs/validation/light-atelier/day.png)
 
-The showcase contains **102,634,228 editable 10 cm voxels** in 1,009 anchored bodies. [Its Blender source and export workflow](docs/showcase.md) let you change the beacon, cargo pod, and gateway assets. The earlier demolition district remains available through `VOXEL_DISTRICTS=1` and supplies the repeatable stress workloads.
+The 44 × 34 meter showcase opens close to its editable 10 cm voxel sculptures. [Its Blender source and voxelization workflow](docs/showcase.md) let you replace or extend the exhibits. Hold L to compare the night lighting. The demolition district remains available through `VOXEL_DISTRICTS=1`, `4`, or `16` and supplies the repeatable stress workloads.
 
 ## Quick start
 
@@ -14,7 +14,13 @@ You need **[Bend 2.0.31](https://github.com/bendlang/bend/releases/tag/v2.0.31)*
 make run
 ```
 
-This compiles the shaders, native Vulkan library, and Bend application, then opens a resizable window with a 640 × 360 logical view. To build once and launch separately:
+This compiles the shaders, native Vulkan library, and Bend application, then opens a resizable window with a 640 × 360 logical view. Choose the startup render resolution with `VOXEL_RESOLUTION=WIDTHxHEIGHT`, for example:
+
+```sh
+VOXEL_RESOLUTION=1920x1080 make run
+```
+
+The minimum is 640 × 360; the maximum is 8,294,400 pixels, with width at most 7,680 and height at most 4,320. The camera, picking, HUD, and reset control use the selected size. Resizing the window afterward scales that logical view. The stress benchmark defaults to 640 × 360 and accepts `--resolution WIDTHxHEIGHT`. To build once and launch separately:
 
 ```sh
 make build
@@ -35,7 +41,7 @@ make build
 | R or RESET | Restore the scene and camera |
 | Escape | Release controls; click the scene to resume |
 
-Green foundation material marks protected anchors; concrete is tan, frames are blue, and machinery is orange. The material palette is authored in OKLCH. Detached bodies retain their material hue with a lighter, softer appearance. Sunlight casts structure and prop shadows across the yard; sky ambient light and a nearby work light shade surfaces in linear RGB. Hold L to inspect the yard at night. The floor is indestructible. Bodies fall vertically and stop at the floor. Rotation, body collisions, stacking, and reattachment are not implemented. The camera travels at 12 m/s, or 60 m/s while Shift is held, without collision or horizontal bounds.
+Green foundation material marks protected anchors; concrete is tan, frames are blue, machinery is orange, and plaster is pale. The material palette is authored in OKLCH. Detached bodies retain their material hue with a lighter, softer appearance. Sunlight casts sculpture and canopy shadows across the courtyard; sky ambient light and a nearby work light shade surfaces in linear RGB. Hold L to inspect the scene at night. The underlying floor is indestructible; the plaster platform is editable. Bodies fall vertically and stop at the floor. Rotation, body collisions, stacking, and reattachment are not implemented. The camera travels at 12 m/s, or 60 m/s while Shift is held, without collision or horizontal bounds.
 
 ```sh
 VOXEL_DISTRICTS=1 ./scripts/run.sh
@@ -60,7 +66,7 @@ The stress suite opens the Vulkan window and measures real scale, camera motion,
 
 - `src/spatial.bend`: sparse solid cuboids, spatial trees, sphere subtraction, shared-face connectivity, and exposed rectangles.
 - `src/world.bend`: body ownership, transactional edits, configurable budget, and vertical motion.
-- `src/showcase.bend`, `src/showcase_assets.bend`: the generated works yard and Blender-exported voxel assets.
+- `src/showcase.bend`, `src/atelier_assets.bend`: the sculpture courtyard and Blender-voxelized exhibits.
 - `src/district.bend`: deterministic district generation and real spatial replication.
 - `src/render.bend`: camera and spatial picking.
 - `src/input.bend`, `src/demo.bend`, `src/main.bend`: controls, HUD, application loop, and repeatable workloads.

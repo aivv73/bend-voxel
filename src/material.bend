@@ -6,6 +6,7 @@ def foundation() -> U32: 1
 def concrete() -> U32: 2
 def frame() -> U32: 3
 def machinery() -> U32: 4
+def plaster() -> U32: 5
 
 # Foundation cells are the current level's protected anchors.
 def is_anchor(material: U32) -> Bool:

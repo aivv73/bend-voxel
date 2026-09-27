@@ -4,13 +4,16 @@ import ./spatial.bend as S
 import ./material.bend as M
 
 # Generated from assets/showcase_assets.blend.
-# Edit the Blender boxes, then run make export-showcase-assets.
+# Edit the Blender meshes, then run make export-showcase-assets.
 def beacon() -> S.Tree:
   S.build([S.Box{R.Vec{(0.0 - 8.0 : F32),0.0,(0.0 - 8.0 : F32)},R.Vec{8.0,2.0,8.0},M.foundation()},
     S.Box{R.Vec{(0.0 - 8.0 : F32),24.0,(0.0 - 8.0 : F32)},R.Vec{8.0,30.0,8.0},M.machinery()},
     S.Box{R.Vec{(0.0 - 7.0 : F32),2.0,(0.0 - 7.0 : F32)},R.Vec{(0.0 - 5.0 : F32),24.0,(0.0 - 5.0 : F32)},M.frame()},
     S.Box{R.Vec{(0.0 - 7.0 : F32),2.0,5.0},R.Vec{(0.0 - 5.0 : F32),24.0,7.0},M.frame()},
     S.Box{R.Vec{(0.0 - 6.0 : F32),30.0,(0.0 - 6.0 : F32)},R.Vec{6.0,32.0,6.0},M.foundation()},
+    S.Box{R.Vec{(0.0 - 3.0 : F32),2.0,(0.0 - 2.0 : F32)},R.Vec{3.0,24.0,2.0},M.machinery()},
+    S.Box{R.Vec{(0.0 - 2.0 : F32),2.0,(0.0 - 3.0 : F32)},R.Vec{2.0,24.0,(0.0 - 2.0 : F32)},M.machinery()},
+    S.Box{R.Vec{(0.0 - 2.0 : F32),2.0,2.0},R.Vec{2.0,24.0,3.0},M.machinery()},
     S.Box{R.Vec{5.0,2.0,(0.0 - 7.0 : F32)},R.Vec{7.0,24.0,(0.0 - 5.0 : F32)},M.frame()},
     S.Box{R.Vec{5.0,2.0,5.0},R.Vec{7.0,24.0,7.0},M.frame()}])
 

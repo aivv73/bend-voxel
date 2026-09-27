@@ -120,7 +120,8 @@ def summarize_views(rows, mode, warmup, measured):
             'target_frames': target_frames, 'preview_frames': preview_frames}, errors
 
 
-def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='static', world_scale=None):
+def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='static', world_scale=None,
+                 resolution=(640, 360)):
     rows = list(csv.reader(lines))
     errors = []
     special = {}
@@ -170,7 +171,7 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     if not measured_frames:
         errors.append('No measured frames')
     district_summary, district_errors = summarize_district(rows, frame_data, edits, edit_frames,
-        world_scale, view_mode, warmup, measured) if world_scale is not None else ({}, [])
+        world_scale, view_mode, warmup, measured, resolution) if world_scale is not None else ({}, [])
     errors.extend(district_errors)
     durations = [row[1] for row in measured_frames]
     total_us = sum(durations)
@@ -200,7 +201,7 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     }
 
 
-def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, measured):
+def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, measured, resolution):
     """Validate actual world scale, body motion and cache identity on every frame."""
     errors = []
     inventory = [row for row in rows if row and row[0] == 'world']
@@ -268,7 +269,7 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
             errors.append('View-only workload mutated the world')
         measured_cache = caches[warmup:]
         measured_lod = lods[warmup:]
-        if scale == 16 and mode in ('static', 'camera') and not max(row[2] for row in measured_lod):
+        if scale == 16 and mode in ('static', 'camera') and resolution == (640, 360) and not max(row[2] for row in measured_lod):
             errors.append('Distant overview did not select any LOD proxies')
         return {
             'initial_solid_cells': solids,

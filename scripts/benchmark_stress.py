@@ -31,6 +31,16 @@ VIEW_IDS = {'static': 0, 'camera': 1, 'aim': 2, 'carve': 3, 'bridge': 4, 'fragme
 DISTRICTS = {1: 1, 2: 4, 3: 16}
 
 
+def resolution(value):
+    match = re.fullmatch(r'(\d+)x(\d+)', value)
+    if match is None:
+        raise argparse.ArgumentTypeError('resolution must be WIDTHxHEIGHT')
+    width, height = map(int, match.groups())
+    if not (640 <= width <= 7680 and 360 <= height <= 4320 and width * height <= 8294400):
+        raise argparse.ArgumentTypeError('resolution must be 640..7680 by 360..4320, at most 8294400 pixels')
+    return width, height
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cases', nargs='+', choices=CASES, default=list(CASES))
@@ -39,6 +49,7 @@ def main():
     parser.add_argument('--edit-every', type=int, default=30, help='carve/bridge interval; 0 disables those edits; fragment bursts use 1')
     parser.add_argument('--body-budget', type=int, default=2048)
     parser.add_argument('--timeout', type=int, default=180, help='seconds per case')
+    parser.add_argument('--resolution', type=resolution, default=(640, 360), help='render size WIDTHxHEIGHT (default: 640x360)')
     parser.add_argument('--output', type=Path, default=Path('build/stress'))
     args = parser.parse_args()
     if args.warmup < 0 or args.frames < 1 or args.edit_every < 0 or args.timeout < 1:
@@ -62,7 +73,7 @@ def main():
             'bend': subprocess.check_output(['bend', 'version'], text=True).strip(),
             'git_revision': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
             'working_tree_dirty': bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT)),
-            'resolution': [640, 360],
+            'resolution': list(args.resolution),
             'warmup_frames': args.warmup,
             'measured_frames': args.frames,
             'edit_every_frames': args.edit_every,
@@ -78,9 +89,9 @@ def main():
         scene, view = CASES[name]
         scale = DISTRICTS[scene]
         edit_every = 1 if view == 'fragments' else args.edit_every if view in ('carve', 'bridge') else 0
-        print(f'Stress {name}: {scale} real districts, {view} workload', flush=True)
+        print(f'Stress {name}: {scale} real districts, {view} workload, {args.resolution[0]}x{args.resolution[1]}', flush=True)
         csv_path = out / f'{name}.csv'
-        env = {**os.environ, 'VOXEL_STRESS_SCENE': str(scene),
+        env = {**os.environ, 'VOXEL_RESOLUTION': f'{args.resolution[0]}x{args.resolution[1]}', 'VOXEL_STRESS_SCENE': str(scene),
                'VOXEL_BODY_BUDGET': str(args.body_budget), 'VOXEL_STRESS_PRESENT': 'unpaced',
                'VOXEL_STRESS_VIEW': str(VIEW_IDS[view]),
                'VOXEL_STRESS_WARMUP': str(args.warmup),
@@ -99,7 +110,7 @@ def main():
         (out / f'{name}.stderr').write_text(stderr)
         with csv_path.open() as stream:
             result = parse_stress(stream, exit_code, args.warmup, args.frames,
-                                  edit_every, view, world_scale=scale)
+                                  edit_every, view, world_scale=scale, resolution=args.resolution)
         modes = re.findall(r'^stress_present_mode,(immediate|mailbox)$', stderr, re.MULTILINE)
         if not modes or len(set(modes)) != 1:
             result['errors'].append('Unpaced present mode was not confirmed')

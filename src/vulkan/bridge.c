@@ -35,7 +35,7 @@ typedef struct {
 
 typedef struct {
   float eye[3], yaw, pitch, aim[3];
-  u32 aim_kind, body_count, night;
+  u32 aim_kind, body_count, night, width, height;
   const VoxelVkBody* bodies;
   const char* hud;
 } VoxelVkFrame;
@@ -125,9 +125,9 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
   if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
     err_fail("bad Vulkan scene state");
-  // With Bend 2.0.31: State = World(8), Control(Camera(5) + 9), pending, last.
-  if (cid_arity(CID_DEMO_STATE)!=24 || cid_arity(CID_WORLD_WORLD)!=8 ||
-      cid_arity(CID_INPUT_CONTROL)!=14 || cid_arity(CID_RENDER_AIM)!=5 ||
+  // With Bend 2.0.31: State = World(8), Control(Camera(7) + 9), pending, last.
+  if (cid_arity(CID_DEMO_STATE)!=26 || cid_arity(CID_WORLD_WORLD)!=8 ||
+      cid_arity(CID_INPUT_CONTROL)!=16 || cid_arity(CID_RENDER_AIM)!=5 ||
       cid_arity(CID_WORLD_BODY)!=7 || cid_arity(CID_SPATIAL_FACE)!=8 ||
       cid_arity(CID_SPATIAL_LEAF)!=7 || cid_arity(CID_SPATIAL_BRANCH)!=9)
     err_fail("Bend Vulkan state layout changed");
@@ -139,7 +139,8 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   }
   frame.yaw=voxel_vk_float(e.mem[st+11]);
   frame.pitch=voxel_vk_float(e.mem[st+12]);
-  frame.night=((u32)e.mem[st+13]&256u)!=0; // Held L in Control.keys.
+  frame.width=(u32)e.mem[st+13]; frame.height=(u32)e.mem[st+14];
+  frame.night=((u32)e.mem[st+15]&256u)!=0; // Held L in Control.keys.
   frame.aim_kind=(u32)e.mem[al+4]; frame.hud=hud;
   voxel_vk_generation++;
   u32 anchored=0,moving=0,translated=0;
@@ -277,6 +278,8 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   u64 len = 0;
   char* hud = io_cstr(e, f[3], &len);
   VoxelVkFrame frame = voxel_vk_scene(e, f[1], f[2], hud);
+  if (frame.width!=(u32)win->img->width || frame.height!=(u32)win->img->height)
+    err_fail("Vulkan camera and window resolutions differ");
   static int stress_scene_logged;
   if (getenv("VOXEL_STRESS_SCENE") && !stress_scene_logged++)
     {

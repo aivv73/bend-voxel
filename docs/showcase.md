@@ -1,33 +1,53 @@
-# Material Works Yard
+# Light Atelier
 
-The default interactive scene is a 6 × 6 grid of 64-meter tiles, spanning 384 × 384 meters. Each tile has a protected foundation, a concrete surface, one of four large structures, a gateway, and a 5 × 5 cluster of smaller beacon and cargo props. A 46-meter signal needle marks the center. The world contains 102,634,228 occupied 10 cm voxels and 1,009 anchored bodies. All four stable material IDs appear in the structures and props: green foundation, tan concrete, blue frame, and orange machinery.
+The default demo is a 44 × 34 meter sculpture courtyard designed to show lighting, cast shadows, and imported Blender geometry immediately. The opening camera looks across three large sculptures at close range. Pale plaster floors and pedestals receive their shadows; a slatted canopy casts a repeated stripe pattern onto the foreground.
 
-![Showcase overview](validation/material-works-yard/overview.png)
+![Light Atelier in the Vulkan demo](validation/light-atelier/day.png)
 
-The Vulkan renderer shades the OKLCH material palette with sunlight and sky ambient light. Structures and props cast directional shadows across the yard; the [closer view](validation/material-works-yard/shadows-close.png) shows their shape. Hold L to preview [night lighting](validation/material-works-yard/night.png); a work light near the camera illuminates nearby geometry. Camera and lighting changes leave the sun shadow map and render meshes cached.
+The exhibits are **Suzanne**, a subdivided Blender monkey head; **Oculus**, a vertical torus with an open center; and **Twist**, an octagonal column swept through 207°. Their curved silhouettes and 10 cm voxel steps come from actual Blender meshes. They are fully editable game geometry, with protected footings and normal carving, connectivity, surface caching, and shadow updates.
 
-The opening camera sees the whole yard. In the [two-frame LOD sample](validation/material-works-yard/lod-sample.csv), 984 bodies are visible; 875 are represented by 35 cached tile proxies, leaving 144 scene draws. This is a rendering choice: bodies remain full resolution for picking, cuts, connectivity, and motion. The [renderer guide](vulkan-renderer.md#render-lod) explains the LOD thresholds and cache behavior. Hold Shift while moving to travel at 60 m/s across the yard.
+The courtyard has six bodies: the floor, backdrop, canopy, and three exhibits. It focuses the existing 2,048² sun shadow map on a much smaller area than the earlier Material Works Yard. The new plaster material has a pale OKLCH color that makes warm sunlight and cool shadows easy to distinguish. Sunlight arrives at a lower angle, producing longer shadows. Shadow filtering compares each sampled texel with the receiver plane's depth to prevent diagonal self-shadow stripes on the walls.
 
-## Edit the Blender assets
-
-[showcase_assets.blend](../assets/showcase_assets.blend) contains three editable voxel assets: a beacon, cargo pod, and gateway. The presentation floor, labels, camera, and light are for preview and are not exported.
-
-![Blender asset preview](validation/material-works-yard/blender-assets.png)
-
-Each asset collection has `voxel_asset` and `voxel_origin` custom properties. Every solid part is a box mesh with a `voxel_material` property from 1 to 4. Keep its eight corners axis-aligned on the 10 cm grid. Boxes within one asset must not overlap, and each asset needs a ground-level foundation box. Blender uses Z-up; the exporter maps Blender X/Y/Z to engine X/Z/Y.
-
-The beacon and cargo pod must stay within 1.2 meters of their local center in both horizontal directions so their repeated instances do not overlap. The gateway has a 5-meter half-width and 2-meter half-depth limit. The exporter enforces these footprints.
-
-Blender's colors preview the four IDs. The in-engine colors come from the OKLCH definitions in [material.hpp](../src/vulkan/material.hpp); changing a Blender swatch alone does not change that palette.
-
-After editing and saving the `.blend` file, regenerate the Bend source and verify the scene:
+Hold **L** to compare the [night view](validation/light-atelier/night.png), with cool ambient light and a stronger warm work light around the camera. Use WASD and Q/E to approach the voxel steps, RMB to look, LMB to carve, and R to restore the sculptures and the opening camera. The sun casts shadows; the camera work light does not. Render LOD remains available as you move away, while the opening view shows the full meshes.
 
 ```sh
-make export-showcase-assets
+VOXEL_RESOLUTION=1280x720 make run
+```
+
+## Blender source and import
+
+[light_atelier.blend](../assets/light_atelier.blend) contains the three source assets in named collections. The preview floor, labels, camera, and sun are excluded from export. Suzanne's subdivision, remesh, and smoothing modifiers remain editable in the source; the remesh closes its eye sockets for solid voxelization. Its `voxel_remove_isolated` object property opts into discarding solitary sampled voxels with no face-connected neighbor. The exporter reports this cleanup; other objects preserve all sampled cells by default.
+
+![Original Blender meshes before engine voxelization](validation/light-atelier/blender.png)
+
+| Asset | Mesh voxels, excluding pedestal | Exported cuboids, including pedestal |
+| --- | ---: | ---: |
+| Suzanne | 21,020 | 731 |
+| Oculus | 15,464 | 628 |
+| Twist | 20,104 | 642 |
+
+To change or replace an exhibit:
+
+1. Open the source file in Blender. Import or append a model and move its solid mesh objects directly into the appropriate asset collection.
+2. Keep the collection's `voxel_asset` name and `voxel_origin` placement origin. Assign each mesh an integer `voxel_material`: 1 foundation, 2 concrete, 3 frame, 4 machinery, or 5 plaster. Use separate objects for different game materials.
+3. Keep a ground-level foundation part and connect the sculpture to its pedestal. Avoid overlapping occupied cells. New collections generate new asset functions; place them through `src/showcase.bend`.
+4. Save the source, export, build, and verify:
+
+```sh
+make export-atelier-assets
+make test-blender
 make build
 make test
 ```
 
-The exporter validates box shapes, bounds, materials, anchors, and overlap before writing [showcase_assets.bend](../src/showcase_assets.bend). Commit the `.blend` file and generated Bend file together. [create_showcase_assets.py](../scripts/create_showcase_assets.py) records how the initial assets were built and refuses to replace an existing `.blend` file.
+The exporter evaluates modifiers and world transforms, maps Blender X/Y/Z to engine X/Z/Y, samples closed manifold meshes at 10 cm cell centers, and merges same-material cells into disjoint cuboids. Exact grid-aligned boxes keep their exact bounds. Closed cavities remain empty; details thinner than a voxel can disappear. Blender material swatches preview the IDs; the game's colors come from `src/vulkan/material.hpp`.
 
-The large structures and tile placement are generated in [showcase.bend](../src/showcase.bend). The earlier demolition district and its exact-inventory stress workloads remain in [district.bend](../src/district.bend); run them with `VOXEL_DISTRICTS=1`, `4`, or `16`.
+Each non-box mesh is limited to one million candidate cells, and each asset to 4,096 cuboids. Large curved meshes can cost more to carve and rebuild than their occupied-cell count suggests. Export validates closure, materials, anchor presence, bounds, and overlap; the engine tests additionally verify connectivity and the ring's open center.
+
+Commit the source `.blend` and generated [atelier_assets.bend](../src/atelier_assets.bend) together. [create_light_atelier.py](../scripts/create_light_atelier.py) records the initial authoring steps and refuses to overwrite the source unless explicitly given `--replace`.
+
+## Scale workloads and earlier assets
+
+The demolition district remains available with `VOXEL_DISTRICTS=1`, `4`, or `16`; its [stress suite](stress-benchmark.md) still measures world scale, view changes, destruction, and falling bodies. The earlier [showcase_assets.blend](../assets/showcase_assets.blend) and `make export-showcase-assets` retain the beacon, cargo pod, and gateway import examples. Their repeated-layout footprint limits still apply. Earlier yard screenshots are preserved under `docs/validation/material-works-yard/`.
+
+See the [Light Atelier validation record](validation/light-atelier/README.md) for captures and checks.

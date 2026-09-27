@@ -4,6 +4,7 @@ layout(location = 0) in vec3 position;
 layout(push_constant) uniform Camera {
   vec4 eye_yaw;
   vec4 pitch_offset;
+  vec4 viewport;
   mat4 shadow_matrix;
 } pc;
 

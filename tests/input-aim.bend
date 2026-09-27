@@ -27,22 +27,31 @@ def hit(a: V.Aim, kind0: U32, t0: F32) -> Bool:
   (U32.is_eq(kind,kind0) && (F32.abs((t - t0 : F32)) < 0.0001 : F32))
 def moved(c: I.Control) -> Bool:
   I.Control{cam,_,_,_,_,_,_,_,_,_} = c
-  V.Camera{p,_,_} = cam
+  V.Camera{p,_,_,_,_} = cam
   R.Vec{_,y,_} = p
   (F32.abs((y - 36.0 : F32)) < 0.0001 : F32)
 def sprinted(c: I.Control) -> Bool:
   I.Control{cam,_,_,_,_,_,_,_,_,_} = c
-  V.Camera{p,_,_} = cam
+  V.Camera{p,_,_,_,_} = cam
   R.Vec{_,y,_} = p
   (F32.abs((y - 60.0 : F32)) < 0.0001 : F32)
 def showcase.camera(c: I.Control) -> Bool:
   I.Control{cam,_,_,_,_,_,_,_,_,_} = c
-  V.Camera{p,_,pitch} = cam
+  V.Camera{p,_,pitch,_,_} = cam
   R.Vec{x,y,z} = p
-  (((F32.abs((x - 160.0 : F32)) < 0.0001) &&
-    (F32.abs((y - 145.0 : F32)) < 0.0001) &&
-    (F32.abs((z - 500.0 : F32)) < 0.0001) &&
-    (F32.abs((pitch + 0.4 : F32)) < 0.0001)) : F32)
+  (((F32.abs((x - 9.0 : F32)) < 0.0001) &&
+    (F32.abs((y - 11.0 : F32)) < 0.0001) &&
+    (F32.abs((z - 25.0 : F32)) < 0.0001) &&
+    (F32.abs((pitch + 0.3 : F32)) < 0.0001)) : F32)
+def viewport(c: I.Control, width: U32, height: U32, mx: U32, my: U32) -> Bool:
+  I.Control{V.Camera{_,_,_,w,h},_,x,y,_,_,_,_,_,_} = c
+  (U32.is_eq(w,width) && U32.is_eq(h,height) && U32.is_eq(x,mx) && U32.is_eq(y,my))
+def projection(c: R.Cam) -> Bool:
+  R.Cam{_,_,_,_,focal,cx,cy,_,w,h} = c
+  ((F32.abs((focal - 800.0 : F32)) < 0.0001) &&
+    (F32.abs((cx - 640.0 : F32)) < 0.0001) &&
+    (F32.abs((cy - 360.0 : F32)) < 0.0001) &&
+    U32.is_eq(w,1280) && U32.is_eq(h,720) : F32)
 def main() -> IO(Unit):
   +held = I.mouse(320,180,0,True{},I.initial())
   +released = I.key(27,True{},I.key(119,True{},I.initial()))
@@ -60,8 +69,12 @@ def main() -> IO(Unit):
     Unit <- check(sprinted(I.step(I.key(16,True{},I.key(101,True{},I.initial())),0.5)),"shift enables fast travel")
     Unit <- check(U32.is_eq((keys(I.key(108,True{},I.initial())) .&. 256 : U32),256),"L enables night lighting")
     Unit <- check(U32.is_eq((keys(I.key(108,False{},I.key(108,True{},I.initial()))) .&. 256 : U32),0),"releasing L restores daylight")
-    Unit <- check(showcase.camera(I.showcase()),"showcase starts at the overview camera")
+    Unit <- check(showcase.camera(I.showcase()),"showcase starts close to the sculptures")
     Unit <- check(showcase.camera(I.reset.state(I.showcase(),True{})),"showcase reset restores its camera")
+    Unit <- check(viewport(I.initial.size(1280,720),1280,720,640,360),"custom resolution centers pointer")
+    Unit <- check(viewport(I.reset.state(I.showcase.size(1280,720),True{}),1280,720,640,360),"reset keeps custom resolution")
+    Unit <- check(reset(I.mouse(1200,30,0,True{},I.initial.size(1280,720))),"scaled reset button")
+    Unit <- check(projection(V.cam(V.camera.size(1280,720))),"camera projection scales with resolution")
     Unit <- check(hit(V.ray.tree(S.Leaf{D.box((0.0 - 320.0 : F32),0.0,(0.0 - 320.0 : F32),640.0,4.0,640.0,2)},0.0,R.Vec{31.9,4.0,31.9},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),1,3.6),"large sparse slab far-end picking")
     Unit <- check(hit(V.ray.tree(S.Leaf{D.box((0.0 - 40.0 : F32),20.0,0.0,10.0,10.0,10.0,2)},(0.0 - 1.0 : F32),R.Vec{(0.0 - 3.5 : F32),5.0,0.5},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),1,3.0),"picking uses moving body local coordinates")
     Unit <- check(hit(V.ray.tree(S.Leaf{D.box(0.0,0.0,0.0,10.0,10.0,10.0,1)},0.0,R.Vec{0.5,5.0,0.5},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),2,4.0),"spatial picking identifies explicit anchors")
