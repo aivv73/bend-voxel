@@ -16,11 +16,12 @@ inline constexpr uint32_t foundation_id=1;
 
 // IDs are the stable voxel values declared in src/material.bend. Colors were
 // authored from the original demo palette, then expressed as OKLCH values.
-inline constexpr std::array<Definition,4> definitions{{
+inline constexpr std::array<Definition,5> definitions{{
   {foundation_id,"foundation",{0.736340f,0.114340f,173.8965f}},
   {2,"concrete",  {0.733411f,0.093103f, 66.0436f}},
   {3,"frame",     {0.630974f,0.062930f,239.8232f}},
   {4,"machinery", {0.723628f,0.119039f, 64.7019f}},
+  {5,"plaster",   {0.860000f,0.018000f, 85.0000f}},
 }};
 
 inline const Definition& find(uint32_t id) {

@@ -1,6 +1,6 @@
 # Live Vulkan renderer
 
-Vulkan is the renderer for the 640 × 360 demo. Gameplay remains in Bend: voxel ownership, cuts, connected components, cached face merging, falling bodies, camera input, and picking. The application loop in `src/main.bend` uses `vulkan.frame` to render each current world state.
+Vulkan is the renderer for the demo, which defaults to a 640 × 360 logical view and accepts `VOXEL_RESOLUTION=WIDTHxHEIGHT` at startup. Gameplay remains in Bend: voxel ownership, cuts, connected components, cached face merging, falling bodies, camera input, and picking. The application loop in `src/main.bend` uses `vulkan.frame` to render each current world state.
 
 ## Run and measure
 
@@ -17,7 +17,7 @@ The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surf
 2. The pinned native effect reads the current cached `Body` and merged `Face` values from Bend's heap. It passes a flat face list, camera, aim, and HUD to `libvoxel_vulkan.so`.
 3. The native renderer caches world-face triangles by body ID, revision, and anchor status; translation changes only the draw transform. It adds affected voxel cells near the brush and three twelve-segment rings each frame.
 4. Vulkan 1.3 dynamic rendering fills a depth-only sun shadow map when body geometry or position changes. The main pass samples that map while shading voxel faces with sunlight, sky ambient light, and a camera work light, then draws triangles with depth testing, brush lines, and screen-space bitmap text into the Xlib swapchain image. The backend handles acquire, submission, presentation, and resize recreation. It uses a present wait semaphore per swapchain image, following [Khronos's swapchain reuse guidance](https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html).
-5. The X11 adapter synchronizes the X server and sends key, mouse, focus, and close events back to Bend. Pointer positions are mapped to the demo's 640 × 360 logical space after resize.
+5. The X11 adapter synchronizes the X server and sends key, mouse, focus, and close events back to Bend. Pointer positions are mapped to the selected logical resolution after resize.
 
 The native effect returns the same Bend state it received. The effect depends on Bend 2.0.31's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, or `Face` definitions require reviewing that bridge.
 
@@ -29,13 +29,21 @@ Proxy meshes are cached by member body IDs and revisions. Camera movement and ai
 
 ## Material colors
 
-`src/material.bend` names the four stable voxel IDs and defines which one marks protected foundations. `src/vulkan/material.hpp` gives each ID an OKLCH base color. The renderer builds linear RGB base swatches once for each material and anchor state. Detached bodies get a lightness/chroma adjustment in OKLCH, so their material hue remains visible. Out-of-gamut colors keep lightness and hue while chroma is reduced to fit sRGB.
+`src/material.bend` names the five stable voxel IDs and defines which one marks protected foundations. The Light Atelier adds pale plaster as ID 5. `src/vulkan/material.hpp` gives each ID an OKLCH base color. The renderer builds linear RGB base swatches once for each material and anchor state. Detached bodies get a lightness/chroma adjustment in OKLCH, so their material hue remains visible. Out-of-gamut colors keep lightness and hue while chroma is reduced to fit sRGB.
 
 Each cached vertex carries its face direction alongside its linear base color. The fragment shader applies cool sky ambient light, warm directional sunlight, and a distance-attenuated work light near the camera, then encodes for a UNORM attachment or leaves linear output for Vulkan's automatic sRGB attachment encoding. The ground receives light and shadows; HUD, aim rings, and the cut preview remain flat display colors. Holding L switches to a darker night setup with a stronger work light.
 
-The 2,048 × 2,048 depth-only sun map uses an orthographic projection fitted to the occupied world. A three-by-three depth comparison softens shadow edges. It is cached by body ID, revision, anchor state, and vertical offset: camera, aim, and lighting changes reuse it, while cuts, detachments, and falling bodies update it. The shadow pass draws full body meshes so the main view's LOD selection cannot change a cached shadow. The nearby work light does not cast shadows. The palette is static; changing its definitions requires a rebuild.
+The 2,048 × 2,048 depth-only sun map uses an orthographic projection fitted to the occupied world. A three-by-three depth comparison softens shadow edges; each tap compares against the receiver plane at its texel center to prevent self-shadow stripes. It is cached by body ID, revision, anchor state, and vertical offset: camera, aim, and lighting changes reuse it, while cuts, detachments, and falling bodies update it. The shadow pass draws full body meshes so the main view's LOD selection cannot change a cached shadow. The nearby work light does not cast shadows. The palette is static; changing its definitions requires a rebuild. `VOXEL_VULKAN_TRACE=1` logs shadow refreshes alongside the opening camera trace.
 
 ## Validation
+
+### Light Atelier (2026-09-27)
+
+`make export-atelier-assets`, `make build`, `make test`, and `make test-blender` passed. Live day/night captures were inspected at 1280 × 720, with an additional default 640 × 360 capture. A 15-cell cut and reset each rebuilt one body's mesh and refreshed the shadow map; reset restored the pre-cut scene pixels. The [validation record](validation/light-atelier/README.md) includes the Blender source preview, engine captures, counts, and runtime trace.
+
+### Startup resolution (2026-09-27)
+
+`make build` and `make test` passed with resolution parsing, camera projection, reset target, and native cache checks. The Material Works Yard rendered three frames at both 1280 × 720 and 1024 × 768, and a 1024 × 768 window capture was inspected for correct layout. An invalid `1920X1080` value exited with a clear error before opening a window. The 16-district camera and aim stress workloads passed a short 24-frame run at the runner's default 640 × 360 resolution.
 
 ### Bend 2.0.31 update (2026-09-27)
 

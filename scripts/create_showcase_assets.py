@@ -61,8 +61,23 @@ def box(group, name, material, bounds):
     return obj
 
 
+def cylinder(group, name, material, center, radius, bottom, top):
+    ox, oy, oz = group.get("voxel_origin", (0.0, 0.0, 0.0))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=radius, depth=top - bottom,
+                                        location=(ox + center[0], oy + center[1], oz + (bottom + top) / 2))
+    obj = bpy.context.object
+    obj.name = name
+    for old in tuple(obj.users_collection):
+        old.objects.unlink(obj)
+    group.objects.link(obj)
+    obj["voxel_material"] = material
+    obj.data.materials.append(materials[material])
+    return obj
+
+
 beacon = collection("01 Beacon", "beacon", (-8.0, 0.0, 0.0))
 box(beacon, "Foundation plinth", 1, (-0.8, -0.8, 0.0, 0.8, 0.8, 0.2))
+cylinder(beacon, "Voxelized signal core", 4, (0.0, 0.0), 0.34, 0.2, 2.4)
 for x in (-0.7, 0.5):
     for y in (-0.7, 0.5):
         box(beacon, f"Frame post {x} {y}", 3,

@@ -21,7 +21,7 @@
 #include <unordered_map>
 
 namespace {
-constexpr uint32_t WIDTH=640, HEIGHT=360;
+constexpr uint32_t DEFAULT_WIDTH=640, DEFAULT_HEIGHT=360;
 void check(VkResult result, const char* what) {
   if (result!=VK_SUCCESS) throw std::runtime_error(std::string(what)+": Vulkan "+std::to_string(result));
 }
@@ -84,28 +84,35 @@ const uint8_t* glyph(char c) {
   for (const auto& entry:glyphs) if (entry.character==c) return entry.rows;
   return glyphs[sizeof(glyphs)/sizeof(glyphs[0])-1].rows;
 }
-void hud_text(Geometry& g,float x,float baseline,const char* begin,size_t length,Vec3 color) {
-  for (size_t i=0;i<length;i++,x+=6) {
+void hud_text(Geometry& g,float x,float baseline,const char* begin,size_t length,Vec3 color,float scale) {
+  for (size_t i=0;i<length;i++,x+=6*scale) {
     if (begin[i]==' ') continue;
     const uint8_t* rows=glyph(begin[i]);
     for (int y=0;y<7;y++) for (int bit=0;bit<5;bit++) if (rows[y]&(16>>bit)) {
-      float left=x+bit,top=baseline-10.5f+y*1.5f;
-      Vec3 a{left,top,0},b{left+1,top,0},c{left+1,top+1.5f,0},d{left,top+1.5f,0};
+      float left=x+bit*scale,top=baseline-10.5f*scale+y*1.5f*scale;
+      Vec3 a{left,top,0},b{left+scale,top,0},c{left+scale,top+1.5f*scale,0},d{left,top+1.5f*scale,0};
       for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color,6});
       g.hud+=6;
     }
   }
 }
-void add_hud(Geometry& g,const char* hud) {
-  constexpr int ys[]={20,38,55,72,325,347};
+void add_hud(Geometry& g,const char* hud,uint32_t width,uint32_t height) {
+  float scale=std::min(float(width)/640.f,float(height)/360.f);
+  // Keep the controls readable against the atelier's pale shadow receivers.
+  Vec3 a{0,float(height)-51.f*scale,0},b{float(width),a.y,0},
+    c{float(width),float(height),0},d{0,float(height),0};
+  for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,rgb(0x12202e),6});
+  g.hud+=6;
+  const float ys[]={20.f*scale,38.f*scale,55.f*scale,72.f*scale,
+    float(height)-35.f*scale,float(height)-13.f*scale};
   constexpr uint32_t colors[]={0xe7e8e7,0x9fdbdd,0x9fdbdd,0xffdf68,0xe7e8e7,0x9fdbdd};
   if (hud) for (int row=0;row<6 && *hud;row++) {
     const char* end=std::strchr(hud,'\n');
-    hud_text(g,12,float(ys[row]),hud,end?size_t(end-hud):std::strlen(hud),rgb(colors[row]));
+    hud_text(g,12.f*scale,ys[row],hud,end?size_t(end-hud):std::strlen(hud),rgb(colors[row]),scale);
     if (!end) break;
     hud=end+1;
   }
-  hud_text(g,577,20,"RESET",5,rgb(0x4bc1a4));
+  hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,rgb(0x4bc1a4),scale);
 }
 Vec3 vector(const float* p) { return {p[0],p[1],p[2]}; }
 void face_quad(Geometry& g,const VoxelVkFace& f,Vec3 color,float offset=0,bool lit=true) {
@@ -196,7 +203,7 @@ ShadowMatrix shadow_matrix(const VoxelVkFrame& frame) {
   }
   if (!frame.body_count) { lo={-16,0,-16}; hi={16,32,16}; }
   lo=lo-Vec3{8,4,8}; hi=hi+Vec3{8,8,8};
-  Vec3 toward_sun=normalized({-.45f,.82f,.35f});
+  Vec3 toward_sun=normalized({-.62f,.62f,.48f});
   Vec3 right=normalized(cross({0,1,0},toward_sun));
   Vec3 up=cross(toward_sun,right),forward=toward_sun*(-1.f);
   Vec3 low{INFINITY,INFINITY,INFINITY},high{-INFINITY,-INFINITY,-INFINITY};
@@ -226,13 +233,14 @@ float view_depth(Vec3 p,const VoxelVkFrame& f,const ViewBasis& basis) {
 }
 bool visible(const VoxelVkBody& body,const VoxelVkFrame& frame,const ViewBasis& basis) {
   unsigned outside=31;
+  float horizontal=800.f*float(frame.height)/(360.f*float(frame.width));
   for (unsigned corner=0;corner<8;corner++) {
     Vec3 p={(corner&1?body.hi[0]:body.lo[0])*.1f,
       (corner&2?body.hi[1]:body.lo[1])*.1f+body.offset,
       (corner&4?body.hi[2]:body.lo[2])*.1f};
     auto v=view_position(p,frame,basis);
-    unsigned mask=(v.z<.05f?1u:0u)|(v.x*1.25f>v.z?2u:0u)|
-      (-v.x*1.25f>v.z?4u:0u)|(v.y*(400.f/180)>v.z?8u:0u)|
+    unsigned mask=(v.z<.05f?1u:0u)|(v.x*horizontal>v.z?2u:0u)|
+      (-v.x*horizontal>v.z?4u:0u)|(v.y*(400.f/180)>v.z?8u:0u)|
       (-v.y*(400.f/180)>v.z?16u:0u);
     outside&=mask;
   }
@@ -284,7 +292,7 @@ float proxy_pixels(const ProxyGroup& group,const VoxelVkFrame& frame,const ViewB
     (group.hi[1]-group.lo[1])*.05f,(group.hi[2]-group.lo[2])*.05f};
   float radius=std::sqrt(dot(half,half));
   float depth=view_depth(center,frame,basis)-radius;
-  return depth<=.05f ? INFINITY : 800.f*radius/depth;
+  return depth<=.05f ? INFINITY : 800.f*(float(frame.height)/360.f)*radius/depth;
 }
 bool proxy_near_aim(const ProxyGroup& group,const VoxelVkFrame& frame) {
   if (!frame.aim_kind) return false;
@@ -301,7 +309,7 @@ bool proxy_visible(const ProxyGroup& group,const VoxelVkFrame& frame,const ViewB
   return visible(bounds,frame,basis);
 }
 uint32_t proxy_material(const VoxelVkBody& body) {
-  std::array<float,5> area{};
+  std::array<float,material::definitions.size()+1> area{};
   for (uint32_t i=0;i<body.face_count;i++) {
     const auto& f=body.faces[i];
     material::find(f.material);
@@ -479,7 +487,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
       if (view_depth(a,frame,basis)>=.05f && view_depth(b,frame,basis)>=.05f) line(g,a,b,color);
     }
   }
-  add_hud(g,frame.hud);
+  add_hud(g,frame.hud,frame.width,frame.height);
   return g;
 }
 std::vector<uint32_t> spirv(const char* path) {
@@ -491,8 +499,8 @@ std::vector<uint32_t> spirv(const char* path) {
   in.seekg(0); in.read(reinterpret_cast<char*>(code.data()),size);
   return code;
 }
-struct Push { float eye_yaw[4],pitch_offset[4],shadow_matrix[16]; };
-static_assert(sizeof(Push)==96,"shadow push constants must fit Vulkan's 128-byte minimum");
+struct Push { float eye_yaw[4],pitch_offset[4],viewport[4],shadow_matrix[16]; };
+static_assert(sizeof(Push)==112,"shadow push constants must fit Vulkan's 128-byte minimum");
 
 class Renderer {
   Display* display;
@@ -505,7 +513,7 @@ class Renderer {
   uint32_t family=0;
   VkSwapchainKHR swapchain=VK_NULL_HANDLE;
   VkFormat format=VK_FORMAT_UNDEFINED;
-  VkExtent2D extent{WIDTH,HEIGHT};
+  VkExtent2D extent{DEFAULT_WIDTH,DEFAULT_HEIGHT};
   std::vector<VkImage> images;
   std::vector<VkImageView> views;
   std::vector<VkSemaphore> finished;
@@ -931,12 +939,17 @@ public:
     }
     if (acquire!=VK_SUCCESS&&acquire!=VK_SUBOPTIMAL_KHR) check(acquire,"acquire swapchain image");
     bool shadow_dirty=!shadow_valid || shadow_changed(shadow_world,frame);
+    if (shadow_dirty && std::getenv("VOXEL_VULKAN_TRACE"))
+      std::fprintf(stderr,"vulkan shadow refresh bodies %u rebuilt %u\n",
+        frame.body_count,geometry_cache.rebuilt);
     ShadowMatrix light=shadow_dirty?shadow_matrix(frame):saved_shadow;
     check(vkResetCommandBuffer(command,0),"reset command buffer");
     VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     check(vkBeginCommandBuffer(command,&bi),"begin command buffer");
     Push push{{frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw},
-      {frame.pitch,0,0,float(frame.night!=0)},{}};
+      {frame.pitch,0,0,float(frame.night!=0)},
+      {float(frame.width)*.5f,float(frame.height)*.5f,
+        800.f*float(frame.height)/(360.f*float(frame.width)),0.f},{}};
     std::memcpy(push.shadow_matrix,light.values,sizeof light.values);
     VkDeviceSize offset=0;
     vkCmdBindVertexBuffers(command,0,1,&vertices,&offset);

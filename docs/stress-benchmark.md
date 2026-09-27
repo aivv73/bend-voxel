@@ -11,6 +11,8 @@ make build
 python3 scripts/benchmark_stress.py --cases district-camera district-bridge district-fragments --warmup 10 --frames 60 --output build/stress-pilot
 ```
 
+To measure at 1920 × 1080, run `make build` and then `python3 scripts/benchmark_stress.py --resolution 1920x1080 --output build/stress-1920x1080`. The default is 640 × 360. The camera and aim pointer coordinates scale with the selected resolution so they follow the same world path and target region. Higher resolutions can keep distant tiles on full meshes where the 640 × 360 view selects LOD proxies; only the default-resolution 16-district overview requires proxy selection. Compare throughput between resolutions as separate workloads.
+
 ## Real world scale
 
 Each district occupies a 64 × 64 × 32 meter content envelope at 10 cm resolution. Its 2,443,284 occupied cells are compressed into 3,434 solid regions, forming 154 anchored assemblies and 20,374 exposed surface rectangles. Districts are placed 64 meters apart on a square grid. Every district contributes independently editable material and bodies.
@@ -36,7 +38,7 @@ Physics advances by exactly 1/60 second per benchmark frame. Camera paths, point
 - **Bridge:** two cuts at the requested interval. The first preserves a path to an anchor; the second detaches exactly one bridge. Total removed material is 56 cells.
 - **Fragments:** eight support cuts per district per frame for the first 16 measured frames. Each is a normal, timed sphere edit. Motion continues while the camera follows the most recently detached body, including its vertical translation. The burst produces 128 or 512 bodies before the first ones land.
 
-`--edit-every` controls carve/bridge cases; zero disables their edits. Fragment bursts always use their fixed schedule. Use `--cases`, `--warmup`, `--frames`, `--body-budget`, `--timeout`, and `--output` to select a run. The default body budget is 2,048. Moving-view cases require at least four measured frames; 17 or more are needed to observe the full simultaneous fragment population.
+`--edit-every` controls carve/bridge cases; zero disables their edits. Fragment bursts always use their fixed schedule. Use `--cases`, `--warmup`, `--frames`, `--body-budget`, `--timeout`, `--resolution`, and `--output` to select a run. The default body budget is 2,048. Moving-view cases require at least four measured frames; 17 or more are needed to observe the full simultaneous fragment population.
 
 ## Measurements and validation
 
@@ -51,7 +53,7 @@ Validation checks:
 - Reported anchors, fragments, moving bodies, and live meshes agree.
 - Camera/aim/follow workloads actually move or hit removable material as specified.
 - Frames without edits rebuild zero body meshes after the initial frame, including while fragments fall.
-- Frames without edits rebuild zero render proxies after the initial frame; the 16-district overview and camera workloads must select proxies.
+- Frames without edits rebuild zero render proxies after the initial frame; the default-resolution 16-district overview and camera workloads must select proxies.
 - Edits rebuild only affected bodies, and bridge/fragment workloads produce the required components.
 - The body budget is respected and cuts are accepted.
 

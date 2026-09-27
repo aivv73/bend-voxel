@@ -79,7 +79,7 @@ def target(kind: U32) -> String:
       "NO TARGET"
 def scene.title(+districts: U32) -> String:
   match districts:
-    case 0: "BEND VOXEL / MATERIAL WORKS YARD"
+    case 0: "BEND VOXEL / LIGHT ATELIER"
     case _: "BEND VOXEL / DEMOLITION DISTRICT"
 def hud(n: U32, count: U32, budget: U32, removed: U32, s: U32, kind: U32, frameUs: U32, cutUs: U32, districts: U32) -> String:
   scene.title(districts) ++ "\n" ++

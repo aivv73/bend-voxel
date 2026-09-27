@@ -8,6 +8,7 @@ import ./vulkan.bend as VK
 import ./math.bend as R
 import ./probe.bend as Probe
 import ./spatial.bend as S
+import ./resolution.bend as Resolution
 
 def aim.kind(a: V.Aim) -> U32:
   V.Aim{_, _, kind} = a
@@ -115,24 +116,27 @@ def stress.edit.due(+index: U32, +warmup: U32, every: U32, +mode: U32) -> Bool:
       ((index >= warmup : U32) && U32.is_eq(((index - warmup) % period : U32),0) &&
         ((index - warmup) / period < R.word(U32.is_eq(mode,4),2,R.word(U32.is_eq(mode,5),16,75)) : U32))
 def stress.camera(+index: U32, s: D.State) -> D.State:
-  D.State{+w,_,p,last} = s
+  D.State{+w,c,p,last} = s
   W.World{_,_,_,_,_,_,_,districts} = w
+  I.Control{V.Camera{_,_,_,+viewportW,+viewportH},_,_,_,_,_,_,_,_,_} = c
   +width = F32.ceil(F32.sqrt(U32.to_f32(districts)))
   +center = ((width - 1.0) * 32.0 : F32)
   +radius = (width * 52.0 : F32)
   +angle = (U32.to_f32((index % 720 : U32)) * 0.008726646 : F32)
   +eye = {R.Vec{(center + radius * F32.sin(angle) : F32),(28.0 + (width - 1.0) * 12.0 : F32),(center + radius * F32.cos(angle) : F32)} : R.Vec}
-  D.State{w,I.Control{V.Camera{eye,(3.14159265 + angle : F32),(0.0 - 0.30 : F32)},
-    0,320,180,False{},False{},False{},False{},False{},False{}},p,last}
+  D.State{w,I.Control{V.Camera{eye,(3.14159265 + angle : F32),(0.0 - 0.30 : F32),viewportW,viewportH},
+    0,(viewportW / 2 : U32),(viewportH / 2 : U32),False{},False{},False{},False{},False{},False{}},p,last}
 def stress.aim(+index: U32, s: D.State) -> D.State:
-  D.State{w,_,p,last} = s
-  +mx = (100 + index * 5 % 440 : U32)
-  D.State{w,I.Control{V.Camera{R.Vec{16.0,5.0,26.0},3.14159265,(0.0 - 0.15 : F32)},
-    0,mx,180,False{},False{},True{},False{},False{},False{}},p,last}
+  D.State{w,c,p,last} = s
+  I.Control{V.Camera{_,_,_,+viewportW,+viewportH},_,_,_,_,_,_,_,_,_} = c
+  +mx = ((100 + index * 5 % 440) * viewportW / 640 : U32)
+  D.State{w,I.Control{V.Camera{R.Vec{16.0,5.0,26.0},3.14159265,(0.0 - 0.15 : F32),viewportW,viewportH},
+    0,mx,(viewportH / 2 : U32),False{},False{},True{},False{},False{},False{}},p,last}
 def stress.bridge(s: D.State) -> D.State:
-  D.State{w,_,p,last} = s
-  D.State{w,I.Control{V.Camera{R.Vec{0.0,20.0,(0.0 - 4.0 : F32)},3.14159265,(0.0 - 0.25 : F32)},
-    0,320,180,False{},False{},False{},False{},False{},False{}},p,last}
+  D.State{w,c,p,last} = s
+  I.Control{V.Camera{_,_,_,+viewportW,+viewportH},_,_,_,_,_,_,_,_,_} = c
+  D.State{w,I.Control{V.Camera{R.Vec{0.0,20.0,(0.0 - 4.0 : F32)},3.14159265,(0.0 - 0.25 : F32),viewportW,viewportH},
+    0,(viewportW / 2 : U32),(viewportH / 2 : U32),False{},False{},False{},False{},False{},False{}},p,last}
 def stress.follow.box(b: S.Box, offset: F32) -> R.Vec:
   S.Box{l,h,_} = b
   R.Vec.add(R.Vec.scale(R.Vec.add(l,h),0.05),R.Vec{0.0,offset,0.0})
@@ -142,11 +146,12 @@ def stress.follow.body(bs: List<&2,W.Body>) -> R.Vec:
     case W.Body{_,_,o,_,False{},t,_} <> _: stress.follow.box(S.bounds(t),o)
     case _ <> rest: stress.follow.body(rest)
 def stress.follow(s: D.State) -> D.State:
-  D.State{+w,_,p,last} = s
+  D.State{+w,c,p,last} = s
   W.World{bs,_,_,_,_,_,_,_} = w
+  I.Control{V.Camera{_,_,_,+viewportW,+viewportH},_,_,_,_,_,_,_,_,_} = c
   +eye = R.Vec.add(stress.follow.body(bs),R.Vec{0.0,3.0,5.0})
-  D.State{w,I.Control{V.Camera{eye,3.14159265,(0.0 - 0.5404195 : F32)},
-    0,320,180,False{},False{},True{},False{},False{},False{}},p,last}
+  D.State{w,I.Control{V.Camera{eye,3.14159265,(0.0 - 0.5404195 : F32),viewportW,viewportH},
+    0,(viewportW / 2 : U32),(viewportH / 2 : U32),False{},False{},True{},False{},False{},False{}},p,last}
 def stress.view(mode: U32, index: U32, s: D.State) -> D.State:
   match mode:
     case 1: stress.camera(index,s)
@@ -211,29 +216,31 @@ def stress.inventory(w: W.World) -> IO(Unit):
   W.World{+bs,n,_,_,_,_,budget,districts} = w
   IO.print("world," ++ U32.show(n) ++ "," ++ U32.show(W.bodies.count(bs)) ++ "," ++
     U32.show(W.bodies.regions(bs)) ++ "," ++ U32.show(districts) ++ "," ++ U32.show(budget))
-def stress.start(win: Window, +scene: U32, +warmup: U32, measured: U32, every: U32, mode: U32, budget: U32) -> IO(Unit):
+def stress.start(win: Window, +scene: U32, +warmup: U32, measured: U32, every: U32, mode: U32, budget: U32,
+  width: U32, height: U32) -> IO(Unit):
   do IO<Unit>:
     +start : U32 <- P.micros()
     +world : W.World <- IO.pure(W.World, W.configured(R.word(U32.is_eq(scene,2),4,R.word(U32.is_eq(scene,3),16,1)),budget))
     +epoch : U32 <- P.micros()
     Unit <- IO.print("init," ++ U32.show(scene) ++ "," ++ U32.show((epoch - start : U32)))
     Unit <- stress.inventory(world)
-    stress.loop(win, D.State{world, I.initial(), Nil{}, 0},
+    stress.loop(win, D.State{world, I.initial.size(width,height), Nil{}, 0},
       Stress{epoch, 0, (warmup + measured : U32), scene, warmup, every, mode}, epoch, 0)
 
 def interactive.world(+districts: U32, budget: U32) -> W.World:
   match districts:
     case 0: W.showcase(budget)
     case _: W.configured(districts,budget)
-def interactive.control(+districts: U32) -> I.Control:
+def interactive.control(+districts: U32, width: U32, height: U32) -> I.Control:
   match districts:
-    case 0: I.showcase()
-    case _: I.initial()
+    case 0: I.showcase.size(width,height)
+    case _: I.initial.size(width,height)
 def start.stress(on: Bool, win: Window, now: U32, frames: U32,
-  scene: U32, warmup: U32, measured: U32, every: U32, mode: U32, +districts: U32, budget: U32) -> IO(Unit):
+  scene: U32, warmup: U32, measured: U32, every: U32, mode: U32, +districts: U32, budget: U32,
+  width: U32, height: U32) -> IO(Unit):
   match on:
-    case True{}: stress.start(win, scene, warmup, measured, every, mode, budget)
-    case False{}: loop(win,D.State{interactive.world(districts,budget),interactive.control(districts),Nil{},0},now,frames)
+    case True{}: stress.start(win, scene, warmup, measured, every, mode, budget, width, height)
+    case False{}: loop(win,D.State{interactive.world(districts,budget),interactive.control(districts,width,height),Nil{},0},now,frames)
 
 def configuration.budget.go(ok: Bool) -> IO(Unit):
   match ok:
@@ -247,6 +254,14 @@ def configuration.valid.go(ok: Bool, budget: U32) -> IO(Unit):
     case False{}: IO.die(Unit,1,"VOXEL_DISTRICTS must be 1, 4, or 16")
 def configuration.valid(+districts: U32, budget: U32) -> IO(Unit):
   configuration.valid.go((U32.is_eq(districts,0) || U32.is_eq(districts,1) || U32.is_eq(districts,4) || U32.is_eq(districts,16)),budget)
+def configuration.resolution.parsed(r: Maybe<&2,Resolution.Size>) -> IO(Resolution.Size):
+  match r:
+    case Some{size}: IO.pure(Resolution.Size,size)
+    case None{}: IO.die(Resolution.Size,1,"VOXEL_RESOLUTION must be WIDTHxHEIGHT (640..7680 by 360..4320, at most 8294400 pixels)")
+def configuration.resolution(r: Result<&1,&1,U32 & String,String>) -> IO(Resolution.Size):
+  match r:
+    case Fail{_}: IO.pure(Resolution.Size,Resolution.default())
+    case Done{text}: configuration.resolution.parsed(Resolution.parse(text))
 def main() -> IO(Unit):
   do IO<Unit>:
     districtEnv : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_DISTRICTS")
@@ -261,8 +276,12 @@ def main() -> IO(Unit):
     stressEdit : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_STRESS_EDIT_EVERY")
     stressView : Result<&1, &1, U32 & String, String> <- IO.get_env("VOXEL_STRESS_VIEW")
     +stressId : U32 <- IO.pure(U32, number(stressScene))
-    win : Window <- IO.try(Window, Window.open("Bend Voxel Vulkan - WASD / RMB look / LMB carve / R reset", 640, 360))
+    resolutionEnv : Result<&1,&1,U32 & String,String> <- IO.get_env("VOXEL_RESOLUTION")
+    +size : Resolution.Size <- configuration.resolution(resolutionEnv)
+    +width : U32 <- IO.pure(U32,Resolution.width(size))
+    +height : U32 <- IO.pure(U32,Resolution.height(size))
+    win : Window <- IO.try(Window, Window.open("Bend Voxel Vulkan - WASD / RMB look / LMB carve / R reset", width, height))
     +now : U32 <- P.micros()
     start.stress((stressId > 0 : U32), win, now, number(frames),
       stressId, number(stressWarmup), number(stressMeasured), number(stressEdit), number(stressView),
-      districts,R.word(U32.is_eq(budget,0),2048,budget))
+      districts,R.word(U32.is_eq(budget,0),2048,budget),width,height)

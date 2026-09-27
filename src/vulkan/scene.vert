@@ -10,12 +10,13 @@ layout(location = 3) out vec3 shadow_coord;
 layout(push_constant) uniform Camera {
   vec4 eye_yaw;
   vec4 pitch_offset;
+  vec4 viewport;
   mat4 shadow_matrix;
 } pc;
 
 void main() {
   if (pc.pitch_offset.z > 0.5) {
-    gl_Position = vec4(position.x / 320.0 - 1.0, position.y / 180.0 - 1.0, 0.0, 1.0);
+    gl_Position = vec4(position.x / pc.viewport.x - 1.0, position.y / pc.viewport.y - 1.0, 0.0, 1.0);
     pixel_color = color;
     world_position = vec3(0.0);
     face_side = side;
@@ -36,7 +37,7 @@ void main() {
   float x = dot(delta, right);
   float y = dot(delta, up);
   float z = dot(delta, forward);
-  gl_Position = vec4(1.25 * x, -(400.0 / 180.0) * y, z - 0.05, z);
+  gl_Position = vec4(pc.viewport.z * x, -(400.0 / 180.0) * y, z - 0.05, z);
   pixel_color = color;
   face_side = side;
 }

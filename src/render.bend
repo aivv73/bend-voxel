@@ -5,21 +5,27 @@ import ./spatial.bend as S
 import ./material.bend as M
 
 type Camera is Data:
-  Camera{eye: R.Vec, yaw: F32, pitch: F32}
+  Camera{eye: R.Vec, yaw: F32, pitch: F32, width: U32, height: U32}
 type Aim is Data:
   Aim{point: R.Vec, distance: F32, kind: U32}
 
+def camera.size(width: U32, height: U32) -> Camera:
+  Camera{R.Vec{44.0, 30.0, 48.0}, (0.0 - 2.40 : F32), (0.0 - 0.34 : F32),width,height}
 def camera() -> Camera:
-  Camera{R.Vec{44.0, 30.0, 48.0}, (0.0 - 2.40 : F32), (0.0 - 0.34 : F32)}
+  camera.size(640,360)
+def camera.showcase.size(width: U32, height: U32) -> Camera:
+  Camera{R.Vec{9.0, 11.0, 25.0}, (0.0 - 2.8084 : F32), (0.0 - 0.30 : F32),width,height}
 def camera.showcase() -> Camera:
-  Camera{R.Vec{160.0, 145.0, 500.0}, 3.1415927, (0.0 - 0.40 : F32)}
+  camera.showcase.size(640,360)
 def cam(+c: Camera) -> R.Cam:
-  Camera{eye, +yaw, +pitch} = c
+  Camera{eye, +yaw, +pitch, +width, +height} = c
   +sy = F32.sin(yaw)
   +cy = F32.cos(yaw)
   +sp = F32.sin(pitch)
   +cp = F32.cos(pitch)
-  R.Cam{eye, R.Vec{(0.0 - cy : F32), 0.0, sy}, R.Vec{(0.0 - sy * sp : F32), cp, (0.0 - cy * sp : F32)}, R.Vec{(sy * cp : F32), sp, (cy * cp : F32)}, 400.0, 320.0, 180.0, 0.05, 640, 360}
+  R.Cam{eye, R.Vec{(0.0 - cy : F32), 0.0, sy}, R.Vec{(0.0 - sy * sp : F32), cp, (0.0 - cy * sp : F32)}, R.Vec{(sy * cp : F32), sp, (cy * cp : F32)},
+    (400.0 * U32.to_f32(height) / 360.0 : F32), (U32.to_f32(width) * 0.5 : F32),
+    (U32.to_f32(height) * 0.5 : F32), 0.05, width, height}
 # Ray-box traversal uses the same sparse tree as edits and connectivity.
 # Distances are meters; leaf bounds are converted from integer cell space.
 type Interval is Data:
@@ -87,8 +93,8 @@ def ray.start(bs: List<&2,W.Body>, +o: R.Vec, +d: R.Vec) -> Aim:
   ray.bodies(bs,o,d,aim.choose(((dy < 0.0) && (t < 256.0) && (t >= 0.0) : F32),
     R.Vec.add(o,R.Vec.scale(d,t)),t,3,Aim{R.Vec{0.0,0.0,0.0},256.0,0}))
 def ray.cam(c: R.Cam, bs: List<&2,W.Body>, mx: F32, my: F32) -> Aim:
-  R.Cam{eye,right,up,fwd,_,_,_,_,_,_} = c
-  ray.start(bs,eye,R.Vec.unit(R.Vec.add(fwd,R.Vec.add(R.Vec.scale(right,((mx - 320.0) / 400.0 : F32)),R.Vec.scale(up,((180.0 - my) / 400.0 : F32))))))
+  R.Cam{eye,right,up,fwd,+focal,+cx,+cy,_,_,_} = c
+  ray.start(bs,eye,R.Vec.unit(R.Vec.add(fwd,R.Vec.add(R.Vec.scale(right,((mx - cx) / focal : F32)),R.Vec.scale(up,((cy - my) / focal : F32))))))
 def aim(active: Bool, bs: List<&2,W.Body>, c: Camera, mx: U32, my: U32) -> Aim:
   match active:
     case True{}: ray.cam(cam(c),bs,U32.to_f32(mx),U32.to_f32(my))

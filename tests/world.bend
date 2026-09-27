@@ -4,6 +4,7 @@ import ../src/spatial.bend as S
 import ../src/district.bend as D
 import ../src/showcase.bend as Showcase
 import ../src/showcase_assets.bend as Assets
+import ../src/atelier_assets.bend as Atelier
 import ../src/math.bend as R
 
 def check(ok: Bool, label: String) -> IO(Unit):
@@ -18,7 +19,7 @@ def inspect(+w: W.World, n: U32, c: U32, status: U32, label: String) -> IO(W.Wor
 def inspect.showcase(+w: W.World, label: String) -> IO(W.World):
   W.World{bs,n,fragments,_,_,_,_,scene} = w
   do IO<W.World>:
-    Unit <- check(((n > 80000000 : U32) && U32.is_eq(W.bodies.count(bs),1009) &&
+    Unit <- check(((n > 500000 : U32) && U32.is_eq(W.bodies.count(bs),6) &&
       U32.is_eq(fragments,0) && U32.is_eq(scene,0)),label)
     IO.pure(W.World,w)
 def fixture(+t: S.Tree, budget: U32, offset: F32, speed: F32) -> W.World:
@@ -129,21 +130,18 @@ def main() -> IO(Unit):
     Unit <- check(U32.is_eq(components(S.build([D.box(0.0,0.0,0.0,1.0,1.0,1.0,2),D.box(1.0,1.0,0.0,1.0,1.0,1.0,2)])),2),"edge contact stays disconnected")
     Unit <- check(connected.assemblies(D.district()),"generated regions do not overlap and all assemblies are six-connected")
     Unit <- check(connected.assemblies([D.Assembly{Showcase.ground()}]),"showcase ground is connected and disjoint")
-    Unit <- check(disjoint(S.boxes(Showcase.foundry(),Nil{})),"showcase foundry boxes are disjoint")
-    Unit <- check(U32.is_eq(components(Showcase.foundry()),1),"showcase foundry is connected")
-    Unit <- check(connected.assemblies([D.Assembly{Showcase.landmark()}]),"showcase landmark is connected and disjoint")
+    Unit <- check(connected.assemblies([D.Assembly{Showcase.backdrop()}]),"shadow backdrop is connected and disjoint")
+    Unit <- check(connected.assemblies([D.Assembly{Showcase.canopy()}]),"shadow canopy is connected and disjoint")
     Unit <- check(connected.assemblies([D.Assembly{Assets.beacon()}]),"Blender beacon is connected and disjoint")
     Unit <- check(connected.assemblies([D.Assembly{Assets.cargo_pod()}]),"Blender cargo pod is connected and disjoint")
     Unit <- check(connected.assemblies([D.Assembly{Assets.gateway()}]),"Blender gateway is connected and disjoint")
-    Unit <- check(connected.assemblies(Showcase.tile(0)),"foundry tile is connected and disjoint")
-    Unit <- check(connected.assemblies(Showcase.tile(1)),"observatory tile is connected and disjoint")
-    Unit <- check(connected.assemblies(Showcase.tile(2)),"transit tile is connected and disjoint")
-    Unit <- check(connected.assemblies(Showcase.tile(3)),"stackyard tile is connected and disjoint")
-    Unit <- check((disjoint.assemblies(Showcase.tile(0)) &&
-      disjoint.assemblies(Showcase.tile(1)) &&
-      disjoint.assemblies(Showcase.tile(2)) &&
-      disjoint.assemblies(Showcase.tile(3))),"showcase bodies have no overlapping voxels")
-    showcase : W.World <- inspect.showcase(W.initial(),"36-tile showcase has real voxels and bodies")
+    Unit <- check(connected.assemblies([D.Assembly{Atelier.suzanne()}]),"voxelized Suzanne is connected and disjoint")
+    Unit <- check(connected.assemblies([D.Assembly{Atelier.oculus()}]),"voxelized Oculus is connected and disjoint")
+    Unit <- check(connected.assemblies([D.Assembly{Atelier.twist()}]),"voxelized Twist is connected and disjoint")
+    Unit <- check((Bool.not(S.contains(Atelier.oculus(),R.Vec{0.5,42.5,0.5})) &&
+      S.contains(Atelier.oculus(),R.Vec{0.5,73.5,0.5})),"Oculus retains its open center and solid curved rim")
+    Unit <- check(disjoint.assemblies(Showcase.generate()),"showcase bodies have no overlapping voxels")
+    showcase : W.World <- inspect.showcase(W.initial(),"sculpture courtyard has real voxels and six bodies")
     showcase : W.World <- inspect.showcase(W.reset(showcase),"showcase reset preserves scene selection")
     w : W.World <- inspect(W.configured(1,2048),2443284,0,1,"district has more than two million real voxels")
     w : W.World <- inspect(W.carve(w,R.Vec{(0.0 - 15.9 : F32),16.25,(0.0 - 19.95 : F32)}),2443256,0,1,"first bridge fuse retains anchor path across regions")
