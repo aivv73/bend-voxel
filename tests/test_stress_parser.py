@@ -98,6 +98,49 @@ class StressParserTests(unittest.TestCase):
         self.assertFalse(result['pass'])
         self.assertTrue(any('Unedited geometry rebuilt' in error for error in result['errors']))
 
+    def atelier_rows(self):
+        return (ROWS.replace(',5400,0', ',803970,0').replace(',5380,0', ',803950,0') +
+                'world,803970,6,2034,0,2048\n'
+                'mesh_cache,0,6,6,6,62046,300000\n'
+                'mesh_cache,1,1,6,6,62046,16000\n'
+                'lod_cache,0,0,0,0,6,0\n'
+                'lod_cache,1,0,0,0,6,0\n'
+                'bodies,0,6,0,0,0.000000\n'
+                'bodies,1,6,0,0,0.000000\n'
+                'view,0,9,11,25,-2.8084,-0.3,0,0,0,0\n'
+                'view,1,9,11,25,-2.8084,-0.3,0,0,0,0\n'
+                'lighting,0,0,1\n'
+                'lighting,1,0,1\n')
+
+    def test_atelier_edit_inventory_and_shadow_refresh(self):
+        rows = self.atelier_rows()
+        result = parse_stress(io.StringIO(rows), 0, 1, 1, 1, 'carve',
+                              world_scale=0, scene_kind='atelier')
+        self.assertTrue(result['pass'], result['errors'])
+        self.assertEqual(result['initial_assemblies'], 6)
+        self.assertEqual(result['shadow_refreshes'], 2)
+        for changed in (rows.replace('world,803970,6', 'world,803970,5'),
+                        rows.replace('lighting,1,0,1', 'lighting,1,0,0'),
+                        rows.replace('lighting,1,0,1', 'lighting,1,1,1')):
+            result = parse_stress(io.StringIO(changed), 0, 1, 1, 1, 'carve',
+                                  world_scale=0, scene_kind='atelier')
+            self.assertFalse(result['pass'])
+
+    def test_atelier_night_does_not_rebuild_shadows(self):
+        rows = self.atelier_rows().replace('803950', '803970')
+        rows = rows.replace('stage,2500,100,100,100,0,0,0,1100,100',
+                            'stage,2500,0,0,0,0,300,0,1100,100')
+        rows = rows.replace('mesh_cache,1,1,6', 'mesh_cache,1,0,6')
+        rows = rows.replace('lighting,0,0,1', 'lighting,0,1,1')
+        rows = rows.replace('lighting,1,0,1', 'lighting,1,1,0')
+        rows = '\n'.join(row for row in rows.splitlines()
+                         if not row.startswith(('edit,', 'cut,')))
+        result = parse_stress(io.StringIO(rows), 0, 1, 1, 0, 'night',
+                              world_scale=0, scene_kind='atelier')
+        self.assertTrue(result['pass'], result['errors'])
+        self.assertEqual(result['night_frames'], 2)
+        self.assertEqual(result['shadow_refreshes'], 1)
+
 
 if __name__ == '__main__':
     unittest.main()

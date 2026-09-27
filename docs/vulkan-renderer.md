@@ -9,7 +9,7 @@ make run
 make benchmark-stress
 ```
 
-The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures larger and more exposed scenes with unpaced presentation; see the [stress benchmark guide](stress-benchmark.md). The earlier 65-second acceptance replay described below is historical and is no longer runnable.
+The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures the Light Atelier with unpaced presentation; the larger district cases remain selectable. See the [benchmark guide](stress-benchmark.md). The earlier 65-second acceptance replay described below is historical and is no longer runnable.
 
 ## Frame path
 

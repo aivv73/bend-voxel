@@ -7,7 +7,10 @@ Source revision: `bbbeace8280f1b3805f3b0bb81558ab1715ddd8f`. The working tree wa
 ```sh
 make test
 make build
-python3 scripts/benchmark_stress.py --output build/district-final
+python3 scripts/benchmark_stress.py --cases district district-4 district-16 \
+  district-camera district-camera-4 district-camera-16 district-aim district-aim-16 \
+  district-carve district-bridge district-fragments district-fragments-4 \
+  --output build/district-final
 ```
 
 ## Results

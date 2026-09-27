@@ -108,9 +108,9 @@ def summarize_views(rows, mode, warmup, measured):
     elif mode == 'aim':
         if camera_positions != 1 or aim_positions < required_positions or preview_frames < measured // 4:
             errors.append('Aim workload did not sweep removable targets with a fixed camera')
-    elif mode in ('carve', 'bridge'):
+    elif mode in ('carve', 'bridge', 'night'):
         if camera_positions != 1 or target_frames:
-            errors.append('Destruction overview moved or enabled aim')
+            errors.append('Fixed view moved or enabled aim')
     elif mode == 'fragments':
         if camera_positions < required_positions or preview_frames < measured // 4:
             errors.append('Fragment workload did not follow removable moving bodies')
@@ -121,7 +121,7 @@ def summarize_views(rows, mode, warmup, measured):
 
 
 def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='static', world_scale=None,
-                 resolution=(640, 360)):
+                 resolution=(640, 360), scene_kind='district'):
     rows = list(csv.reader(lines))
     errors = []
     special = {}
@@ -138,7 +138,7 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     view_summary, view_errors = summarize_views(views, view_mode, warmup, measured)
     errors.extend(view_errors)
     ordinary = [row for row in rows if row and row[0] not in
-                ('init', 'surface', 'view', 'world', 'mesh_cache', 'lod_cache', 'bodies')]
+                ('init', 'surface', 'view', 'world', 'mesh_cache', 'lod_cache', 'bodies', 'lighting')]
     errors.extend(validate_samples(ordinary))
     frames = [row for row in ordinary if row[0] == 'frame']
     stages = [row for row in ordinary if row[0] == 'stage']
@@ -158,7 +158,7 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     measured_frames = frame_data[warmup:]
     measured_stages = stage_data[warmup:]
     measured_vk = vk_data[warmup:]
-    limit = {'bridge': 2, 'fragments': 16, 'carve': 75}.get(view_mode, 5000)
+    limit = 6 if scene_kind == 'atelier' else {'bridge': 2, 'fragments': 16, 'carve': 75}.get(view_mode, 5000)
     batch = 8 * (world_scale or 1) if view_mode == 'fragments' else 1
     edit_frames = {i: batch for i in range(warmup, expected)
                    if edit_every > 0 and (i - warmup) % edit_every == 0
@@ -170,20 +170,26 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
         errors.append('A stress edit was not accepted')
     if not measured_frames:
         errors.append('No measured frames')
-    district_summary, district_errors = summarize_district(rows, frame_data, edits, edit_frames,
-        world_scale, view_mode, warmup, measured, resolution) if world_scale is not None else ({}, [])
-    errors.extend(district_errors)
+    world_summary, world_errors = summarize_world(rows, frame_data, edits, edit_frames,
+        world_scale, view_mode, warmup, measured, resolution, scene_kind) if world_scale is not None else ({}, [])
+    errors.extend(world_errors)
+    lighting_summary, lighting_errors = summarize_lighting(rows, expected, edit_frames,
+        view_mode, scene_kind)
+    errors.extend(lighting_errors)
+    if scene_kind == 'atelier' and special['init'][0] != 4:
+        errors.append('The Light Atelier scene was not selected')
     durations = [row[1] for row in measured_frames]
     total_us = sum(durations)
     acquire_us = sum(row[5] for row in measured_vk)
     return {
-        **district_summary,
+        **world_summary,
+        **lighting_summary,
         'pass': not errors,
         'errors': errors,
         'scene': special['init'][0],
         'initialization_ms': special['init'][1] / 1000,
         'surface_rectangles': special['surface'][0],
-        'solid_cells_start': district_summary.get('initial_solid_cells', frame_data[0][2]),
+        'solid_cells_start': world_summary.get('initial_solid_cells', frame_data[0][2]),
         'solid_cells_end': frame_data[-1][2],
         'max_bodies': max(row[3] for row in frame_data),
         'measured_frames': len(measured_frames),
@@ -201,7 +207,35 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     }
 
 
-def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, measured, resolution):
+def summarize_lighting(rows, expected, edit_frames, mode, scene_kind):
+    lighting = [row for row in rows if row and row[0] == 'lighting']
+    if scene_kind != 'atelier':
+        return {}, []
+    errors = []
+    if len(lighting) != expected:
+        return {}, [f'Expected {expected} lighting rows']
+    expected_night = int(mode == 'night')
+    shadow_refreshes = 0
+    for index, row in enumerate(lighting):
+        try:
+            if len(row) != 4:
+                raise ValueError('invalid field count')
+            frame, night, refresh = map(int, row[1:])
+            if frame != index or night != expected_night or refresh not in (0, 1):
+                raise ValueError('frame, night mode or shadow refresh mismatch')
+            if (index == 0 or index in edit_frames) and refresh != 1:
+                errors.append(f'Shadow map did not refresh for frame {index}')
+            if mode in ('static', 'night', 'camera', 'aim') and index > 0 and refresh:
+                errors.append(f'View-only frame {index} refreshed the shadow map')
+            shadow_refreshes += refresh
+        except ValueError as exc:
+            errors.append(f'Invalid lighting row {index}: {exc}')
+    return {'night_frames': expected * expected_night,
+            'shadow_refreshes': shadow_refreshes}, errors
+
+
+def summarize_world(rows, frames, edits, edit_frames, scale, mode, warmup, measured, resolution,
+                    scene_kind):
     """Validate actual world scale, body motion and cache identity on every frame."""
     errors = []
     inventory = [row for row in rows if row and row[0] == 'world']
@@ -212,8 +246,10 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
         if len(inventory) != 1 or len(inventory[0]) != 6:
             raise ValueError('expected one world inventory')
         solids, assemblies, regions, districts, budget = map(int, inventory[0][1:])
-        if (solids, assemblies, regions, districts) != (2443284 * scale, 154 * scale, 3434 * scale, scale):
-            raise ValueError('world inventory does not match real district scale')
+        expected_inventory = ((803970, 6, 2034, 0) if scene_kind == 'atelier' else
+                              (2443284 * scale, 154 * scale, 3434 * scale, scale))
+        if (solids, assemblies, regions, districts) != expected_inventory:
+            raise ValueError(f'world inventory does not match {scene_kind} scene')
         if (len(cache_rows) != len(frames) or len(lod_rows) != len(frames)
                 or len(body_rows) != len(frames)):
             raise ValueError('missing mesh cache, LOD cache or body samples')
@@ -293,4 +329,4 @@ def summarize_district(rows, frames, edits, edit_frames, scale, mode, warmup, me
             'proxy_vertices_max': max(row[5] for row in measured_lod),
         }, errors
     except (ValueError, IndexError, KeyError) as exc:
-        return {}, [f'Invalid district samples: {exc}']
+        return {}, [f'Invalid {scene_kind} samples: {exc}']

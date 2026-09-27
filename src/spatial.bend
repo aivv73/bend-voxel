@@ -318,3 +318,73 @@ def contains.go(on: Bool, t: Tree, +p: R.Vec) -> Bool:
 @unsafe
 def contains(+t: Tree, +p: R.Vec) -> Bool:
   contains.go(contains.box(bounds(t),p),t,p)
+
+# A cut can change exposure only at the removed cells and their neighbors.
+# Keep the old rectangles outside this conservative integer-aligned window;
+# produce fresh rectangles inside it from only intersecting cuboids. A
+# retained rectangle belongs to the new component containing its solid-side
+# sample. This also handles a cut that separates one body into several.
+def cut.window(+p: R.Vec, +r2: F32) -> Box:
+  R.Vec{x,y,z} = p
+  +margin = (F32.sqrt(r2) + 1.0 : F32)
+  Box{R.Vec{F32.floor((x - margin : F32)),F32.floor((y - margin : F32)),F32.floor((z - margin : F32))},
+      R.Vec{F32.ceil((x + margin : F32)),F32.ceil((y + margin : F32)),F32.ceil((z + margin : F32))},0}
+def face.in.window(+f: Face, +w: Box) -> Bool:
+  Face{l,h,+s,_} = f
+  Box{wl,wh,_} = w
+  +a = (s / 2 : U32)
+  +u = ((a + 1) % 3 : U32)
+  +v = ((a + 2) % 3 : U32)
+  (((axis(l,a) >= axis(wl,a)) && (axis(l,a) <= axis(wh,a)) &&
+    (axis(l,u) < axis(wh,u)) && (axis(h,u) > axis(wl,u)) &&
+    (axis(l,v) < axis(wh,v)) && (axis(h,v) > axis(wl,v))) : F32)
+def face.inside(+f: Face, w: Box) -> Face:
+  Face{l,h,s,m} = f
+  Box{wl,wh,_} = w
+  Face{maximum(l,wl),minimum(h,wh),s,m}
+def face.solid.sample(f: Face) -> R.Vec:
+  Face{+l,_,+s,_} = f
+  +a = (s / 2 : U32)
+  +p = R.Vec.add(l,R.Vec{0.5,0.5,0.5})
+  put(p,a,(axis(l,a) + R.pick(U32.is_eq((s % 2 : U32),0),0.5,(0.0 - 0.5 : F32)) : F32))
+def faces.keep.component(fs: List<&2,Face>, +t: Tree, tail: List<&2,Face>) -> List<&2,Face>:
+  match fs:
+    case Nil{}: tail
+    case +f <> rest:
+      face.emit(contains(t,face.solid.sample(f)),f,faces.keep.component(rest,t,tail))
+def faces.old.one(on: Bool, f: Face, t: Tree, w: Box, tail: List<&2,Face>) -> List<&2,Face>:
+  match on:
+    case False{}: faces.keep.component([f],t,tail)
+    case True{}: faces.keep.component(face.subtract(f,w,Nil{}),t,tail)
+def faces.old(fs: List<&2,Face>, +t: Tree, +w: Box, tail: List<&2,Face>) -> List<&2,Face>:
+  match fs:
+    case Nil{}: tail
+    case +f <> rest:
+      faces.old.one(face.in.window(f,w),f,t,w,faces.old(rest,t,w,tail))
+@unsafe
+def faces.local.side(n: Nat, +s: U32, +b: Box, +t: Tree, +w: Box, fs: List<&2,Face>) -> List<&2,Face>:
+  match n:
+    case 0n: fs
+    case 1n+k:
+      +f = face(b,s)
+      faces.local.side.one(face.in.window(f,w),f,k,(s + 1 : U32),b,t,w,fs)
+@unsafe
+def faces.local.side.one(on: Bool, f: Face, n: Nat, s: U32, b: Box, +t: Tree, +w: Box,
+  fs: List<&2,Face>) -> List<&2,Face>:
+  match on:
+    case False{}: faces.local.side(n,s,b,t,w,fs)
+    case True{}:
+      +piece = face.inside(f,w)
+      faces.local.side(n,s,b,t,w,append(Face,faces.hide(t,face.bounds(piece),[piece]),fs))
+@unsafe
+def faces.local.tree.go(on: Bool, +node: Tree, +t: Tree, +w: Box, fs: List<&2,Face>) -> List<&2,Face>:
+  match on node:
+    case False{} _: fs
+    case True{} Empty{}: fs
+    case True{} Leaf{b}: faces.local.side(6n,0,b,t,w,fs)
+    case True{} Branch{_,a,b}: faces.local.tree(b,t,w,faces.local.tree(a,t,w,fs))
+@unsafe
+def faces.local.tree(+node: Tree, +t: Tree, +w: Box, fs: List<&2,Face>) -> List<&2,Face>:
+  faces.local.tree.go(overlaps(bounds(node),w),node,t,w,fs)
+def faces.patch(+t: Tree, old: List<&2,Face>, +w: Box) -> List<&2,Face>:
+  faces.local.tree(t,t,w,faces.old(old,t,w,Nil{}))
