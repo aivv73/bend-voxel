@@ -14,8 +14,8 @@ struct Oklch { float lightness, chroma, hue_degrees; };
 struct Definition { uint32_t id; const char* name; Oklch base; };
 inline constexpr uint32_t foundation_id=1;
 
-// IDs are the stable voxel values declared in src/material.bend. Colors were
-// authored from the original demo palette, then expressed as OKLCH values.
+// IDs are the stable voxel values declared in src/material.bend. Colors are
+// authored as OKLCH values.
 inline constexpr std::array<Definition,5> definitions{{
   {foundation_id,"foundation",{0.736340f,0.114340f,173.8965f}},
   {2,"concrete",  {0.733411f,0.093103f, 66.0436f}},

@@ -2,7 +2,6 @@ import Base
 import ./math.bend as R
 import ./spatial.bend as S
 import ./material.bend as M
-import ./district.bend as D
 import ./atelier_assets.bend as A
 
 # Light Atelier: a 44 x 34 m sculpture court. Coordinates are 10 cm cells.
@@ -50,10 +49,20 @@ def canopy() -> S.Tree:
     box((0.0 - 180.0 : F32),58.0,35.0,4.0,4.0,115.0,M.frame()),
     box((0.0 - 119.0 : F32),58.0,35.0,4.0,4.0,115.0,M.frame())]))
 
-def generate() -> List<&2,D.Assembly>:
-  [D.Assembly{ground()},
-   D.Assembly{backdrop()},
-   D.Assembly{canopy()},
-   D.Assembly{D.translate(A.suzanne(),R.Vec{(0.0 - 75.0 : F32),3.0,15.0})},
-   D.Assembly{D.translate(A.oculus(),R.Vec{5.0,3.0,(0.0 - 15.0 : F32)})},
-   D.Assembly{D.translate(A.twist(),R.Vec{125.0,3.0,(0.0 - 25.0 : F32)})}]
+type Assembly is Data:
+  Assembly{tree: S.Tree}
+def translate.box(b: S.Box, +delta: R.Vec) -> S.Box:
+  S.Box{l,h,m} = b
+  S.Box{R.Vec.add(l,delta),R.Vec.add(h,delta),m}
+def translate(t: S.Tree, +delta: R.Vec) -> S.Tree:
+  match t:
+    case S.Empty{}: S.Empty{}
+    case S.Leaf{b}: S.Leaf{translate.box(b,delta)}
+    case S.Branch{b,a,c}: S.Branch{translate.box(b,delta),translate(a,delta),translate(c,delta)}
+def generate() -> List<&2,Assembly>:
+  [Assembly{ground()},
+   Assembly{backdrop()},
+   Assembly{canopy()},
+   Assembly{translate(A.suzanne(),R.Vec{(0.0 - 75.0 : F32),3.0,15.0})},
+   Assembly{translate(A.oculus(),R.Vec{5.0,3.0,(0.0 - 15.0 : F32)})},
+   Assembly{translate(A.twist(),R.Vec{125.0,3.0,(0.0 - 25.0 : F32)})}]

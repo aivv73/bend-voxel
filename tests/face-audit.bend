@@ -37,7 +37,7 @@ def bodies.match(bs: List<&2,W.Body>) -> Bool:
     case W.Body{_,_,_,_,_,t,+fs,vs} <> rest:
       (Audit.equivalent(fs,S.faces(t)) && vertices.same(vs,Mesh.vertices(fs)) && bodies.match(rest))
 def world.match(w: W.World) -> Bool:
-  W.World{bs,_,_,_,_,_,_,_} = w
+  W.World{bs,_,_,_,_,_,_} = w
   bodies.match(bs)
 def main() -> IO(Unit):
   +t = S.build([
@@ -46,7 +46,7 @@ def main() -> IO(Unit):
     box(2.0,4.0,2.0,4.0,2.0,2.0,M.machinery())])
   +bar = {S.Leaf{box(0.0,100.0,0.0,11.0,1.0,1.0,M.concrete())} : S.Tree}
   +barFaces = S.faces(bar)
-  +split = W.carve(W.from.bodies([W.Body{1,0,0.0,0.0,False{},bar,barFaces,Mesh.vertices(barFaces)}],2,1),
+  +split = W.carve(W.from.bodies([W.Body{1,0,0.0,0.0,False{},bar,barFaces,Mesh.vertices(barFaces)}],2),
     R.Vec{0.55,10.05,0.05})
   do IO<Unit>:
     Unit <- compare(t,"profile matches partial face coverage and materials")

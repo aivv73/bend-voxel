@@ -9,7 +9,7 @@ from mathutils import Vector
 
 root = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location(
-    "voxel_export", root / "scripts/export_showcase_assets.py")
+    "voxel_export", root / "scripts/export_atelier_assets.py")
 voxel = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(voxel)
 

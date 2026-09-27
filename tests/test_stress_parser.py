@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from stress_parser import parse_stress, summarize_views
 
 
-ROWS = '''init,4,500000
+ROWS = '''init,500000
 surface,1200
 frame,1000,1000,5400,0
 stage,1000,0,0,0,0,0,0,1000,0
@@ -62,45 +62,9 @@ class StressParserTests(unittest.TestCase):
         self.assertEqual(summary['preview_frames'], 14)
         self.assertTrue(summarize_views(aim, 'camera', 2, 14)[1])
 
-    def district_rows(self):
-        return (ROWS.replace(',5400,0', ',2443284,0').replace(',5380,0', ',2443264,0') +
-                'world,2443284,154,3434,1,2048\n'
-                'mesh_cache,0,154,154,100,119658,3000000\n'
-                'mesh_cache,1,1,154,100,119658,16000\n'
-                'lod_cache,0,0,0,0,100,0\n'
-                'lod_cache,1,0,0,0,100,0\n'
-                'bodies,0,154,0,0,0.000000\n'
-                'bodies,1,154,0,0,0.000000\n'
-                'view,0,1,20,30,3,-0.3,0,0,0,0\n'
-                'view,1,1,20,30,3,-0.3,0,0,0,0\n')
-
-    def test_real_inventory_and_body_cache(self):
-        result = parse_stress(io.StringIO(self.district_rows()), 0, 1, 1, 1,
-                              'carve', world_scale=1)
-        self.assertTrue(result['pass'], result['errors'])
-        self.assertEqual(result['meshes_rebuilt'], 1)
-        self.assertEqual(result['initial_solid_cells'], 2443284)
-        for old, new in (('world,2443284', 'world,5400'),
-                         ('bodies,1,154', 'bodies,1,0'),
-                         ('mesh_cache,1,1,154', 'mesh_cache,1,154,154'),
-                         ('lod_cache,1,0,0,0,100,0', 'lod_cache,1,1,200,0,100,0')):
-            result = parse_stress(io.StringIO(self.district_rows().replace(old, new)),
-                                  0, 1, 1, 1, 'carve', world_scale=1)
-            self.assertFalse(result['pass'])
-
-    def test_unedited_frames_cannot_rebuild_world(self):
-        rows = self.district_rows().replace('2443264', '2443284')
-        rows = rows.replace('stage,2500,100,100,100,0,0,0,1100,100',
-                            'stage,2500,0,0,0,0,300,0,1100,100')
-        rows = '\n'.join(row for row in rows.splitlines()
-                         if not row.startswith(('edit,', 'cut,')))
-        result = parse_stress(io.StringIO(rows), 0, 1, 1, 0, 'carve', world_scale=1)
-        self.assertFalse(result['pass'])
-        self.assertTrue(any('Unedited geometry rebuilt' in error for error in result['errors']))
-
     def atelier_rows(self):
         return (ROWS.replace(',5400,0', ',803970,0').replace(',5380,0', ',803950,0') +
-                'world,803970,6,2034,0,2048\n'
+                'world,803970,6,2034,2048\n'
                 'mesh_cache,0,6,6,6,62046,300000\n'
                 'mesh_cache,1,1,6,6,62046,16000\n'
                 'lod_cache,0,0,0,0,6,0\n'
@@ -115,7 +79,7 @@ class StressParserTests(unittest.TestCase):
     def test_atelier_edit_inventory_and_shadow_refresh(self):
         rows = self.atelier_rows()
         result = parse_stress(io.StringIO(rows), 0, 1, 1, 1, 'carve',
-                              world_scale=0, scene_kind='atelier')
+                              check_world=True)
         self.assertTrue(result['pass'], result['errors'])
         self.assertEqual(result['initial_assemblies'], 6)
         self.assertEqual(result['shadow_refreshes'], 2)
@@ -123,7 +87,7 @@ class StressParserTests(unittest.TestCase):
                         rows.replace('lighting,1,0,1', 'lighting,1,0,0'),
                         rows.replace('lighting,1,0,1', 'lighting,1,1,1')):
             result = parse_stress(io.StringIO(changed), 0, 1, 1, 1, 'carve',
-                                  world_scale=0, scene_kind='atelier')
+                                  check_world=True)
             self.assertFalse(result['pass'])
 
     def test_atelier_night_does_not_rebuild_shadows(self):
@@ -136,7 +100,7 @@ class StressParserTests(unittest.TestCase):
         rows = '\n'.join(row for row in rows.splitlines()
                          if not row.startswith(('edit,', 'cut,')))
         result = parse_stress(io.StringIO(rows), 0, 1, 1, 0, 'night',
-                              world_scale=0, scene_kind='atelier')
+                              check_world=True)
         self.assertTrue(result['pass'], result['errors'])
         self.assertEqual(result['night_frames'], 2)
         self.assertEqual(result['shadow_refreshes'], 1)

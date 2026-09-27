@@ -950,7 +950,7 @@ public:
       upload(geometry_cache.scene_vertices,g.vertices.size()-geometry_cache.scene_vertices);
     }
     auto after_upload=Clock::now();
-    if (std::getenv("VOXEL_STRESS_SCENE")) {
+    if (std::getenv("VOXEL_STRESS")) {
       static uint32_t cache_frame;
       std::fprintf(stdout,"mesh_cache,%u,%u,%u,%zu,%u,%zu\n",cache_frame++,
         geometry_cache.rebuilt,frame.body_count,size_t(geometry_cache.visible_bodies),
@@ -971,7 +971,7 @@ public:
     }
     if (acquire!=VK_SUCCESS&&acquire!=VK_SUBOPTIMAL_KHR) check(acquire,"acquire swapchain image");
     bool shadow_dirty=!shadow_valid || shadow_changed(shadow_world,frame);
-    if (std::getenv("VOXEL_STRESS_SCENE")) {
+    if (std::getenv("VOXEL_STRESS")) {
       static uint32_t lighting_frame;
       std::fprintf(stdout,"lighting,%u,%u,%u\n",lighting_frame++,frame.night,shadow_dirty?1u:0u);
     }

@@ -152,8 +152,8 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
   if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
     err_fail("bad Vulkan scene state");
-  // With Bend 2.0.31: State = World(8), Control(Camera(7) + 9), pending, last.
-  if (cid_arity(CID_DEMO_STATE)!=26 || cid_arity(CID_WORLD_WORLD)!=8 ||
+  // With Bend 2.0.31: State = World(7), Control(Camera(7) + 9), pending, last.
+  if (cid_arity(CID_DEMO_STATE)!=25 || cid_arity(CID_WORLD_WORLD)!=7 ||
       cid_arity(CID_INPUT_CONTROL)!=16 || cid_arity(CID_RENDER_AIM)!=5 ||
       cid_arity(CID_WORLD_BODY)!=8 || cid_arity(CID_SPATIAL_FACE)!=8 ||
       cid_arity(CID_MESH_VERTEX)!=5 ||
@@ -162,13 +162,13 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   u64 st=term_peek(e,state),al=term_peek(e,aim);
   VoxelVkFrame frame={0};
   for (u32 i=0;i<3;i++) {
-    frame.eye[i]=voxel_vk_float(e.mem[st+8+i]);
+    frame.eye[i]=voxel_vk_float(e.mem[st+7+i]);
     frame.aim[i]=voxel_vk_float(e.mem[al+i]);
   }
-  frame.yaw=voxel_vk_float(e.mem[st+11]);
-  frame.pitch=voxel_vk_float(e.mem[st+12]);
-  frame.width=(u32)e.mem[st+13]; frame.height=(u32)e.mem[st+14];
-  frame.night=((u32)e.mem[st+15]&256u)!=0; // Held L in Control.keys.
+  frame.yaw=voxel_vk_float(e.mem[st+10]);
+  frame.pitch=voxel_vk_float(e.mem[st+11]);
+  frame.width=(u32)e.mem[st+12]; frame.height=(u32)e.mem[st+13];
+  frame.night=((u32)e.mem[st+14]&256u)!=0; // Held L in Control.keys.
   frame.aim_kind=(u32)e.mem[al+4]; frame.hud=hud;
   voxel_vk_generation++;
   u32 anchored=0,moving=0,translated=0;
@@ -212,7 +212,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
       free(entry->faces); free(entry->vertices); memset(entry,0,sizeof *entry);
     }
   }
-  if (getenv("VOXEL_STRESS_SCENE"))
+  if (getenv("VOXEL_STRESS"))
     fprintf(stdout,"bodies,%u,%u,%u,%u,%.6f\n",voxel_vk_generation-1,anchored,moving,translated,minimum_offset);
   frame.bodies=voxel_vk_bodies;
   return frame;
@@ -299,7 +299,7 @@ static Term voxel_vk_events(Env e, BendWin* win) {
 }
 
 Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
-  int profile = getenv("VOXEL_STRESS_SCENE") != NULL;
+  int profile = getenv("VOXEL_STRESS") != NULL;
   u64 start = profile ? voxel_vk_tick() : 0;
   io_sync();
   voxel_vk_load();
@@ -310,7 +310,7 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   if (frame.width!=(u32)win->img->width || frame.height!=(u32)win->img->height)
     err_fail("Vulkan camera and window resolutions differ");
   static int stress_scene_logged;
-  if (getenv("VOXEL_STRESS_SCENE") && !stress_scene_logged++)
+  if (getenv("VOXEL_STRESS") && !stress_scene_logged++)
     {
     u32 faces=0;
     for (u32 i=0;i<frame.body_count;i++) faces+=frame.bodies[i].face_count;

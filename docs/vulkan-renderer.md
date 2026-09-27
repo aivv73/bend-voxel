@@ -9,7 +9,7 @@ make run
 make benchmark-stress
 ```
 
-The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures the Light Atelier with unpaced presentation; the larger district cases remain selectable. See the [benchmark guide](stress-benchmark.md).
+The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surface support, Vulkan headers and loader, `glslc`, `g++`, and X11 development headers. `make run` uses Bend's CPU execution mode for gameplay; scene rasterization and presentation run in Vulkan. `make benchmark-stress` measures the Light Atelier with unpaced presentation. See the [benchmark guide](stress-benchmark.md).
 
 ## Frame path
 
@@ -19,7 +19,7 @@ The build requires Bend 2.0.31, Linux/X11 or XWayland, Vulkan 1.3 with Xlib surf
 4. Vulkan 1.3 dynamic rendering fills a depth-only sun shadow map when body geometry or position changes. The main pass samples that map while shading voxel faces with sunlight, sky ambient light, and a camera work light, then draws triangles with depth testing, brush lines, and screen-space bitmap text into the Xlib swapchain image. The backend handles acquire, submission, presentation, and resize recreation. It uses a present wait semaphore per swapchain image, following [Khronos's swapchain reuse guidance](https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html).
 5. The X11 adapter synchronizes the X server and sends key, mouse, focus, and close events back to Bend. Pointer positions are mapped to the selected logical resolution after resize.
 
-Initial body meshes are independent Bend CPU tasks. An edit keeps unchanged bodies verbatim and builds faces and vertices only for newly classified bodies. Per-body parallel tasks on edits increased surface-stage time in the 512-fragment workload, so that short dirty list remains sequential.
+Initial body meshes are independent Bend CPU tasks. An edit keeps unchanged bodies verbatim and builds faces and vertices only for newly classified bodies. The short dirty list on edits is built sequentially.
 
 The native effect returns the same Bend state it received. The effect depends on Bend 2.0.31's generated C layout; it checks the relevant constructor arities at runtime. Changes to Bend or the `State`, `World`, `Control`, `Aim`, `Body`, `Face`, or `Vertex` definitions require reviewing that bridge. `VOXEL_VERIFY_BEND_MESH=1` compares rebuilt body vertices against the previous native face expansion and fails on a mismatch; it is a validation mode, not a throughput setting.
 
@@ -43,20 +43,10 @@ The 2,048 × 2,048 depth-only sun map uses an orthographic projection fitted to 
 
 `make export-atelier-assets`, `make build`, `make test`, and `make test-blender` passed. Live day/night captures were inspected at 1280 × 720, with an additional default 640 × 360 capture. A 15-cell cut and reset each rebuilt one body's mesh and refreshed the shadow map; reset restored the pre-cut scene pixels. The [validation record](validation/light-atelier/README.md) includes the Blender source preview, engine captures, counts, and runtime trace.
 
-### Startup resolution (2026-09-27)
+### Resolution and compiler checks (2026-09-27)
 
-`make build` and `make test` passed with resolution parsing, camera projection, reset target, and native cache checks. The Material Works Yard rendered three frames at both 1280 × 720 and 1024 × 768, and a 1024 × 768 window capture was inspected for correct layout. An invalid `1920X1080` value exited with a clear error before opening a window. The 16-district camera and aim stress workloads passed a short 24-frame run at the runner's default 640 × 360 resolution.
-
-### Bend 2.0.31 update (2026-09-27)
-
-The project pin was updated to [Bend 2.0.31](https://github.com/bendlang/bend/releases/tag/v2.0.31). The generated C now gives imported effects module-qualified constructor IDs and uses `u64` for heap locations; the native timer and Vulkan effects were adjusted to match. `make build` and `make test` passed. A three-frame live run rendered the 1,009-body Material Works Yard. Short 24-frame stress runs for district camera motion, aim sweep, and bridge severing all passed their workload and cache checks. These are compatibility checks, not a controlled compiler performance comparison. The local smoke report is under `build/bend-2.0.31-smoke/`.
-
-### Earlier renderer checks
-
-The Bend 2.0.27 compiler update passed `make build` and `make test` without source changes to the native bridge. Renderer validation also covered a Vulkan window run, pointer cut, reset, and 800 × 450 resize. The pointer cut removed 16 voxels and reset restored all 4,640. Earlier fixed-scene Vulkan and Bend3D image comparisons remain visible in the [prototype captures](validation/vulkan-prototype/tick-0540-vulkan.png).
-
-Live [Bend3D](validation/vulkan-renderer/initial-bend.png) and [Vulkan](validation/vulkan-renderer/initial-vulkan.png) captures of the initial state use the same default camera. The captures were taken at different times and use different text drawing methods. They are a visual diagnostic, not a synchronized pixel parity gate. The [interactive cut](validation/vulkan-renderer/interactive-cut.png) and [resized window](validation/vulkan-renderer/resized.png) screenshots document the native presentation path.
+`make build` and `make test` passed with resolution parsing, camera projection, reset target, and native cache checks. Invalid resolution input exits before opening a window. The project pin was updated to [Bend 2.0.31](https://github.com/bendlang/bend/releases/tag/v2.0.31); the native timer and Vulkan effects were adjusted for its generated C layout.
 
 ## Current boundaries
 
-The renderer caches scene triangles across unchanged inputs and updates bitmap HUD glyphs each frame. It uses one frame in flight and a host-visible vertex buffer. The implementation is Linux/X11-specific and does not use the Bend3D image tree. The preview matches the affected-cell/ring behavior, but the live image has not been given a pixel-by-pixel parity gate against Bend3D. Vulkan validation layers are not installed on the tested desktop; the live path has been exercised through window, edit, reset, and resize checks.
+The renderer caches scene triangles across unchanged inputs and updates bitmap HUD glyphs each frame. It uses one frame in flight and a host-visible vertex buffer. The implementation is Linux/X11-specific and does not use the Bend3D image tree. The live path has been exercised through window, edit, reset, and resize checks.
