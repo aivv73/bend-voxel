@@ -11,7 +11,7 @@ type Sample is Data:
 type State is Data:
   State{world: W.World, control: I.Control, pending: List<&2, Sample>, lastCut: U32}
 def initial() -> State:
-  State{W.initial(), I.showcase(), Nil{}, 0}
+  State{W.initial(), I.initial(), Nil{}, 0}
 def state.world(-T: Type, s: State, k: W.World -> I.Control -> List<&2, Sample> -> U32 -> T) -> T:
   State{w, c, p, t} = s
   k(w, c, p, t)
@@ -35,21 +35,21 @@ def status(s: U32) -> String:
       "READY"
 def apply.aim(aim: V.Aim, w: W.World, c: I.Control, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
   V.Aim{point, _, +kind} = aim
-  W.use.world(State, selected(kind, w, point), bs => n => count => r => +status => next => budget => districts =>
-    State{W.World{bs, n, count, r, status, next, budget, districts}, c, pending.add(status, kind, stamp, p), last})
+  W.use.world(State, selected(kind, w, point), bs => n => count => r => +status => next => budget =>
+    State{W.World{bs, n, count, r, status, next, budget}, c, pending.add(status, kind, stamp, p), last})
 def apply.cut(doit: Bool, w: W.World, +c: I.Control, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
   match doit:
     case False{}:
       State{w, c, p, last}
     case True{}:
-      W.World{+bs, n, count, r, status, next, budget, districts} = w
-      apply.aim(I.aim(c, bs), W.World{bs, n, count, r, status, next, budget, districts}, c, p, last, stamp)
+      W.World{+bs, n, count, r, status, next, budget} = w
+      apply.aim(I.aim(c, bs), W.World{bs, n, count, r, status, next, budget}, c, p, last, stamp)
 def apply.reset(reset: Bool, cut: Bool, w: W.World, c: I.Control, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
   match reset:
     case True{}:
-      W.use.world(State,w,bs => n => count => r => status => next => budget => +districts =>
-        State{W.reset(W.World{bs,n,count,r,status,next,budget,districts}),
-          I.reset.state(c,U32.is_eq(districts,0)),Nil{},0})
+      W.use.world(State,w,bs => n => count => r => status => next => budget =>
+        State{W.reset(W.World{bs,n,count,r,status,next,budget}),
+          I.reset.state(c),Nil{},0})
     case False{}:
       apply.cut(cut, w, c, p, last, stamp)
 def event.control(+c: I.Control, w: W.World, p: List<&2, Sample>, last: U32, stamp: U32) -> State:
@@ -77,12 +77,8 @@ def target(kind: U32) -> String:
       "PROTECTED FLOOR"
     case _:
       "NO TARGET"
-def scene.title(+districts: U32) -> String:
-  match districts:
-    case 0: "BEND VOXEL / LIGHT ATELIER"
-    case _: "BEND VOXEL / DEMOLITION DISTRICT"
-def hud(n: U32, count: U32, budget: U32, removed: U32, s: U32, kind: U32, frameUs: U32, cutUs: U32, districts: U32) -> String:
-  scene.title(districts) ++ "\n" ++
+def hud(n: U32, count: U32, budget: U32, removed: U32, s: U32, kind: U32, frameUs: U32, cutUs: U32) -> String:
+  "BEND VOXEL / LIGHT ATELIER\n" ++
   "VOXELS " ++ U32.show(n) ++ "  BODIES " ++ U32.show(count) ++ "/" ++ U32.show(budget) ++ "  REMOVED " ++ U32.show(removed) ++ "\n" ++
   "FRAME " ++ U32.show((frameUs / 1000 : U32)) ++ " MS  CUT " ++ U32.show((cutUs / 1000 : U32)) ++ " MS\n" ++
   target(kind) ++ "\n" ++ status(s) ++ "\n" ++
@@ -147,5 +143,5 @@ def events.close(es: List<Event>) -> Bool:
     case _ <> rest: events.close(rest)
 def sample.measured(r: Probe.EditResult, c: I.Control, p: List<&2,Sample>, last: U32, kind: U32, stamp: U32) -> State:
   Probe.EditResult{w,cut,connectivity,surface,finalize} = r
-  W.use.world(State,w,bs => n => count => r => +status => next => budget => districts =>
-    State{W.World{bs,n,count,r,status,next,budget,districts},c,Sample{stamp,status,kind,cut,connectivity,surface,finalize} <> p,last})
+  W.use.world(State,w,bs => n => count => r => +status => next => budget =>
+    State{W.World{bs,n,count,r,status,next,budget},c,Sample{stamp,status,kind,cut,connectivity,surface,finalize} <> p,last})

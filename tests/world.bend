@@ -1,9 +1,7 @@
 import Base
 import ../src/world.bend as W
 import ../src/spatial.bend as S
-import ../src/district.bend as D
 import ../src/showcase.bend as Showcase
-import ../src/showcase_assets.bend as Assets
 import ../src/atelier_assets.bend as Atelier
 import ../src/math.bend as R
 import ../src/mesh.bend as Mesh
@@ -13,21 +11,21 @@ def check(ok: Bool, label: String) -> IO(Unit):
     case True{}: IO.print("PASS " ++ label)
     case False{}: IO.die(Unit,1,"FAIL " ++ label)
 def inspect(+w: W.World, n: U32, c: U32, status: U32, label: String) -> IO(W.World):
-  W.World{_,actualN,actualC,_,actualS,_,_,_} = w
+  W.World{_,actualN,actualC,_,actualS,_,_} = w
   do IO<W.World>:
     Unit <- check((U32.is_eq(n,actualN) && U32.is_eq(c,actualC) && U32.is_eq(status,actualS)),label)
     IO.pure(W.World,w)
 def inspect.showcase(+w: W.World, label: String) -> IO(W.World):
-  W.World{bs,n,fragments,_,_,_,_,scene} = w
+  W.World{bs,n,fragments,_,_,_,_} = w
   do IO<W.World>:
     Unit <- check(((n > 500000 : U32) && U32.is_eq(W.bodies.count(bs),6) &&
-      U32.is_eq(fragments,0) && U32.is_eq(scene,0)),label)
+      U32.is_eq(fragments,0)),label)
     IO.pure(W.World,w)
 def fixture(+t: S.Tree, budget: U32, offset: F32, speed: F32) -> W.World:
   +fs = S.faces(t)
-  W.from.bodies([W.Body{1,0,offset,speed,S.anchored(t),t,fs,Mesh.vertices(fs)}],budget,1)
+  W.from.bodies([W.Body{1,0,offset,speed,S.anchored(t),t,fs,Mesh.vertices(fs)}],budget)
 def bar(budget: U32, offset: F32, speed: F32) -> W.World:
-  fixture(S.Leaf{D.box(0.0,100.0,0.0,11.0,1.0,1.0,2)},budget,offset,speed)
+  fixture(S.Leaf{Showcase.box(0.0,100.0,0.0,11.0,1.0,1.0,2)},budget,offset,speed)
 @unsafe
 def components(t: S.Tree) -> U32:
   match t:
@@ -73,13 +71,13 @@ def motion(bs: List<&2,W.Body>, +offset: F32, +speed: F32) -> Bool:
     case W.Body{_,_,o,v,_,_,_,_} <> rest:
       ((F32.abs((o - offset : F32)) < 0.0001 : F32) && (F32.abs((v - speed : F32)) < 0.0001 : F32) && motion(rest,offset,speed))
 def moving(w: W.World, offset: F32, speed: F32) -> Bool:
-  W.World{bs,_,_,_,_,_,_,_} = w
+  W.World{bs,_,_,_,_,_,_} = w
   motion(bs,offset,speed)
 def many(n: Nat, +i: U32) -> List<&2,W.Body>:
   match n:
     case 0n: Nil{}
     case 1n+k:
-      +t = {S.Leaf{D.box((U32.to_f32(i) * 2.0 : F32),100.0,0.0,1.0,1.0,1.0,2)} : S.Tree}
+      +t = {S.Leaf{Showcase.box((U32.to_f32(i) * 2.0 : F32),100.0,0.0,1.0,1.0,1.0,2)} : S.Tree}
       +fs = S.faces(t)
       W.Body{i,0,0.0,0.0,False{},t,fs,Mesh.vertices(fs)} <> many(k,(i + 1 : U32))
 def disjoint.box(+b: S.Box, rest: List<&2,S.Box>) -> Bool:
@@ -100,12 +98,12 @@ def disjoint.across(bs: List<&2,S.Box>, +other: List<&2,S.Box>) -> Bool:
 def disjoint.trees(+a: S.Tree, +b: S.Tree) -> Bool:
   (Bool.not(S.overlaps(S.bounds(a),S.bounds(b))) ||
     disjoint.across(S.boxes(a,Nil{}),S.boxes(b,Nil{})))
-def disjoint.assembly(+a: D.Assembly, rest: List<&2,D.Assembly>) -> Bool:
+def disjoint.assembly(+a: Showcase.Assembly, rest: List<&2,Showcase.Assembly>) -> Bool:
   match a rest:
     case _ Nil{}: True{}
-    case D.Assembly{+t} D.Assembly{u} <> tail:
+    case Showcase.Assembly{+t} Showcase.Assembly{u} <> tail:
       (disjoint.trees(t,u) && disjoint.assembly(a,tail))
-def disjoint.assemblies(bs: List<&2,D.Assembly>) -> Bool:
+def disjoint.assemblies(bs: List<&2,Showcase.Assembly>) -> Bool:
   match bs:
     case Nil{}: True{}
     case a <> +tail: (disjoint.assembly(a,tail) && disjoint.assemblies(tail))
@@ -114,55 +112,44 @@ def falling.bodies(bs: List<&2,W.Body>) -> Bool:
     case Nil{}: False{}
     case W.Body{_,_,o,v,_,_,_,_} <> _: ((o < (0.0 - 10.0)) && (v < 0.0) : F32)
 def falling(w: W.World) -> Bool:
-  W.World{bs,_,_,_,_,_,_,_} = w
+  W.World{bs,_,_,_,_,_,_} = w
   falling.bodies(bs)
-def connected.assemblies(bs: List<&2,D.Assembly>) -> Bool:
+def connected.assemblies(bs: List<&2,Showcase.Assembly>) -> Bool:
   match bs:
     case Nil{}: True{}
-    case D.Assembly{+t} <> rest: (U32.is_eq(components(t),1) && disjoint(S.boxes(t,Nil{})) && connected.assemblies(rest))
+    case Showcase.Assembly{+t} <> rest: (U32.is_eq(components(t),1) && disjoint(S.boxes(t,Nil{})) && connected.assemblies(rest))
 def main() -> IO(Unit):
-  +solid = {S.Leaf{D.box(0.0,0.0,0.0,8.0,8.0,8.0,2)} : S.Tree}
+  +solid = {S.Leaf{Showcase.box(0.0,0.0,0.0,8.0,8.0,8.0,2)} : S.Tree}
   +p = {R.Vec{3.5,4.5,2.5} : R.Vec}
   +cut = S.cut(solid,p,4.00001)
-  +partial = S.build([D.box(0.0,0.0,0.0,4.0,4.0,4.0,2),D.box(4.0,1.0,1.0,2.0,2.0,2.0,3)])
+  +partial = S.build([Showcase.box(0.0,0.0,0.0,4.0,4.0,4.0,2),Showcase.box(4.0,1.0,1.0,2.0,2.0,2.0,3)])
   do IO<Unit>:
-    Unit <- check(U32.is_eq(S.count(S.Leaf{D.box(0.0,0.0,0.0,257.0,257.0,257.0,2)}),16974593),"large cuboid cell counts use exact integer arithmetic")
+    Unit <- check(U32.is_eq(S.count(S.Leaf{Showcase.box(0.0,0.0,0.0,257.0,257.0,257.0,2)}),16974593),"large cuboid cell counts use exact integer arithmetic")
     Unit <- check(dense.cut(512n,0,solid,cut,p),"sparse sphere agrees with every dense reference cell")
     Unit <- check(U32.is_eq(area(S.faces(cut)),dense.area(512n,0,cut)),"carved surface area agrees with dense exposed faces")
     Unit <- check(U32.is_eq(area(S.faces(partial)),dense.area(512n,0,partial)),"partial material boundary hides exactly shared faces")
-    Unit <- check(U32.is_eq(components(S.build([D.box(0.0,0.0,0.0,1.0,1.0,1.0,2),D.box(1.0,1.0,0.0,1.0,1.0,1.0,2)])),2),"edge contact stays disconnected")
-    Unit <- check(connected.assemblies(D.district()),"generated regions do not overlap and all assemblies are six-connected")
-    Unit <- check(connected.assemblies([D.Assembly{Showcase.ground()}]),"showcase ground is connected and disjoint")
-    Unit <- check(connected.assemblies([D.Assembly{Showcase.backdrop()}]),"shadow backdrop is connected and disjoint")
-    Unit <- check(connected.assemblies([D.Assembly{Showcase.canopy()}]),"shadow canopy is connected and disjoint")
-    Unit <- check(connected.assemblies([D.Assembly{Assets.beacon()}]),"Blender beacon is connected and disjoint")
-    Unit <- check(connected.assemblies([D.Assembly{Assets.cargo_pod()}]),"Blender cargo pod is connected and disjoint")
-    Unit <- check(connected.assemblies([D.Assembly{Assets.gateway()}]),"Blender gateway is connected and disjoint")
-    Unit <- check(connected.assemblies([D.Assembly{Atelier.suzanne()}]),"voxelized Suzanne is connected and disjoint")
-    Unit <- check(connected.assemblies([D.Assembly{Atelier.oculus()}]),"voxelized Oculus is connected and disjoint")
-    Unit <- check(connected.assemblies([D.Assembly{Atelier.twist()}]),"voxelized Twist is connected and disjoint")
+    Unit <- check(U32.is_eq(components(S.build([Showcase.box(0.0,0.0,0.0,1.0,1.0,1.0,2),Showcase.box(1.0,1.0,0.0,1.0,1.0,1.0,2)])),2),"edge contact stays disconnected")
+    Unit <- check(connected.assemblies([Showcase.Assembly{Showcase.ground()}]),"showcase ground is connected and disjoint")
+    Unit <- check(connected.assemblies([Showcase.Assembly{Showcase.backdrop()}]),"shadow backdrop is connected and disjoint")
+    Unit <- check(connected.assemblies([Showcase.Assembly{Showcase.canopy()}]),"shadow canopy is connected and disjoint")
+    Unit <- check(connected.assemblies([Showcase.Assembly{Atelier.suzanne()}]),"voxelized Suzanne is connected and disjoint")
+    Unit <- check(connected.assemblies([Showcase.Assembly{Atelier.oculus()}]),"voxelized Oculus is connected and disjoint")
+    Unit <- check(connected.assemblies([Showcase.Assembly{Atelier.twist()}]),"voxelized Twist is connected and disjoint")
     Unit <- check((Bool.not(S.contains(Atelier.oculus(),R.Vec{0.5,42.5,0.5})) &&
       S.contains(Atelier.oculus(),R.Vec{0.5,73.5,0.5})),"Oculus retains its open center and solid curved rim")
     Unit <- check(disjoint.assemblies(Showcase.generate()),"showcase bodies have no overlapping voxels")
     showcase : W.World <- inspect.showcase(W.initial(),"sculpture courtyard has real voxels and six bodies")
-    showcase : W.World <- inspect.showcase(W.reset(showcase),"showcase reset preserves scene selection")
-    w : W.World <- inspect(W.configured(1,2048),2443284,0,1,"district has more than two million real voxels")
-    w : W.World <- inspect(W.carve(w,R.Vec{(0.0 - 15.9 : F32),16.25,(0.0 - 19.95 : F32)}),2443256,0,1,"first bridge fuse retains anchor path across regions")
-    w : W.World <- inspect(W.carve(w,R.Vec{15.9,16.25,(0.0 - 19.95 : F32)}),2443228,1,1,"last bridge fuse detaches one fragment")
-    w : W.World <- inspect(W.step(w,10.0),2443228,1,1,"falling bridge preserves all remaining cells")
-    w : W.World <- inspect(W.carve(w,R.Vec{1000.0,1.0,1000.0}),2443228,1,2,"air cut is a no-op")
-    w : W.World <- inspect(W.configured(4,2048),9773136,0,1,"four districts multiply simulated cells")
-    w : W.World <- inspect(W.configured(16,2048),39092544,0,1,"sixteen districts multiply simulated cells")
-    w : W.World <- inspect(W.carve(fixture(S.Leaf{D.box((0.0 - 80.0 : F32),100.0,0.0,2.0,2.0,2.0,1)},10,0.0,0.0),R.Vec{(0.0 - 7.9 : F32),10.1,0.1}),8,0,2,"explicit elevated anchor is protected")
-    w : W.World <- inspect(W.carve(fixture(S.build([D.box((0.0 - 40.0 : F32),10.0,0.0,2.0,1.0,1.0,1),D.box((0.0 - 38.0 : F32),10.0,0.0,12.0,1.0,1.0,2)]),10,0.0,0.0),R.Vec{(0.0 - 3.15 : F32),1.05,0.05}),9,1,1,"signed coordinates and cross-region severing")
+    showcase : W.World <- inspect.showcase(W.reset(showcase),"Light Atelier reset restores the world")
+    w : W.World <- inspect(W.carve(fixture(S.Leaf{Showcase.box((0.0 - 80.0 : F32),100.0,0.0,2.0,2.0,2.0,1)},10,0.0,0.0),R.Vec{(0.0 - 7.9 : F32),10.1,0.1}),8,0,2,"explicit elevated anchor is protected")
+    w : W.World <- inspect(W.carve(fixture(S.build([Showcase.box((0.0 - 40.0 : F32),10.0,0.0,2.0,1.0,1.0,1),Showcase.box((0.0 - 38.0 : F32),10.0,0.0,12.0,1.0,1.0,2)]),10,0.0,0.0),R.Vec{(0.0 - 3.15 : F32),1.05,0.05}),9,1,1,"signed coordinates and cross-region severing")
     w : W.World <- inspect(W.carve(bar(1,0.0,0.0),R.Vec{0.55,10.05,0.05}),11,1,3,"body budget overflow rolls back mass and ownership")
     w : W.World <- inspect(W.carve(bar(2,0.0,0.0),R.Vec{0.55,10.05,0.05}),6,2,1,"configured body budget admits the same split")
     w : W.World <- inspect(W.carve(bar(2,(0.0 - 1.0 : F32),(0.0 - 2.0 : F32)),R.Vec{0.55,9.05,0.05}),6,2,1,"moving fragment can be split again")
     Unit <- check(moving(w,(0.0 - 1.0 : F32),(0.0 - 2.0 : F32)),"split fragments inherit position and velocity")
     Unit <- check(moving(W.step(bar(2,0.0,0.0),10.0),(0.0 - 10.0 : F32),0.0),"falling body stops at ground")
-    w : W.World <- inspect(W.from.bodies(many(512n,1),1024,1),512,512,1,"512 independent bodies exceed the removed 64-body cap")
+    w : W.World <- inspect(W.from.bodies(many(512n,1),1024),512,512,1,"512 independent bodies are supported")
     w : W.World <- inspect(W.step(w,0.1),512,512,1,"512 bodies move without losing material")
-    w : W.World <- inspect(W.carve(fixture(S.Leaf{D.box(0.0,0.0,0.0,1.0,1.0,1.0,2)},10,0.0,0.0),R.Vec{0.05,0.05,0.05}),0,0,1,"ground-level cells are removable without explicit anchor material")
-    w : W.World <- inspect(W.carve(fixture(S.Leaf{D.box(0.0,100.0,0.0,1.0,10.0,1.0,2)},10,(0.0 - 10.0 : F32),0.0),R.Vec{0.05,0.15,0.05}),6,1,1,"removing the lowest cells updates the landing bound")
+    w : W.World <- inspect(W.carve(fixture(S.Leaf{Showcase.box(0.0,0.0,0.0,1.0,1.0,1.0,2)},10,0.0,0.0),R.Vec{0.05,0.05,0.05}),0,0,1,"ground-level cells are removable without explicit anchor material")
+    w : W.World <- inspect(W.carve(fixture(S.Leaf{Showcase.box(0.0,100.0,0.0,1.0,10.0,1.0,2)},10,(0.0 - 10.0 : F32),0.0),R.Vec{0.05,0.15,0.05}),6,1,1,"removing the lowest cells updates the landing bound")
     Unit <- check(falling(W.step(w,0.1)),"landed fragment resumes falling after its bottom is cut")
     IO.print("ALL SPARSE WORLD CHECKS PASSED")

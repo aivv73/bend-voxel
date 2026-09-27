@@ -108,24 +108,20 @@ def summarize_views(rows, mode, warmup, measured):
     elif mode == 'aim':
         if camera_positions != 1 or aim_positions < required_positions or preview_frames < measured // 4:
             errors.append('Aim workload did not sweep removable targets with a fixed camera')
-    elif mode in ('carve', 'bridge', 'night'):
+    elif mode in ('carve', 'night'):
         if camera_positions != 1 or target_frames:
             errors.append('Fixed view moved or enabled aim')
-    elif mode == 'fragments':
-        if camera_positions < required_positions or preview_frames < measured // 4:
-            errors.append('Fragment workload did not follow removable moving bodies')
     else:
         errors.append(f'Unknown view mode {mode}')
     return {'camera_positions': camera_positions, 'aim_positions': aim_positions,
             'target_frames': target_frames, 'preview_frames': preview_frames}, errors
 
 
-def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='static', world_scale=None,
-                 resolution=(640, 360), scene_kind='district'):
+def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='static', check_world=False):
     rows = list(csv.reader(lines))
     errors = []
     special = {}
-    for tag, width in (('init', 3), ('surface', 2)):
+    for tag, width in (('init', 2), ('surface', 2)):
         found = [row for row in rows if row and row[0] == tag]
         if len(found) != 1 or len(found[0]) != width:
             errors.append(f'Expected one {tag} row')
@@ -158,11 +154,9 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     measured_frames = frame_data[warmup:]
     measured_stages = stage_data[warmup:]
     measured_vk = vk_data[warmup:]
-    limit = 6 if scene_kind == 'atelier' else {'bridge': 2, 'fragments': 16, 'carve': 75}.get(view_mode, 5000)
-    batch = 8 * (world_scale or 1) if view_mode == 'fragments' else 1
-    edit_frames = {i: batch for i in range(warmup, expected)
+    edit_frames = {i: 1 for i in range(warmup, expected)
                    if edit_every > 0 and (i - warmup) % edit_every == 0
-                   and (i - warmup) // edit_every < limit}
+                   and (i - warmup) // edit_every < 6}
     expected_edits = sum(edit_frames.values())
     if len(edits) != expected_edits or len(cuts) != expected_edits:
         errors.append(f'Expected {expected_edits} edits and latency samples')
@@ -171,13 +165,11 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     if not measured_frames:
         errors.append('No measured frames')
     world_summary, world_errors = summarize_world(rows, frame_data, edits, edit_frames,
-        world_scale, view_mode, warmup, measured, resolution, scene_kind) if world_scale is not None else ({}, [])
+        view_mode, warmup) if check_world else ({}, [])
     errors.extend(world_errors)
-    lighting_summary, lighting_errors = summarize_lighting(rows, expected, edit_frames,
-        view_mode, scene_kind)
+    lighting_summary, lighting_errors = (summarize_lighting(rows, expected, edit_frames, view_mode)
+                                        if check_world else ({}, []))
     errors.extend(lighting_errors)
-    if scene_kind == 'atelier' and special['init'][0] != 4:
-        errors.append('The Light Atelier scene was not selected')
     durations = [row[1] for row in measured_frames]
     total_us = sum(durations)
     acquire_us = sum(row[5] for row in measured_vk)
@@ -186,8 +178,7 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
         **lighting_summary,
         'pass': not errors,
         'errors': errors,
-        'scene': special['init'][0],
-        'initialization_ms': special['init'][1] / 1000,
+        'initialization_ms': special['init'][0] / 1000,
         'surface_rectangles': special['surface'][0],
         'solid_cells_start': world_summary.get('initial_solid_cells', frame_data[0][2]),
         'solid_cells_end': frame_data[-1][2],
@@ -207,10 +198,8 @@ def parse_stress(lines, exit_code, warmup, measured, edit_every, view_mode='stat
     }
 
 
-def summarize_lighting(rows, expected, edit_frames, mode, scene_kind):
+def summarize_lighting(rows, expected, edit_frames, mode):
     lighting = [row for row in rows if row and row[0] == 'lighting']
-    if scene_kind != 'atelier':
-        return {}, []
     errors = []
     if len(lighting) != expected:
         return {}, [f'Expected {expected} lighting rows']
@@ -234,22 +223,19 @@ def summarize_lighting(rows, expected, edit_frames, mode, scene_kind):
             'shadow_refreshes': shadow_refreshes}, errors
 
 
-def summarize_world(rows, frames, edits, edit_frames, scale, mode, warmup, measured, resolution,
-                    scene_kind):
-    """Validate actual world scale, body motion and cache identity on every frame."""
+def summarize_world(rows, frames, edits, edit_frames, mode, warmup):
+    """Validate world inventory, body motion and cache identity on every frame."""
     errors = []
     inventory = [row for row in rows if row and row[0] == 'world']
     cache_rows = [row for row in rows if row and row[0] == 'mesh_cache']
     lod_rows = [row for row in rows if row and row[0] == 'lod_cache']
     body_rows = [row for row in rows if row and row[0] == 'bodies']
     try:
-        if len(inventory) != 1 or len(inventory[0]) != 6:
+        if len(inventory) != 1 or len(inventory[0]) != 5:
             raise ValueError('expected one world inventory')
-        solids, assemblies, regions, districts, budget = map(int, inventory[0][1:])
-        expected_inventory = ((803970, 6, 2034, 0) if scene_kind == 'atelier' else
-                              (2443284 * scale, 154 * scale, 3434 * scale, scale))
-        if (solids, assemblies, regions, districts) != expected_inventory:
-            raise ValueError(f'world inventory does not match {scene_kind} scene')
+        solids, assemblies, regions, budget = map(int, inventory[0][1:])
+        if (solids, assemblies, regions) != (803970, 6, 2034):
+            raise ValueError('world inventory does not match Light Atelier')
         if (len(cache_rows) != len(frames) or len(lod_rows) != len(frames)
                 or len(body_rows) != len(frames)):
             raise ValueError('missing mesh cache, LOD cache or body samples')
@@ -293,20 +279,10 @@ def summarize_world(rows, frames, edits, edit_frames, scale, mode, warmup, measu
         total_edits = sum(edit_frames.values())
         if total_edits and frames[-1][2] >= solids:
             errors.append('Accepted edits did not remove real cells')
-        if mode == 'bridge' and total_edits == 2:
-            if frames[-1][3] != 1 or frames[-1][2] != solids - 56:
-                errors.append('The second bridge fuse did not detach exactly one bridge')
-        if mode == 'fragments':
-            if frames[-1][3] != total_edits:
-                errors.append('Support cuts did not produce the requested independent fragments')
-            if measured >= 17 and max(row[2] for row in bodies) != 128 * scale:
-                errors.append('Requested fragment population was not falling simultaneously')
-        if mode in ('static', 'camera', 'aim') and (frames[-1][2] != solids or frames[-1][3] != 0):
+        if mode in ('static', 'night', 'camera', 'aim') and (frames[-1][2] != solids or frames[-1][3] != 0):
             errors.append('View-only workload mutated the world')
         measured_cache = caches[warmup:]
         measured_lod = lods[warmup:]
-        if scale == 16 and mode in ('static', 'camera') and resolution == (640, 360) and not max(row[2] for row in measured_lod):
-            errors.append('Distant overview did not select any LOD proxies')
         return {
             'initial_solid_cells': solids,
             'initial_assemblies': assemblies,
@@ -329,4 +305,4 @@ def summarize_world(rows, frames, edits, edit_frames, scale, mode, warmup, measu
             'proxy_vertices_max': max(row[5] for row in measured_lod),
         }, errors
     except (ValueError, IndexError, KeyError) as exc:
-        return {}, [f'Invalid {scene_kind} samples: {exc}']
+        return {}, [f'Invalid Light Atelier samples: {exc}']

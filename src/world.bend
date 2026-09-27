@@ -2,21 +2,18 @@ import Base
 import ./math.bend as R
 import ./spatial.bend as S
 import ./mesh.bend as Mesh
-import ./district.bend as District
 import ./showcase.bend as Showcase
 
-# The world stores 0 in districts for the showcase; positive values select
-# the original district grid used by the stress workloads.
 # Each body owns a sparse spatial tree, local-space faces, and render vertices.
 # IDs remain stable until an edit changes that body's geometry. Translation
 # never changes geometry identity. Unrelated bodies survive an edit verbatim.
 type Body is Data:
   Body{id: U32, revision: U32, offset: F32, speed: F32, anchored: Bool, tree: S.Tree, faces: List<&2,S.Face>, vertices: List<&2,Mesh.Vertex>}
 type World is Data:
-  World{bodies: List<&2,Body>, solids: U32, fragments: U32, removed: U32, status: U32, next: U32, budget: U32, districts: U32}
-def use.world(-C: Type, w: World, k: List<&2,Body> -> U32 -> U32 -> U32 -> U32 -> U32 -> U32 -> U32 -> C) -> C:
-  World{a,b,c,d,e,f,g,h} = w
-  k(a,b,c,d,e,f,g,h)
+  World{bodies: List<&2,Body>, solids: U32, fragments: U32, removed: U32, status: U32, next: U32, budget: U32}
+def use.world(-C: Type, w: World, k: List<&2,Body> -> U32 -> U32 -> U32 -> U32 -> U32 -> U32 -> C) -> C:
+  World{a,b,c,d,e,f,g} = w
+  k(a,b,c,d,e,f,g)
 def bodies.count(bs: List<&2,Body>) -> U32:
   match bs:
     case Nil{}: 0
@@ -43,11 +40,11 @@ def meshes(bs: List<&2,Body>) -> List<&2,Body>:
   match bs:
     case Nil{}: Nil{}
     case b <> rest: mesh(b) <> meshes(rest)
-def assembly.body(a: District.Assembly, id: U32) -> Body:
-  District.Assembly{+t} = a
+def assembly.body(a: Showcase.Assembly, id: U32) -> Body:
+  Showcase.Assembly{+t} = a
   +fs = S.faces(t)
   Body{id,0,0.0,0.0,S.anchored(t),t,fs,Mesh.vertices(fs)}
-def assemblies(bs: List<&2,District.Assembly>, +id: U32) -> List<&2,Body>:
+def assemblies(bs: List<&2,Showcase.Assembly>, +id: U32) -> List<&2,Body>:
   match bs:
     case Nil{}: Nil{}
     case a <> rest:
@@ -60,22 +57,18 @@ def bodies.next(bs: List<&2,Body>) -> U32:
     case Body{+id,_,_,_,_,_,_,_} <> rest:
       +next = bodies.next(rest)
       R.word((next > id : U32),next,(id + 1 : U32))
-def from.bodies(+bs: List<&2,Body>, budget: U32, districts: U32) -> World:
-  World{bs,bodies.solids(bs),bodies.fragments(bs),0,1,bodies.next(bs),budget,districts}
-def configured(+districts: U32, budget: U32) -> World:
-  from.bodies(assemblies(District.generate(districts),1),budget,districts)
+def from.bodies(+bs: List<&2,Body>, budget: U32) -> World:
+  World{bs,bodies.solids(bs),bodies.fragments(bs),0,1,bodies.next(bs),budget}
 def showcase(budget: U32) -> World:
-  from.bodies(assemblies(Showcase.generate(),1),budget,0)
+  from.bodies(assemblies(Showcase.generate(),1),budget)
 def initial() -> World:
   showcase(2048)
 def reset(w: World) -> World:
-  World{_,_,_,_,_,_,budget,districts} = w
-  match districts:
-    case 0: showcase(budget)
-    case _: configured(districts,budget)
+  World{_,_,_,_,_,_,budget} = w
+  showcase(budget)
 def status(w: World, status: U32) -> World:
-  World{bs,n,c,_,_,next,budget,districts} = w
-  World{bs,n,c,0,status,next,budget,districts}
+  World{bs,n,c,_,_,next,budget} = w
+  World{bs,n,c,0,status,next,budget}
 
 type Pending is Data:
   Pending{body: Body, tree: S.Tree, window: S.Box}
@@ -98,7 +91,7 @@ def prepare.bs(bs: List<&2,Body>, +p: R.Vec) -> Prepared:
 type Edit is Data:
   Edit{old: World, prepared: Prepared}
 def carve.prepare(+w: World, p: R.Vec) -> Edit:
-  World{bs,_,_,_,_,_,_,_} = w
+  World{bs,_,_,_,_,_,_} = w
   Edit{w,prepare.bs(bs,p)}
 
 type Classified is Data:
@@ -131,7 +124,7 @@ def classify.bs(ps: List<&2,Pending>, state: Classified) -> Classified:
 type EditClassification is Data:
   EditClassification{old: World, classified: Classified, removed: U32}
 def carve.classify.prepared(+w: World, prepared: Prepared) -> EditClassification:
-  World{_,_,_,_,_,next,_,_} = w
+  World{_,_,_,_,_,next,_} = w
   Prepared{bs,dirty,removed} = prepared
   EditClassification{w,classify.bs(dirty,Classified{bs,Nil{},Nil{},next}),removed}
 def carve.classify(edit: Edit) -> EditClassification:
@@ -157,14 +150,14 @@ def carve.commit(ok: Bool, old: World, bs: List<&2,Body>, next: U32, +removed: U
   match ok:
     case False{}: status(old,3)
     case True{}:
-      World{_,n,_,_,_,_,budget,districts} = old
+      World{_,n,_,_,_,_,budget} = old
       +bs = bs
-      World{bs,(n - removed : U32),bodies.fragments(bs),removed,1,next,budget,districts}
+      World{bs,(n - removed : U32),bodies.fragments(bs),removed,1,next,budget}
 def carve.finish.changed(changed: Bool, +old: World, +bs: List<&2,Body>, next: U32, +removed: U32) -> World:
   match changed:
     case False{}: status(old,2)
     case True{}:
-      World{_,_,_,_,_,_,budget,_} = old
+      World{_,_,_,_,_,_,budget} = old
       carve.commit((bodies.fragments(bs) <= budget : U32),old,bs,next,removed)
 def carve.finalize(edit: EditSurfaces) -> World:
   EditSurfaces{w,bs,next,+removed} = edit
@@ -188,5 +181,5 @@ def bodies.step(bs: List<&2,Body>, +dt: F32) -> List<&2,Body>:
     case Nil{}: Nil{}
     case b <> rest: body.step(dt,b) <> bodies.step(rest,dt)
 def step(w: World, dt: F32) -> World:
-  World{bs,n,c,r,s,next,budget,districts} = w
-  World{bodies.step(bs,dt),n,c,r,s,next,budget,districts}
+  World{bs,n,c,r,s,next,budget} = w
+  World{bodies.step(bs,dt),n,c,r,s,next,budget}

@@ -9,10 +9,6 @@ def initial.size(+width: U32, +height: U32) -> Control:
   Control{V.camera.size(width,height), 0, (width / 2 : U32), (height / 2 : U32), False{}, False{}, True{}, False{}, False{}, False{}}
 def initial() -> Control:
   initial.size(640,360)
-def showcase.size(+width: U32, +height: U32) -> Control:
-  Control{V.camera.showcase.size(width,height), 0, (width / 2 : U32), (height / 2 : U32), False{}, False{}, True{}, False{}, False{}, False{}}
-def showcase() -> Control:
-  showcase.size(640,360)
 def key.bit(+key: U32, code: U32, bit: U32) -> U32:
   R.word(U32.is_eq(key, code), bit, 0)
 def key.mask(+key: U32) -> U32:
@@ -68,11 +64,7 @@ def aim(+c: Control, bs: List<&2, W.Body>) -> V.Aim:
   V.aim((focus && Bool.not(look)), bs, cam, mx, my)
 
 # Keep held-button latches when resetting so one press remains one action.
-def reset.camera(showcase: Bool, width: U32, height: U32) -> V.Camera:
-  match showcase:
-    case True{}: V.camera.showcase.size(width,height)
-    case False{}: V.camera.size(width,height)
-def reset.state(c: Control, showcase: Bool) -> Control:
+def reset.state(c: Control) -> Control:
   Control{cam,keys,_,_,_,left,focus,_,_,quit} = c
   V.Camera{_,_,_,+width,+height} = cam
-  Control{reset.camera(showcase,width,height),keys,(width / 2 : U32),(height / 2 : U32),False{},left,focus,False{},False{},quit}
+  Control{V.camera.size(width,height),keys,(width / 2 : U32),(height / 2 : U32),False{},left,focus,False{},False{},quit}

@@ -6,7 +6,7 @@ The default demo is a 44 × 34 meter sculpture courtyard designed to show lighti
 
 The exhibits are **Suzanne**, a subdivided Blender monkey head; **Oculus**, a vertical torus with an open center; and **Twist**, an octagonal column swept through 207°. Their curved silhouettes and 10 cm voxel steps come from actual Blender meshes. They are fully editable game geometry, with protected footings and normal carving, connectivity, surface caching, and shadow updates.
 
-The courtyard has six bodies: the floor, backdrop, canopy, and three exhibits. It focuses the existing 2,048² sun shadow map on a much smaller area than the earlier Material Works Yard. The new plaster material has a pale OKLCH color that makes warm sunlight and cool shadows easy to distinguish. Sunlight arrives at a lower angle, producing longer shadows. Shadow filtering compares each sampled texel with the receiver plane's depth to prevent diagonal self-shadow stripes on the walls.
+The courtyard has six bodies: the floor, backdrop, canopy, and three exhibits. The 2,048² sun shadow map focuses on the courtyard. The new plaster material has a pale OKLCH color that makes warm sunlight and cool shadows easy to distinguish. Sunlight arrives at a lower angle, producing longer shadows. Shadow filtering compares each sampled texel with the receiver plane's depth to prevent diagonal self-shadow stripes on the walls.
 
 Hold **L** to compare the [night view](validation/light-atelier/night.png), with cool ambient light and a stronger warm work light around the camera. Use WASD and Q/E to approach the voxel steps, RMB to look, LMB to carve, and R to restore the sculptures and the opening camera. The sun casts shadows; the camera work light does not. Render LOD remains available as you move away, while the opening view shows the full meshes.
 
@@ -46,8 +46,8 @@ Each non-box mesh is limited to one million candidate cells, and each asset to 4
 
 Commit the source `.blend` and generated [atelier_assets.bend](../src/atelier_assets.bend) together. [create_light_atelier.py](../scripts/create_light_atelier.py) records the initial authoring steps and refuses to overwrite the source unless explicitly given `--replace`.
 
-## Scale workloads and earlier assets
+## Measurements
 
-The [default benchmark](stress-benchmark.md) measures this scene's daylight and night rendering, view changes, picking, edits, and shadow refreshes. The demolition district remains available with `VOXEL_DISTRICTS=1`, `4`, or `16`; its optional benchmark cases still measure world scale, destruction, and falling bodies. The earlier [showcase_assets.blend](../assets/showcase_assets.blend) and `make export-showcase-assets` retain the beacon, cargo pod, and gateway import examples. Their repeated-layout footprint limits still apply. Earlier yard screenshots are preserved under `docs/validation/material-works-yard/`.
+The [benchmark](stress-benchmark.md) measures this scene's daylight and night rendering, view changes, picking, edits, and shadow refreshes.
 
 See the [Light Atelier validation record](validation/light-atelier/README.md) for captures and checks.

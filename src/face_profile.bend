@@ -9,7 +9,7 @@ import ./atelier_workload.bend as AtelierWorkload
 # Headless diagnostic: time the ordinary edit, then replay the face builder
 # with counters. Audit time is separate from the ordinary surface stage.
 def next.id(w: W.World) -> U32:
-  W.World{_,_,_,_,_,next,_,_} = w
+  W.World{_,_,_,_,_,next,_} = w
   next
 def printed(same: Bool, ordinal: U32, body: U32, removed: U32,
   cut: U32, connectivity: U32, surface: U32, finalize: U32, auditUs: U32,
@@ -61,12 +61,12 @@ def checked.count(count: U32, w: W.World) -> IO(W.World):
     case _: IO.pure(W.World,w)
 def step.world(w: W.World, ordinal: U32, firstId: U32,
   cut: U32, connectivity: U32, surface: U32, finalize: U32) -> IO(W.World):
-  W.World{+bs,n,fragments,+removed,status,next,budget,districts} = w
+  W.World{+bs,n,fragments,+removed,status,next,budget} = w
   match status:
     case 1:
       do IO<W.World>:
         +count : U32 <- audit.bodies(bs,firstId,ordinal,removed,cut,connectivity,surface,finalize)
-        checked.count(count,W.World{bs,n,fragments,removed,status,next,budget,districts})
+        checked.count(count,W.World{bs,n,fragments,removed,status,next,budget})
     case _: IO.die(W.World,1,"Atelier face-profile cut was rejected")
 def step.result(r: Probe.EditResult, ordinal: U32, firstId: U32) -> IO(W.World):
   Probe.EditResult{w,cut,connectivity,surface,finalize} = r

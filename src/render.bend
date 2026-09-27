@@ -10,13 +10,9 @@ type Aim is Data:
   Aim{point: R.Vec, distance: F32, kind: U32}
 
 def camera.size(width: U32, height: U32) -> Camera:
-  Camera{R.Vec{44.0, 30.0, 48.0}, (0.0 - 2.40 : F32), (0.0 - 0.34 : F32),width,height}
+  Camera{R.Vec{9.0, 11.0, 25.0}, (0.0 - 2.8084 : F32), (0.0 - 0.30 : F32),width,height}
 def camera() -> Camera:
   camera.size(640,360)
-def camera.showcase.size(width: U32, height: U32) -> Camera:
-  Camera{R.Vec{9.0, 11.0, 25.0}, (0.0 - 2.8084 : F32), (0.0 - 0.30 : F32),width,height}
-def camera.showcase() -> Camera:
-  camera.showcase.size(640,360)
 def cam(+c: Camera) -> R.Cam:
   Camera{eye, +yaw, +pitch, +width, +height} = c
   +sy = F32.sin(yaw)

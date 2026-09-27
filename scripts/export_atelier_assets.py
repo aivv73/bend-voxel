@@ -1,6 +1,6 @@
 """Export Blender asset collections into editable Bend voxel trees.
 
-Run with: blender -b assets/showcase_assets.blend --python-exit-code 1 --python scripts/export_showcase_assets.py
+Run with: blender -b assets/light_atelier.blend --python-exit-code 1 --python scripts/export_atelier_assets.py
 Closed meshes are sampled at 10 cm cell centers and packed into cuboids.
 Grid-aligned cube parts retain their exact bounds. Blender X/Y/Z maps to
 engine X/Z/Y respectively.
@@ -18,17 +18,11 @@ from mathutils.bvhtree import BVHTree
 
 
 ROOT = Path(__file__).resolve().parent.parent
-OUTPUT = ROOT / "src/showcase_assets.bend"
+OUTPUT = ROOT / "src/atelier_assets.bend"
 MATERIALS = {1: "foundation", 2: "concrete", 3: "frame", 4: "machinery", 5: "plaster"}
 GRID = 10  # Cells per meter.
 MAX_SAMPLE_CELLS = 1_000_000
 MAX_ASSET_BOXES = 4096
-FOOTPRINTS = {
-    "beacon": (12, 12),
-    "cargo_pod": (12, 12),
-    "gateway": (50, 20),
-}
-
 
 def cell(value):
     scaled = value * GRID
@@ -207,11 +201,6 @@ def asset_boxes(group, depsgraph):
         raise ValueError(f"{group.name} has {len(boxes)} boxes; limit is {MAX_ASSET_BOXES}")
     if not any(box[6] == 1 and box[1] == 0 for box in boxes):
         raise ValueError(f"{group.name} needs a ground-level foundation box")
-    if group["voxel_asset"] in FOOTPRINTS:
-        x_limit, z_limit = FOOTPRINTS[group["voxel_asset"]]
-        if any(box[0] < -x_limit or box[3] > x_limit or
-               box[2] < -z_limit or box[5] > z_limit for box in boxes):
-            raise ValueError(f"{group.name} exceeds its placement footprint")
     return boxes
 
 
