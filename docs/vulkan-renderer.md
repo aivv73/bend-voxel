@@ -45,7 +45,7 @@ The 2,048 × 2,048 depth-only sun map uses an orthographic projection fitted to 
 
 ### Resolution and compiler checks (2026-09-27)
 
-`make build` and `make test` passed with resolution parsing, camera projection, reset target, and native cache checks. Invalid resolution input exits before opening a window. The project pin was updated to [Bend 2.0.31](https://github.com/bendlang/bend/releases/tag/v2.0.31); the native timer and Vulkan effects were adjusted for its generated C layout.
+`make build` and `make test` passed with resolution parsing, camera projection, reset target, and native cache checks. Invalid resolution input exits before opening a window. The project pin was updated to [Bend 2.0.31](https://github.com/bendlang/bend/releases/tag/v2.0.31). Its generated C uses module-qualified constructor IDs and `u64` heap locations; the native timer and Vulkan effects were adjusted to match.
 
 ## Current boundaries
 

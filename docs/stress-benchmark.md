@@ -57,7 +57,7 @@ Validation checks:
 - Every expected frame, timing stage, edit batch, and latency sample is present and accounted for.
 - Inventory matches Light Atelier; cell counts never increase during destruction.
 - Reported anchors, fragments, moving bodies, and live meshes agree.
-- Camera/aim/follow workloads actually move or hit removable material as specified.
+- Camera and aim workloads actually move or hit removable material as specified.
 - Frames without edits rebuild zero body meshes after the initial frame, including while fragments fall.
 - Frames without edits rebuild zero render proxies after the initial frame.
 - Edits rebuild only affected bodies.
