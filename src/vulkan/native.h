@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
   float eye[3], yaw, pitch, aim[3];
-  uint32_t aim_kind, body_count;
+  uint32_t aim_kind, body_count, night;
   const VoxelVkBody* bodies;
   const char* hud;
 } VoxelVkFrame;

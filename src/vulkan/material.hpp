@@ -85,11 +85,7 @@ inline Rgb decode(Rgb color) {
   return {decode_channel(color.r),decode_channel(color.g),decode_channel(color.b)};
 }
 
-inline float light(uint32_t side) {
-  return side==3 ? 1.0f : side<2 ? 0.58f : 0.35f;
-}
-
-using Swatches=std::array<std::array<std::array<Rgb,6>,2>,definitions.size()>;
+using Swatches=std::array<std::array<Rgb,2>,definitions.size()>;
 inline const Swatches& swatches() {
   static const Swatches values=[] {
     Swatches result{};
@@ -100,20 +96,15 @@ inline const Swatches& swatches() {
         color.lightness=std::min(0.92f,color.lightness+0.07f);
         color.chroma*=0.72f;
       }
-      Rgb base=to_linear(color);
-      for (uint32_t side=0;side<6;side++) {
-        float amount=light(side);
-        result[i][detached][side]=encode({base.r*amount,base.g*amount,base.b*amount});
-      }
+      result[i][detached]=to_linear(color);
     }
     return result;
   }();
   return values;
 }
 
-inline Rgb surface(uint32_t id,bool detached,uint32_t side) {
-  if (side>=6) throw std::runtime_error("invalid voxel face side");
-  return swatches()[find(id).id-1][detached?1:0][side];
+inline Rgb surface(uint32_t id,bool detached) {
+  return swatches()[find(id).id-1][detached?1:0];
 }
 
 } // namespace material

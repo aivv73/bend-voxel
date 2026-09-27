@@ -12,7 +12,7 @@ def showcase() -> Control:
 def key.bit(+key: U32, code: U32, bit: U32) -> U32:
   R.word(U32.is_eq(key, code), bit, 0)
 def key.mask(+key: U32) -> U32:
-  (key.bit(key, 119, 1) .|. key.bit(key, 115, 2) .|. key.bit(key, 97, 4) .|. key.bit(key, 100, 8) .|. key.bit(key, 113, 16) .|. key.bit(key, 101, 32) .|. key.bit(key, 114, 64) .|. key.bit(key, 16, 128) : U32)
+  (key.bit(key, 119, 1) .|. key.bit(key, 115, 2) .|. key.bit(key, 97, 4) .|. key.bit(key, 100, 8) .|. key.bit(key, 113, 16) .|. key.bit(key, 101, 32) .|. key.bit(key, 114, 64) .|. key.bit(key, 16, 128) .|. key.bit(key, 108, 256) : U32)
 def key(+code: U32, +down: Bool, c: Control) -> Control:
   Control{cam, +keys, mx, my, look, left, +focus, _, _, quit} = c
   +mask = key.mask(code)

@@ -35,7 +35,7 @@ typedef struct {
 
 typedef struct {
   float eye[3], yaw, pitch, aim[3];
-  u32 aim_kind, body_count;
+  u32 aim_kind, body_count, night;
   const VoxelVkBody* bodies;
   const char* hud;
 } VoxelVkFrame;
@@ -139,6 +139,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   }
   frame.yaw=voxel_vk_float(e.mem[st+11]);
   frame.pitch=voxel_vk_float(e.mem[st+12]);
+  frame.night=((u32)e.mem[st+13]&256u)!=0; // Held L in Control.keys.
   frame.aim_kind=(u32)e.mem[al+4]; frame.hud=hud;
   voxel_vk_generation++;
   u32 anchored=0,moving=0,translated=0;

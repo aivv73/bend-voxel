@@ -86,7 +86,7 @@ def hud(n: U32, count: U32, budget: U32, removed: U32, s: U32, kind: U32, frameU
   "VOXELS " ++ U32.show(n) ++ "  BODIES " ++ U32.show(count) ++ "/" ++ U32.show(budget) ++ "  REMOVED " ++ U32.show(removed) ++ "\n" ++
   "FRAME " ++ U32.show((frameUs / 1000 : U32)) ++ " MS  CUT " ++ U32.show((cutUs / 1000 : U32)) ++ " MS\n" ++
   target(kind) ++ "\n" ++ status(s) ++ "\n" ++
-  "WASD MOVE  QE UP/DOWN  SHIFT FAST  RMB LOOK  LMB CUT  R RESET  ESC RELEASE"
+  "WASD MOVE  QE UP/DOWN  SHIFT FAST  L NIGHT  RMB LOOK  LMB CUT  R RESET"
 def pending.last(p: List<&2, Sample>, +end: U32, last: U32) -> U32:
   match p:
     case Nil{}:

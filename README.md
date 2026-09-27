@@ -31,10 +31,11 @@ make build
 | W / A / S / D | Move horizontally |
 | Q / E | Move down / up |
 | Hold Shift | Travel five times faster |
+| Hold L | Preview night lighting with a nearby work light |
 | R or RESET | Restore the scene and camera |
 | Escape | Release controls; click the scene to resume |
 
-Green foundation material marks protected anchors; concrete is tan, frames are blue, and machinery is orange. The material palette is authored in OKLCH. Detached bodies retain their material hue with a lighter, softer appearance. The floor is indestructible. Bodies fall vertically and stop at the floor. Rotation, body collisions, stacking, and reattachment are not implemented. The camera travels at 12 m/s, or 60 m/s while Shift is held, without collision or horizontal bounds.
+Green foundation material marks protected anchors; concrete is tan, frames are blue, and machinery is orange. The material palette is authored in OKLCH. Detached bodies retain their material hue with a lighter, softer appearance. Sunlight casts structure and prop shadows across the yard; sky ambient light and a nearby work light shade surfaces in linear RGB. Hold L to inspect the yard at night. The floor is indestructible. Bodies fall vertically and stop at the floor. Rotation, body collisions, stacking, and reattachment are not implemented. The camera travels at 12 m/s, or 60 m/s while Shift is held, without collision or horizontal bounds.
 
 ```sh
 VOXEL_DISTRICTS=1 ./scripts/run.sh
@@ -63,7 +64,7 @@ The stress suite opens the Vulkan window and measures real scale, camera motion,
 - `src/district.bend`: deterministic district generation and real spatial replication.
 - `src/render.bend`: camera and spatial picking.
 - `src/input.bend`, `src/demo.bend`, `src/main.bend`: controls, HUD, application loop, and repeatable workloads.
-- `src/vulkan/`: per-body transport/mesh caches, dirty mesh uploads, transform draws, and Vulkan presentation.
+- `src/vulkan/`: per-body transport/mesh caches, dirty mesh uploads, GPU lighting, transform draws, and Vulkan presentation.
 - `src/math.bend`: vector/camera primitives adapted from Bend3D; see the [third-party notice](src/vendor/NOTICE.md).
 
 See the [sparse storage decision](docs/adr/0001-sparse-cuboid-world.md), [world model glossary](CONTEXT.md), and [earlier architecture exploration](docs/architecture.md). Irregular destruction can grow the number of stored regions and surfaces; the suite measures this representation rather than promising an arbitrary-world scale limit.

@@ -4,6 +4,8 @@ The default interactive scene is a 6 Ã— 6 grid of 64-meter tiles, spanning 384 Ã
 
 ![Showcase overview](validation/material-works-yard/overview.png)
 
+The Vulkan renderer shades the OKLCH material palette with sunlight and sky ambient light. Structures and props cast directional shadows across the yard; the [closer view](validation/material-works-yard/shadows-close.png) shows their shape. Hold L to preview [night lighting](validation/material-works-yard/night.png); a work light near the camera illuminates nearby geometry. Camera and lighting changes leave the sun shadow map and render meshes cached.
+
 The opening camera sees the whole yard. In the [two-frame LOD sample](validation/material-works-yard/lod-sample.csv), 984 bodies are visible; 875 are represented by 35 cached tile proxies, leaving 144 scene draws. This is a rendering choice: bodies remain full resolution for picking, cuts, connectivity, and motion. The [renderer guide](vulkan-renderer.md#render-lod) explains the LOD thresholds and cache behavior. Hold Shift while moving to travel at 60 m/s across the yard.
 
 ## Edit the Blender assets

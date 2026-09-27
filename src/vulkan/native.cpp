@@ -28,29 +28,33 @@ void check(VkResult result, const char* what) {
 struct Vec3 { float x,y,z; };
 Vec3 operator+(Vec3 a,Vec3 b) { return {a.x+b.x,a.y+b.y,a.z+b.z}; }
 Vec3 operator-(Vec3 a,Vec3 b) { return {a.x-b.x,a.y-b.y,a.z-b.z}; }
+Vec3 operator*(Vec3 a,float k) { return {a.x*k,a.y*k,a.z*k}; }
 float dot(Vec3 a,Vec3 b) { return a.x*b.x+a.y*b.y+a.z*b.z; }
+Vec3 cross(Vec3 a,Vec3 b) {
+  return {a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x};
+}
+Vec3 normalized(Vec3 v) { return v*(1.f/std::sqrt(dot(v,v))); }
 Vec3 rgb(uint32_t word) { return {float((word>>16)&255)/255,float((word>>8)&255)/255,float(word&255)/255}; }
-Vec3 shaded_rgb(uint32_t word,uint32_t side) {
-  Vec3 encoded=rgb(word);
+Vec3 linear_rgb(uint32_t word) {
+  auto encoded=rgb(word);
   auto linear=material::decode({encoded.x,encoded.y,encoded.z});
-  float amount=material::light(side);
-  auto shaded=material::encode({linear.r*amount,linear.g*amount,linear.b*amount});
-  return {shaded.r,shaded.g,shaded.b};
+  return {linear.r,linear.g,linear.b};
 }
 Vec3 quantize(Vec3 c) { return {std::floor(c.x*255)/255,std::floor(c.y*255)/255,std::floor(c.z*255)/255}; }
-struct Vertex { Vec3 position,color; };
+// Sides 0..5 are face normals; 6 marks flat HUD, brush, and line colors.
+struct Vertex { Vec3 position,color; uint32_t side; };
 struct Geometry { std::vector<Vertex> vertices; uint32_t triangles=0,lines=0,hud=0; };
 using Clock=std::chrono::steady_clock;
 uint32_t microseconds(Clock::time_point start,Clock::time_point end) {
   return uint32_t(std::chrono::duration_cast<std::chrono::microseconds>(end-start).count());
 }
-void quad(Geometry& g,Vec3 a,Vec3 b,Vec3 c,Vec3 d,Vec3 color) {
-  color=quantize(color);
-  for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color});
+void quad(Geometry& g,Vec3 a,Vec3 b,Vec3 c,Vec3 d,Vec3 color,uint32_t side=6) {
+  if (side==6) color=quantize(color);
+  for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color,side});
   g.triangles+=6;
 }
 void line(Geometry& g,Vec3 a,Vec3 b,Vec3 color) {
-  g.vertices.push_back({a,color}); g.vertices.push_back({b,color}); g.lines+=2;
+  g.vertices.push_back({a,color,6}); g.vertices.push_back({b,color,6}); g.lines+=2;
 }
 struct Glyph { char character; uint8_t rows[7]; };
 // Five-column bitmap glyphs for the demo's uppercase ASCII HUD.
@@ -87,7 +91,7 @@ void hud_text(Geometry& g,float x,float baseline,const char* begin,size_t length
     for (int y=0;y<7;y++) for (int bit=0;bit<5;bit++) if (rows[y]&(16>>bit)) {
       float left=x+bit,top=baseline-10.5f+y*1.5f;
       Vec3 a{left,top,0},b{left+1,top,0},c{left+1,top+1.5f,0},d{left,top+1.5f,0};
-      for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color});
+      for (Vec3 p:{a,b,c,a,c,d}) g.vertices.push_back({p,color,6});
       g.hud+=6;
     }
   }
@@ -104,7 +108,7 @@ void add_hud(Geometry& g,const char* hud) {
   hud_text(g,577,20,"RESET",5,rgb(0x4bc1a4));
 }
 Vec3 vector(const float* p) { return {p[0],p[1],p[2]}; }
-void face_quad(Geometry& g,const VoxelVkFace& f,Vec3 color,float offset=0) {
+void face_quad(Geometry& g,const VoxelVkFace& f,Vec3 color,float offset=0,bool lit=true) {
   uint32_t a=f.side/2,u=(a+1)%3,v=(a+2)%3;
   float p[4][3];
   for (auto& corner:p) for (uint32_t i=0;i<3;i++) corner[i]=f.lo[i]*.1f;
@@ -112,8 +116,9 @@ void face_quad(Geometry& g,const VoxelVkFace& f,Vec3 color,float offset=0) {
   p[2][v]=p[3][v]=f.hi[v]*.1f;
   for (auto& corner:p) corner[1]+=offset;
   // Culling is disabled, but keep the winding consistent with the outward normal.
-  if (f.side%2) quad(g,vector(p[0]),vector(p[1]),vector(p[2]),vector(p[3]),color);
-  else quad(g,vector(p[3]),vector(p[2]),vector(p[1]),vector(p[0]),color);
+  uint32_t side=lit?f.side:6;
+  if (f.side%2) quad(g,vector(p[0]),vector(p[1]),vector(p[2]),vector(p[3]),color,side);
+  else quad(g,vector(p[3]),vector(p[2]),vector(p[1]),vector(p[0]),color,side);
 }
 void face(Geometry& g,const VoxelVkFace& f,bool anchored) {
   if (f.side>=6) throw std::runtime_error("invalid Bend face");
@@ -123,7 +128,7 @@ void face(Geometry& g,const VoxelVkFace& f,bool anchored) {
         (i==a ? f.hi[i]!=f.lo[i] : f.hi[i]<=f.lo[i]))
       throw std::runtime_error("invalid Bend face bounds");
   }
-  auto color=material::surface(f.material,!anchored,f.side);
+  auto color=material::surface(f.material,!anchored);
   face_quad(g,f,{color.r,color.g,color.b});
 }
 bool near_aim(const VoxelVkBody& body,const VoxelVkFrame& frame) {
@@ -153,7 +158,7 @@ void preview_face(Geometry& g,const VoxelVkFace& f,const VoxelVkBody& body,const
     preview.lo[u]=float(x); preview.hi[u]=float(x+1);
     preview.lo[v]=float(y); preview.hi[v]=float(y+1);
     preview.lo[a]=preview.hi[a]=f.lo[a]+(f.side%2?.01f:-.01f);
-    face_quad(g,preview,shaded_rgb(0xffdf68,f.side),body.offset);
+    face_quad(g,preview,rgb(0xffdf68),body.offset,false);
   }
 }
 Vec3 ring_point(Vec3 p,uint32_t axis,float angle) {
@@ -165,6 +170,52 @@ struct ViewBasis {
   explicit ViewBasis(const VoxelVkFrame& f):sy(std::sin(f.yaw)),cy(std::cos(f.yaw)),
     sp(std::sin(f.pitch)),cp(std::cos(f.pitch)) {}
 };
+constexpr uint32_t SHADOW_SIZE=2048;
+struct ShadowMatrix { float values[16]{}; };
+struct ShadowIdentity { uint32_t id,revision,anchored; float offset; };
+bool shadow_changed(const std::vector<ShadowIdentity>& saved,const VoxelVkFrame& frame) {
+  if (saved.size()!=frame.body_count) return true;
+  for (uint32_t i=0;i<frame.body_count;i++) {
+    const auto& a=saved[i];
+    const auto& b=frame.bodies[i];
+    if (a.id!=b.id || a.revision!=b.revision || a.anchored!=b.anchored ||
+        a.offset!=b.offset) return true;
+  }
+  return false;
+}
+// Fit one orthographic sun map to the occupied world, including translated
+// bodies. Camera motion changes only the main view; it does not move the map.
+ShadowMatrix shadow_matrix(const VoxelVkFrame& frame) {
+  Vec3 lo{INFINITY,INFINITY,INFINITY},hi{-INFINITY,-INFINITY,-INFINITY};
+  for (uint32_t i=0;i<frame.body_count;i++) {
+    const auto& b=frame.bodies[i];
+    Vec3 a{b.lo[0]*.1f,b.lo[1]*.1f+b.offset,b.lo[2]*.1f};
+    Vec3 z{b.hi[0]*.1f,b.hi[1]*.1f+b.offset,b.hi[2]*.1f};
+    lo={std::min(lo.x,a.x),std::min(lo.y,a.y),std::min(lo.z,a.z)};
+    hi={std::max(hi.x,z.x),std::max(hi.y,z.y),std::max(hi.z,z.z)};
+  }
+  if (!frame.body_count) { lo={-16,0,-16}; hi={16,32,16}; }
+  lo=lo-Vec3{8,4,8}; hi=hi+Vec3{8,8,8};
+  Vec3 toward_sun=normalized({-.45f,.82f,.35f});
+  Vec3 right=normalized(cross({0,1,0},toward_sun));
+  Vec3 up=cross(toward_sun,right),forward=toward_sun*(-1.f);
+  Vec3 low{INFINITY,INFINITY,INFINITY},high{-INFINITY,-INFINITY,-INFINITY};
+  for (unsigned corner=0;corner<8;corner++) {
+    Vec3 p{corner&1?hi.x:lo.x,corner&2?hi.y:lo.y,corner&4?hi.z:lo.z};
+    Vec3 q{dot(p,right),dot(p,up),dot(p,forward)};
+    low={std::min(low.x,q.x),std::min(low.y,q.y),std::min(low.z,q.z)};
+    high={std::max(high.x,q.x),std::max(high.y,q.y),std::max(high.z,q.z)};
+  }
+  low=low-Vec3{2,2,4}; high=high+Vec3{2,2,4};
+  float sx=2.f/(high.x-low.x),sy=2.f/(high.y-low.y),sz=1.f/(high.z-low.z);
+  float rows[4][4]={{right.x*sx,right.y*sx,right.z*sx,-1.f-low.x*sx},
+    {up.x*sy,up.y*sy,up.z*sy,-1.f-low.y*sy},
+    {forward.x*sz,forward.y*sz,forward.z*sz,-low.z*sz},{0,0,0,1}};
+  ShadowMatrix result;
+  for (unsigned row=0;row<4;row++) for (unsigned col=0;col<4;col++)
+    result.values[col*4+row]=rows[row][col]; // GLSL mat4 column-major order.
+  return result;
+}
 Vec3 view_position(Vec3 p,const VoxelVkFrame& f,const ViewBasis& basis) {
   float sy=basis.sy,cy=basis.cy,sp=basis.sp,cp=basis.cp;
   Vec3 d=p-Vec3{f.eye[0],f.eye[1],f.eye[2]};
@@ -282,6 +333,7 @@ struct GeometryCache {
   std::vector<ProxyGroup*> group_for_body;
   std::vector<Range> free,dirty;
   std::vector<Draw> draws;
+  std::vector<Draw> shadow_draws;
   uint32_t scene_vertices=0,generation=0,rebuilt=0,proxy_rebuilt=0;
   uint32_t proxy_draws=0,proxied_bodies=0,visible_bodies=0;
   size_t proxy_vertices=0;
@@ -314,11 +366,11 @@ struct GeometryCache {
 Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_reused) {
   Geometry& g=cache.geometry;
   ViewBasis basis(frame);
-  cache.generation++; cache.dirty.clear(); cache.draws.clear(); cache.rebuilt=0;
+  cache.generation++; cache.dirty.clear(); cache.draws.clear(); cache.shadow_draws.clear(); cache.rebuilt=0;
   cache.proxy_rebuilt=cache.proxy_draws=cache.proxied_bodies=cache.visible_bodies=0;
   cache.proxy_vertices=0;
   if (!cache.scene_vertices) {
-    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},rgb(0x1e303d));
+    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},linear_rgb(0x1e303d),3);
     cache.scene_vertices=6; cache.dirty.push_back({0,6});
   }
   bool world_changed=cache.group_world.size()!=frame.body_count;
@@ -374,9 +426,11 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
       cache.meshes[b.id]={b.revision,b.anchored,first,mesh.triangles,cache.generation};
     }
     const auto& mesh=cache.meshes.at(b.id);
+    // Sun depth uses full meshes, independent of camera, aim, and render LOD.
+    cache.shadow_draws.push_back({mesh.first,mesh.count,b.offset});
+    auto group=cache.group_for_body[i];
     if (visible(b,frame,basis)) {
       cache.visible_bodies++;
-      auto group=cache.group_for_body[i];
       if (!group || !group->selected)
         cache.draws.push_back({mesh.first,mesh.count,b.offset});
       else group->visible_bodies++;
@@ -437,7 +491,8 @@ std::vector<uint32_t> spirv(const char* path) {
   in.seekg(0); in.read(reinterpret_cast<char*>(code.data()),size);
   return code;
 }
-struct Push { float eye_yaw[4],pitch_offset[4]; };
+struct Push { float eye_yaw[4],pitch_offset[4],shadow_matrix[16]; };
+static_assert(sizeof(Push)==96,"shadow push constants must fit Vulkan's 128-byte minimum");
 
 class Renderer {
   Display* display;
@@ -457,18 +512,29 @@ class Renderer {
   VkImage depth=VK_NULL_HANDLE;
   VkDeviceMemory depth_memory=VK_NULL_HANDLE;
   VkImageView depth_view=VK_NULL_HANDLE;
+  VkImage shadow_image=VK_NULL_HANDLE;
+  VkDeviceMemory shadow_memory=VK_NULL_HANDLE;
+  VkImageView shadow_view=VK_NULL_HANDLE;
+  VkSampler shadow_sampler=VK_NULL_HANDLE;
+  VkDescriptorSetLayout shadow_set_layout=VK_NULL_HANDLE;
+  VkDescriptorPool shadow_pool=VK_NULL_HANDLE;
+  VkDescriptorSet shadow_set=VK_NULL_HANDLE;
   VkBuffer vertices=VK_NULL_HANDLE;
   VkDeviceMemory vertex_memory=VK_NULL_HANDLE;
   VkDeviceSize capacity=0;
   void* mapped=nullptr;
-  VkShaderModule vs=VK_NULL_HANDLE,fs=VK_NULL_HANDLE;
+  VkShaderModule vs=VK_NULL_HANDLE,fs=VK_NULL_HANDLE,shadow_vs=VK_NULL_HANDLE;
   VkPipelineLayout layout=VK_NULL_HANDLE;
-  VkPipeline triangles=VK_NULL_HANDLE,lines=VK_NULL_HANDLE,hud_pipeline=VK_NULL_HANDLE;
+  VkPipeline triangles=VK_NULL_HANDLE,lines=VK_NULL_HANDLE,hud_pipeline=VK_NULL_HANDLE,
+    shadow_pipeline=VK_NULL_HANDLE;
   VkCommandPool pool=VK_NULL_HANDLE;
   VkCommandBuffer command=VK_NULL_HANDLE;
   VkFence fence=VK_NULL_HANDLE;
   VkSemaphore acquired=VK_NULL_HANDLE;
   GeometryCache geometry_cache;
+  std::vector<ShadowIdentity> shadow_world;
+  ShadowMatrix saved_shadow;
+  bool shadow_valid=false;
 
   uint32_t memory_type(uint32_t bits,VkMemoryPropertyFlags flags) {
     VkPhysicalDeviceMemoryProperties p{}; vkGetPhysicalDeviceMemoryProperties(physical,&p);
@@ -493,6 +559,56 @@ class Renderer {
     vi.subresourceRange={VK_IMAGE_ASPECT_DEPTH_BIT,0,1,0,1};
     check(vkCreateImageView(device,&vi,nullptr,&depth_view),"create depth view");
   }
+  void make_shadow() {
+    VkFormatProperties properties{};
+    vkGetPhysicalDeviceFormatProperties(physical,VK_FORMAT_D32_SFLOAT,&properties);
+    if ((properties.optimalTilingFeatures&(VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT|
+        VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT))!=
+        (VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT|VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT))
+      throw std::runtime_error("sampled D32 shadow map unsupported");
+    VkImageCreateInfo info{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
+    info.imageType=VK_IMAGE_TYPE_2D; info.format=VK_FORMAT_D32_SFLOAT;
+    info.extent={SHADOW_SIZE,SHADOW_SIZE,1}; info.mipLevels=1; info.arrayLayers=1;
+    info.samples=VK_SAMPLE_COUNT_1_BIT; info.tiling=VK_IMAGE_TILING_OPTIMAL;
+    info.usage=VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT|VK_IMAGE_USAGE_SAMPLED_BIT;
+    check(vkCreateImage(device,&info,nullptr,&shadow_image),"create sun shadow image");
+    VkMemoryRequirements req{}; vkGetImageMemoryRequirements(device,shadow_image,&req);
+    VkMemoryAllocateInfo ai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+    ai.allocationSize=req.size;
+    ai.memoryTypeIndex=memory_type(req.memoryTypeBits,VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    check(vkAllocateMemory(device,&ai,nullptr,&shadow_memory),"allocate sun shadow image");
+    check(vkBindImageMemory(device,shadow_image,shadow_memory,0),"bind sun shadow image");
+    VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
+    vi.image=shadow_image; vi.viewType=VK_IMAGE_VIEW_TYPE_2D; vi.format=VK_FORMAT_D32_SFLOAT;
+    vi.subresourceRange={VK_IMAGE_ASPECT_DEPTH_BIT,0,1,0,1};
+    check(vkCreateImageView(device,&vi,nullptr,&shadow_view),"create sun shadow view");
+    VkSamplerCreateInfo si{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
+    si.magFilter=VK_FILTER_NEAREST; si.minFilter=VK_FILTER_NEAREST;
+    si.mipmapMode=VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    si.addressModeU=si.addressModeV=si.addressModeW=VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+    si.borderColor=VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+    si.compareEnable=VK_TRUE; si.compareOp=VK_COMPARE_OP_LESS_OR_EQUAL;
+    si.maxLod=1;
+    check(vkCreateSampler(device,&si,nullptr,&shadow_sampler),"create sun shadow sampler");
+    VkDescriptorSetLayoutBinding binding{};
+    binding.binding=0; binding.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    binding.descriptorCount=1; binding.stageFlags=VK_SHADER_STAGE_FRAGMENT_BIT;
+    VkDescriptorSetLayoutCreateInfo li{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
+    li.bindingCount=1; li.pBindings=&binding;
+    check(vkCreateDescriptorSetLayout(device,&li,nullptr,&shadow_set_layout),"create sun shadow layout");
+    VkDescriptorPoolSize size{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,1};
+    VkDescriptorPoolCreateInfo pi{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
+    pi.maxSets=1; pi.poolSizeCount=1; pi.pPoolSizes=&size;
+    check(vkCreateDescriptorPool(device,&pi,nullptr,&shadow_pool),"create sun shadow descriptor pool");
+    VkDescriptorSetAllocateInfo di{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
+    di.descriptorPool=shadow_pool; di.descriptorSetCount=1; di.pSetLayouts=&shadow_set_layout;
+    check(vkAllocateDescriptorSets(device,&di,&shadow_set),"allocate sun shadow descriptor");
+    VkDescriptorImageInfo image{shadow_sampler,shadow_view,VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL};
+    VkWriteDescriptorSet write{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+    write.dstSet=shadow_set; write.dstBinding=0; write.descriptorCount=1;
+    write.descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; write.pImageInfo=&image;
+    vkUpdateDescriptorSets(device,1,&write,0,nullptr);
+  }
   void clear_swapchain() {
     for (VkSemaphore s:finished) vkDestroySemaphore(device,s,nullptr);
     finished.clear();
@@ -504,6 +620,8 @@ class Renderer {
     lines=VK_NULL_HANDLE;
     if (hud_pipeline) vkDestroyPipeline(device,hud_pipeline,nullptr);
     hud_pipeline=VK_NULL_HANDLE;
+    if (shadow_pipeline) vkDestroyPipeline(device,shadow_pipeline,nullptr);
+    shadow_pipeline=VK_NULL_HANDLE;
     if (depth_view) vkDestroyImageView(device,depth_view,nullptr);
     depth_view=VK_NULL_HANDLE;
     if (depth) vkDestroyImage(device,depth,nullptr);
@@ -513,10 +631,10 @@ class Renderer {
     if (swapchain) vkDestroySwapchainKHR(device,swapchain,nullptr);
     swapchain=VK_NULL_HANDLE;
   }
-  VkPipeline pipeline(VkPrimitiveTopology topology,bool depth_test) {
+  VkPipeline pipeline(VkPrimitiveTopology topology,bool depth_test,bool shadow=false) {
     VkPipelineShaderStageCreateInfo stages[2]{};
     stages[0].sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    stages[0].stage=VK_SHADER_STAGE_VERTEX_BIT; stages[0].module=vs; stages[0].pName="main";
+    stages[0].stage=VK_SHADER_STAGE_VERTEX_BIT; stages[0].module=shadow?shadow_vs:vs; stages[0].pName="main";
     stages[1].sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     stages[1].stage=VK_SHADER_STAGE_FRAGMENT_BIT; stages[1].module=fs; stages[1].pName="main";
     uint32_t srgb_attachment=(format==VK_FORMAT_B8G8R8A8_SRGB || format==VK_FORMAT_R8G8B8A8_SRGB);
@@ -524,11 +642,12 @@ class Renderer {
     VkSpecializationInfo transfer{1,&transfer_entry,sizeof(srgb_attachment),&srgb_attachment};
     stages[1].pSpecializationInfo=&transfer;
     VkVertexInputBindingDescription binding{0,sizeof(Vertex),VK_VERTEX_INPUT_RATE_VERTEX};
-    VkVertexInputAttributeDescription attrs[2]={{0,0,VK_FORMAT_R32G32B32_SFLOAT,offsetof(Vertex,position)},
-      {1,0,VK_FORMAT_R32G32B32_SFLOAT,offsetof(Vertex,color)}};
+    VkVertexInputAttributeDescription attrs[3]={{0,0,VK_FORMAT_R32G32B32_SFLOAT,offsetof(Vertex,position)},
+      {1,0,VK_FORMAT_R32G32B32_SFLOAT,offsetof(Vertex,color)},
+      {2,0,VK_FORMAT_R32_UINT,offsetof(Vertex,side)}};
     VkPipelineVertexInputStateCreateInfo input{VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
     input.vertexBindingDescriptionCount=1; input.pVertexBindingDescriptions=&binding;
-    input.vertexAttributeDescriptionCount=2; input.pVertexAttributeDescriptions=attrs;
+    input.vertexAttributeDescriptionCount=shadow?1:3; input.pVertexAttributeDescriptions=attrs;
     VkPipelineInputAssemblyStateCreateInfo assembly{VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO};
     assembly.topology=topology;
     VkPipelineViewportStateCreateInfo viewport{VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO};
@@ -538,6 +657,8 @@ class Renderer {
     dynamic.dynamicStateCount=2; dynamic.pDynamicStates=dynamic_states;
     VkPipelineRasterizationStateCreateInfo raster{VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO};
     raster.polygonMode=VK_POLYGON_MODE_FILL; raster.cullMode=VK_CULL_MODE_NONE; raster.lineWidth=1;
+    raster.depthBiasEnable=shadow; raster.depthBiasConstantFactor=1.25f;
+    raster.depthBiasSlopeFactor=1.5f;
     VkPipelineMultisampleStateCreateInfo ms{VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO};
     ms.rasterizationSamples=VK_SAMPLE_COUNT_1_BIT;
     VkPipelineDepthStencilStateCreateInfo ds{VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO};
@@ -546,12 +667,13 @@ class Renderer {
     attachment.colorWriteMask=VK_COLOR_COMPONENT_R_BIT|VK_COLOR_COMPONENT_G_BIT|
       VK_COLOR_COMPONENT_B_BIT|VK_COLOR_COMPONENT_A_BIT;
     VkPipelineColorBlendStateCreateInfo blend{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
-    blend.attachmentCount=1; blend.pAttachments=&attachment;
+    blend.attachmentCount=shadow?0:1; blend.pAttachments=shadow?nullptr:&attachment;
     VkPipelineRenderingCreateInfo rendering{VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO};
-    rendering.colorAttachmentCount=1; rendering.pColorAttachmentFormats=&format;
+    rendering.colorAttachmentCount=shadow?0:1;
+    rendering.pColorAttachmentFormats=shadow?nullptr:&format;
     rendering.depthAttachmentFormat=VK_FORMAT_D32_SFLOAT;
     VkGraphicsPipelineCreateInfo info{VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO};
-    info.pNext=&rendering; info.stageCount=2; info.pStages=stages;
+    info.pNext=&rendering; info.stageCount=shadow?1:2; info.pStages=stages;
     info.pVertexInputState=&input; info.pInputAssemblyState=&assembly;
     info.pViewportState=&viewport; info.pRasterizationState=&raster;
     info.pMultisampleState=&ms; info.pDepthStencilState=&ds; info.pColorBlendState=&blend;
@@ -636,6 +758,7 @@ class Renderer {
     triangles=pipeline(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,true);
     lines=pipeline(VK_PRIMITIVE_TOPOLOGY_LINE_LIST,false);
     hud_pipeline=pipeline(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,false);
+    shadow_pipeline=pipeline(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,true,true);
   }
   bool ensure_vertices(VkDeviceSize bytes) {
     if (bytes<=capacity) return false;
@@ -711,13 +834,18 @@ public:
     vkGetDeviceQueue(device,family,0,&queue);
     auto vertex_code=spirv("build/vulkan-scene.vert.spv");
     auto fragment_code=spirv("build/vulkan-scene.frag.spv");
+    auto shadow_code=spirv("build/vulkan-shadow.vert.spv");
     VkShaderModuleCreateInfo mi{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     mi.codeSize=vertex_code.size()*4; mi.pCode=vertex_code.data();
     check(vkCreateShaderModule(device,&mi,nullptr,&vs),"create vertex shader");
     mi.codeSize=fragment_code.size()*4; mi.pCode=fragment_code.data();
     check(vkCreateShaderModule(device,&mi,nullptr,&fs),"create fragment shader");
-    VkPushConstantRange range{VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push)};
+    mi.codeSize=shadow_code.size()*4; mi.pCode=shadow_code.data();
+    check(vkCreateShaderModule(device,&mi,nullptr,&shadow_vs),"create shadow shader");
+    make_shadow();
+    VkPushConstantRange range{VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(Push)};
     VkPipelineLayoutCreateInfo li{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
+    li.setLayoutCount=1; li.pSetLayouts=&shadow_set_layout;
     li.pushConstantRangeCount=1; li.pPushConstantRanges=&range;
     check(vkCreatePipelineLayout(device,&li,nullptr,&layout),"create pipeline layout");
     VkCommandPoolCreateInfo pi{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
@@ -743,8 +871,15 @@ public:
       if (fence) vkDestroyFence(device,fence,nullptr);
       if (pool) vkDestroyCommandPool(device,pool,nullptr);
       if (layout) vkDestroyPipelineLayout(device,layout,nullptr);
+      if (shadow_pool) vkDestroyDescriptorPool(device,shadow_pool,nullptr);
+      if (shadow_set_layout) vkDestroyDescriptorSetLayout(device,shadow_set_layout,nullptr);
+      if (shadow_sampler) vkDestroySampler(device,shadow_sampler,nullptr);
+      if (shadow_view) vkDestroyImageView(device,shadow_view,nullptr);
+      if (shadow_image) vkDestroyImage(device,shadow_image,nullptr);
+      if (shadow_memory) vkFreeMemory(device,shadow_memory,nullptr);
       if (vs) vkDestroyShaderModule(device,vs,nullptr);
       if (fs) vkDestroyShaderModule(device,fs,nullptr);
+      if (shadow_vs) vkDestroyShaderModule(device,shadow_vs,nullptr);
       vkDestroyDevice(device,nullptr);
     }
     if (surface) vkDestroySurfaceKHR(instance,surface,nullptr);
@@ -795,9 +930,51 @@ public:
       clear_swapchain(); make_swapchain(); return;
     }
     if (acquire!=VK_SUCCESS&&acquire!=VK_SUBOPTIMAL_KHR) check(acquire,"acquire swapchain image");
+    bool shadow_dirty=!shadow_valid || shadow_changed(shadow_world,frame);
+    ShadowMatrix light=shadow_dirty?shadow_matrix(frame):saved_shadow;
     check(vkResetCommandBuffer(command,0),"reset command buffer");
     VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     check(vkBeginCommandBuffer(command,&bi),"begin command buffer");
+    Push push{{frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw},
+      {frame.pitch,0,0,float(frame.night!=0)},{}};
+    std::memcpy(push.shadow_matrix,light.values,sizeof light.values);
+    VkDeviceSize offset=0;
+    vkCmdBindVertexBuffers(command,0,1,&vertices,&offset);
+    if (shadow_dirty) {
+      barrier(shadow_image,VK_IMAGE_ASPECT_DEPTH_BIT,
+        shadow_valid?VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        shadow_valid?VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT:VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        shadow_valid?VK_ACCESS_SHADER_READ_BIT:0,VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+      VkRenderingAttachmentInfo sun_depth{VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO};
+      sun_depth.imageView=shadow_view;
+      sun_depth.imageLayout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+      sun_depth.loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR;
+      sun_depth.storeOp=VK_ATTACHMENT_STORE_OP_STORE;
+      sun_depth.clearValue.depthStencil={1,0};
+      VkRenderingInfo sun_pass{VK_STRUCTURE_TYPE_RENDERING_INFO};
+      sun_pass.renderArea={{0,0},{SHADOW_SIZE,SHADOW_SIZE}}; sun_pass.layerCount=1;
+      sun_pass.pDepthAttachment=&sun_depth;
+      vkCmdBeginRendering(command,&sun_pass);
+      VkViewport sun_viewport{0,0,float(SHADOW_SIZE),float(SHADOW_SIZE),0,1};
+      VkRect2D sun_scissor{{0,0},{SHADOW_SIZE,SHADOW_SIZE}};
+      vkCmdSetViewport(command,0,1,&sun_viewport);
+      vkCmdSetScissor(command,0,1,&sun_scissor);
+      vkCmdBindPipeline(command,VK_PIPELINE_BIND_POINT_GRAPHICS,shadow_pipeline);
+      for (auto draw:geometry_cache.shadow_draws) {
+        push.pitch_offset[1]=draw.offset;
+        vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,
+          0,sizeof(Push),&push);
+        vkCmdDraw(command,draw.count,1,draw.first,0);
+      }
+      vkCmdEndRendering(command);
+      barrier(shadow_image,VK_IMAGE_ASPECT_DEPTH_BIT,VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT|VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+        VK_ACCESS_SHADER_READ_BIT);
+    }
     barrier(images[index],VK_IMAGE_ASPECT_COLOR_BIT,VK_IMAGE_LAYOUT_UNDEFINED,
       VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,0,VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
@@ -824,18 +1001,18 @@ public:
     VkViewport vp{0,0,float(extent.width),float(extent.height),0,1};
     VkRect2D sc{{0,0},extent};
     vkCmdSetViewport(command,0,1,&vp); vkCmdSetScissor(command,0,1,&sc);
-    VkDeviceSize offset=0; vkCmdBindVertexBuffers(command,0,1,&vertices,&offset);
-    Push push{{frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw},{frame.pitch,0,0,0}};
-    vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push),&push);
+    vkCmdBindDescriptorSets(command,VK_PIPELINE_BIND_POINT_GRAPHICS,layout,0,1,&shadow_set,0,nullptr);
+    push.pitch_offset[1]=0;
+    vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(Push),&push);
     vkCmdBindPipeline(command,VK_PIPELINE_BIND_POINT_GRAPHICS,triangles);
     vkCmdDraw(command,6,1,0,0); // Ground.
     for (auto draw:geometry_cache.draws) {
       push.pitch_offset[1]=draw.offset;
-      vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push),&push);
+      vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(Push),&push);
       vkCmdDraw(command,draw.count,1,draw.first,0);
     }
     push.pitch_offset[1]=0;
-    vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push),&push);
+    vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(Push),&push);
     vkCmdDraw(command,g.triangles-geometry_cache.scene_vertices,1,geometry_cache.scene_vertices,0);
     if (g.lines) {
       vkCmdBindPipeline(command,VK_PIPELINE_BIND_POINT_GRAPHICS,lines);
@@ -843,7 +1020,7 @@ public:
     }
     if (g.hud) {
       push.pitch_offset[2]=1;
-      vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT,0,sizeof(Push),&push);
+      vkCmdPushConstants(command,layout,VK_SHADER_STAGE_VERTEX_BIT|VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(Push),&push);
       vkCmdBindPipeline(command,VK_PIPELINE_BIND_POINT_GRAPHICS,hud_pipeline);
       vkCmdDraw(command,g.hud,1,g.triangles+g.lines,0);
     }
@@ -862,6 +1039,15 @@ public:
     submit.pCommandBuffers=&command; submit.signalSemaphoreCount=1;
     submit.pSignalSemaphores=&finished[index];
     check(vkQueueSubmit(queue,1,&submit,fence),"submit frame");
+    if (shadow_dirty) {
+      shadow_world.clear(); shadow_world.reserve(frame.body_count);
+      for (uint32_t i=0;i<frame.body_count;i++) {
+        const auto& b=frame.bodies[i];
+        shadow_world.push_back({b.id,b.revision,b.anchored,b.offset});
+      }
+      saved_shadow=light;
+      shadow_valid=true;
+    }
     VkPresentInfoKHR present{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
     present.waitSemaphoreCount=1; present.pWaitSemaphores=&finished[index];
     present.swapchainCount=1; present.pSwapchains=&swapchain; present.pImageIndices=&index;

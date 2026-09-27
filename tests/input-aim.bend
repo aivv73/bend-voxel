@@ -58,6 +58,8 @@ def main() -> IO(Unit):
     Unit <- check(reset(I.mouse(600,15,0,True{},I.initial())),"reset button")
     Unit <- check(moved(I.step(I.key(101,True{},I.initial()),0.5)),"movement is twelve meters per second")
     Unit <- check(sprinted(I.step(I.key(16,True{},I.key(101,True{},I.initial())),0.5)),"shift enables fast travel")
+    Unit <- check(U32.is_eq((keys(I.key(108,True{},I.initial())) .&. 256 : U32),256),"L enables night lighting")
+    Unit <- check(U32.is_eq((keys(I.key(108,False{},I.key(108,True{},I.initial()))) .&. 256 : U32),0),"releasing L restores daylight")
     Unit <- check(showcase.camera(I.showcase()),"showcase starts at the overview camera")
     Unit <- check(showcase.camera(I.reset.state(I.showcase(),True{})),"showcase reset restores its camera")
     Unit <- check(hit(V.ray.tree(S.Leaf{D.box((0.0 - 320.0 : F32),0.0,(0.0 - 320.0 : F32),640.0,4.0,640.0,2)},0.0,R.Vec{31.9,4.0,31.9},R.Vec{0.0,(0.0 - 1.0 : F32),0.0},V.Aim{R.Vec{0.0,0.0,0.0},256.0,0}),1,3.6),"large sparse slab far-end picking")
