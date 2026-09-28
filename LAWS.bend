@@ -30,6 +30,23 @@ law palette_length:
 # - This file states the accepted contract. Change claims only when the user
 #   authorizes a contract change; implement proofs in PROOF.bend.
 
+# Future Megascene qualification rules (runtime evidence, not formal claims):
+# - Require independent small references, a separate validation replay per
+#   configuration, and matching state/geometry checkpoints in timed attempts.
+# - Preserve exact workload/state across 1, 6, and 12 threads; reject silent
+#   clamping, unsupported numeric operations, overflow, and truncated evidence.
+# - Primary fidelity uses full body geometry, picking strictly below 256 m,
+#   declared-world visual ground coverage, and world-fitted 2048^2 shadows.
+#   Proxy LOD is a separate diagnostic; quality limits are distinct from
+#   incorrect state/rendering. These future gates are not yet implemented.
+# - Canonical decision: https://github.com/aivv73/bend-voxel/issues/44
+#   Runtime/reference checks must cover all unsafe/native-dependent properties.
+# - Accepted #45 refinements: proxy thresholds retain render-pixel scaling.
+#   Calibration-off controls may omit intermediate timed checkpoints only as
+#   diagnostics with explicit limited equivalence evidence; they never qualify
+#   benchmark passes or endpoints. Qualifying runs retain all required checks.
+#   See docs/megascene-spec.md for the handoff and calibration protocol.
+
 # Stable material IDs are shared by the native bridge and generated assets.
 law material_ids:
   {[Material.foundation(),Material.concrete(),Material.frame(),

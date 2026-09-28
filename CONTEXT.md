@@ -33,3 +33,6 @@ Accumulated impact on material before its removal. Destruction without accumulat
 **Particle**:
 A visual dust or small debris effect that is not part of the solid world.
 _Avoid_: fragment.
+
+**Megascene**:
+A procedurally generated large world combining terrain and destructible structures, used to expose the scale limits of the current architecture.
