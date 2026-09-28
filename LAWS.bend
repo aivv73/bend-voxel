@@ -83,6 +83,15 @@ law palette_length:
 #   interruption/exhaustion requires an explicit addition, never a ticket reset.
 #   These native/OS rules require runtime/reference tests, not formal claims.
 #   See docs/megascene-supervision.md.
+# - GPU timestamps belong to their submitted frame, including delayed results
+#   and teardown collection. Retain raw ticks, period, valid bits and scope.
+#   Use existing synchronization only; never add a query wait to frame work.
+# - Resolve only available pairs with valid CPU bounds and unambiguous wrap.
+#   Unsupported, disabled, not-ready, incomplete and failed collection are
+#   distinct from measured zero. Missing required tails prevent completion.
+#   CPU waits are not GPU execution or display latency. GPU availability never
+#   establishes calibration, validation, supervision or benchmark qualification.
+#   See docs/megascene-gpu.md; native timestamp rules use runtime/reference tests.
 
 # Stable material IDs are shared by the native bridge and generated assets.
 law material_ids:

@@ -1,0 +1,495 @@
+{
+  "attempts": [
+    {
+      "archive": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/validation",
+      "attempt_id": "7a23ae52-a532-478f-aa29-52da0c8f4cb6",
+      "completed_prefix": {
+        "measured": "3600",
+        "startup": true,
+        "warmup": "120"
+      },
+      "evidence": [
+        {
+          "bytes": "46804589",
+          "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/validation/cpu.jsonl",
+          "sha256": "bf9f8a4d37fd9dd5aa216c81f912540c3f955d0800798fa5f4f54637bebcb5d5"
+        },
+        {
+          "bytes": "4700837",
+          "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/validation/gpu.jsonl",
+          "sha256": "ac92b5afea3f6bc21d83e9d3ae766686a1849935f1bda65072424af917bd16df"
+        },
+        {
+          "bytes": "2967690",
+          "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/validation/summary.json",
+          "sha256": "7c4be45ead9382668104778a6ff65ff2cd53451c79a71aee5b8d76e4209953c8"
+        },
+        {
+          "bytes": "1289",
+          "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/validation/supervision.json",
+          "sha256": "1461cf67653d13d9166828a885117a5340ee7f39fdecc6fed221ab88ea592cad"
+        }
+      ],
+      "evidence_errors": [],
+      "final_gpu_interval": {
+        "attempt_id": "7a23ae52-a532-478f-aa29-52da0c8f4cb6",
+        "availability": [
+          "1",
+          "1"
+        ],
+        "campaign_id": "a6c0e3ec-f206-4e82-9372-fc1e0c01c435",
+        "clock_id": "linux.CLOCK_MONOTONIC",
+        "collection_frame": null,
+        "collection_phase": "teardown",
+        "completion_ns": "26703174854524",
+        "duration_ticks": "1589024",
+        "frame": "3720",
+        "period_bits": "0x3f800000",
+        "period_ns": 1,
+        "range_status": "valid",
+        "raw_ticks": [
+          "1790588774006806016",
+          "1790588774008395040"
+        ],
+        "reason": "available bounded timestamp pair",
+        "record_type": "gpu_interval",
+        "schema": "megascene-evidence/1",
+        "scope": "submitted_frame_top_to_bottom",
+        "sequence": "7442",
+        "series_id": "c401499a-eb63-4d02-a228-74b8fa15575a",
+        "status": "measured",
+        "submission": "3720",
+        "submit_begin_ns": "26703172704538",
+        "time_ns": "26703174867795",
+        "unit": "ns",
+        "valid_bits": "64",
+        "value": 1589024,
+        "vk_result": "0"
+      },
+      "first_gpu_interval": {
+        "attempt_id": "7a23ae52-a532-478f-aa29-52da0c8f4cb6",
+        "availability": [
+          "1",
+          "1"
+        ],
+        "campaign_id": "a6c0e3ec-f206-4e82-9372-fc1e0c01c435",
+        "clock_id": "linux.CLOCK_MONOTONIC",
+        "collection_frame": "1",
+        "collection_phase": "frame",
+        "completion_ns": "26648703142070",
+        "duration_ticks": "376288",
+        "frame": "0",
+        "period_bits": "0x3f800000",
+        "period_ns": 1,
+        "range_status": "valid",
+        "raw_ticks": [
+          "1790588719522505248",
+          "1790588719522881536"
+        ],
+        "reason": "available bounded timestamp pair",
+        "record_type": "gpu_interval",
+        "schema": "megascene-evidence/1",
+        "scope": "submitted_frame_top_to_bottom",
+        "sequence": "2",
+        "series_id": "c401499a-eb63-4d02-a228-74b8fa15575a",
+        "status": "measured",
+        "submission": "0",
+        "submit_begin_ns": "26648688869088",
+        "time_ns": "26648703162885",
+        "unit": "ns",
+        "valid_bits": "64",
+        "value": 376288,
+        "vk_result": "0"
+      },
+      "gpu_capability": {
+        "attempt_id": "7a23ae52-a532-478f-aa29-52da0c8f4cb6",
+        "begin_stage": "TOP_OF_PIPE",
+        "campaign_id": "a6c0e3ec-f206-4e82-9372-fc1e0c01c435",
+        "clock_id": "linux.CLOCK_MONOTONIC",
+        "collection": "after existing fence or teardown idle; no query wait",
+        "end_stage": "BOTTOM_OF_PIPE",
+        "period_bits": "0x3f800000",
+        "period_ns": 1,
+        "query_capacity": "3721",
+        "queue_family": "0",
+        "reason": "queue supports timestamp queries",
+        "record_type": "gpu_capability",
+        "schema": "megascene-evidence/1",
+        "scope": "submitted_frame_top_to_bottom",
+        "sequence": "0",
+        "series_id": "c401499a-eb63-4d02-a228-74b8fa15575a",
+        "status": "measured",
+        "time_ns": "26648686413868",
+        "valid_bits": "64"
+      },
+      "gpu_counts": {
+        "collection_failure": "0",
+        "disabled": "0",
+        "incomplete": "0",
+        "measured": "3721",
+        "not_executed": "0",
+        "not_ready": "0",
+        "unsupported": "0"
+      },
+      "gpu_errors": [],
+      "gpu_populations": {
+        "ordinary": {
+          "count": "3600",
+          "max": 3786464,
+          "mean": 1611378.0266666666,
+          "p50": 1586432,
+          "p95": 2077984,
+          "p99": 2186528,
+          "unit": "ns"
+        },
+        "startup": {
+          "count": "1",
+          "max": 376288,
+          "mean": 376288.0,
+          "p50": 376288,
+          "p95": 376288,
+          "p99": 376288,
+          "unit": "ns"
+        },
+        "warmup": {
+          "count": "120",
+          "max": 307552,
+          "mean": 290316.26666666666,
+          "p50": 289184,
+          "p95": 297664,
+          "p99": 305920,
+          "unit": "ns"
+        }
+      },
+      "qualification": "unqualified_development_observation",
+      "rendering_correctness": {
+        "evidence": [],
+        "reason": "not implemented in static development slice",
+        "scope": "complete qualified attempt",
+        "status": "inconclusive"
+      },
+      "schedule_completion": {
+        "evidence": [
+          "cpu.jsonl"
+        ],
+        "reason": "declared schedule completed",
+        "scope": "accepted",
+        "status": "pass"
+      },
+      "state_correctness": {
+        "evidence": [
+          "comparison.json"
+        ],
+        "reason": "independent initial references and every-frame sparse checks",
+        "scope": "complete declared static schedule",
+        "status": "pass"
+      }
+    },
+    {
+      "archive": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080",
+      "attempt_id": "dc5ccc84-9b5d-4986-8d43-8a585c3b9080",
+      "completed_prefix": {
+        "measured": "3600",
+        "startup": true,
+        "warmup": "120"
+      },
+      "evidence": [
+        {
+          "bytes": "26665558",
+          "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/cpu.jsonl",
+          "sha256": "8d7c4842d098d90f5483b262edca70938effc2007d81972e045538a9ef706829"
+        },
+        {
+          "bytes": "4693919",
+          "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/gpu.jsonl",
+          "sha256": "783b754ca049c92cb1302e130ffef375817a6183d14cf546457eab34b4d9a8ee"
+        },
+        {
+          "bytes": "2961403",
+          "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/summary.json",
+          "sha256": "dbf5206700f39ef7d9ced24e61f13f927f474f931dfbcad505d23966e4973a24"
+        },
+        {
+          "bytes": "1286",
+          "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/supervision.json",
+          "sha256": "3aeacec204c158c23736429f5f35bc0ca278d432ad11f29a3dd4cf526851b83d"
+        }
+      ],
+      "evidence_errors": [],
+      "final_gpu_interval": {
+        "attempt_id": "dc5ccc84-9b5d-4986-8d43-8a585c3b9080",
+        "availability": [
+          "1",
+          "1"
+        ],
+        "campaign_id": "a6c0e3ec-f206-4e82-9372-fc1e0c01c435",
+        "clock_id": "linux.CLOCK_MONOTONIC",
+        "collection_frame": null,
+        "collection_phase": "teardown",
+        "completion_ns": "26713953289583",
+        "duration_ticks": "240640",
+        "frame": "3720",
+        "period_bits": "0x3f800000",
+        "period_ns": 1,
+        "range_status": "valid",
+        "raw_ticks": [
+          "1790588784785951744",
+          "1790588784786192384"
+        ],
+        "reason": "available bounded timestamp pair",
+        "record_type": "gpu_interval",
+        "schema": "megascene-evidence/1",
+        "scope": "submitted_frame_top_to_bottom",
+        "sequence": "7442",
+        "series_id": "c401499a-eb63-4d02-a228-74b8fa15575a",
+        "status": "measured",
+        "submission": "3720",
+        "submit_begin_ns": "26713952134091",
+        "time_ns": "26713953301388",
+        "unit": "ns",
+        "valid_bits": "64",
+        "value": 240640,
+        "vk_result": "0"
+      },
+      "first_gpu_interval": {
+        "attempt_id": "dc5ccc84-9b5d-4986-8d43-8a585c3b9080",
+        "availability": [
+          "1",
+          "1"
+        ],
+        "campaign_id": "a6c0e3ec-f206-4e82-9372-fc1e0c01c435",
+        "clock_id": "linux.CLOCK_MONOTONIC",
+        "collection_frame": "1",
+        "collection_phase": "frame",
+        "completion_ns": "26709529934671",
+        "duration_ticks": "372960",
+        "frame": "0",
+        "period_bits": "0x3f800000",
+        "period_ns": 1,
+        "range_status": "valid",
+        "raw_ticks": [
+          "1790588780362639136",
+          "1790588780363012096"
+        ],
+        "reason": "available bounded timestamp pair",
+        "record_type": "gpu_interval",
+        "schema": "megascene-evidence/1",
+        "scope": "submitted_frame_top_to_bottom",
+        "sequence": "2",
+        "series_id": "c401499a-eb63-4d02-a228-74b8fa15575a",
+        "status": "measured",
+        "submission": "0",
+        "submit_begin_ns": "26709528812845",
+        "time_ns": "26709529957441",
+        "unit": "ns",
+        "valid_bits": "64",
+        "value": 372960,
+        "vk_result": "0"
+      },
+      "gpu_capability": {
+        "attempt_id": "dc5ccc84-9b5d-4986-8d43-8a585c3b9080",
+        "begin_stage": "TOP_OF_PIPE",
+        "campaign_id": "a6c0e3ec-f206-4e82-9372-fc1e0c01c435",
+        "clock_id": "linux.CLOCK_MONOTONIC",
+        "collection": "after existing fence or teardown idle; no query wait",
+        "end_stage": "BOTTOM_OF_PIPE",
+        "period_bits": "0x3f800000",
+        "period_ns": 1,
+        "query_capacity": "3721",
+        "queue_family": "0",
+        "reason": "queue supports timestamp queries",
+        "record_type": "gpu_capability",
+        "schema": "megascene-evidence/1",
+        "scope": "submitted_frame_top_to_bottom",
+        "sequence": "0",
+        "series_id": "c401499a-eb63-4d02-a228-74b8fa15575a",
+        "status": "measured",
+        "time_ns": "26709526656643",
+        "valid_bits": "64"
+      },
+      "gpu_counts": {
+        "collection_failure": "0",
+        "disabled": "0",
+        "incomplete": "0",
+        "measured": "3721",
+        "not_executed": "0",
+        "not_ready": "0",
+        "unsupported": "0"
+      },
+      "gpu_errors": [],
+      "gpu_populations": {
+        "ordinary": {
+          "count": "3600",
+          "max": 350528,
+          "mean": 241925.96444444446,
+          "p50": 238912,
+          "p95": 261504,
+          "p99": 290880,
+          "unit": "ns"
+        },
+        "startup": {
+          "count": "1",
+          "max": 372960,
+          "mean": 372960.0,
+          "p50": 372960,
+          "p95": 372960,
+          "p99": 372960,
+          "unit": "ns"
+        },
+        "warmup": {
+          "count": "120",
+          "max": 339392,
+          "mean": 296268.0,
+          "p50": 296128,
+          "p95": 310016,
+          "p99": 339328,
+          "unit": "ns"
+        }
+      },
+      "qualification": "unqualified_development_observation",
+      "rendering_correctness": {
+        "evidence": [
+          "validation.json",
+          "comparison.json"
+        ],
+        "reason": "drawable geometry, native cache and unculled visibility checks",
+        "scope": "static geometry/cache/visibility; visual quality remains separate",
+        "status": "pass"
+      },
+      "schedule_completion": {
+        "evidence": [
+          "cpu.jsonl"
+        ],
+        "reason": "declared schedule completed",
+        "scope": "accepted",
+        "status": "pass"
+      },
+      "state_correctness": {
+        "evidence": [
+          "validation.json",
+          "comparison.json",
+          "cpu.jsonl"
+        ],
+        "reason": "exact required checkpoints agree with separately validated configuration",
+        "scope": "complete declared static schedule",
+        "status": "pass"
+      }
+    }
+  ],
+  "command": [
+    "python3",
+    "scripts/megascene.py",
+    "--case",
+    "static",
+    "--preset",
+    "small",
+    "--seed",
+    "45",
+    "--threads",
+    "6",
+    "--resolution",
+    "1920x1080",
+    "--profile",
+    "full",
+    "--output",
+    "build/issue52-static",
+    "--archive",
+    "/home/aivv/megascene-gpu-evidence"
+  ],
+  "configuration": {
+    "archive": "/home/aivv/megascene-gpu-evidence",
+    "capture_opening": false,
+    "case": "static",
+    "deadline_s": "300",
+    "fragment_budget": "2048",
+    "frames": "3600",
+    "preset": "small",
+    "profile": "full",
+    "resolution": "1920x1080",
+    "runtime_from": null,
+    "schedule": "static-v1",
+    "schedule_kind": "accepted",
+    "seed": "45",
+    "side_m": "64",
+    "threads": "6",
+    "validated": null,
+    "validation_only": false,
+    "warmup": "120"
+  },
+  "final_reader_recheck": [
+    {
+      "errors": [],
+      "gpu_counts": {
+        "collection_failure": "0",
+        "disabled": "0",
+        "incomplete": "0",
+        "measured": "3721",
+        "not_executed": "0",
+        "not_ready": "0",
+        "unsupported": "0"
+      },
+      "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/validation",
+      "schedule_completion": {
+        "evidence": [
+          "cpu.jsonl",
+          "gpu.jsonl"
+        ],
+        "reason": "declared schedule completed",
+        "scope": "accepted",
+        "status": "pass"
+      }
+    },
+    {
+      "errors": [],
+      "gpu_counts": {
+        "collection_failure": "0",
+        "disabled": "0",
+        "incomplete": "0",
+        "measured": "3721",
+        "not_executed": "0",
+        "not_ready": "0",
+        "unsupported": "0"
+      },
+      "path": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080",
+      "schedule_completion": {
+        "evidence": [
+          "cpu.jsonl",
+          "gpu.jsonl"
+        ],
+        "reason": "declared schedule completed",
+        "scope": "accepted",
+        "status": "pass"
+      }
+    }
+  ],
+  "manifest": "/home/aivv/megascene-gpu-evidence/a6c0e3ec-f206-4e82-9372-fc1e0c01c435/c401499a-eb63-4d02-a228-74b8fa15575a/dc5ccc84-9b5d-4986-8d43-8a585c3b9080/manifest.json",
+  "manifest_sha256": "4a554fda883fa01bff454741c429d41e04e6e4f021c7ffc3d8c70280b5d68043",
+  "record_type": "gpu_validation_index",
+  "render_settings": {
+    "api_version": "4211039",
+    "attempt_id": "dc5ccc84-9b5d-4986-8d43-8a585c3b9080",
+    "campaign_id": "a6c0e3ec-f206-4e82-9372-fc1e0c01c435",
+    "clock_id": "linux.CLOCK_MONOTONIC",
+    "device_id": "8580",
+    "device_name_hex": "4e5649444941204765466f726365204754582031363630",
+    "driver_version": "2580660800",
+    "frame": "0",
+    "ground_half_extent_m": "40",
+    "height": "1080",
+    "night": "0",
+    "present_mode": "immediate",
+    "profile": "full",
+    "record_type": "render_settings",
+    "schema": "megascene-evidence/1",
+    "sequence": "10",
+    "series_id": "c401499a-eb63-4d02-a228-74b8fa15575a",
+    "shadow_size": "2048",
+    "time_ns": "26709526677877",
+    "vendor_id": "4318",
+    "width": "1920"
+  },
+  "runtime_and_evidence_hashes_verified": true,
+  "schema": "megascene-evidence/1",
+  "scope": "issue #52 static timestamp implementation; no performance qualification",
+  "synthetic": false
+}

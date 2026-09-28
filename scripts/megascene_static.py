@@ -1,6 +1,6 @@
 """Bounded static Vulkan development observations through the public runner.
 
-This slice never qualifies a benchmark: GPU measurements, visual review qualification and calibration remain separate.
+This slice never qualifies a benchmark: visual review qualification and calibration remain separate.
 """
 import hashlib
 import math
@@ -16,6 +16,7 @@ import uuid
 
 from megascene_inventory import SCHEMA, canonical, integer, inventory, measurement, outcome, read_json, require
 from megascene_recipe import admit_sources, bend_program, bits, checked, generate
+from megascene_gpu import u64
 
 
 def settings(args, base):
@@ -104,12 +105,12 @@ def read_stream(path, attempt_id):
             require(not records or all(r[k] == records[0][k] for k in ("campaign_id", "series_id")), "campaign/series identity mismatch")
             require(integer(r["sequence"]) == len(records), "sequence gap or duplicate")
             require(r["clock_id"] == "linux.CLOCK_MONOTONIC", "unexpected clock")
-            now = integer(r["time_ns"])
+            now = u64(r["time_ns"])
             require(not records or now >= integer(records[-1]["time_ns"]), "nonmonotonic record time")
             integer(r["frame"])
             require(r["record_type"] in {"worker_start", "stage", "static_state", "render_settings", "palette", "render_work", "frame", "opening_capture", "complete", "window_closed", "checkpoint", "static_audit", "native_audit", "presentation_status"}, "unknown evidence record type")
             if r["record_type"] in ("frame", "stage"):
-                begin, end = integer(r["begin_ns"]), integer(r["end_ns"])
+                begin, end = u64(r["begin_ns"]), u64(r["end_ns"])
                 require(begin <= end <= now, "invalid interval boundaries")
                 require(integer(r["duration_ns"]) == end-begin and r["status"] == "measured" and r["unit"] == "ns", "invalid duration/status/unit")
             if r["record_type"] == "checkpoint":
@@ -177,7 +178,7 @@ def distribution(values):
             **{f"p{p}": ordered[math.ceil(len(values)*p/100)-1] for p in (50,95,99)}, "max": max(values)}
 
 
-def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, review=False):
+def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, review=False, gpu_records=None, gpu_problems=None):
     frames = [r for r in records if r["record_type"] == "frame"]
     prefix = []
     for r in frames:
@@ -210,13 +211,13 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
               **{k: dict(missing) for k in ("state_correctness", "rendering_correctness", "visual_quality", "numeric_validity",
                   "population_qualification", "calibration", "responsiveness", "qualified_capacity", "interactive_pass")},
               "schedule_completion": outcome("pass" if complete else "inconclusive", "declared schedule completed" if complete else "incomplete or invalid evidence",
-                                             "opening capture only" if review else config["schedule_kind"], ["cpu.jsonl"]),
+                                             "opening capture only" if review else config["schedule_kind"], ["cpu.jsonl", "gpu.jsonl"]),
               "completed_prefix": {"startup": bool(prefix), "warmup": str(min(max(0,len(prefix)-1),int(config["warmup"]))),
                                    "measured": str(max(0,len(prefix)-1-int(config["warmup"])))},
               "termination": {"cause": cause, "exit_code": str(exit_code) if exit_code >= 0 else None,
                               "signal": str(-exit_code) if exit_code < 0 else None},
               "evidence_errors": problems,
-              "limitations": ["No GPU timing or calibration; supervised resource evidence is retained separately.",
+              "limitations": ["No instrumentation calibration; GPU queries and supervised resources are separate evidence.",
                               "CPU intervals include instrumentation; no physical display latency claim.", "Unsafe/native behavior is runtime evidence, never a formal proof."],
               "measurement_availability": measurement("measured", "CPU frame-effect boundaries", "completed frame prefix", "frames", str(len(prefix)))
                   if prefix else measurement("not_executed", "no frame returned", "attempt", "frames")}
@@ -240,6 +241,23 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
     result["final_bookkeeping"] = measurement("measured", "last frame-effect return to teardown begin; excluded from frame populations", "final bookkeeping", "ns",
         str(int(tail["begin_ns"])-int(prefix[-1]["end_ns"]))) if tail and prefix else measurement("incomplete", "final boundary unavailable", "final bookkeeping", "ns")
     result["effective_render_settings"] = next((r for r in records if r["record_type"] == "render_settings"), None)
+    from megascene_gpu import summarize
+    result["gpu_execution"] = summarize(gpu_records or [], gpu_problems or [], prefix, config)
+    gpu = result["gpu_execution"]
+    by_frame = {r["frame"]: r for r in prefix}
+    for r in gpu["intervals"]:
+        frame = by_frame.get(r["frame"])
+        if frame and "submit_begin_ns" in r and not int(frame["begin_ns"]) <= int(r["submit_begin_ns"]) <= int(frame["end_ns"]):
+            gpu["errors"].append("GPU submission outside originating CPU frame")
+    if complete and len(gpu["intervals"]) != len(prefix):
+        gpu["errors"].append("GPU submission count differs from completed schedule")
+    if gpu["errors"]:
+        gpu["required_evidence_complete"] = False
+        gpu["status"] = "incomplete"
+    result["evidence_errors"] += ["GPU: "+e for e in result["gpu_execution"]["errors"]]
+    if prefix and not result["gpu_execution"]["required_evidence_complete"]:
+        result["schedule_completion"] = outcome("inconclusive", "required GPU evidence incomplete; CPU prefix retained",
+                                                config["schedule_kind"], ["cpu.jsonl", "gpu.jsonl"])
     return result
 
 
@@ -291,7 +309,7 @@ def execute(config, output, manifest, campaign):
         manifest["build"] = original["build"]
         manifest["source"] = original["source"]
         loader = Path(original["worker_command"][0]).name
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
         manifest["artifacts"] += [artifact(output/name,output) for name in ("inputs.json", "schedule.json")]
@@ -299,7 +317,7 @@ def execute(config, output, manifest, campaign):
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
@@ -347,6 +365,7 @@ def execute(config, output, manifest, campaign):
                                  (("gpu", "ns"), ("resources", "bytes"), ("allocations", "bytes"), ("calibration", "ratio"), ("validation_replay", "frames"))}
     for name in ("resources", "allocations"):
         manifest["capabilities"][name] = measurement("not_ready", "required supervision checked before work; see supervision.json", name, "bytes")
+    manifest["capabilities"]["gpu"] = measurement("not_ready", "queried from the selected render queue during invocation", "submitted_frame_top_to_bottom", "ns")
     archive = Path(config["archive"])/manifest["campaign_id"]/manifest["series_id"]/manifest["attempt_id"]
     manifest["reproduction"] = {"archive": str(archive), "status": "preparing_archive",
                                 "scope": "actual application executable/native library/shaders/source/frozen inputs and linked libraries; host graphics stack required"}
@@ -445,6 +464,9 @@ def execute(config, output, manifest, campaign):
 
 def finish_archive(archive,output,manifest):
     from megascene import artifact, snapshot
+    summary = read_json((archive/"summary.json").read_text())
+    manifest["capabilities"]["gpu"] = summary.get("gpu_execution", {}).get("capability") or measurement(
+        "not_executed", "render queue capability not observed; see summary.json", "submitted_frame_top_to_bottom", "ns")
     manifest["evidence"] = [artifact(p,archive) for p in sorted(archive.rglob("*")) if p.is_file() and "runtime" not in p.relative_to(archive).parts and p.relative_to(archive).as_posix() != "manifest.json"]
     snapshot(archive/"manifest.json",manifest)
     for p in archive.rglob("*"):
@@ -462,6 +484,7 @@ def launch(config, archive, manifest, loader, review=False, campaign=None, valid
     env.update(manifest["worker_environment"])
     env.update(VOXEL_VULKAN_LIBRARY=str(archive/"runtime/build/libvoxel_vulkan.so"),
                MEGASCENE_EVENTS=str(destination/"cpu.jsonl"), MEGASCENE_ATTEMPT=manifest["attempt_id"],
+               MEGASCENE_GPU=str(destination/"gpu.jsonl"),
                MEGASCENE_CAMPAIGN=manifest["campaign_id"], MEGASCENE_SERIES=manifest["series_id"],
                VK_LOADER_LAYERS_DISABLE="~all~")
     if validation:
@@ -481,7 +504,10 @@ def launch(config, archive, manifest, loader, review=False, campaign=None, valid
     if cause == "worker_error" and "unpaced Vulkan present mode unavailable" in (destination/"stderr.log").read_text(errors="replace"):
         cause = "unsupported_presentation"
         termination["cause"] = cause
-    result = report(records, problems, config, code, cause, int(supervised["launch_ns"]), manifest["attempt_id"], review)
+    from megascene_gpu import read_stream as read_gpu
+    gpu_records, gpu_problems = read_gpu(destination/"gpu.jsonl", manifest)
+    result = report(records, problems, config, code, cause, int(supervised["launch_ns"]), manifest["attempt_id"], review,
+                    gpu_records, gpu_problems)
     result["termination"] = termination
     result["supervision"] = supervised
     result["reference_completed_prefix"] = {"frames": supervised["completed_frame_prefix"], "actions": supervised["completed_actions"]}

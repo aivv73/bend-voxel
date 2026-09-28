@@ -51,7 +51,7 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
             # Validate retained evidence bytes as well as runtime identities. A
             # successful flag in an edited/incomplete file is insufficient.
             required = {"validation.json"} | {"validation/"+name for name in (
-                "manifest.json", "summary.json", "cpu.jsonl", "stdout.log", "stderr.log", "reference.stdout.log",
+                "manifest.json", "summary.json", "cpu.jsonl", "gpu.jsonl", "stdout.log", "stderr.log", "reference.stdout.log",
                 "reference.stderr.log", "comparison.json", "inventory.json", "invocation.json", "supervision.json",
                 "resources.jsonl", "heaps.jsonl", "allocations.jsonl", "reference.jsonl", "reference.shared")}
             required |= {a["path"] for a in original["evidence"] if a["path"].startswith("validation/")}

@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/"scripts"))
 from megascene_inventory import SCHEMA, canonical, read_evidence
 from megascene_static import read_stream, report, schedule
+from test_megascene_gpu import fixtures as gpu_fixtures
 
 CONFIG = {"case": "static", "preset": "small", "side_m": "64", "seed": "45", "threads": "6",
           "fragment_budget": "2048", "resolution": "640x360", "profile": "full", "warmup": "1", "frames": "1",
@@ -57,7 +58,7 @@ def fixtures():
 
 class StaticReports(unittest.TestCase):
     def summarize(self, records, code=0, cause="normal_exit"):
-        result = report(records,[],CONFIG,code,cause,10**15-500,"fixture")
+        result = report(records,[],CONFIG,code,cause,10**15-500,"fixture",gpu_records=gpu_fixtures() if records else [])
         result["synthetic"] = True
         return result
 
@@ -99,6 +100,52 @@ class StaticReports(unittest.TestCase):
         records = fixtures()
         records.append(dict(records[-1], sequence=str(len(records))))
         self.assertNotEqual(self.summarize(records)["schedule_completion"]["status"],"pass")
+
+    def test_gpu_availability_never_overrides_required_evidence(self):
+        cpu = fixtures()
+        result = report(cpu,[],CONFIG,0,"normal_exit",10**15-500,"fixture")
+        self.assertEqual(result["gpu_execution"]["counts"]["incomplete"],"3")
+        self.assertEqual(result["populations"]["ordinary"]["count"],"1")
+        self.assertEqual(result["schedule_completion"]["status"],"inconclusive")
+        result = report(cpu,["required supervision unavailable"],CONFIG,0,"normal_exit",10**15-500,
+                        "fixture",gpu_records=gpu_fixtures())
+        self.assertTrue(result["gpu_execution"]["required_evidence_complete"])
+        self.assertEqual(result["schedule_completion"]["status"],"inconclusive")
+        self.assertEqual(result["interactive_pass"]["status"],"inconclusive")
+
+    def test_unsupported_exception_is_distinct_from_disabled(self):
+        for status in ("unsupported","disabled","collection_failure"):
+            gpu = gpu_fixtures()
+            for r in gpu:
+                if "valid_bits" in r and status == "unsupported":
+                    r["valid_bits"] = "0"
+                if "status" in r:
+                    r["status"] = status
+                if r["record_type"] == "gpu_interval":
+                    r.update(value=None,duration_ticks=None,raw_ticks=None,availability=None,range_status="unavailable")
+            result = report(fixtures(),[],CONFIG,0,"normal_exit",10**15-500,"fixture",gpu_records=gpu)
+            self.assertEqual(result["gpu_execution"]["status"],status)
+            self.assertEqual(result["schedule_completion"]["status"],"pass" if status=="unsupported" else "inconclusive")
+            self.assertIsNone(result["gpu_execution"]["populations"]["ordinary"]["mean"])
+
+    def test_gpu_submit_must_belong_to_cpu_frame_interval(self):
+        gpu = gpu_fixtures()
+        for r in gpu:
+            if r.get("frame") == "1":
+                r["submit_begin_ns"] = str(10**15+99)
+        result = report(fixtures(),[],CONFIG,0,"normal_exit",10**15-500,"fixture",gpu_records=gpu)
+        self.assertIn("GPU: GPU submission outside originating CPU frame",result["evidence_errors"])
+        self.assertEqual(result["schedule_completion"]["status"],"inconclusive")
+
+    def test_cpu_clock_invalid_and_overflow_intervals(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d)/"cpu.jsonl"
+            for field,value in (("end_ns","0"),("end_ns",str(2**64)),("begin_ns",str(2**64)),("duration_ns","0")):
+                records = fixtures()
+                next(r for r in records if r["record_type"] == "stage")[field] = value
+                path.write_bytes(b"".join(canonical(r)+b"\n" for r in records))
+                _,errors = read_stream(path,"fixture")
+                self.assertTrue(errors,(field,value))
 
     def test_frame_gap_duplicate_and_wrong_boundary(self):
         for key,value in (("frame","4"),("begin_ns","100"),("population","warmup")):
@@ -185,7 +232,7 @@ class StaticVulkan(unittest.TestCase):
                        "--warmup","1","--frames","2","--archive",str(archive),"--output",str(output),"--capture-opening"]
             env = {**os.environ,"VOXEL_STRESS":"1","VOXEL_STRESS_VIEW":"6"}
             proc = subprocess.run(command,capture_output=True,text=True,env=env,timeout=180)
-            self.assertEqual(proc.returncode,0,proc.stderr)
+            self.assertEqual(proc.returncode,0,proc.stderr+((output/"summary.json").read_text() if (output/"summary.json").exists() else ""))
             manifest = read_evidence(output/"manifest.json")
             retained = Path(manifest["reproduction"]["archive"])
             for entry in manifest["artifacts"]+manifest["evidence"]:
@@ -194,6 +241,13 @@ class StaticVulkan(unittest.TestCase):
             self.assertEqual(result["completed_prefix"]["measured"],"2")
             self.assertEqual(result["schedule_completion"]["status"],"pass")
             self.assertEqual(result["interactive_pass"]["status"],"inconclusive")
+            gpu = result["gpu_execution"]
+            self.assertTrue(gpu["required_evidence_complete"],gpu)
+            self.assertEqual(gpu["counts"]["measured"],"4")
+            self.assertEqual(gpu["intervals"][-1]["frame"],"3")
+            self.assertEqual(gpu["intervals"][-1]["collection_phase"],"teardown")
+            self.assertIsNone(gpu["intervals"][-1]["collection_frame"])
+            self.assertEqual(manifest["capabilities"]["gpu"]["valid_bits"],gpu["capability"]["valid_bits"])
             self.assertEqual(result["supervision"]["allocation_ledger"]["live_bytes"],"0")
             self.assertGreater(int(result["supervision"]["allocation_ledger"]["peak_bytes"]),0)
             self.assertEqual(result["supervision"]["reference_records"],"4")

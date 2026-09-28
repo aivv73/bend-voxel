@@ -9,8 +9,9 @@ Picking and edits are disabled; window input cannot move the camera or modify
 the world. Closing the window retains an incomplete prefix.
 
 These are **unqualified development observations**. [Static replay validation and canonical timed checkpoints](megascene-validation.md)
-are implemented in issue #51. GPU timestamps, feature qualification and
-instrumentation calibration belong to later slices of #47. None of their absent results is a pass. Completing the
+are implemented in issue #51. [GPU timestamp evidence](megascene-gpu.md) is
+implemented in issue #52; feature qualification and instrumentation calibration
+remain later slices of #47. None of their absent results is a pass. Completing the
 static schedule is independent of benchmark, capacity or interactive qualification.
 The existing default demo and all five Light Atelier benchmarks retain their
 settings and report meanings.
@@ -87,6 +88,10 @@ return ends cold startup. Subsequent frame intervals span consecutive returns,
 including the preceding boundary record, loop bookkeeping, static state checks,
 physics, view preparation, transport, native logging, submission and waits.
 They are CPU wall time, not GPU execution or physical presentation latency.
+`gpu.jsonl` separately records submitted work with its originating frame,
+timestamp capability, raw ticks, availability and checked resolved interval.
+The final pair is collected after existing teardown synchronization; it remains
+associated with the final frame and adds no measured CPU frame.
 
 Generation/tree construction, initial surfaces/vertices, inventory transport,
 window setup, renderer setup, initial upload and first-frame work have separate

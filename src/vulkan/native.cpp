@@ -28,6 +28,7 @@ void check(VkResult result, const char* what) {
 }
 } // namespace
 #include "supervision.h"
+#include "gpu_timing.h"
 #include "checkpoint.h"
 #include "visibility_reference.h"
 namespace {
@@ -657,6 +658,7 @@ class Renderer {
   std::vector<ShadowIdentity> shadow_world;
   ShadowMatrix saved_shadow;
   bool shadow_valid=false;
+  gpu_timing::Queries gpu_queries;
 
   uint32_t memory_type(uint32_t bits,VkMemoryPropertyFlags flags) {
     VkPhysicalDeviceMemoryProperties p{}; vkGetPhysicalDeviceMemoryProperties(physical,&p);
@@ -985,6 +987,7 @@ public:
     if (device) {
       VkResult idle=vkDeviceWaitIdle(device);
       if(idle!=VK_SUCCESS) record_vk_failure(idle,"device teardown wait");
+      if(gpu_queries.active()) gpu_queries.finish(idle,monotonic_ns());
       clear_swapchain();
       if (mapped) vkUnmapMemory(device,vertex_memory);
       if (vertices) vkDestroyBuffer(device,vertices,nullptr);
@@ -1010,6 +1013,13 @@ public:
   bool matches(Display* d,::Window w) const { return d==display&&w==window; }
   void render(const VoxelVkFrame& frame,VoxelVkTimings& timings) {
     uint64_t ns_start=frame.record?monotonic_ns():0;
+    if(frame.gpu_evidence && frame.record && !gpu_queries.active()) {
+      VkPhysicalDeviceProperties properties{}; vkGetPhysicalDeviceProperties(physical,&properties);
+      uint32_t count=0; vkGetPhysicalDeviceQueueFamilyProperties(physical,&count,nullptr);
+      std::vector<VkQueueFamilyProperties> families(count);
+      vkGetPhysicalDeviceQueueFamilyProperties(physical,&count,families.data());
+      gpu_queries.start(device,family,properties.limits.timestampPeriod,families.at(family).timestampValidBits,3721);
+    }
     if (frame.full_geometry && (extent.width!=frame.width || extent.height!=frame.height))
       throw std::runtime_error("Megascene actual swapchain resolution differs from frozen request");
     if (frame.full_geometry && present_mode!=VK_PRESENT_MODE_IMMEDIATE_KHR && present_mode!=VK_PRESENT_MODE_MAILBOX_KHR)
@@ -1044,9 +1054,11 @@ public:
     uint64_t ns_after_geometry=frame.record?monotonic_ns():0;
     stage(frame,"geometry",ns_start,ns_after_geometry);
     timings.geometry_us=microseconds(start,after_geometry);
-    check(vkWaitForFences(device,1,&fence,VK_TRUE,UINT64_MAX),"wait for frame fence");
+    VkResult waited=vkWaitForFences(device,1,&fence,VK_TRUE,UINT64_MAX);
     auto after_fence=Clock::now();
     uint64_t ns_after_fence=frame.record?monotonic_ns():0;
+    if(gpu_queries.active()) gpu_queries.collect(frame.evidence_frame,false,waited,ns_after_fence);
+    check(waited,"wait for frame fence");
     stage(frame,"fence_wait",ns_after_geometry,ns_after_fence);
     timings.fence_wait_us=microseconds(after_geometry,after_fence);
     bool new_buffer=ensure_vertices(g.vertices.size()*sizeof(Vertex));
@@ -1124,6 +1136,7 @@ public:
     check(vkResetCommandBuffer(command,0),"reset command buffer");
     VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     check(vkBeginCommandBuffer(command,&bi),"begin command buffer");
+    gpu_queries.begin(command);
     Push push{{frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw},
       {frame.pitch,0,0,float(frame.night!=0)},
       {float(frame.width)*.5f,float(frame.height)*.5f,
@@ -1216,6 +1229,7 @@ public:
     barrier(images[index],VK_IMAGE_ASPECT_COLOR_BIT,VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
       VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
       VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,0);
+    gpu_queries.end(command);
     check(vkEndCommandBuffer(command),"end command buffer");
     auto after_record=Clock::now();
     uint64_t ns_after_record=frame.record?monotonic_ns():0;
@@ -1228,7 +1242,9 @@ public:
     submit.pWaitDstStageMask=&wait_stage; submit.commandBufferCount=1;
     submit.pCommandBuffers=&command; submit.signalSemaphoreCount=1;
     submit.pSignalSemaphores=&finished[index];
+    uint64_t submit_begin=gpu_queries.active()?monotonic_ns():0;
     check(vkQueueSubmit(queue,1,&submit,fence),"submit frame");
+    gpu_queries.submitted(frame.evidence_frame,submit_begin);
     if (shadow_dirty) {
       shadow_world.clear(); shadow_world.reserve(frame.body_count);
       for (uint32_t i=0;i<frame.body_count;i++) {
@@ -1271,7 +1287,7 @@ public:
 std::unique_ptr<Renderer> renderer;
 }
 
-extern "C" int voxel_vk_render_profile(void* display,unsigned long window,const VoxelVkFrame* frame,
+extern "C" int voxel_vk_render_timed(void* display,unsigned long window,const VoxelVkFrame* frame,
   VoxelVkTimings* timings,char* error,size_t error_cap) {
   try {
     if (!frame || !display || !window || !timings) throw std::runtime_error("invalid Vulkan frame");
@@ -1292,6 +1308,13 @@ extern "C" int voxel_vk_render_profile(void* display,unsigned long window,const 
     }
     return 0;
   }
+}
+// Preserve the profile ABI used by archived static workers before GPU timing.
+extern "C" int voxel_vk_render_profile(void* display,unsigned long window,const VoxelVkFrame* frame,
+  VoxelVkTimings* timings,char* error,size_t error_cap) {
+  VoxelVkFrame previous{};
+  if(frame) std::memcpy(&previous,frame,offsetof(VoxelVkFrame,evidence_frame));
+  return voxel_vk_render_timed(display,window,frame?&previous:nullptr,timings,error,error_cap);
 }
 // Preserve the original ABI for previously built Light Atelier executables.
 extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkFrame* frame,

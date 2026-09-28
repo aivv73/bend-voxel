@@ -34,6 +34,8 @@ typedef struct {
   unsigned full_geometry;
   float ground_half_extent;
   void (*record)(const char* fields); // Megascene CPU evidence, NULL for legacy.
+  uint64_t evidence_frame;
+  unsigned gpu_evidence; // Only the versioned timing ABI reads these fields.
 } VoxelVkFrame;
 
 // Checkpoint-only ABI: independently read tree leaves and current Bend geometry.
@@ -62,6 +64,8 @@ int voxel_vk_render(void* display, unsigned long window, const VoxelVkFrame* fra
                     VoxelVkTimings* timings, char* error, size_t error_cap);
 int voxel_vk_render_profile(void* display, unsigned long window, const VoxelVkFrame* frame,
                             VoxelVkTimings* timings, char* error, size_t error_cap);
+int voxel_vk_render_timed(void* display, unsigned long window, const VoxelVkFrame* frame,
+                         VoxelVkTimings* timings, char* error, size_t error_cap);
 void voxel_vk_release(void);
 
 #ifdef __cplusplus

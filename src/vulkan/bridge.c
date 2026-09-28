@@ -39,6 +39,8 @@ typedef struct {
   unsigned full_geometry;
   float ground_half_extent;
   void (*record)(const char* fields); // Megascene CPU evidence, NULL for legacy.
+  uint64_t evidence_frame;
+  unsigned gpu_evidence;
 } VoxelVkFrame;
 
 // Checkpoint-only ABI: independently read tree leaves and current Bend geometry.
@@ -138,7 +140,7 @@ static void voxel_vk_load(void) {
   const char* path = getenv("VOXEL_VULKAN_LIBRARY");
   voxel_vk_library = dlopen(path ? path : "./build/libvoxel_vulkan.so", RTLD_NOW | RTLD_LOCAL);
   if (!voxel_vk_library) err_fail(dlerror());
-  voxel_vk_render_fn = (VoxelVkRender)dlsym(voxel_vk_library, "voxel_vk_render_profile");
+  voxel_vk_render_fn = (VoxelVkRender)dlsym(voxel_vk_library, "voxel_vk_render_timed");
   voxel_vk_release_fn = (VoxelVkRelease)dlsym(voxel_vk_library, "voxel_vk_release");
   if (!voxel_vk_render_fn || !voxel_vk_release_fn) err_fail("incomplete Vulkan renderer library");
 }
@@ -364,6 +366,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
     fprintf(stdout,"bodies,%u,%u,%u,%u,%.6f\n",voxel_vk_generation-1,anchored,moving,translated,minimum_offset);
   if (mega_stream) {
     frame.full_geometry=1; frame.ground_half_extent=mega_ground; frame.record=mega_record;
+    frame.evidence_frame=mega_frame; frame.gpu_evidence=1;
     if (anchored!=frame.body_count || moving || translated || frame.aim_kind || frame.night)
       err_fail("static Megascene state invariant failed");
     static u32 saved_state[14];
