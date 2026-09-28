@@ -126,6 +126,7 @@ through a possibly different math library during comparison runs.
 | `cavity` | (256,44,244) | (256,8,256) | Cavity depth and open air; center ray hits removable floor material 2. |
 | `assembly` | (284,90,160) | (284,T,180) | Irregular lobes and material distinctions; center ray hits the upper lobe. |
 | `sky` | (160,120,160) | (160,220,260) | Known miss above all scene geometry. |
+| `far` | (0,0.75*L,1.25*L) m | (0,2.4,0) m | Whole occupied district extent and major structure/shadow relationships. No required picking hit. |
 
 The table records the original `traversal-v1` route. Issue #53's 1080p
 captures showed its cavity bridge above the image and insufficient cavity
@@ -135,7 +136,6 @@ at both neighborhood visits. All other poses, phase lengths, interpolation,
 startup, warm-up, picking and edit rules remain as stated here. Resolve and
 freeze new binary32 camera bits under the distinct `traversal-v2` schedule ID;
 retain `traversal-v1` and its failing visual review as separate evidence.
-| `far` | (0,0.75*L,1.25*L) m | (0,2.4,0) m | Whole occupied district extent and major structure/shadow relationships. No required picking hit. |
 
 The traversal and picking cases share the same 12-phase route, each phase
 lasting 300 measured frames:
