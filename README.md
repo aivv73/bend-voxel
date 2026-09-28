@@ -54,6 +54,9 @@ with declared hit/miss holds, independent target references and numeric guards.
 The [localized cut runner](docs/megascene-localized.md) performs one frozen terrain
 edit, checks exact removal and atomic rejection, and keeps its single edit
 response separate from ordinary-frame measurements.
+The [support runner](docs/megascene-support.md) severs three spans with six cuts,
+verifies their actual concurrent motion at frames 31–42, and retains component,
+mesh, shadow and named beam-feature evidence.
 
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),

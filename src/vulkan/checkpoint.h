@@ -217,8 +217,10 @@ void emit(const VoxelVkFrame& f,const VoxelMegaState& s) {
   std::vector<J> names;
   if(s.frame==0) { names.push_back(quote("initialization")); names.push_back(quote("review_opening")); }
   if(s.frame==s.warmup) names.push_back(quote("warmup_end"));
-  if(s.action_frame) names.push_back(quote("action_0"));
-  if(!std::getenv("MEGASCENE_LOCALIZED") && std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
+  if(s.action_frame) names.push_back(quote("action_"+std::to_string(s.action_id)));
+  if(std::getenv("MEGASCENE_SUPPORT") && s.frame>=uint64_t(s.warmup)+32 && s.frame<=uint64_t(s.warmup)+43)
+    names.push_back(quote("motion_"+std::to_string(s.frame-s.warmup-1)));
+  if(!std::getenv("MEGASCENE_LOCALIZED") && !std::getenv("MEGASCENE_SUPPORT") && std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
      s.frame<=uint64_t(s.warmup)+s.measured &&
      (s.frame-s.warmup-1)%300==60) {
     unsigned phase=unsigned((s.frame-s.warmup-1)/300);

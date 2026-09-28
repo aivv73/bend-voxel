@@ -551,13 +551,16 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
   require(cache.proxy_draws==0&&cache.shadow_draws.size()==f.body_count,"native shadow/proxy draw mismatch");
   uint64_t vertices_checked=0,reference_visible=0;
   std::vector<checkpoint::J> drawn_ids;
-  checkpoint::Object mesh_slots,proxy_hashes;
+  checkpoint::Object mesh_slots,proxy_hashes,mesh_hashes;
   for(unsigned i=0;i<f.body_count;i++) {
     const auto& b=f.bodies[i]; auto it=cache.meshes.find(b.id);
     require(it!=cache.meshes.end(),"missing native mesh"); const auto& mesh=it->second;
     require(mesh.revision==b.revision&&mesh.anchored==b.anchored&&mesh.count==b.vertex_count,"native mesh identity mismatch");
     require(uint64_t(mesh.first)+mesh.count<=cache.geometry.vertices.size(),"native mesh range overflow");
     mesh_slots[std::to_string(b.id)]=checkpoint::array({checkpoint::number(mesh.first),checkpoint::number(mesh.count)});
+    if(std::getenv("MEGASCENE_SUPPORT"))
+      mesh_hashes[std::to_string(b.id)]=checkpoint::quote(checkpoint::hash(
+        std::string(reinterpret_cast<const char*>(b.vertices),size_t(b.vertex_count)*sizeof *b.vertices)));
     for(unsigned j=0;j<b.vertex_count;j++) {
       const auto& actual=cache.geometry.vertices[mesh.first+j]; const auto& expected=b.vertices[j];
       auto color=material_color(f,expected.material,!b.anchored);
@@ -590,10 +593,12 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
     }
     proxy_hashes[std::to_string(key)]=checkpoint::quote(checkpoint::hash(checkpoint::array(vertices)));
   }
-  auto record=checkpoint::object({{"drawn_ids",checkpoint::array(drawn_ids)},
+  checkpoint::Object fields={{"drawn_ids",checkpoint::array(drawn_ids)},
     {"mesh_slots",checkpoint::object(mesh_slots)},{"proxy_cache_sha256",checkpoint::object(proxy_hashes)},
     {"record_type",checkpoint::quote("native_audit")},{"reference_visible",checkpoint::number(reference_visible)},
-    {"vertices_checked",checkpoint::number(vertices_checked)}});
+    {"vertices_checked",checkpoint::number(vertices_checked)}};
+  if(std::getenv("MEGASCENE_SUPPORT")) fields["mesh_sha256"]=checkpoint::object(mesh_hashes);
+  auto record=checkpoint::object(fields);
   f.record(record.substr(1,record.size()-2).c_str());
 }
 
@@ -1031,7 +1036,7 @@ public:
     if (instance) vkDestroyInstance(instance,nullptr);
   }
   bool matches(Display* d,::Window w) const { return d==display&&w==window; }
-  void render(const VoxelVkFrame& frame,VoxelVkTimings& timings) {
+  void render(const VoxelVkFrame& frame,VoxelVkTimings& timings,bool supplementary=false) {
     uint64_t ns_start=frame.record?monotonic_ns():0;
     if(frame.gpu_evidence && frame.record && !gpu_queries.active()) {
       VkPhysicalDeviceProperties properties{}; vkGetPhysicalDeviceProperties(physical,&properties);
@@ -1172,7 +1177,7 @@ public:
     check(vkResetCommandBuffer(command,0),"reset command buffer");
     VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     check(vkBeginCommandBuffer(command,&bi),"begin command buffer");
-    gpu_queries.begin(command);
+    if(!supplementary) gpu_queries.begin(command);
     Push push{{frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw},
       {frame.pitch,0,0,float(frame.night!=0)},
       {float(frame.width)*.5f,float(frame.height)*.5f,
@@ -1265,7 +1270,7 @@ public:
     barrier(images[index],VK_IMAGE_ASPECT_COLOR_BIT,VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
       VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
       VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,0);
-    gpu_queries.end(command);
+    if(!supplementary) gpu_queries.end(command);
     check(vkEndCommandBuffer(command),"end command buffer");
     auto after_record=Clock::now();
     uint64_t ns_after_record=frame.record?monotonic_ns():0;
@@ -1280,7 +1285,7 @@ public:
     submit.pSignalSemaphores=&finished[index];
     uint64_t submit_begin=gpu_queries.active()?monotonic_ns():0;
     check(vkQueueSubmit(queue,1,&submit,fence),"submit frame");
-    gpu_queries.submitted(frame.evidence_frame,submit_begin);
+    if(!supplementary) gpu_queries.submitted(frame.evidence_frame,submit_begin);
     if (shadow_dirty) {
       shadow_world.clear(); shadow_world.reserve(frame.body_count);
       for (uint32_t i=0;i<frame.body_count;i++) {
@@ -1343,6 +1348,19 @@ extern "C" int voxel_vk_render_timed(void* display,unsigned long window,const Vo
       error[error_cap-1]=0;
     }
     return 0;
+  }
+}
+// Validation-only extra views reuse the already rendered world. They do not
+// submit GPU measurement samples or advance any simulation/action ordinal.
+extern "C" int voxel_vk_render_detail(void* display,unsigned long window,const VoxelVkFrame* frame,
+  VoxelVkTimings* timings,char* error,size_t error_cap) {
+  try {
+    if(!std::getenv("MEGASCENE_VALIDATE") || !std::getenv("MEGASCENE_SUPPORT") || !renderer ||
+       !frame || !frame->record || !timings || !renderer->matches(static_cast<Display*>(display),window))
+      throw std::runtime_error("supplementary render outside support validation");
+    *timings={}; renderer->render(*frame,*timings,true); return 1;
+  } catch(const std::exception& e) {
+    std::snprintf(error,error_cap,"%s",e.what()); return 0;
   }
 }
 // Preserve the profile ABI used by archived static workers before GPU timing.

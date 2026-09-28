@@ -30,8 +30,8 @@ def settings(args, base):
             from megascene_traversal import ROUTES
         require(args.schedule is None or args.schedule in ROUTES, "unsupported frozen schedule")
         schedule_id = args.schedule or args.case+"-v2"
-    elif args.case == "localized":
-        schedule_id = "localized-v1"
+    elif args.case in ("localized", "support"):
+        schedule_id = args.case+"-v1"
         require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
     else:
         schedule_id = "static-v1"
@@ -41,7 +41,7 @@ def settings(args, base):
     frames = integer(args.frames if args.frames is not None else "3600")
     deadline = integer(args.deadline if args.deadline is not None else "300")
     require(0 <= warmup <= 120 and 1 <= frames <= 3600, "development schedules require 0..120 warmup and 1..3600 measured frames")
-    if args.case in ("traversal", "picking", "localized"):
+    if args.case in ("traversal", "picking", "localized", "support"):
         require((warmup, frames) == (120, 3600), "primary replay requires the complete 120/3600 schedule")
         require(not args.capture_opening, "replay captures come from the separate validation replay")
     require(1 <= deadline <= 300, "development deadline must be 1..300 seconds")
@@ -60,6 +60,9 @@ def settings(args, base):
 
 
 def schedule(config):
+    if config.get("case") == "support":
+        from megascene_support import schedule as support_schedule
+        return support_schedule(config)
     if config.get("case") == "localized":
         from megascene_localized import schedule as localized_schedule
         return localized_schedule(config)
@@ -91,7 +94,7 @@ def schedule(config):
 
 def worker_program(owners, config, frozen):
     source = bend_program(owners, int(config["fragment_budget"])).split("def main()", 1)[0]
-    module = {"localized":"megascene_localized", "picking":"megascene_picking_replay", "traversal":"megascene_traversal", "static":"megascene_static"}[config["case"]]
+    module = {"support":"megascene_support", "localized":"megascene_localized", "picking":"megascene_picking_replay", "traversal":"megascene_traversal", "static":"megascene_static"}[config["case"]]
     source = source.replace("import Base", f"import Base\nimport ./src/{module}.bend as Static\nimport ./src/vulkan.bend as VK\nimport ./src/render.bend as V")
     def real(value):
         decoded = struct.unpack(">f", bytes.fromhex(value[2:]))[0]
@@ -99,10 +102,13 @@ def worker_program(owners, config, frozen):
     camera = frozen["opening"]
     width, height = config["resolution"].split("x")
     cam = "V.Camera{R.Vec{"+",".join(map(real, camera["eye_m"]))+"},"+real(camera["yaw"])+","+real(camera["pitch"])+f",{width},{height}"+"}"
-    start_args = f"{width},{height}" if config['case'] in ('traversal','picking','localized') else f"{cam},{width},{height}"
+    start_args = f"{width},{height}" if config['case'] in ('traversal','picking','localized','support') else f"{cam},{width},{height}"
     if config['case'] == 'localized':
         point = "R.Vec{"+",".join(map(real,frozen['actions'][0]['target_m']))+"}"
         start_args = point+","+start_args
+    if config['case'] == 'support':
+        cuts = ["Static.Cut{"+a['frame']+","+a['action']+",R.Vec{"+",".join(map(real,a['target_m']))+"}}" for a in frozen['actions']]
+        start_args = "["+",".join(cuts)+"],"+start_args
     source += f'''def main() -> IO(Unit):
   do IO<Unit>:
     VK.vulkan.mark(0)
@@ -137,7 +143,7 @@ def read_stream(path, attempt_id):
             now = u64(r["time_ns"])
             require(not records or now >= integer(records[-1]["time_ns"]), "nonmonotonic record time")
             integer(r["frame"])
-            require(r["record_type"] in {"worker_start", "stage", "static_state", "render_settings", "palette", "render_work", "frame", "opening_capture", "capture", "complete", "window_closed", "checkpoint", "static_audit", "native_audit", "presentation_status", "picking", "edit_begin", "action", "edit"}, "unknown evidence record type")
+            require(r["record_type"] in {"worker_start", "stage", "static_state", "render_settings", "palette", "render_work", "frame", "opening_capture", "capture", "complete", "window_closed", "checkpoint", "static_audit", "native_audit", "presentation_status", "picking", "edit_begin", "action", "edit", "body_motion", "detail_render", "detail_capture"}, "unknown evidence record type")
             if r["record_type"] in ("frame", "stage", "edit"):
                 begin, end = u64(r["begin_ns"]), u64(r["end_ns"])
                 require(begin <= end <= now, "invalid interval boundaries")
@@ -183,11 +189,23 @@ def audit_observation(records, config, frames):
             camera = planned["camera"]
             require(state["aim_kind"] == planned.get("expected_pick", {"kind":"0"})["kind"], "actual picking kind mismatch")
             require({k:state[k] for k in camera} == camera, "actual view differs from frozen camera schedule")
-            edited = config.get("case") == "localized" and int(f["frame"]) >= 121
-            removed = 16 if edited else 0
-            require(state["anchored"] == str(owners) and all(state[k] == "0" for k in ("moving", "translated", "fragments")) and state["removed"] == str(removed), "world state mismatch")
-            require(state["cells"] == str((10503360 if owners == 21 else 42096576)-removed) and state["next_id"] == str(owners+1+int(edited)) and state["budget"] == config["fragment_budget"], "world inventory mismatch")
-            require(work["body_count"] == work["full_meshes"] == str(owners), "full meshes missing")
+            if config.get("case") == "support":
+                from megascene_support import CUT_FRAMES, motion, value
+                i=int(f['frame']);cuts=sum(at<=i for at in CUT_FRAMES)
+                released=[at for at in CUT_FRAMES[1::2] if at<=i]
+                moving=sum(value(motion(min(i-at,60))[1])!=0 for at in released)
+                translated=sum(i>at for at in released)
+                require((state['anchored'],state['fragments'],state['moving'],state['translated'])==
+                        tuple(map(str,(owners+(cuts+1)//2,len(released),moving,translated))), 'support inventory/moving count mismatch')
+                require((state['cells'],state['removed'],state['next_id'],state['budget'])==
+                        (str((10503360 if owners==21 else 42096576)-cuts*16),'16' if cuts else '0',str(owners+1+2*cuts),config['fragment_budget']), 'support material/identity inventory mismatch')
+                require(work['body_count']==work['full_meshes']==str(owners+cuts),'support full meshes missing')
+            else:
+                edited = config.get("case") == "localized" and int(f["frame"]) >= 121
+                removed = 16 if edited else 0
+                require(state["anchored"] == str(owners) and all(state[k] == "0" for k in ("moving", "translated", "fragments")) and state["removed"] == str(removed), "world state mismatch")
+                require(state["cells"] == str((10503360 if owners == 21 else 42096576)-removed) and state["next_id"] == str(owners+1+int(edited)) and state["budget"] == config["fragment_budget"], "world inventory mismatch")
+                require(work["body_count"] == work["full_meshes"] == str(owners), "full meshes missing")
             require(work["proxy_draws"] == "0" and work["main_body_draws"] == work["visible_bodies"], "full geometry substitution")
             stages = [r for r in items if r["record_type"] == "stage"]
             required = {"transport", "renderer", "geometry", "fence_wait", "vertex_upload", "acquire", "command_record", "submit_present", "events"}
@@ -220,9 +238,7 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
     frozen = schedule(config)
     for r in frames:
         i = len(prefix)
-        expected = "startup" if i == 0 else "warmup" if i <= int(config["warmup"]) else "ordinary"
-        if config.get("case") == "localized" and i == 121:
-            expected = "edit"
+        expected = frozen["frames"][i]["phase"] if i<len(frozen["frames"]) else None
         if (r["frame"] != str(i) or r["population"] != expected or
             (i and r["begin_ns"] != prefix[-1]["end_ns"])):
             problems.append("frame sequence/population/boundary mismatch")
@@ -235,6 +251,13 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
             audit_actions(records, frozen)
         except (ValueError, KeyError, TypeError, StopIteration) as exc:
             problems.append(str(exc) or "missing required action evidence")
+    if config.get("case") == "support":
+        from megascene_support import audit_actions, audit_window
+        try:
+            audit_actions(records, frozen)
+            audit_window(records, frozen)
+        except (ValueError, KeyError, TypeError, StopIteration) as exc:
+            problems.append(str(exc) or "missing required support evidence")
     completions = [r for r in records if r["record_type"] == "complete"]
     if completions:
         expected_count = 1 if review else 1+int(config["warmup"])+int(config["frames"])
@@ -251,7 +274,7 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
                 len(prefix) == (1 if review else 1+int(config["warmup"])+int(config["frames"])))
     missing = outcome("inconclusive", "not implemented in static development slice", "complete qualified attempt")
     result = {"schema": SCHEMA, "record_type": "summary", "attempt_id": attempt_id,
-              "attempt_kind": "opening_capture" if review else "development_observation", "synthetic": False,
+              "attempt_kind": "opening_capture" if review else "development_observation", "synthetic": any(r.get("synthetic", False) for r in records),
               "qualification": "unqualified_development_observation",
               **{k: dict(missing) for k in ("state_correctness", "rendering_correctness", "visual_quality", "numeric_validity",
                   "population_qualification", "calibration", "responsiveness", "qualified_capacity", "interactive_pass")},
@@ -267,7 +290,7 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
               "measurement_availability": measurement("measured", "CPU frame-effect boundaries", "completed frame prefix", "frames", str(len(prefix)))
                   if prefix else measurement("not_executed", "no frame returned", "attempt", "frames")}
     populations = {}
-    for name in ("warmup", "ordinary", "edit"):
+    for name in (("warmup", "ordinary", "edit", "motion") if config.get("case")=="support" else ("warmup", "ordinary", "edit")):
         values = [int(r["end_ns"])-int(r["begin_ns"]) for r in prefix if r["population"] == name]
         populations[name] = {**distribution(values), "observation_interval_ns": str(sum(values))}
     result["populations"] = populations
@@ -278,12 +301,12 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
         "insufficient population: requires 1000 ordinary frames and 10 measured seconds without extending the frozen schedule",
         "ordinary population", ["cpu.jsonl"])
     result["edit_response"] = outcome("not_applicable", "static schedule disables edits", "accepted edits")
-    if config.get("case") == "localized":
+    if config.get("case") in ("localized", "support"):
         accepted = [r for r in records if r["record_type"] == "edit" and r["accepted"]]
         result["accepted_edits"] = distribution([int(r["duration_ns"]) for r in accepted])
         result["edit_response"] = outcome("inconclusive", f"{len(accepted)} accepted edit(s); percentile gate requires 100 without pooling attempts or adding cuts", "accepted edits", ["cpu.jsonl", "reference.jsonl"])
-        result["combined_frames"] = distribution([int(r["duration_ns"]) for r in prefix if r["population"] in ("ordinary", "edit")])
-        result["edit_stages"] = [r for r in records if r["record_type"] == "stage" and r["frame"] == "121"]
+        result["combined_frames"] = distribution([int(r["duration_ns"]) for r in prefix if r["population"] in ("ordinary", "edit", "motion")])
+        result["edit_stages"] = [r for r in records if r["record_type"] == "stage" and r["frame"] in {a["frame"] for a in frozen["actions"]}]
     result["cold_startup"] = measurement("measured", "process launch to first usable frame-effect return", "startup", "ns",
                                            str(int(prefix[0]["end_ns"])-launch_ns)) if prefix and int(prefix[0]["end_ns"]) >= launch_ns else measurement("incomplete", "first usable frame unavailable", "startup", "ns")
     result["startup_stages"] = [r for r in records if r["record_type"] == "stage" and r["frame"] == "0"]
@@ -346,14 +369,17 @@ def execute(config, output, manifest, campaign):
         bounds["picking"] = frozen["picking_admission"]
         manifest["numeric_admission"] = outcome("pass", "frozen target/operation preflight plus actual runtime guards before picking",
             "fixed-preset construction and bounded picking", ["inputs.json", "schedule.json"])
-    if config["case"] == "localized":
-        manifest["numeric_admission"] = outcome("pass", "frozen brush/reference removal; actual count, ID, predicate and native-size guards before unsafe edit", "bounded half-cell localized edit envelope", ["inputs.json", "schedule.json"])
+    if config["case"] in ("localized", "support"):
+        manifest["numeric_admission"] = outcome("pass", "frozen brush/reference removal; actual count, ID, predicate and native-size guards before unsafe edit", "bounded half-cell edits plus separated translated bodies", ["inputs.json", "schedule.json"])
     snapshot(output/"schedule.json", frozen)
     if config["case"] == "picking":
         from megascene_picking import ray_bytes
         (output/"rays.bin").write_bytes(ray_bytes(frozen))
-    input_names = ("inputs.json", "schedule.json") + (("camera.bin",) if config["case"] in ("traversal", "picking", "localized") else ()) + (("rays.bin",) if config["case"] == "picking" else ())
-    if config["case"] in ("traversal", "picking", "localized"):
+    if config['case']=='support':
+        from megascene_traversal import camera_bytes
+        (output/'support-review.bin').write_bytes(camera_bytes({'frames':frozen['supplementary_views']}))
+    input_names = (("support-review.bin",) if config['case']=='support' else ()) + ("inputs.json", "schedule.json") + (("camera.bin",) if config["case"] in ("traversal", "picking", "localized", "support") else ()) + (("rays.bin",) if config["case"] == "picking" else ())
+    if config["case"] in ("traversal", "picking", "localized", "support"):
         from megascene_traversal import camera_bytes
         (output/"camera.bin").write_bytes(camera_bytes(frozen))
     snapshot(output/"inputs.json", {"schema": SCHEMA, "record_type": "generation_inputs", "configuration": {k: config[k] for k in ("preset", "seed", "side_m", "fragment_budget")},
@@ -373,7 +399,7 @@ def execute(config, output, manifest, campaign):
         manifest["build"] = original["build"]
         manifest["source"] = original["source"]
         loader = Path(original["worker_command"][0]).name
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
         manifest["artifacts"] += [artifact(output/name,output) for name in input_names]
@@ -381,16 +407,19 @@ def execute(config, output, manifest, campaign):
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
         if config["case"] == "picking":
             from megascene_picking_references import program as picking_reference_program
             (runtime/"src/megascene_picking_reference_entry.bend").write_text(picking_reference_program())
-        if config["case"] == "localized":
+        if config["case"] in ("localized", "support"):
             from megascene_edit_references import program as edit_reference_program
             (runtime/"src/megascene_edit_reference_entry.bend").write_text(edit_reference_program())
+        if config["case"] == "support":
+            from megascene_support_references import program as support_reference_program
+            (runtime/"src/megascene_support_reference_entry.bend").write_text(support_reference_program())
         (runtime/"src/megascene_entry.bend").write_text(worker_program(owners,config,frozen))
         require(subprocess.check_output(["bend", "version"], text=True).strip() == "bend 2.0.32", "Megascene requires Bend 2.0.32")
         commands = [["glslc", "--target-env=vulkan1.3", f"src/vulkan/{name}", "-o", f"build/vulkan-{name}.spv"] for name in ("scene.vert", "scene.frag", "shadow.vert")]
@@ -399,8 +428,10 @@ def execute(config, output, manifest, campaign):
                      ["bend", "src/megascene_reference_entry.bend", "-o", "reference-worker"]]
         if config["case"] == "picking":
             commands.append(["bend", "src/megascene_picking_reference_entry.bend", "-o", "picking-reference-worker"])
-        if config["case"] == "localized":
+        if config["case"] in ("localized", "support"):
             commands.append(["bend", "src/megascene_edit_reference_entry.bend", "-o", "edit-reference-worker"])
+        if config["case"] == "support":
+            commands.append(["bend", "src/megascene_support_reference_entry.bend", "-o", "support-reference-worker"])
         manifest["build"] = {"commands": commands, "working_directory": "runtime", "bend": "bend 2.0.32",
                              "compilers": {name: subprocess.check_output([name, "--version"], text=True).splitlines()[0] for name in ("g++", "clang", "glslc")}}
         manifest["source"] = provenance()
@@ -448,14 +479,16 @@ def execute(config, output, manifest, campaign):
                                       "MEGASCENE_WARMUP": config["warmup"], "MEGASCENE_MEASURED": config["frames"],
                                       "MEGASCENE_GROUND": str(int(config["side_m"])//2+8),
                                       "MEGASCENE_SCHEDULE_SHA256": artifact(output/"schedule.json",output)["sha256"]}
-    if config["case"] in ("traversal", "picking", "localized"):
+    if config["case"] in ("traversal", "picking", "localized", "support"):
         manifest["worker_environment"]["MEGASCENE_CAMERA_FILE"] = "../camera.bin"
+    if config['case']=='support':
+        manifest['worker_environment']['MEGASCENE_DETAIL_CAMERA_FILE']='../support-review.bin'
     if config["case"] == "picking":
         manifest["worker_environment"]["MEGASCENE_RAY_FILE"] = "../rays.bin"
-    if config["case"] == "localized":
-        manifest["worker_environment"]["MEGASCENE_LOCALIZED"] = "1"
+    if config["case"] in ("localized", "support"):
+        manifest["worker_environment"]["MEGASCENE_"+config["case"].upper()] = "1"
     manifest["constants"] = {"lighting": "baseline-8c3ffad-daylight", "shadow_size": ["2048","2048"], "shadow_filter": "nearest compare LEQUAL; 3x3 receiver-plane PCF; depth bias 0.00005",
-                             "projection": "0.05m near, infinite far, baseline focal 400 at 360px", "picking": config["case"] == "picking", "edits": config["case"] == "localized",
+                             "projection": "0.05m near, infinite far, baseline focal 400 at 360px", "picking": config["case"] == "picking", "edits": config["case"] in ("localized", "support"),
                              "palette": "runtime/src/color.bend", "lighting_constants": "runtime/src/vulkan/scene.frag",
                              "shadow_fit": "runtime/src/vulkan/native.cpp:shadow_matrix", "fixed_step": frozen["fixed_step"],
                              "proxy_bookkeeping": "retained; visible full meshes forced", "ground_half_extent_m": str(int(config["side_m"])//2+8)}
@@ -472,10 +505,16 @@ def execute(config, output, manifest, campaign):
     validation = validate_or_reuse(config, archive, manifest, loader, campaign, source, owners, bounds)
     snapshot(archive/"validation.json", validation)
     traversal_review = None
-    if config["case"] in ("traversal", "picking", "localized"):
+    if config["case"] in ("traversal", "picking", "localized", "support"):
         from megascene_traversal import review_evidence
         replay_records, _ = read_stream(archive/"validation"/"cpu.jsonl", validation["attempt_id"])
         traversal_review = review_evidence(archive, frozen, replay_records)
+        if config['case']=='support':
+            for view in traversal_review['views']:
+                view['body_features']=[f for f in validation.get('beam_features',[]) if f['frame']==view['frame']]
+        if config['case']=='support':
+            from megascene_support_review import review_details
+            review_details(archive,frozen,replay_records,traversal_review)
         snapshot(archive/"review.json", traversal_review)
     manifest["capabilities"]["validation_replay"] = measurement(
         "measured" if validation["status"] == "pass" else "incomplete",
@@ -488,7 +527,7 @@ def execute(config, output, manifest, campaign):
         report_value["measurement_scope"] = "validation execution cost; excluded from performance populations"
         manifest["extensions"]["phase"] = "validation_complete" if validation["status"] == "pass" else "validation_failed"
         report_value["state_correctness"] = outcome(validation["status"], "separate "+config["case"]+" validation", "complete declared "+config["case"]+" schedule", ["validation.json"])
-        if config["case"] in ("traversal", "picking", "localized"):
+        if config["case"] in ("traversal", "picking", "localized", "support"):
             report_value["rendering_correctness"] = outcome(validation["status"], "native visibility, cache and shadow fit replay", "complete declared "+config["case"]+" schedule", ["validation.json", "validation/comparison.json"])
         report_value["validation"] = {"path": "validation.json", "status": validation["status"]}
         if traversal_review is not None:
@@ -585,7 +624,7 @@ def launch(config, archive, manifest, loader, review=False, campaign=None, valid
                VK_LOADER_LAYERS_DISABLE="~all~")
     if validation:
         env["MEGASCENE_VALIDATE"] = "1"
-        if config["case"] in ("traversal", "picking", "localized"):
+        if config["case"] in ("traversal", "picking", "localized", "support"):
             captures = destination/"captures"
             captures.mkdir(exist_ok=True)
             env["MEGASCENE_CAPTURE_DIR"] = str(captures)

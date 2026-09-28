@@ -55,6 +55,7 @@ typedef struct {
   const char* schedule_sha256;
   const char* action_outcomes; // Canonical action history, including no-ops/rejections.
   unsigned action_frame;
+  unsigned action_id;
 } VoxelMegaState;
 
 typedef struct {
