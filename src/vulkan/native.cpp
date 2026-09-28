@@ -21,8 +21,20 @@
 
 namespace {
 constexpr uint32_t DEFAULT_WIDTH=640, DEFAULT_HEIGHT=360;
+void record_vk_failure(VkResult result,const char* what);
 void check(VkResult result, const char* what) {
+  if(result!=VK_SUCCESS) record_vk_failure(result,what);
   if (result!=VK_SUCCESS) throw std::runtime_error(std::string(what)+": Vulkan "+std::to_string(result));
+}
+} // namespace
+#include "supervision.h"
+#include "gpu_timing.h"
+#include "checkpoint.h"
+#include "visibility_reference.h"
+namespace {
+void record_vk_failure(VkResult result,const char* what) {
+  supervision::emit(supervision::allocations,supervision::allocation_seq,
+    "\"record_type\":\"vulkan_error\",\"operation\":\""+std::string(what)+"\",\"vk_result\":\""+std::to_string(result)+"\"");
 }
 struct Vec3 { float x,y,z; };
 Vec3 operator+(Vec3 a,Vec3 b) { return {a.x+b.x,a.y+b.y,a.z+b.z}; }
@@ -117,7 +129,7 @@ void add_hud(Geometry& g,const VoxelVkFrame& frame) {
     if (!end) break;
     hud=end+1;
   }
-  hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,
+  if (!frame.full_geometry) hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,
     palette_color(frame,HUD_RESET),scale);
 }
 Vec3 vector(const float* p) { return {p[0],p[1],p[2]}; }
@@ -416,7 +428,9 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   cache.proxy_rebuilt=cache.proxy_draws=cache.proxied_bodies=cache.visible_bodies=0;
   cache.proxy_vertices=0;
   if (!cache.scene_vertices) {
-    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},
+    float h=frame.full_geometry ? frame.ground_half_extent : 512.f;
+    if (!std::isfinite(h) || h<=0) throw std::runtime_error("invalid visual ground bounds");
+    quad(g,{-h,0,-h},{-h,0,h},{h,0,h},{h,0,-h},
       palette_color(frame,GROUND_COLOR),3);
     cache.scene_vertices=6; cache.dirty.push_back({0,6});
   }
@@ -478,7 +492,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
     auto group=cache.group_for_body[i];
     if (visible(b,frame,basis)) {
       cache.visible_bodies++;
-      if (!group || !group->selected)
+      if (frame.full_geometry || !group || !group->selected)
         cache.draws.push_back({mesh.first,mesh.count,b.offset});
       else group->visible_bodies++;
     }
@@ -501,7 +515,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
       it->second.selected=group.selected;
     }
     cache.proxy_vertices+=it->second.count;
-    if (group.selected && group.visible_bodies && proxy_visible(group,frame,basis)) {
+    if (!frame.full_geometry && group.selected && group.visible_bodies && proxy_visible(group,frame,basis)) {
       cache.draws.push_back({it->second.first,it->second.count,0});
       cache.proxy_draws++; cache.proxied_bodies+=group.visible_bodies;
     }
@@ -529,6 +543,60 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   add_hud(g,frame);
   return g;
 }
+// Verify actual cached mesh slots and submitted draw ranges, independent of slot
+// allocation order. Culling is checked against unculled full-mesh triangles.
+void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
+  using checkpoint::require;
+  require(f.full_geometry&&cache.meshes.size()==f.body_count,"native full-mesh ownership mismatch");
+  require(cache.proxy_draws==0&&cache.shadow_draws.size()==f.body_count,"native shadow/proxy draw mismatch");
+  uint64_t vertices_checked=0,reference_visible=0;
+  std::vector<checkpoint::J> drawn_ids;
+  checkpoint::Object mesh_slots,proxy_hashes;
+  for(unsigned i=0;i<f.body_count;i++) {
+    const auto& b=f.bodies[i]; auto it=cache.meshes.find(b.id);
+    require(it!=cache.meshes.end(),"missing native mesh"); const auto& mesh=it->second;
+    require(mesh.revision==b.revision&&mesh.anchored==b.anchored&&mesh.count==b.vertex_count,"native mesh identity mismatch");
+    require(uint64_t(mesh.first)+mesh.count<=cache.geometry.vertices.size(),"native mesh range overflow");
+    mesh_slots[std::to_string(b.id)]=checkpoint::array({checkpoint::number(mesh.first),checkpoint::number(mesh.count)});
+    for(unsigned j=0;j<b.vertex_count;j++) {
+      const auto& actual=cache.geometry.vertices[mesh.first+j]; const auto& expected=b.vertices[j];
+      auto color=material_color(f,expected.material,!b.anchored);
+      require(std::memcmp(&actual.position,expected.position,12)==0&&actual.side==expected.side&&
+        std::memcmp(&actual.color,&color,sizeof color)==0,"stale native mesh vertex/material");
+      vertices_checked++;
+    }
+    auto matches=[&](const Draw& d){return d.first==mesh.first&&d.count==mesh.count&&checkpoint::real(d.offset)==checkpoint::real(b.offset);};
+    auto drawn=std::count_if(cache.draws.begin(),cache.draws.end(),matches);
+    require(drawn<=1&&std::count_if(cache.shadow_draws.begin(),cache.shadow_draws.end(),matches)==1,"duplicate/missing native draw");
+    bool visible_reference=visibility_reference::body(b,f); reference_visible+=visible_reference;
+    require(!visible_reference||drawn==1,"visible full geometry was culled");
+    if(drawn) drawn_ids.push_back(checkpoint::number(b.id));
+  }
+  require(drawn_ids.size()==cache.draws.size(),"unknown native draw ownership");
+  require(cache.proxies.size()==cache.groups.size(),"stale native proxy ownership");
+  for(const auto& [key,proxy]:cache.proxies) {
+    const auto& group=cache.groups.at(key);
+    require(proxy.members==group.members && uint64_t(proxy.first)+proxy.count<=cache.geometry.vertices.size(),"stale native proxy members/range");
+    Geometry expected;
+    for(auto index:group.bodies) proxy_box(expected,f.bodies[index],f);
+    require(expected.triangles==proxy.count,"native proxy vertex count");
+    std::vector<checkpoint::J> vertices;
+    for(unsigned j=0;j<proxy.count;j++) {
+      const auto& v=cache.geometry.vertices[proxy.first+j]; const auto& want=expected.vertices[j];
+      require(std::memcmp(&v.position,&want.position,sizeof v.position)==0 &&
+        std::memcmp(&v.color,&want.color,sizeof v.color)==0 && v.side==want.side,"stale native proxy contents");
+      vertices.push_back(checkpoint::array({checkpoint::real(v.position.x),checkpoint::real(v.position.y),checkpoint::real(v.position.z),
+        checkpoint::real(v.color.x),checkpoint::real(v.color.y),checkpoint::real(v.color.z),checkpoint::number(v.side)}));
+    }
+    proxy_hashes[std::to_string(key)]=checkpoint::quote(checkpoint::hash(checkpoint::array(vertices)));
+  }
+  auto record=checkpoint::object({{"drawn_ids",checkpoint::array(drawn_ids)},
+    {"mesh_slots",checkpoint::object(mesh_slots)},{"proxy_cache_sha256",checkpoint::object(proxy_hashes)},
+    {"record_type",checkpoint::quote("native_audit")},{"reference_visible",checkpoint::number(reference_visible)},
+    {"vertices_checked",checkpoint::number(vertices_checked)}});
+  f.record(record.substr(1,record.size()-2).c_str());
+}
+
 std::vector<uint32_t> spirv(const char* path) {
   std::ifstream in(path,std::ios::binary|std::ios::ate);
   if (!in) throw std::runtime_error(std::string("cannot open shader ")+path);
@@ -537,6 +605,31 @@ std::vector<uint32_t> spirv(const char* path) {
   std::vector<uint32_t> code(size/4);
   in.seekg(0); in.read(reinterpret_cast<char*>(code.data()),size);
   return code;
+}
+// These CPU markers share CLOCK_MONOTONIC with the runner and bridge. They
+// measure actual boundaries, including intervening instrumentation and waits.
+uint32_t float_bits(float value) {
+  uint32_t bits;
+  std::memcpy(&bits,&value,sizeof bits);
+  return bits;
+}
+uint64_t monotonic_ns() {
+  timespec now{};
+  if (clock_gettime(CLOCK_MONOTONIC,&now)) throw std::runtime_error("monotonic clock failed");
+  return uint64_t(now.tv_sec)*1000000000ull+uint64_t(now.tv_nsec);
+}
+void stage(const VoxelVkFrame& frame,const char* name,uint64_t begin,uint64_t end) {
+  if (!frame.record) return;
+  char record[512];
+  std::snprintf(record,sizeof record,
+    "\"record_type\":\"stage\",\"stage\":\"%s\",\"begin_ns\":\"%llu\",\"end_ns\":\"%llu\",\"duration_ns\":\"%llu\",\"status\":\"measured\",\"unit\":\"ns\",\"scope\":\"cpu_stage\"",
+    name,(unsigned long long)begin,(unsigned long long)end,(unsigned long long)(end-begin));
+  frame.record(record);
+}
+VkPresentModeKHR unpaced_mode(const std::vector<VkPresentModeKHR>& modes) {
+  for (auto mode:{VK_PRESENT_MODE_IMMEDIATE_KHR,VK_PRESENT_MODE_MAILBOX_KHR})
+    if (std::find(modes.begin(),modes.end(),mode)!=modes.end()) return mode;
+  throw std::runtime_error("unpaced Vulkan present mode unavailable");
 }
 struct Push { float eye_yaw[4],pitch_offset[4],viewport[4],shadow_matrix[16]; };
 static_assert(sizeof(Push)==112,"shadow push constants must fit Vulkan's 128-byte minimum");
@@ -547,11 +640,14 @@ class Renderer {
   VkInstance instance=VK_NULL_HANDLE;
   VkSurfaceKHR surface=VK_NULL_HANDLE;
   VkPhysicalDevice physical=VK_NULL_HANDLE;
+  VkSurfaceCapabilitiesKHR frozen_surface{};
   VkDevice device=VK_NULL_HANDLE;
   VkQueue queue=VK_NULL_HANDLE;
   uint32_t family=0;
   VkSwapchainKHR swapchain=VK_NULL_HANDLE;
   VkFormat format=VK_FORMAT_UNDEFINED;
+  VkPresentModeKHR present_mode=VK_PRESENT_MODE_FIFO_KHR;
+  bool settings_recorded=false;
   VkExtent2D extent{DEFAULT_WIDTH,DEFAULT_HEIGHT};
   std::vector<VkImage> images;
   std::vector<VkImageView> views;
@@ -582,6 +678,7 @@ class Renderer {
   std::vector<ShadowIdentity> shadow_world;
   ShadowMatrix saved_shadow;
   bool shadow_valid=false;
+  gpu_timing::Queries gpu_queries;
 
   uint32_t memory_type(uint32_t bits,VkMemoryPropertyFlags flags) {
     VkPhysicalDeviceMemoryProperties p{}; vkGetPhysicalDeviceMemoryProperties(physical,&p);
@@ -599,7 +696,7 @@ class Renderer {
     VkMemoryRequirements req{}; vkGetImageMemoryRequirements(device,depth,&req);
     VkMemoryAllocateInfo ai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
     ai.allocationSize=req.size; ai.memoryTypeIndex=memory_type(req.memoryTypeBits,VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    check(vkAllocateMemory(device,&ai,nullptr,&depth_memory),"allocate depth image");
+    check(supervision::allocate(device,physical,&ai,&depth_memory),"allocate depth image");
     check(vkBindImageMemory(device,depth,depth_memory,0),"bind depth image");
     VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
     vi.image=depth; vi.viewType=VK_IMAGE_VIEW_TYPE_2D; vi.format=VK_FORMAT_D32_SFLOAT;
@@ -623,7 +720,7 @@ class Renderer {
     VkMemoryAllocateInfo ai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
     ai.allocationSize=req.size;
     ai.memoryTypeIndex=memory_type(req.memoryTypeBits,VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    check(vkAllocateMemory(device,&ai,nullptr,&shadow_memory),"allocate sun shadow image");
+    check(supervision::allocate(device,physical,&ai,&shadow_memory),"allocate sun shadow image");
     check(vkBindImageMemory(device,shadow_image,shadow_memory,0),"bind sun shadow image");
     VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
     vi.image=shadow_image; vi.viewType=VK_IMAGE_VIEW_TYPE_2D; vi.format=VK_FORMAT_D32_SFLOAT;
@@ -673,7 +770,7 @@ class Renderer {
     depth_view=VK_NULL_HANDLE;
     if (depth) vkDestroyImage(device,depth,nullptr);
     depth=VK_NULL_HANDLE;
-    if (depth_memory) vkFreeMemory(device,depth_memory,nullptr);
+    if (depth_memory) supervision::free(device,depth_memory);
     depth_memory=VK_NULL_HANDLE;
     if (swapchain) vkDestroySwapchainKHR(device,swapchain,nullptr);
     swapchain=VK_NULL_HANDLE;
@@ -776,14 +873,12 @@ class Renderer {
       std::vector<VkPresentModeKHR> modes(mode_count);
       check(vkGetPhysicalDeviceSurfacePresentModesKHR(physical,surface,&mode_count,modes.data()),
         "query present modes");
-      if (std::find(modes.begin(),modes.end(),VK_PRESENT_MODE_IMMEDIATE_KHR)!=modes.end())
-        ci.presentMode=VK_PRESENT_MODE_IMMEDIATE_KHR;
-      else if (std::find(modes.begin(),modes.end(),VK_PRESENT_MODE_MAILBOX_KHR)!=modes.end())
-        ci.presentMode=VK_PRESENT_MODE_MAILBOX_KHR;
-      else throw std::runtime_error("unpaced Vulkan present mode unavailable");
+      ci.presentMode=unpaced_mode(modes);
       std::fprintf(stderr,"stress_present_mode,%s\n",
         ci.presentMode==VK_PRESENT_MODE_IMMEDIATE_KHR?"immediate":"mailbox");
     }
+    present_mode=ci.presentMode;
+    frozen_surface=caps;
     ci.clipped=VK_TRUE;
     check(vkCreateSwapchainKHR(device,&ci,nullptr,&swapchain),"create swapchain");
     check(vkGetSwapchainImagesKHR(device,swapchain,&n,nullptr),"get swapchain images");
@@ -811,7 +906,7 @@ class Renderer {
     if (bytes<=capacity) return false;
     if (mapped) vkUnmapMemory(device,vertex_memory);
     if (vertices) vkDestroyBuffer(device,vertices,nullptr);
-    if (vertex_memory) vkFreeMemory(device,vertex_memory,nullptr);
+    if (vertex_memory) supervision::free(device,vertex_memory);
     capacity=std::max<VkDeviceSize>(bytes,capacity?capacity*2:1024*1024);
     VkBufferCreateInfo bi{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
     bi.size=capacity; bi.usage=VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -822,7 +917,7 @@ class Renderer {
     ai.allocationSize=req.size;
     ai.memoryTypeIndex=memory_type(req.memoryTypeBits,VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT|
       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    check(vkAllocateMemory(device,&ai,nullptr,&vertex_memory),"allocate vertex buffer");
+    check(supervision::allocate(device,physical,&ai,&vertex_memory),"allocate vertex buffer");
     check(vkBindBufferMemory(device,vertices,vertex_memory,0),"bind vertex buffer");
     check(vkMapMemory(device,vertex_memory,0,capacity,0,&mapped),"map vertex buffer");
     return true;
@@ -868,6 +963,7 @@ public:
       if (physical) break;
     }
     if (!physical) throw std::runtime_error("no Vulkan 1.3 graphics/present queue");
+    supervision::verify(physical);
     float priority=1;
     VkDeviceQueueCreateInfo qi{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO};
     qi.queueFamilyIndex=family; qi.queueCount=1; qi.pQueuePriorities=&priority;
@@ -909,11 +1005,13 @@ public:
   }
   ~Renderer() {
     if (device) {
-      vkDeviceWaitIdle(device);
+      VkResult idle=vkDeviceWaitIdle(device);
+      if(idle!=VK_SUCCESS) record_vk_failure(idle,"device teardown wait");
+      if(gpu_queries.active()) gpu_queries.finish(idle,monotonic_ns());
       clear_swapchain();
       if (mapped) vkUnmapMemory(device,vertex_memory);
       if (vertices) vkDestroyBuffer(device,vertices,nullptr);
-      if (vertex_memory) vkFreeMemory(device,vertex_memory,nullptr);
+      if (vertex_memory) supervision::free(device,vertex_memory);
       if (acquired) vkDestroySemaphore(device,acquired,nullptr);
       if (fence) vkDestroyFence(device,fence,nullptr);
       if (pool) vkDestroyCommandPool(device,pool,nullptr);
@@ -923,7 +1021,7 @@ public:
       if (shadow_sampler) vkDestroySampler(device,shadow_sampler,nullptr);
       if (shadow_view) vkDestroyImageView(device,shadow_view,nullptr);
       if (shadow_image) vkDestroyImage(device,shadow_image,nullptr);
-      if (shadow_memory) vkFreeMemory(device,shadow_memory,nullptr);
+      if (shadow_memory) supervision::free(device,shadow_memory);
       if (vs) vkDestroyShaderModule(device,vs,nullptr);
       if (fs) vkDestroyShaderModule(device,fs,nullptr);
       if (shadow_vs) vkDestroyShaderModule(device,shadow_vs,nullptr);
@@ -934,13 +1032,54 @@ public:
   }
   bool matches(Display* d,::Window w) const { return d==display&&w==window; }
   void render(const VoxelVkFrame& frame,VoxelVkTimings& timings) {
+    uint64_t ns_start=frame.record?monotonic_ns():0;
+    if(frame.gpu_evidence && frame.record && !gpu_queries.active()) {
+      VkPhysicalDeviceProperties properties{}; vkGetPhysicalDeviceProperties(physical,&properties);
+      uint32_t count=0; vkGetPhysicalDeviceQueueFamilyProperties(physical,&count,nullptr);
+      std::vector<VkQueueFamilyProperties> families(count);
+      vkGetPhysicalDeviceQueueFamilyProperties(physical,&count,families.data());
+      gpu_queries.start(device,family,properties.limits.timestampPeriod,families.at(family).timestampValidBits,3721);
+    }
+    if (frame.full_geometry && (extent.width!=frame.width || extent.height!=frame.height))
+      throw std::runtime_error("Megascene actual swapchain resolution differs from frozen request");
+    if (frame.full_geometry && present_mode!=VK_PRESENT_MODE_IMMEDIATE_KHR && present_mode!=VK_PRESENT_MODE_MAILBOX_KHR)
+      throw std::runtime_error("Megascene requires immediate or mailbox presentation");
+    if (frame.record && !settings_recorded) {
+      VkPhysicalDeviceProperties p{}; vkGetPhysicalDeviceProperties(physical,&p);
+      char name[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE*2+1]{};
+      for (size_t i=0;i<std::strlen(p.deviceName);i++) std::snprintf(name+i*2,3,"%02x",(unsigned char)p.deviceName[i]);
+      char record[2048];
+      std::snprintf(record,sizeof record,
+        "\"record_type\":\"render_settings\",\"width\":\"%u\",\"height\":\"%u\",\"present_mode\":\"%s\","
+        "\"profile\":\"full\",\"ground_half_extent_m\":\"%.9g\",\"shadow_size\":\"%u\",\"night\":\"%u\","
+        "\"device_name_hex\":\"%s\",\"vendor_id\":\"%u\",\"device_id\":\"%u\",\"driver_version\":\"%u\",\"api_version\":\"%u\"",
+        extent.width,extent.height,present_mode==VK_PRESENT_MODE_IMMEDIATE_KHR?"immediate":"mailbox",
+        frame.ground_half_extent,SHADOW_SIZE,frame.night,name,p.vendorID,p.deviceID,p.driverVersion,p.apiVersion);
+      frame.record(record);
+      std::string palette="\"record_type\":\"palette\",\"colors\":[";
+      for (unsigned color=0;color<19;color++) {
+        char rgb[64];
+        std::snprintf(rgb,sizeof rgb,"%s[\"0x%08x\",\"0x%08x\",\"0x%08x\"]",color?",":"",
+          float_bits(frame.colors[color][0]),float_bits(frame.colors[color][1]),float_bits(frame.colors[color][2]));
+        palette+=rgb;
+      }
+      palette+="]"; frame.record(palette.c_str());
+      settings_recorded=true;
+    }
     auto start=Clock::now();
     bool scene_reused=false;
     Geometry& g=geometry(frame,geometry_cache,scene_reused);
+    if(frame.record) audit_native(frame,geometry_cache);
     auto after_geometry=Clock::now();
+    uint64_t ns_after_geometry=frame.record?monotonic_ns():0;
+    stage(frame,"geometry",ns_start,ns_after_geometry);
     timings.geometry_us=microseconds(start,after_geometry);
-    check(vkWaitForFences(device,1,&fence,VK_TRUE,UINT64_MAX),"wait for frame fence");
+    VkResult waited=vkWaitForFences(device,1,&fence,VK_TRUE,UINT64_MAX);
     auto after_fence=Clock::now();
+    uint64_t ns_after_fence=frame.record?monotonic_ns():0;
+    if(gpu_queries.active()) gpu_queries.collect(frame.evidence_frame,false,waited,ns_after_fence);
+    check(waited,"wait for frame fence");
+    stage(frame,"fence_wait",ns_after_geometry,ns_after_fence);
     timings.fence_wait_us=microseconds(after_geometry,after_fence);
     bool new_buffer=ensure_vertices(g.vertices.size()*sizeof(Vertex));
     // The fence protects the single mapped arena. Its stable mesh slots survive
@@ -957,6 +1096,8 @@ public:
       upload(geometry_cache.scene_vertices,g.vertices.size()-geometry_cache.scene_vertices);
     }
     auto after_upload=Clock::now();
+    uint64_t ns_after_upload=frame.record?monotonic_ns():0;
+    stage(frame,"vertex_upload",ns_after_fence,ns_after_upload);
     if (std::getenv("VOXEL_STRESS")) {
       static uint32_t cache_frame;
       std::fprintf(stdout,"mesh_cache,%u,%u,%u,%zu,%u,%zu\n",cache_frame++,
@@ -971,9 +1112,12 @@ public:
     uint32_t index=0;
     VkResult acquire=vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,acquired,VK_NULL_HANDLE,&index);
     auto after_acquire=Clock::now();
+    uint64_t ns_after_acquire=frame.record?monotonic_ns():0;
+    stage(frame,"acquire",ns_after_upload,ns_after_acquire);
     timings.acquire_us=microseconds(after_upload,after_acquire);
     if (acquire==VK_ERROR_OUT_OF_DATE_KHR) {
       check(vkDeviceWaitIdle(device),"wait for swapchain recreation");
+      if (frame.full_geometry) throw std::runtime_error("Megascene swapchain became out of date");
       clear_swapchain(); make_swapchain(); return;
     }
     if (acquire!=VK_SUCCESS&&acquire!=VK_SUBOPTIMAL_KHR) check(acquire,"acquire swapchain image");
@@ -986,9 +1130,49 @@ public:
       std::fprintf(stderr,"vulkan shadow refresh bodies %u rebuilt %u\n",
         frame.body_count,geometry_cache.rebuilt);
     ShadowMatrix light=shadow_dirty?shadow_matrix(frame):saved_shadow;
+    float shadow_min_margin_texels=INFINITY;
+    if(frame.record) {
+      auto fresh=shadow_matrix(frame);
+      if(std::memcmp(light.values,fresh.values,sizeof light.values))
+        throw std::runtime_error("stale native shadow transform");
+      for(float value:light.values) if(!std::isfinite(value))
+        throw std::runtime_error("nonfinite native shadow transform");
+      for(uint32_t i=0;i<frame.body_count;i++) for(unsigned corner=0;corner<8;corner++) {
+        const auto& b=frame.bodies[i];
+        float x=(corner&1?b.hi[0]:b.lo[0])*.1f;
+        float y=(corner&2?b.hi[1]:b.lo[1])*.1f+b.offset;
+        float z=(corner&4?b.hi[2]:b.lo[2])*.1f;
+        float sx=light.values[0]*x+light.values[4]*y+light.values[8]*z+light.values[12];
+        float sy=light.values[1]*x+light.values[5]*y+light.values[9]*z+light.values[13];
+        float sz=light.values[2]*x+light.values[6]*y+light.values[10]*z+light.values[14];
+        if(!std::isfinite(sx)||!std::isfinite(sy)||!std::isfinite(sz)||
+           std::abs(sx)>1.0001f||std::abs(sy)>1.0001f||sz<-.0001f||sz>1.0001f)
+          throw std::runtime_error("occupied geometry outside sun shadow fit");
+        shadow_min_margin_texels=std::min(shadow_min_margin_texels,
+          std::min(1.f-std::abs(sx),1.f-std::abs(sy))*SHADOW_SIZE*.5f);
+      }
+    }
+    if (frame.record) {
+      char record[1024];
+      float sx=std::sqrt(light.values[0]*light.values[0]+light.values[4]*light.values[4]+light.values[8]*light.values[8]);
+      float sy=std::sqrt(light.values[1]*light.values[1]+light.values[5]*light.values[5]+light.values[9]*light.values[9]);
+      std::snprintf(record,sizeof record,
+        "\"record_type\":\"render_work\",\"body_count\":\"%u\",\"visible_bodies\":\"%u\",\"full_meshes\":\"%zu\","
+        "\"main_body_draws\":\"%zu\",\"proxy_draws\":\"%u\",\"proxy_groups\":\"%zu\",\"proxy_vertices\":\"%zu\","
+        "\"mesh_rebuilt\":\"%u\",\"proxy_rebuilt\":\"%u\",\"uploaded_bytes\":\"%zu\","
+        "\"shadow_refresh\":%s,\"shadow_body_draws\":\"%zu\",\"shadow_extent_m\":[\"0x%08x\",\"0x%08x\"],\"shadow_texel_m\":[\"0x%08x\",\"0x%08x\"],\"shadow_fit_min_margin_texels\":\"0x%08x\"",
+        frame.body_count,geometry_cache.visible_bodies,geometry_cache.meshes.size(),geometry_cache.draws.size(),
+        geometry_cache.proxy_draws,geometry_cache.proxies.size(),geometry_cache.proxy_vertices,
+        geometry_cache.rebuilt,geometry_cache.proxy_rebuilt,uploaded_vertices*sizeof(Vertex),
+        shadow_dirty?"true":"false",shadow_dirty?geometry_cache.shadow_draws.size():0,
+        float_bits(2.f/sx),float_bits(2.f/sy),float_bits(2.f/(sx*SHADOW_SIZE)),float_bits(2.f/(sy*SHADOW_SIZE)),
+        float_bits(shadow_min_margin_texels));
+      frame.record(record);
+    }
     check(vkResetCommandBuffer(command,0),"reset command buffer");
     VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     check(vkBeginCommandBuffer(command,&bi),"begin command buffer");
+    gpu_queries.begin(command);
     Push push{{frame.eye[0],frame.eye[1],frame.eye[2],frame.yaw},
       {frame.pitch,0,0,float(frame.night!=0)},
       {float(frame.width)*.5f,float(frame.height)*.5f,
@@ -1081,8 +1265,11 @@ public:
     barrier(images[index],VK_IMAGE_ASPECT_COLOR_BIT,VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
       VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
       VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,0);
+    gpu_queries.end(command);
     check(vkEndCommandBuffer(command),"end command buffer");
     auto after_record=Clock::now();
+    uint64_t ns_after_record=frame.record?monotonic_ns():0;
+    stage(frame,"command_record",ns_after_acquire,ns_after_record);
     timings.command_record_us=microseconds(after_acquire,after_record);
     check(vkResetFences(device,1,&fence),"reset frame fence");
     VkPipelineStageFlags wait_stage=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -1091,7 +1278,9 @@ public:
     submit.pWaitDstStageMask=&wait_stage; submit.commandBufferCount=1;
     submit.pCommandBuffers=&command; submit.signalSemaphoreCount=1;
     submit.pSignalSemaphores=&finished[index];
+    uint64_t submit_begin=gpu_queries.active()?monotonic_ns():0;
     check(vkQueueSubmit(queue,1,&submit,fence),"submit frame");
+    gpu_queries.submitted(frame.evidence_frame,submit_begin);
     if (shadow_dirty) {
       shadow_world.clear(); shadow_world.reserve(frame.body_count);
       for (uint32_t i=0;i<frame.body_count;i++) {
@@ -1106,7 +1295,26 @@ public:
     present.swapchainCount=1; present.pSwapchains=&swapchain; present.pImageIndices=&index;
     VkResult result=vkQueuePresentKHR(queue,&present);
     timings.submit_present_us=microseconds(after_record,Clock::now());
+    stage(frame,"submit_present",ns_after_record,frame.record?monotonic_ns():0);
     if (result==VK_ERROR_OUT_OF_DATE_KHR||result==VK_SUBOPTIMAL_KHR) {
+      if (frame.full_geometry) {
+        if(result==VK_ERROR_OUT_OF_DATE_KHR) throw std::runtime_error("Megascene presentation became out of date");
+        // SUBOPTIMAL is a successful presentation, not an out-of-date error.
+        // The compositor can return it with unchanged properties. Retain the
+        // exact result and accept only the original frozen surface capabilities.
+        VkSurfaceCapabilitiesKHR caps{};
+        check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical,surface,&caps),"recheck frozen surface");
+        if(caps.currentExtent.width!=frozen_surface.currentExtent.width||caps.currentExtent.height!=frozen_surface.currentExtent.height||
+           caps.currentTransform!=frozen_surface.currentTransform||caps.supportedTransforms!=frozen_surface.supportedTransforms||
+           caps.minImageCount!=frozen_surface.minImageCount||caps.maxImageCount!=frozen_surface.maxImageCount||
+           caps.minImageExtent.width!=frozen_surface.minImageExtent.width||caps.minImageExtent.height!=frozen_surface.minImageExtent.height||
+           caps.maxImageExtent.width!=frozen_surface.maxImageExtent.width||caps.maxImageExtent.height!=frozen_surface.maxImageExtent.height||
+           caps.maxImageArrayLayers!=frozen_surface.maxImageArrayLayers||caps.supportedCompositeAlpha!=frozen_surface.supportedCompositeAlpha||
+           caps.supportedUsageFlags!=frozen_surface.supportedUsageFlags)
+          throw std::runtime_error("Megascene surface properties changed during frozen attempt");
+        frame.record("\"record_type\":\"presentation_status\",\"result\":\"1000001003\",\"frozen_surface_unchanged\":true");
+        return;
+      }
       check(vkDeviceWaitIdle(device),"wait for swapchain recreation");
       clear_swapchain(); make_swapchain();
     } else check(result,"present frame");
@@ -1115,12 +1323,16 @@ public:
 std::unique_ptr<Renderer> renderer;
 }
 
-extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkFrame* frame,
+extern "C" int voxel_vk_render_timed(void* display,unsigned long window,const VoxelVkFrame* frame,
   VoxelVkTimings* timings,char* error,size_t error_cap) {
   try {
     if (!frame || !display || !window || !timings) throw std::runtime_error("invalid Vulkan frame");
     *timings={};
-    if (!renderer) renderer=std::make_unique<Renderer>(static_cast<Display*>(display),window);
+    if (!renderer) {
+      uint64_t begin=frame->record?monotonic_ns():0;
+      renderer=std::make_unique<Renderer>(static_cast<Display*>(display),window);
+      stage(*frame,"renderer_setup",begin,frame->record?monotonic_ns():0);
+    }
     if (!renderer->matches(static_cast<Display*>(display),window))
       throw std::runtime_error("Vulkan renderer window changed");
     renderer->render(*frame,*timings);
@@ -1133,4 +1345,33 @@ extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkF
     return 0;
   }
 }
+// Preserve the profile ABI used by archived static workers before GPU timing.
+extern "C" int voxel_vk_render_profile(void* display,unsigned long window,const VoxelVkFrame* frame,
+  VoxelVkTimings* timings,char* error,size_t error_cap) {
+  VoxelVkFrame previous{};
+  if(frame) std::memcpy(&previous,frame,offsetof(VoxelVkFrame,evidence_frame));
+  return voxel_vk_render_timed(display,window,frame?&previous:nullptr,timings,error,error_cap);
+}
+// Preserve the original ABI for previously built Light Atelier executables.
+extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkFrame* frame,
+  VoxelVkTimings* timings,char* error,size_t error_cap) {
+  VoxelVkFrame legacy{};
+  if (frame) std::memcpy(&legacy,frame,offsetof(VoxelVkFrame,full_geometry));
+  return voxel_vk_render_profile(display,window,frame?&legacy:nullptr,timings,error,error_cap);
+}
 extern "C" void voxel_vk_release(void) { renderer.reset(); }
+
+// The worker calls this before generation, so long pure computations cannot
+// suppress heap monitoring. A separate probe establishes preflight capability;
+// its usage is never attributed to the worker.
+extern "C" int voxel_mega_start(char* error,size_t cap) {
+  try { supervision::start(); return 1; }
+  catch(const std::exception& e) { std::snprintf(error,cap,"%s",e.what()); return 0; }
+}
+extern "C" int voxel_mega_probe(char* output,size_t cap) {
+  try {
+    supervision::setup();
+    std::string result="{"+supervision::sample()+"}";
+    std::snprintf(output,cap,"%s",result.c_str()); supervision::finish(); return 1;
+  } catch(const std::exception& e) { std::snprintf(output,cap,"%s",e.what()); supervision::finish(); return 0; }
+}

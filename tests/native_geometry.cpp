@@ -135,6 +135,25 @@ static void expect_render_lod() {
   expect_fresh(frame,cache,5);
   assert(cache.proxy_draws==1 && cache.proxied_bodies==5);
   assert(cache.draws.size()==1 && cache.proxy_rebuilt==1);
+  // The primary profile changes selection only: full visible meshes, identical
+  // eligibility, retained proxies, full shadow work and fixed declared ground.
+  VoxelVkFrame full=frame;
+  full.full_geometry=1; full.ground_half_extent=40;
+  GeometryCache full_cache;
+  expect_fresh(full,full_cache,5);
+  assert(full_cache.proxies.size()==cache.proxies.size());
+  assert(full_cache.proxy_vertices==cache.proxy_vertices);
+  assert(full_cache.proxy_rebuilt==1 && full_cache.proxy_draws==0);
+  assert(full_cache.draws.size()==5 && full_cache.shadow_draws.size()==5);
+  assert(full_cache.meshes.size()==5 && full_cache.proxied_bodies==0);
+  for (size_t i=0;i<6;i++) {
+    auto p=full_cache.geometry.vertices[i].position;
+    assert(std::abs(p.x)==40 && std::abs(p.z)==40 && p.y==0);
+  }
+  expect_fresh(full,full_cache,0);
+  assert(full_cache.proxy_rebuilt==0 && full_cache.draws.size()==5);
+  auto old_shadow=shadow_matrix(frame),full_shadow=shadow_matrix(full);
+  assert(std::memcmp(old_shadow.values,full_shadow.values,sizeof old_shadow.values)==0);
   faces[0].material=5; bodies[0].revision++;
   expect_fresh(frame,cache,1);
   assert(proxy_material(bodies[0])==5); // New plaster participates in LOD safely.
@@ -183,7 +202,46 @@ static void expect_render_lod() {
   assert(cache.draws.size()==3);
 }
 
+static void expect_visibility_fixtures() {
+  auto check=[](std::array<float,3> lo,std::array<float,3> hi,float offset,
+                std::array<float,3> eye,bool expected) {
+    std::vector<VoxelVkVertex> vertices;
+    for(unsigned side=0;side<6;side++) {
+      unsigned axis=side/2,u=(axis+1)%3,v=(axis+2)%3;
+      auto corner=[&](unsigned a,unsigned b) {
+        std::array<float,3> p=lo;
+        p[axis]=side%2?hi[axis]:lo[axis];
+        p[u]=a?hi[u]:lo[u]; p[v]=b?hi[v]:lo[v];
+        return VoxelVkVertex{{p[0]*.1f,p[1]*.1f,p[2]*.1f},side,2};
+      };
+      for(auto [a,b]:std::initializer_list<std::pair<unsigned,unsigned>>{{0,0},{1,0},{1,1},{0,0},{1,1},{0,1}})
+        vertices.push_back(corner(a,b));
+    }
+    VoxelVkBody body{};
+    body.id=1; body.offset=offset;
+    std::copy(lo.begin(),lo.end(),body.lo);
+    std::copy(hi.begin(),hi.end(),body.hi);
+    body.vertex_count=vertices.size(); body.vertices=vertices.data();
+    VoxelVkFrame frame{}; frame.width=640; frame.height=360;
+    std::copy(eye.begin(),eye.end(),frame.eye);
+    bool reference=visibility_reference::body(body,frame);
+    assert(reference==expected);
+    if(reference) assert(visible(body,frame,ViewBasis(frame)));
+  };
+  check({8,-1,9},{12,1,12},0,{0,0,0},true); // Frustum side boundary.
+  check({-10,-10,-10},{10,10,10},0,{0,0,0},true); // Eye inside the owner.
+  check({-35,10,-30},{-25,20,-20},-.5f,{-3,1,-4},true); // Signed/translated.
+  check({-1,-1,0},{1,1,1},0,{0,0,0},true); // Near-plane intersection.
+  check({-1,-1,-20},{1,1,-10},0,{0,0,0},false);
+}
+
 int main() {
+  expect_visibility_fixtures();
+  assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR,VK_PRESENT_MODE_IMMEDIATE_KHR})==VK_PRESENT_MODE_IMMEDIATE_KHR);
+  assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR})==VK_PRESENT_MODE_MAILBOX_KHR);
+  bool unsupported=false;
+  try { unpaced_mode({VK_PRESENT_MODE_FIFO_KHR}); } catch (const std::runtime_error&) { unsupported=true; }
+  assert(unsupported);
   expect_bend_palette();
   expect_bend_body_vertices();
   expect_shadow_bounds();

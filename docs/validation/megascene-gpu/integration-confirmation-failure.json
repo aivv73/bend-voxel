@@ -1,0 +1,40 @@
+{
+  "scope": "additional opt-in recovery check; resource freshness failed despite measured GPU intervals",
+  "raw_artifact_availability": "temporary test directory removed; test output and embedded summary retained",
+  "attempt_id": "3b858c3a-223f-4eac-a05b-cf5bc4d74149",
+  "termination": {
+    "cause": "monitoring_failure",
+    "reason": "missing/stale required heap_sample",
+    "exit_code": "0",
+    "signal": null
+  },
+  "schedule_completion": {
+    "status": "inconclusive",
+    "reason": "incomplete or invalid evidence",
+    "scope": "declared_development_prefix",
+    "evidence": [
+      "cpu.jsonl",
+      "gpu.jsonl"
+    ]
+  },
+  "gpu_counts": {
+    "collection_failure": "0",
+    "disabled": "0",
+    "incomplete": "0",
+    "measured": "4",
+    "not_executed": "0",
+    "not_ready": "0",
+    "unsupported": "0"
+  },
+  "gpu_errors": [],
+  "resource_cadence": {
+    "host_sample": {
+      "samples": "17",
+      "max_observed_gap_ns": "100461452"
+    },
+    "heap_sample": {
+      "samples": "4",
+      "max_observed_gap_ns": "1043769686"
+    }
+  }
+}

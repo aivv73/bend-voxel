@@ -1,0 +1,17 @@
+test_actual_artifact_and_configuration_reuse_guards (test_megascene_checkpoints.CanonicalContracts.test_actual_artifact_and_configuration_reuse_guards) ... ok
+test_checkpoint_stream_rejects_escaped_or_reordered_payload (test_megascene_checkpoints.CanonicalContracts.test_checkpoint_stream_rejects_escaped_or_reordered_payload) ... ok
+test_exact_schema_vocabulary_and_numbers (test_megascene_checkpoints.CanonicalContracts.test_exact_schema_vocabulary_and_numbers) ... ok
+test_sparse_signed_occupancy_and_overlap (test_megascene_checkpoints.CanonicalContracts.test_sparse_signed_occupancy_and_overlap) ... ok
+test_equivalent_partitions_compare_equal_and_keep_actual_work (test_megascene_checkpoints.NativeCheckpoints.test_equivalent_partitions_compare_equal_and_keep_actual_work) ... ok
+test_native_checkpoint_matches_independent_sparse_oracle (test_megascene_checkpoints.NativeCheckpoints.test_native_checkpoint_matches_independent_sparse_oracle) ... ok
+test_reject_corruption_before_normalization (test_megascene_checkpoints.NativeCheckpoints.test_reject_corruption_before_normalization) ... ok
+test_signed_zero_and_body_field_diagnostics (test_megascene_checkpoints.NativeCheckpoints.test_signed_zero_and_body_field_diagnostics) ... ok
+test_correct_missing_corrupted_and_incomplete_replays (test_megascene_checkpoints.SyntheticReplay.test_correct_missing_corrupted_and_incomplete_replays) ... ok
+test_equivalent_geometry_keeps_work_difference_separate (test_megascene_checkpoints.SyntheticReplay.test_equivalent_geometry_keeps_work_difference_separate) ... ok
+test_intermediate_static_change_and_stale_mesh (test_megascene_checkpoints.SyntheticReplay.test_intermediate_static_change_and_stale_mesh) ... ok
+test_separate_validation_reuse_corruption_and_missing_evidence (test_megascene_checkpoints.ValidationRunner.test_separate_validation_reuse_corruption_and_missing_evidence) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 73.216s
+
+OK

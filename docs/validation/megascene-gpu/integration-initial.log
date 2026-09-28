@@ -1,0 +1,31 @@
+test_actual_settings_and_work_cannot_be_missing_or_reduced (test_megascene_static.StaticReports.test_actual_settings_and_work_cannot_be_missing_or_reduced) ... ok
+test_complete_observation_is_never_qualified (test_megascene_static.StaticReports.test_complete_observation_is_never_qualified) ... ok
+test_cpu_clock_invalid_and_overflow_intervals (test_megascene_static.StaticReports.test_cpu_clock_invalid_and_overflow_intervals) ... ok
+test_crash_and_policy_stop_preserve_prefix (test_megascene_static.StaticReports.test_crash_and_policy_stop_preserve_prefix) ... ok
+test_duplicate_completion_cannot_pass (test_megascene_static.StaticReports.test_duplicate_completion_cannot_pass) ... ok
+test_frame_gap_duplicate_and_wrong_boundary (test_megascene_static.StaticReports.test_frame_gap_duplicate_and_wrong_boundary) ... ok
+test_frozen_accepted_schedule (test_megascene_static.StaticReports.test_frozen_accepted_schedule) ... ok
+test_gpu_availability_never_overrides_required_evidence (test_megascene_static.StaticReports.test_gpu_availability_never_overrides_required_evidence) ... ok
+test_gpu_submit_must_belong_to_cpu_frame_interval (test_megascene_static.StaticReports.test_gpu_submit_must_belong_to_cpu_frame_interval) ... ok
+test_prelaunch_failure_has_no_invented_worker_exit (test_megascene_static.StaticReports.test_prelaunch_failure_has_no_invented_worker_exit) ... ok
+test_public_rejections_precede_build (test_megascene_static.StaticReports.test_public_rejections_precede_build) ... ok
+test_stream_schema_sequence_damage_and_zero (test_megascene_static.StaticReports.test_stream_schema_sequence_damage_and_zero) ... ok
+test_unsupported_exception_is_distinct_from_disabled (test_megascene_static.StaticReports.test_unsupported_exception_is_distinct_from_disabled) ... ok
+test_validator_import_failure_retains_prelaunch_evidence (test_megascene_static.StaticReports.test_validator_import_failure_retains_prelaunch_evidence) ... validator import fixture
+ok
+test_public_runner_archive_capture_recovery_and_abnormal_exit (test_megascene_static.StaticVulkan.test_public_runner_archive_capture_recovery_and_abnormal_exit) ... FAIL
+
+======================================================================
+FAIL: test_public_runner_archive_capture_recovery_and_abnormal_exit (test_megascene_static.StaticVulkan.test_public_runner_archive_capture_recovery_and_abnormal_exit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/aivv/Документы/projects/bend-voxel/tests/test_megascene_static.py", line 235, in test_public_runner_archive_capture_recovery_and_abnormal_exit
+    self.assertEqual(proc.returncode,0,proc.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 0 : static invocation did not complete correctly; retained summary describes the prefix
+
+
+----------------------------------------------------------------------
+Ran 15 tests in 49.431s
+
+FAILED (failures=1)

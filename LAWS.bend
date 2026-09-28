@@ -41,11 +41,76 @@ law palette_length:
 #   incorrect state/rendering. These future gates are not yet implemented.
 # - Canonical decision: https://github.com/aivv73/bend-voxel/issues/44
 #   Runtime/reference checks must cover all unsafe/native-dependent properties.
+# - The primary traversal freezes every startup, warm-up and measured camera
+#   in binary32 before replay. Picking and edits remain disabled. Validation
+#   checks every view, and timing retains named route checkpoints and return
+#   geometry. Moving views cannot rebuild unchanged full meshes or shadow fit.
+# - The user-approved issue #53 cavity-framing remedy uses traversal-v2 with
+#   eye (256,70,210), look (256,12,272) at both cavity visits. Preserve the
+#   exact traversal-v1 route and its failed readability review as evidence.
+#   Route versions cannot share validation or be silently interchanged.
+# - Issue #54 picking uses the same versioned camera route. Enable only the
+#   declared wall/interior/cavity/assembly/sky holds; preserve strict <256 m
+#   reach, target identity, explicit disabled samples and unchanged geometry.
+#   Admit frozen targets with an independent reference before timing; guard
+#   actual cell/metre/offset/distance operations before unsafe ray traversal.
+#   Picking, native caches and these guards require runtime/reference evidence.
+# - Required route captures occur in the separate validation process. Assess
+#   each named feature's geometry and readability with a bound capture, shadow
+#   fit and texel evidence. Missing review cannot pass visual quality; wrong
+#   rendering and insufficient readability have different outcomes. These are
+#   runtime/reference/human checks, never unsafe-dependent formal proofs.
 # - Accepted #45 refinements: proxy thresholds retain render-pixel scaling.
 #   Calibration-off controls may omit intermediate timed checkpoints only as
 #   diagnostics with explicit limited equivalence evidence; they never qualify
 #   benchmark passes or endpoints. Qualifying runs retain all required checks.
 #   See docs/megascene-spec.md for the handoff and calibration protocol.
+# - Fixed-preset initial admission now checks disjointness, positive-face
+#   connectivity, anchors, arithmetic bounds and actual production inventory.
+#   See docs/megascene-admission.md. These are runtime/reference checks only;
+#   admission does not prove unsafe geometry or qualify a Vulkan attempt.
+
+# - Static Vulkan development observations freeze the binary32 opening view
+#   and 1/60 step, disable picking/edits, and preserve physics-before-render.
+#   Full geometry retains proxy bookkeeping, fixed ground and 2048^2 shadows.
+#   Archive actual runtime artifacts and inputs before invocation; preserve
+#   frame-return intervals, missing evidence and abnormal completed prefixes.
+#   See docs/megascene-static.md. Static correctness is separate from
+#   calibration and performance qualification; missing evidence is not a pass.
+# - Validate each static artifact/workload/schedule/profile/thread configuration
+#   in a fresh complete replay before timing another fresh process. Reuse only
+#   matching actual artifact and execution identities. Charge validation time.
+# - Check actual ownership, tree summaries, material/anchor conservation,
+#   connectivity, drawable coverage/winding, native caches and visibility.
+#   Small independent dense references and large sparse checks have distinct
+#   scopes. Retain required timed checkpoints within normal frame work.
+# - Canonical occupancy/surfaces ignore equivalent partitions, never IDs,
+#   revisions, owners, anchors, motion bits, budget, next ID or view/schedule.
+#   Keep raw work inventories and useful field/body mismatch evidence.
+#   See docs/megascene-validation.md; all these checks are runtime evidence.
+# - Supervision samples host/device/process-attributed heaps every 100 ms,
+#   stops on required monitoring failure or data older than one second, and
+#   enforces independent reserves and the earliest applicable deadline.
+# - Commit minimal reference records to bounded preallocated shared slots.
+#   Never reuse a slot or discard committed evidence after worker termination.
+#   Overflow, gaps, damaged required records or persistence failure invalidate
+#   completion; preserve raw bytes and the usable prefix.
+# - Vulkan allocation identities and exact ledger totals are distinct from
+#   process residency and driver-estimated heap budgets. An exit signal alone
+#   never establishes allocation exhaustion. Retain the known supervisor cause.
+# - Campaign validation/control/attempt time shares one persisted allowance;
+#   interruption/exhaustion requires an explicit addition, never a ticket reset.
+#   These native/OS rules require runtime/reference tests, not formal claims.
+#   See docs/megascene-supervision.md.
+# - GPU timestamps belong to their submitted frame, including delayed results
+#   and teardown collection. Retain raw ticks, period, valid bits and scope.
+#   Use existing synchronization only; never add a query wait to frame work.
+# - Resolve only available pairs with valid CPU bounds and unambiguous wrap.
+#   Unsupported, disabled, not-ready, incomplete and failed collection are
+#   distinct from measured zero. Missing required tails prevent completion.
+#   CPU waits are not GPU execution or display latency. GPU availability never
+#   establishes calibration, validation, supervision or benchmark qualification.
+#   See docs/megascene-gpu.md; native timestamp rules use runtime/reference tests.
 
 # Stable material IDs are shared by the native bridge and generated assets.
 law material_ids:
@@ -118,3 +183,19 @@ law palette_material_order:
      Color.surface(Color.frame(),False{}),Color.surface(Color.frame(),True{}),
      Color.surface(Color.machinery(),False{}),Color.surface(Color.machinery(),True{}),
      Color.surface(Color.plaster(),False{}),Color.surface(Color.plaster(),True{})] : List<&2,R.Vec>}
+
+# - Issue #55 localized-v1 executes exactly one 20 cm terrain cut at measured
+#   frame 0 after physics, then holds its frozen view for unchanged-world
+#   observations. Its 16 removed concrete cells must agree with an independent
+#   reference. A required rejection/no-op cannot satisfy schedule completion.
+# - Preserve every action outcome in canonical checkpoint history, including
+#   rejection and no-op. Atomic rejection preserves body geometry/cache data,
+#   IDs/revisions, next ID, budget, materials, anchors and motion; only the
+#   documented status/removal telemetry changes.
+# - Guard actual carve predicates, counts, ID growth and native size bounds
+#   before unsafe work. Validate local surfaces and unchanged full/proxy mesh
+#   contents at runtime. These rules are never unsafe-dependent formal proofs.
+# - Edit response runs from before the scripted operation through its rendered
+#   frame return, including required checks/logging; CPU/GPU ordinary samples
+#   exclude that frame. One accepted edit leaves percentile qualification
+#   inconclusive; never add cuts or pool attempts to manufacture a pass.

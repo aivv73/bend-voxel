@@ -1,0 +1,111 @@
+{
+  "synthetic": false,
+  "scope": "Legacy regression results retain their existing meanings; no Megascene qualification",
+  "legacy": [
+    {
+      "resolution": "640x360",
+      "pass": true,
+      "warmup": 30,
+      "frames": 180,
+      "cases": [
+        {
+          "name": "atelier",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        },
+        {
+          "name": "atelier-night",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        },
+        {
+          "name": "atelier-camera",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        },
+        {
+          "name": "atelier-aim",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        },
+        {
+          "name": "atelier-carve",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        }
+      ],
+      "report_path": "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/issue49-legacy-640/report.json",
+      "report_sha256": "7059edf077b396fc08f1a21e77d6da86ec690088f674bc368e24cfb9b7a950fd"
+    },
+    {
+      "resolution": "1920x1080",
+      "pass": true,
+      "warmup": 30,
+      "frames": 180,
+      "cases": [
+        {
+          "name": "atelier",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        },
+        {
+          "name": "atelier-night",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        },
+        {
+          "name": "atelier-camera",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        },
+        {
+          "name": "atelier-aim",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        },
+        {
+          "name": "atelier-carve",
+          "pass": true,
+          "errors": [],
+          "present_mode": "immediate",
+          "solid_cells_start": 803970,
+          "max_bodies": 0
+        }
+      ],
+      "report_path": "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/issue49-legacy-1080/report.json",
+      "report_sha256": "80548fcc222f2191781137ae97fb89e2f360bb8237c44e0d1336e7211e37c73a"
+    }
+  ],
+  "face_diagnostic": {
+    "pass": true,
+    "cuts": 6,
+    "report_sha256": "6ca72c72da0c06f8f7bdcd650d1498a8f35e04a23cd66b235110537ea82c15bf"
+  }
+}

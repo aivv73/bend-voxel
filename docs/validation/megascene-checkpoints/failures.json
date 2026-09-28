@@ -1,0 +1,373 @@
+{
+  "campaign_id": "2b024983-0863-4005-beda-5b16088db1b5",
+  "failures": [
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/dda190ce-5d00-43d7-b4b1-d55b5a241a36/d42bad08-2aff-4ec2-b7bf-5cd2af3d0377/validation/summary.json",
+      "entry_scope": "validation_replay",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "30710906-371e-4dad-9cb7-5bd0c6863de9",
+        "cause": "worker_error",
+        "elapsed_ns": "26964815059",
+        "summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/dda190ce-5d00-43d7-b4b1-d55b5a241a36/d42bad08-2aff-4ec2-b7bf-5cd2af3d0377/validation/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "1"
+      },
+      "summary_sha256": "bf0a46decc29121e6d1547d3bff805e85c127adacc7a10a48ff1505a6e072783",
+      "termination": {
+        "cause": "worker_error",
+        "exit_code": "1",
+        "reason": "worker exit; no exhaustion inference from signal",
+        "signal": null
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/dda190ce-5d00-43d7-b4b1-d55b5a241a36/d42bad08-2aff-4ec2-b7bf-5cd2af3d0377/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "d42bad08-2aff-4ec2-b7bf-5cd2af3d0377",
+        "cause": "worker_error",
+        "elapsed_ns": "28809260341",
+        "summary": "/home/aivv/Документы/projects/bend-voxel/build/issue51-smoke/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "1"
+      },
+      "summary_sha256": "7038dccda8605ef9c6c153e68d3269797385f07931f692eb576b86a56913e561",
+      "termination": {
+        "cause": "worker_error",
+        "exit_code": "1",
+        "reason": "worker exit; no exhaustion inference from signal",
+        "signal": null
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/02e8b961-09b1-494c-a571-47407991e7fb/d75b8d72-8aba-4861-bd84-329557bdbcea/validation/summary.json",
+      "entry_scope": "validation_replay",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "7215c91c-1da5-45f2-8a71-affc84c48cb9",
+        "cause": "worker_error",
+        "elapsed_ns": "84333880386",
+        "summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/02e8b961-09b1-494c-a571-47407991e7fb/d75b8d72-8aba-4861-bd84-329557bdbcea/validation/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "1"
+      },
+      "summary_sha256": "e810c39fbcf8e1c2b7d324ee1c97b8646d4a299a3b2011cdcfb14e720f1a9228",
+      "termination": {
+        "cause": "worker_error",
+        "exit_code": "1",
+        "reason": "worker exit; no exhaustion inference from signal",
+        "signal": null
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/02e8b961-09b1-494c-a571-47407991e7fb/d75b8d72-8aba-4861-bd84-329557bdbcea/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "d75b8d72-8aba-4861-bd84-329557bdbcea",
+        "cause": "worker_error",
+        "elapsed_ns": "87115016041",
+        "summary": "/home/aivv/Документы/projects/bend-voxel/build/issue51-smoke2/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "1"
+      },
+      "summary_sha256": "f72846f1809c35818b3ff7d444364d9a696b87dddf44df5712a75017e277b594",
+      "termination": {
+        "cause": "worker_error",
+        "exit_code": "1",
+        "reason": "worker exit; no exhaustion inference from signal",
+        "signal": null
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/4b9a5ff1-c847-4e7d-82ad-f689dcdfab69/f2d3c3a9-918f-4532-ba38-e2974161785f/validation/summary.json",
+      "entry_scope": "validation_replay",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "9379e122-c0c6-4f03-accd-4100dc060aac",
+        "cause": "worker_error",
+        "elapsed_ns": "174285272362",
+        "summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/4b9a5ff1-c847-4e7d-82ad-f689dcdfab69/f2d3c3a9-918f-4532-ba38-e2974161785f/validation/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "1"
+      },
+      "summary_sha256": "e6ab378bdef1d899b73eb738e711e7e54c5a2552836f07f1abf6eb25bcbb3bcb",
+      "termination": {
+        "cause": "worker_error",
+        "exit_code": "1",
+        "reason": "worker exit; no exhaustion inference from signal",
+        "signal": null
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/4b9a5ff1-c847-4e7d-82ad-f689dcdfab69/f2d3c3a9-918f-4532-ba38-e2974161785f/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "f2d3c3a9-918f-4532-ba38-e2974161785f",
+        "cause": "worker_error",
+        "elapsed_ns": "175394181836",
+        "summary": "/home/aivv/Документы/projects/bend-voxel/build/issue51-smoke3/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "1"
+      },
+      "summary_sha256": "9645862c7fa09d874a5cee7e34d3565285b04e372e2b5efe4fe56ae542ba9082",
+      "termination": {
+        "cause": "worker_error",
+        "exit_code": "1",
+        "reason": "worker exit; no exhaustion inference from signal",
+        "signal": null
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/31fd219c-e3c5-46ba-b227-28dfc0beb667/19f86362-81ec-4747-9b6d-d5359d527092/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "19f86362-81ec-4747-9b6d-d5359d527092",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "415341664650",
+        "summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/31fd219c-e3c5-46ba-b227-28dfc0beb667/19f86362-81ec-4747-9b6d-d5359d527092/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "4"
+      },
+      "summary_sha256": "5de5940fd42dc2cfe504218b4ca842cac8ded7aafeeaa9451c8798cf959c8fc4",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": "0",
+        "reason": "required resource sample stale or invalid",
+        "signal": null
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/28dd15cb-8527-4210-8d96-4c055c75c4d5/d163ccd2-507e-460c-89f2-9cefba92f701/validation/summary.json",
+      "entry_scope": "validation_replay",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "53ea5599-77f3-42a6-b9f4-1438bfb9315a",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "564181108473",
+        "summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/28dd15cb-8527-4210-8d96-4c055c75c4d5/d163ccd2-507e-460c-89f2-9cefba92f701/validation/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "3356"
+      },
+      "summary_sha256": "6bc095160e5bc94487008b434377d5f67bdd6c7d64b65e645d0c6a531bd7d9f9",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/28dd15cb-8527-4210-8d96-4c055c75c4d5/d163ccd2-507e-460c-89f2-9cefba92f701/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "d163ccd2-507e-460c-89f2-9cefba92f701",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "567536090164",
+        "summary": "/home/aivv/Документы/projects/bend-voxel/build/issue51-full6/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "3356"
+      },
+      "summary_sha256": "dd0ad1fe90f17bb4defaa5554945b316c95be5dedef2534a3c038d560903de8b",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/ac1a5aae-c2be-4b69-ad95-1dd94c854bf7/837581fc-f51a-4758-98dd-9e206315c6a1/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [
+        "Coordinator files were edited during module loading; ImportError: cannot import name verify_evidence. No worker was launched."
+      ],
+      "ledger_entry": {
+        "attempt_id": "837581fc-f51a-4758-98dd-9e206315c6a1",
+        "cause": "prelaunch_failure",
+        "elapsed_ns": "1876244855017",
+        "summary": "/home/aivv/Документы/projects/bend-voxel/build/issue51-verified1/summary.json"
+      },
+      "recovered_after_coordinator_failure": true,
+      "reference_completed_prefix": null,
+      "summary_sha256": "69dd7ee07d29176b5a507fdf2449ad91daed18393aecfed45c51cdc4799027ee",
+      "termination": {
+        "cause": "prelaunch_failure",
+        "exit_code": null,
+        "reason": "Coordinator files were edited during module loading; ImportError: cannot import name verify_evidence. No worker was launched.",
+        "signal": null
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/31d503dc-db95-4541-9bd5-84bfd6509e9c/7465e71a-a4f3-42f9-a320-6ba42c1105f1/validation/summary.json",
+      "entry_scope": "validation_replay",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "51716dfc-c59f-4b49-9e88-8079e1742787",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "2455110561448",
+        "summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/31d503dc-db95-4541-9bd5-84bfd6509e9c/7465e71a-a4f3-42f9-a320-6ba42c1105f1/validation/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "0"
+      },
+      "summary_sha256": "5f36e6f7e896241054f9fec6cc72d1962704f1ff47dbe7d05fe0b54b9518cae9",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/31d503dc-db95-4541-9bd5-84bfd6509e9c/7465e71a-a4f3-42f9-a320-6ba42c1105f1/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "7465e71a-a4f3-42f9-a320-6ba42c1105f1",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "2456731972826",
+        "summary": "/home/aivv/Документы/projects/bend-voxel/build/issue51-accept6/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "0"
+      },
+      "summary_sha256": "07acafcf3b23c69e9f5f92c66199e7d3ef2daf3f43da28a4255a3d759566d9f5",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/9f10747b-80a9-4158-a182-b3b215f0985b/78f95ce6-75e6-41dc-89ab-5d9e596f4bd7/validation/summary.json",
+      "entry_scope": "validation_replay",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "4f4f14a5-651e-4f64-98fb-90ac4ea269cb",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "3000533614639",
+        "summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/9f10747b-80a9-4158-a182-b3b215f0985b/78f95ce6-75e6-41dc-89ab-5d9e596f4bd7/validation/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "2509"
+      },
+      "summary_sha256": "7f95145b94a9da2f5a3d55d48174a7f402b32a73f4e1d61f405d8959873fefb5",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/9f10747b-80a9-4158-a182-b3b215f0985b/78f95ce6-75e6-41dc-89ab-5d9e596f4bd7/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "78f95ce6-75e6-41dc-89ab-5d9e596f4bd7",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "3003805605245",
+        "summary": "/home/aivv/Документы/projects/bend-voxel/build/issue51-retained-small-12-0/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "2509"
+      },
+      "summary_sha256": "dac59d3cf11bd5430672ad5973b99a11c52b2bae74e3552a8de2726a906e7102",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/755f4711-2f84-49a5-822a-9b7f70dc243b/f3f0e2dc-f788-4755-be1e-75c7ee29cb28/validation/summary.json",
+      "entry_scope": "validation_replay",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "be70d0b4-33fb-4bba-bf31-08cec6e93930",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "3315043738399",
+        "summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/755f4711-2f84-49a5-822a-9b7f70dc243b/f3f0e2dc-f788-4755-be1e-75c7ee29cb28/validation/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "3411"
+      },
+      "summary_sha256": "faa5c37c1be61dd8f771813710ee9ab3b79aa626fd0a96439ea11a3ceb581ab3",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      }
+    },
+    {
+      "archive_summary": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/755f4711-2f84-49a5-822a-9b7f70dc243b/f3f0e2dc-f788-4755-be1e-75c7ee29cb28/summary.json",
+      "entry_scope": "outer_attempt",
+      "evidence_errors": [],
+      "ledger_entry": {
+        "attempt_id": "f3f0e2dc-f788-4755-be1e-75c7ee29cb28",
+        "cause": "monitoring_failure",
+        "elapsed_ns": "3317243882026",
+        "summary": "/home/aivv/Документы/projects/bend-voxel/build/issue51-retained-large-6-0/summary.json"
+      },
+      "recovered_after_coordinator_failure": false,
+      "reference_completed_prefix": {
+        "actions": "0",
+        "frames": "3411"
+      },
+      "summary_sha256": "3e34b592f4f83faf6595fe7e396d774740d18859551d52753835bffa90557081",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      }
+    }
+  ],
+  "scope": "Unsuccessful development ledger entries; outer records may report the same failed replay and are not independent worker attempts"
+}

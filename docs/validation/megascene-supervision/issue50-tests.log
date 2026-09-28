@@ -1,0 +1,102 @@
+ALL PROOFS CHECK
+Use --verdict for mathematical validity.
+PASS large cuboid cell counts use exact integer arithmetic
+PASS sparse sphere agrees with every dense reference cell
+PASS carved surface area agrees with dense exposed faces
+PASS partial material boundary hides exactly shared faces
+PASS edge contact stays disconnected
+PASS showcase ground is connected and disjoint
+PASS shadow backdrop is connected and disjoint
+PASS shadow canopy is connected and disjoint
+PASS voxelized Suzanne is connected and disjoint
+PASS voxelized Oculus is connected and disjoint
+PASS voxelized Twist is connected and disjoint
+PASS Oculus retains its open center and solid curved rim
+PASS showcase bodies have no overlapping voxels
+PASS sculpture courtyard has real voxels and six bodies
+PASS Light Atelier reset restores the world
+PASS explicit elevated anchor is protected
+PASS signed coordinates and cross-region severing
+PASS body budget overflow rolls back mass and ownership
+PASS configured body budget admits the same split
+PASS moving fragment can be split again
+PASS split fragments inherit position and velocity
+PASS falling body stops at ground
+PASS 512 independent bodies are supported
+PASS 512 bodies move without losing material
+PASS ground-level cells are removable without explicit anchor material
+PASS removing the lowest cells updates the landing bound
+PASS landed fragment resumes falling after its bottom is cut
+ALL SPARSE WORLD CHECKS PASSED
+PASS left press cuts once
+PASS held left does not repeat
+PASS release rearms left
+PASS right look suppresses cuts
+PASS escape clears held state
+PASS unfocused movement ignored
+PASS click restores focus
+PASS focus loss clears movement
+PASS reset button
+PASS movement is twelve meters per second
+PASS shift enables fast travel
+PASS L enables night lighting
+PASS releasing L restores daylight
+PASS showcase starts close to the sculptures
+PASS showcase reset restores its camera
+PASS custom resolution centers pointer
+PASS reset keeps custom resolution
+PASS scaled reset button
+PASS camera projection scales with resolution
+PASS large sparse slab far-end picking
+PASS picking uses moving body local coordinates
+PASS spatial picking identifies explicit anchors
+PASS parallel ray outside bounds misses
+ALL INPUT AND AIM CHECKS PASSED
+PASS timed sparse split
+PASS timed budget rollback
+PASS timed no-op transaction
+PASS skipped edit records zero stages
+PASS skipped edit preserves world
+ALL PROBE CHECKS PASSED
+PASS default resolution parses
+PASS HD resolution parses
+PASS ultrawide resolution parses
+PASS wide 4K-pixel limit parses
+PASS separator is lowercase x
+PASS height is required
+PASS extra dimensions are rejected
+PASS non-digits are rejected
+PASS minimum width is enforced
+PASS pixel limit is enforced
+ALL RESOLUTION CHECKS PASSED
+PASS positive face expands to outward triangles
+PASS negative face reverses winding
+PASS empty surface emits no vertices
+ALL BEND MESH CHECKS PASSED
+PASS profile matches partial face coverage and materials
+PASS profile matches carved face splitting
+PASS local rebuild matches mixed-material carved surface
+PASS local rebuild matches edge cut
+PASS local rebuild matches signed-coordinate cut
+PASS split components cache local surfaces and matching vertices
+ALL FACE AUDIT CHECKS PASSED
+PASS foundation keeps its authored color
+PASS concrete keeps its authored color
+PASS frame keeps its authored color
+PASS machinery keeps its authored color
+PASS detachment changes appearance
+PASS out-of-gamut chroma is reduced
+PASS ground display color round trips
+PASS native palette uses material ID order
+PASS every palette channel is finite and in gamut
+ALL BEND COLOR CHECKS PASSED
+PASS budget rollback preserves IDs, next ID, budget, motion, materials, faces and vertices
+PASS no-op edit preserves complete body state
+PASS translation preserves geometry identity and cached faces/vertices
+ALL RUNTIME INVARIANTS PASSED
+ALL NATIVE BODY CACHE CHECKS PASSED
+.....................s..........
+----------------------------------------------------------------------
+Ran 32 tests in 47.943s
+
+OK (skipped=1)

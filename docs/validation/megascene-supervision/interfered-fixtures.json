@@ -1,0 +1,392 @@
+{
+  "schema": "megascene-evidence/1",
+  "synthetic": true,
+  "record_type": "verification_index",
+  "cases": [
+    {
+      "case": "actions",
+      "termination": {
+        "cause": "normal_exit",
+        "exit_code": "0",
+        "reason": "process completed",
+        "signal": null
+      },
+      "reference_records": "5",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/actions/supervision.json",
+      "sha256": "6b26dcbe18ce7158d87cd282e473dd28e014e9d5d3b1602888266a55fe506c59"
+    },
+    {
+      "case": "allocation",
+      "termination": {
+        "cause": "allocation_error",
+        "exit_code": "0",
+        "reason": "explicit failed Vulkan allocation in allocations.jsonl",
+        "signal": null
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/allocation/supervision.json",
+      "sha256": "f020a693df6ea618264560a67ddfa0a26d2b96acf1ee52272cecff15fc18b95c"
+    },
+    {
+      "case": "campaign",
+      "termination": {
+        "cause": "campaign_deadline",
+        "exit_code": null,
+        "reason": "deadline_ns=19568202912509; observed_ns=19568647084445",
+        "signal": "9"
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/campaign/supervision.json",
+      "sha256": "164f30e2ab2b61ac320f5324c50f882d659379941b38ef7895bbac3da1c03d36"
+    },
+    {
+      "case": "case",
+      "termination": {
+        "cause": "case_deadline",
+        "exit_code": null,
+        "reason": "deadline_ns=19566210652645; observed_ns=19566475802510",
+        "signal": "9"
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/case/supervision.json",
+      "sha256": "0ee8f276c4fd3aa6e4ab4bb9e5e5105a4c2a8c6823169997be418420124024a9"
+    },
+    {
+      "case": "complete",
+      "termination": {
+        "cause": "normal_exit",
+        "exit_code": "0",
+        "reason": "process completed",
+        "signal": null
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/complete/supervision.json",
+      "sha256": "f07c0755b64aa81ade3b037b44cf7572ffea908875b14c2d048b086fc8aae163"
+    },
+    {
+      "case": "crash",
+      "termination": {
+        "cause": "unexplained_crash",
+        "exit_code": null,
+        "reason": "worker exit; no exhaustion inference from signal",
+        "signal": "9"
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/crash/supervision.json",
+      "sha256": "5a01ba9d7e4b5b76355861b1846b647bac1f4c2bf0de0e21f8bfbe04667fe642"
+    },
+    {
+      "case": "device_loss",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/device_loss/supervision.json",
+      "sha256": "14cf87dad5ed3a726d085a84554e9507a8bde8964319eb0efa1642aa34d3faab"
+    },
+    {
+      "case": "external",
+      "termination": {
+        "cause": "external_interruption",
+        "exit_code": null,
+        "reason": "supervisor signal 15",
+        "signal": "9"
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/external/supervision.json",
+      "sha256": "7e6e40e60cb334b90d9fe58b457f5563cf361d30c1b26a5e0e149c7b266d1ac2"
+    },
+    {
+      "case": "heap",
+      "termination": {
+        "cause": "heap_budget_reserve",
+        "exit_code": null,
+        "reason": "heap 0: 1073741824/1073741824 at 19550591381969",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/heap/supervision.json",
+      "sha256": "7bafd35d1784df1db211c81b153136cea61f5c0f1f3e7d9129b6e5113ff9fe3c"
+    },
+    {
+      "case": "lost_reference",
+      "termination": {
+        "cause": "persistence_failure",
+        "exit_code": "0",
+        "reason": "CPU/reference committed frame mismatch",
+        "signal": null
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [
+        "CPU/reference committed frame mismatch"
+      ],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/lost_reference/supervision.json",
+      "sha256": "35a57f0fc2e7e35a39aa252f0a824e07f7093f48a06647b98397c1d5d572b42d"
+    },
+    {
+      "case": "malformed_monitor",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "invalid required resource sample: noncanonical integer",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [
+        "required worker resource evidence unavailable"
+      ],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/malformed_monitor/supervision.json",
+      "sha256": "22dd59c93f24b0eac828856f4873e8168b322a292e480a59f09b5252b807b68d"
+    },
+    {
+      "case": "missing_heap",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource data more than one second old",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [
+        "required worker resource evidence unavailable"
+      ],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/missing_heap/supervision.json",
+      "sha256": "045f4917a20cb85d553272aa81d7450993f21d4397b72c82e5a19ef1eb691b4c"
+    },
+    {
+      "case": "monitor_error",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "injected monitor error",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [
+        "required worker resource evidence unavailable"
+      ],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/monitor_error/supervision.json",
+      "sha256": "c3b878ad5119fc43c09e6fc6ccac72f97681bc54a2e9322bf63e41058717ae09"
+    },
+    {
+      "case": "monitor_exit",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "host/device monitor exited",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/monitor_exit/supervision.json",
+      "sha256": "174e9a04e9be54de2e6eaf27750506768eb1ea63d7facbe8688d8956ea2f6e84"
+    },
+    {
+      "case": "monitor_hang",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource data more than one second old",
+        "signal": "9"
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/monitor_hang/supervision.json",
+      "sha256": "a6398b56638a797ab2438ac95376b1a41bed2d743f58d51c796141bc0e5b2c80"
+    },
+    {
+      "case": "overflow",
+      "termination": {
+        "cause": "persistence_failure",
+        "exit_code": "0",
+        "reason": "reference sequence gap/duplicate",
+        "signal": null
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [
+        "reference sequence gap/duplicate"
+      ],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/overflow/supervision.json",
+      "sha256": "e14651dee870a36086ae5f874aa6266ec8fea6485fc7e71e7270a0b4d98b7215"
+    },
+    {
+      "case": "persistence",
+      "termination": {
+        "cause": "persistence_failure",
+        "exit_code": null,
+        "reason": "[Errno 22] Invalid argument",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [
+        "[Errno 22] Invalid argument",
+        "[Errno 22] Invalid argument",
+        "allocation evidence: missing ledger initialization",
+        "allocation ledger unavailable",
+        "required worker resource evidence unavailable",
+        "recorder close failed: [Errno 22] Invalid argument"
+      ],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/persistence/supervision.json",
+      "sha256": "2d63b19ff44d5ad66ccbc7f15f4ce48349cf08c718ec4ff9a871455e58358915"
+    },
+    {
+      "case": "preflight_reserve",
+      "termination": {
+        "cause": "process_rss_reserve",
+        "exit_code": null,
+        "reason": "rss_bytes=21474836480 at 19595938446233",
+        "signal": null
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/preflight_reserve/supervision.json",
+      "sha256": "85e18cc65231f26681baaa828d2f3f4b6421c35fc0b677f1aa338e44a087186c"
+    },
+    {
+      "case": "ram",
+      "termination": {
+        "cause": "available_ram_reserve",
+        "exit_code": null,
+        "reason": "available_ram_bytes=6442450943 at 19548756990188",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/ram/supervision.json",
+      "sha256": "ce1b92ce61204fb1ebcf9f02645c44ae955664ff3de2900d1bd0d5b71c9e185f"
+    },
+    {
+      "case": "reference_gap",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/reference_gap/supervision.json",
+      "sha256": "e0c7476b74b96ab7216641964e85e465bed28773c5d219c7f5c7e01dd2ab54e8"
+    },
+    {
+      "case": "rss",
+      "termination": {
+        "cause": "process_rss_reserve",
+        "exit_code": null,
+        "reason": "rss_bytes=21474836480 at 19548094229027",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/rss/supervision.json",
+      "sha256": "7e6149ea82ad82d93db2bbbb3a9117895d4a1cfecf5d1acb395526c2019eada3"
+    },
+    {
+      "case": "stale",
+      "termination": {
+        "cause": "monitoring_failure",
+        "exit_code": null,
+        "reason": "required resource sample stale or invalid",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [
+        "required worker resource evidence unavailable"
+      ],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/stale/supervision.json",
+      "sha256": "c3ebf853088b3d07fd148255fc9b2807edaa5469cdd634b5a9cc15eea6844244"
+    },
+    {
+      "case": "startup",
+      "termination": {
+        "cause": "startup_deadline",
+        "exit_code": null,
+        "reason": "deadline_ns=19561310558883; observed_ns=19561642150359",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/startup/supervision.json",
+      "sha256": "86504d4adad5a8f3a994a00359bfcb5eb108d95ccd07eaae29cdbb01c070e7d3"
+    },
+    {
+      "case": "tail",
+      "termination": {
+        "cause": "persistence_failure",
+        "exit_code": "0",
+        "reason": "cpu.jsonl: damaged tail (11 bytes retained)",
+        "signal": null
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [
+        "cpu.jsonl: damaged tail (11 bytes retained)"
+      ],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/tail/supervision.json",
+      "sha256": "c92ee645735efc9a26f718ef49b993c70ba020bc84329e8a25792a6441d8035e"
+    },
+    {
+      "case": "vram",
+      "termination": {
+        "cause": "device_free_reserve",
+        "exit_code": null,
+        "reason": "device_free_bytes=805306367 at 19549630465494",
+        "signal": "9"
+      },
+      "reference_records": "0",
+      "completed_frame_prefix": "0",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/vram/supervision.json",
+      "sha256": "e8ef3b3139c8ff418ad9dda6c7781ac70450cf5c0ff00cba4e59036aae6ccb44"
+    },
+    {
+      "case": "watchdog",
+      "termination": {
+        "cause": "completion_watchdog",
+        "exit_code": null,
+        "reason": "deadline_ns=19563647189851; observed_ns=19563733671415",
+        "signal": "9"
+      },
+      "reference_records": "2",
+      "completed_frame_prefix": "2",
+      "errors": [],
+      "path": "/home/aivv/megascene-issue50-evidence/synthetic-verification/watchdog/supervision.json",
+      "sha256": "bbf77c03d2113d6aa1b1c86c65fd0e24c8275ed91835f00482fc51f9e9069d28"
+    }
+  ]
+}

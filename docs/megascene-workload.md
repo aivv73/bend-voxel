@@ -128,6 +128,15 @@ through a possibly different math library during comparison runs.
 | `sky` | (160,120,160) | (160,220,260) | Known miss above all scene geometry. |
 | `far` | (0,0.75*L,1.25*L) m | (0,2.4,0) m | Whole occupied district extent and major structure/shadow relationships. No required picking hit. |
 
+The table records the original `traversal-v1` route. Issue #53's 1080p
+captures showed its cavity bridge above the image and insufficient cavity
+readability. The user accepted a camera-framing remedy. `traversal-v2`
+substitutes eye `(256,70,210)` and look target `(256,12,272)` for `cavity`
+at both neighborhood visits. All other poses, phase lengths, interpolation,
+startup, warm-up, picking and edit rules remain as stated here. Resolve and
+freeze new binary32 camera bits under the distinct `traversal-v2` schedule ID;
+retain `traversal-v1` and its failing visual review as separate evidence.
+
 The traversal and picking cases share the same 12-phase route, each phase
 lasting 300 measured frames:
 

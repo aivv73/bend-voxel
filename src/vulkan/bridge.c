@@ -35,7 +35,32 @@ typedef struct {
   const VoxelVkBody* bodies;
   const char* hud;
   float colors[19][3]; // Material pairs, linear surfaces, display overlays.
+  // Additive explicit profile; zero retains the Light Atelier defaults.
+  unsigned full_geometry;
+  float ground_half_extent;
+  void (*record)(const char* fields); // Megascene CPU evidence, NULL for legacy.
+  uint64_t evidence_frame;
+  unsigned gpu_evidence;
 } VoxelVkFrame;
+
+// Checkpoint-only ABI: independently read tree leaves and current Bend geometry.
+typedef struct { float lo[3], hi[3]; uint32_t material; } VoxelMegaBox;
+typedef struct {
+  float speed;
+  uint32_t box_count;
+  const VoxelMegaBox* boxes;
+  uint64_t tree_nodes;
+} VoxelMegaBody;
+typedef struct {
+  const VoxelMegaBody* bodies;
+  uint32_t world[6]; // cells, fragments, removed, status, next ID, budget
+  float aim_radius;
+  uint64_t frame;
+  uint32_t warmup, measured;
+  const char* schedule_sha256;
+  const char* action_outcomes; // Canonical action history, including no-ops/rejections.
+  unsigned action_frame;
+} VoxelMegaState;
 
 typedef struct {
   u32 geometry_us, fence_wait_us, vertex_upload_us, acquire_us;
@@ -63,16 +88,83 @@ static int voxel_vk_colors_ready;
 
 static u64 voxel_vk_tick(void) {
   struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
+  if (clock_gettime(CLOCK_MONOTONIC, &now)) err_fail("monotonic clock failed");
   return (u64)now.tv_sec * 1000000000ull + (u64)now.tv_nsec;
 }
+
+// The marker effect is emitted before window creation in the static worker.
+// Keep it independent of Base's window effect ordering. Legacy workers have
+// no recorder and retain their original execution path.
+static FILE* mega_stream;
+static u64 mega_frame,mega_previous_end;
+static u32 mega_warmup,mega_measured;
+static float mega_ground;
+#ifdef CID_VULKAN_VULKAN_MARK
+static u64 mega_edit_begin;
+static u32 mega_edit_action,mega_edit_removed,mega_edit_status;
+static int mega_edit_pending;
+static char mega_action_outcomes[4096];
+#endif
+#ifdef CID_VULKAN_VULKAN_MARK
+static void mega_record(const char* fields);
+static void mega_reference(const char* fields);
+static void mega_stage(const char* name,u64 begin,u64 end);
+static const char* mega_env(const char* name);
+#else
+static void mega_record(const char* fields) { (void)fields; }
+static void mega_reference(const char* fields) { (void)fields; }
+static void mega_stage(const char* name,u64 begin,u64 end) { (void)name; (void)begin; (void)end; }
+#endif
+#ifdef CID_VULKAN_VULKAN_CAPTURE
+Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
+  const char* directory=getenv("MEGASCENE_CAPTURE_DIR");
+  char path[4096];
+  if (directory) {
+    u64 rendered=mega_frame-1;
+    int review=rendered==0 || rendered==(u64)mega_warmup+mega_measured ||
+      (getenv("MEGASCENE_LOCALIZED") ? rendered==(u64)mega_warmup+1 :
+       (rendered>mega_warmup && (rendered-mega_warmup-1)%300==60));
+    if (!review) return f[0];
+    if (snprintf(path,sizeof path,"%s/frame-%04llu.ppm",directory,(unsigned long long)rendered)>=(int)sizeof path)
+      err_fail("capture path too long");
+  }
+  BendWin* win=(BendWin*)(intptr_t)io_hand_v(f[0]);
+  if (directory) usleep(250000); // Validation captures are outside measured samples.
+  XSync(win->dpy,False);
+  unsigned width=win->img->width,height=win->img->height;
+  XImage* image=XGetImage(win->dpy,win->win,0,0,width,height,AllPlanes,ZPixmap);
+  if (!image) err_fail("opening capture unavailable");
+  FILE* file=fopen(directory?path:mega_env("MEGASCENE_CAPTURE"),"wx");
+  if (!file) err_fail("cannot create opening capture");
+  fprintf(file,"P6\n%u %u\n255\n",width,height);
+  unsigned long masks[]={image->red_mask,image->green_mask,image->blue_mask};
+  for (unsigned y=0;y<height;y++) for (unsigned x=0;x<width;x++) {
+    unsigned long pixel=XGetPixel(image,x,y);
+    for (unsigned c=0;c<3;c++) {
+      unsigned long mask=masks[c],value=pixel&mask;
+      if (!mask) err_fail("unsupported capture channel mask");
+      while (!(mask&1)) { mask>>=1; value>>=1; }
+      if (fputc((int)(value*255/mask),file)==EOF) err_fail("capture write failed");
+    }
+  }
+  XDestroyImage(image);
+  if (fclose(file)) err_fail("capture flush failed");
+  if (directory) {
+    char record[128];
+    snprintf(record,sizeof record,"\"record_type\":\"capture\",\"rendered_frame\":\"%llu\"",(unsigned long long)(mega_frame-1));
+    mega_record(record);
+  } else mega_record("\"record_type\":\"opening_capture\"");
+  return f[0];
+}
+
+#endif
 
 static void voxel_vk_load(void) {
   if (voxel_vk_library) return;
   const char* path = getenv("VOXEL_VULKAN_LIBRARY");
   voxel_vk_library = dlopen(path ? path : "./build/libvoxel_vulkan.so", RTLD_NOW | RTLD_LOCAL);
   if (!voxel_vk_library) err_fail(dlerror());
-  voxel_vk_render_fn = (VoxelVkRender)dlsym(voxel_vk_library, "voxel_vk_render");
+  voxel_vk_render_fn = (VoxelVkRender)dlsym(voxel_vk_library, "voxel_vk_render_timed");
   voxel_vk_release_fn = (VoxelVkRelease)dlsym(voxel_vk_library, "voxel_vk_release");
   if (!voxel_vk_render_fn || !voxel_vk_release_fn) err_fail("incomplete Vulkan renderer library");
 }
@@ -84,19 +176,7 @@ static float voxel_vk_float(Term t) {
   return out;
 }
 
-static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term faces, Term vertices) {
-  if (id >= voxel_vk_cache_capacity) {
-    u32 previous=voxel_vk_cache_capacity;
-    size_t capacity=previous ? previous : 256;
-    while (id >= capacity) capacity*=2;
-    if (capacity>UINT32_MAX) err_fail("Vulkan body ID overflow");
-    voxel_vk_cache=io_mem(realloc(voxel_vk_cache,capacity*sizeof *voxel_vk_cache));
-    memset(voxel_vk_cache+previous,0,(capacity-previous)*sizeof *voxel_vk_cache);
-    voxel_vk_cache_capacity=(u32)capacity;
-  }
-  VoxelVkTransport* entry=&voxel_vk_cache[id];
-  entry->seen=voxel_vk_generation;
-  if (entry->valid && entry->revision==revision) return entry;
+static void voxel_vk_read_transport(VoxelVkTransport* entry,u32 revision,Env e,Term faces,Term vertices) {
   free(entry->faces); entry->faces=NULL; entry->count=0;
   free(entry->vertices); entry->vertices=NULL; entry->vertex_count=0;
   size_t capacity=0;
@@ -138,6 +218,23 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
   if (term_aux(vertices)!=CID_NIL || entry->vertex_count!=(size_t)entry->count*6)
     err_fail("bad Bend mesh vertex list");
   entry->revision=revision; entry->valid=1;
+
+}
+
+static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term faces, Term vertices) {
+  if (id >= voxel_vk_cache_capacity) {
+    u32 previous=voxel_vk_cache_capacity;
+    size_t capacity=previous ? previous : 256;
+    while (id >= capacity) capacity*=2;
+    if (capacity>UINT32_MAX) err_fail("Vulkan body ID overflow");
+    voxel_vk_cache=io_mem(realloc(voxel_vk_cache,capacity*sizeof *voxel_vk_cache));
+    memset(voxel_vk_cache+previous,0,(capacity-previous)*sizeof *voxel_vk_cache);
+    voxel_vk_cache_capacity=(u32)capacity;
+  }
+  VoxelVkTransport* entry=&voxel_vk_cache[id];
+  entry->seen=voxel_vk_generation;
+  if (entry->valid && entry->revision==revision) return entry;
+  voxel_vk_read_transport(entry,revision,e,faces,vertices);
   return entry;
 }
 
@@ -159,6 +256,74 @@ static void voxel_vk_palette(Env e, Term colors) {
   if (term_aux(colors)!=CID_NIL) err_fail("extra Bend palette colors");
   voxel_vk_colors_ready=1;
 }
+
+#ifdef CID_VULKAN_VULKAN_MARK
+static VoxelMegaBox mega_tree(Env e,Term tree,VoxelMegaBox** boxes,u32* count,u64* nodes,unsigned depth) {
+  if(depth>128) err_fail("checkpoint tree depth exceeded");
+  u32 kind=term_aux(tree);
+  if(kind!=CID_SPATIAL_LEAF&&kind!=CID_SPATIAL_BRANCH) err_fail("checkpoint empty tree child");
+  u64 at=term_peek(e.mem,tree); VoxelMegaBox box;
+  (*nodes)++;
+  for(unsigned k=0;k<3;k++) {
+    box.lo[k]=voxel_vk_float(e.mem[at+k]); box.hi[k]=voxel_vk_float(e.mem[at+3+k]);
+    if(!isfinite(box.lo[k])||!isfinite(box.hi[k])||box.lo[k]>=box.hi[k]) err_fail("checkpoint invalid tree bounds");
+  }
+  box.material=(u32)e.mem[at+6];
+  if(kind==CID_SPATIAL_LEAF) {
+    if(*count==UINT32_MAX) err_fail("checkpoint cuboid count overflow");
+    *boxes=io_mem(realloc(*boxes,((size_t)*count+1)*sizeof **boxes)); (*boxes)[(*count)++]=box;
+  } else {
+    VoxelMegaBox a=mega_tree(e,e.mem[at+7],boxes,count,nodes,depth+1);
+    VoxelMegaBox b=mega_tree(e,e.mem[at+8],boxes,count,nodes,depth+1);
+    if(box.material) err_fail("checkpoint branch material");
+    for(unsigned k=0;k<3;k++) if(box.lo[k]!=fminf(a.lo[k],b.lo[k])||box.hi[k]!=fmaxf(a.hi[k],b.hi[k]))
+      err_fail("checkpoint tree summary mismatch");
+  }
+  return box;
+}
+static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
+  int validation=getenv("MEGASCENE_VALIDATE")!=NULL;
+  int review=!getenv("MEGASCENE_LOCALIZED") && getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
+    (mega_frame-mega_warmup-1)%300==60;
+  if(!validation&&!review&&!mega_edit_pending&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
+  u64 begin=voxel_vk_tick();
+  VoxelMegaBody* raw=io_mem(calloc(frame->body_count,sizeof *raw));
+  VoxelVkBody* actual=io_mem(calloc(frame->body_count,sizeof *actual));
+  Term bodies=e.mem[st];
+  for(u32 i=0;i<frame->body_count;i++) {
+    if(term_aux(bodies)!=CID_CON) err_fail("checkpoint body list changed");
+    u64 link=term_peek(e.mem,bodies),at=term_peek(e.mem,e.mem[link]);
+    VoxelMegaBox* boxes=NULL; u64 nodes=0;
+    mega_tree(e,e.mem[at+5],&boxes,&raw[i].box_count,&nodes,0);
+    raw[i].boxes=boxes; raw[i].tree_nodes=nodes; raw[i].speed=voxel_vk_float(e.mem[at+3]);
+    VoxelVkTransport fresh={0};
+    voxel_vk_read_transport(&fresh,frame->bodies[i].revision,e,e.mem[at+6],e.mem[at+7]);
+    actual[i]=frame->bodies[i];
+    if(fresh.count!=actual[i].face_count||fresh.vertex_count!=actual[i].vertex_count||
+       memcmp(fresh.faces,actual[i].faces,fresh.count*sizeof *fresh.faces)||
+       memcmp(fresh.vertices,actual[i].vertices,fresh.vertex_count*sizeof *fresh.vertices))
+      err_fail("checkpoint stale native transport");
+    actual[i].faces=fresh.faces; actual[i].vertices=fresh.vertices;
+    bodies=e.mem[link+1];
+  }
+  VoxelMegaState state={0}; state.bodies=raw; state.frame=mega_frame;
+  for(unsigned i=0;i<6;i++) state.world[i]=(u32)e.mem[st+1+i];
+  state.aim_radius=voxel_vk_float(e.mem[al+3]); state.warmup=mega_warmup; state.measured=mega_measured;
+  state.schedule_sha256=mega_env("MEGASCENE_SCHEDULE_SHA256");
+  state.action_outcomes=mega_action_outcomes; state.action_frame=mega_edit_pending;
+  voxel_vk_load();
+  typedef int (*Check)(const VoxelVkFrame*,const VoxelMegaState*,char*,size_t);
+  Check check=(Check)dlsym(voxel_vk_library,"voxel_mega_checkpoint");
+  if(!check) err_fail("checkpoint capability unavailable");
+  VoxelVkFrame fresh_frame=*frame; fresh_frame.bodies=actual;
+  char error[1024]; if(!check(&fresh_frame,&state,error,sizeof error)) err_fail(error);
+  for(u32 i=0;i<frame->body_count;i++) { free((void*)raw[i].boxes); free((void*)actual[i].faces); free((void*)actual[i].vertices); }
+  free(raw); free(actual);
+  mega_stage("checkpoint",begin,voxel_vk_tick());
+}
+#else
+static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) { (void)e; (void)st; (void)al; (void)frame; }
+#endif
 
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
   if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
@@ -226,7 +391,36 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   }
   if (getenv("VOXEL_STRESS"))
     fprintf(stdout,"bodies,%u,%u,%u,%u,%.6f\n",voxel_vk_generation-1,anchored,moving,translated,minimum_offset);
+  if (mega_stream) {
+    frame.full_geometry=1; frame.ground_half_extent=mega_ground; frame.record=mega_record;
+    frame.evidence_frame=mega_frame; frame.gpu_evidence=1;
+    if (anchored!=frame.body_count || moving || translated || (frame.aim_kind && !getenv("MEGASCENE_RAY_FILE")) || frame.night)
+      err_fail("static Megascene state invariant failed");
+    if(!getenv("MEGASCENE_LOCALIZED")) {
+    static u32 saved_state[14];
+    u32 current_state[14];
+    // Traversal may change only the camera; checkpoint comparison checks the
+    // exact view bits while this guard protects world scalar state.
+    for (u32 i=0;i<6;i++) current_state[i]=(u32)e.mem[st+1+i];
+    for (u32 i=0;i<7;i++) current_state[6+i]=getenv("MEGASCENE_CAMERA_FILE")?0:(u32)e.mem[st+7+i];
+    current_state[13]=frame.body_count;
+    if (!mega_frame) memcpy(saved_state,current_state,sizeof saved_state);
+    else if (memcmp(saved_state,current_state,sizeof saved_state)) err_fail("Megascene unchanged world state changed");
+    for (u32 i=0;i<frame.body_count;i++)
+      if (voxel_vk_bodies[i].id!=i+1 || voxel_vk_bodies[i].revision!=0)
+        err_fail("static owner identity changed");
+    }
+    char record[1024];
+    snprintf(record,sizeof record,
+      "\"record_type\":\"static_state\",\"anchored\":\"%u\",\"moving\":\"%u\",\"translated\":\"%u\",\"aim_kind\":\"%u\","
+      "\"eye_m\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"],\"yaw\":\"0x%08x\",\"pitch\":\"0x%08x\","
+      "\"cells\":\"%u\",\"fragments\":\"%u\",\"removed\":\"%u\",\"next_id\":\"%u\",\"budget\":\"%u\"",
+      anchored,moving,translated,frame.aim_kind,(u32)e.mem[st+7],(u32)e.mem[st+8],(u32)e.mem[st+9],
+      (u32)e.mem[st+10],(u32)e.mem[st+11],(u32)e.mem[st+1],(u32)e.mem[st+2],(u32)e.mem[st+3],(u32)e.mem[st+5],(u32)e.mem[st+6]);
+    mega_record(record);
+  }
   frame.bodies=voxel_vk_bodies;
+  if (mega_stream) voxel_mega_check(e,st,al,&frame);
   return frame;
 }
 
@@ -314,10 +508,19 @@ Term vulkan_colors_run(Env e, Term* f, IoWork* work) {
   io_sync();
   if (voxel_vk_colors_ready) err_fail("Bend palette already initialized");
   voxel_vk_palette(e,f[1]);
+  if (mega_stream) {
+    BendWin* win=(BendWin*)(intptr_t)io_hand_v(f[0]);
+    XSizeHints hints={0}; hints.flags=PMinSize|PMaxSize;
+    hints.min_width=hints.max_width=win->img->width;
+    hints.min_height=hints.max_height=win->img->height;
+    XSetWMNormalHints(win->dpy,win->win,&hints);
+    XSync(win->dpy,False);
+  }
   return f[0];
 }
 
 Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
+  u64 mega_begin=mega_stream?voxel_vk_tick():0;
   int profile = getenv("VOXEL_STRESS") != NULL;
   u64 start = profile ? voxel_vk_tick() : 0;
   io_sync();
@@ -350,9 +553,13 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   char error[512] = {0};
   u64 prepared = profile ? voxel_vk_tick() : 0;
   VoxelVkTimings timings = {0};
+  if (mega_stream) mega_stage("transport",mega_begin,voxel_vk_tick());
+  u64 mega_render_begin=mega_stream?voxel_vk_tick():0;
   int ok = voxel_vk_render_fn(win->dpy, win->win, &frame, &timings, error, sizeof error);
   if (!ok) err_fail(error[0] ? error : "Vulkan frame failed");
   u64 rendered = profile ? voxel_vk_tick() : 0;
+  if (mega_stream) mega_stage("renderer",mega_render_begin,voxel_vk_tick());
+  u64 mega_events_begin=mega_stream?voxel_vk_tick():0;
   free(hud);
   voxel_vk_pump(win);
   XSync(win->dpy, False);
@@ -371,7 +578,36 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
       (unsigned long long)(render_us >= detailed ? render_us - detailed : 0),
       (unsigned long long)((ended - rendered) / 1000));
   }
-  return io_tup(e, f[0], io_tup(e, f[1], events));
+  Term result=io_tup(e, f[0], io_tup(e, f[1], events));
+  if (mega_stream) {
+    mega_stage("events",mega_events_begin,voxel_vk_tick());
+    // Last marker before handing control back to Bend. Recording this boundary
+    // and subsequent bookkeeping belongs to the following frame interval.
+    u64 end=voxel_vk_tick();
+    char record[512];
+    const char* population=!mega_frame?"startup":mega_frame<=mega_warmup?"warmup":"ordinary";
+#ifdef CID_VULKAN_VULKAN_MARK
+    if(mega_edit_pending) {
+      population="edit";
+      if(end<mega_edit_begin) err_fail("edit clock reversed");
+      snprintf(record,sizeof record,
+        "\"record_type\":\"edit\",\"action\":\"%u\",\"accepted\":%s,\"removed_cells\":\"%u\",\"begin_ns\":\"%llu\",\"end_ns\":\"%llu\",\"duration_ns\":\"%llu\",\"status\":\"measured\",\"unit\":\"ns\",\"scope\":\"scripted_operation_to_frame_return\"",
+        mega_edit_action,mega_edit_status==1&&mega_edit_removed?"true":"false",mega_edit_removed,
+        (unsigned long long)mega_edit_begin,(unsigned long long)end,(unsigned long long)(end-mega_edit_begin));
+      mega_reference(record); mega_record(record); mega_edit_pending=0;
+    }
+#endif
+    char ordinal[32]="null";
+    if (mega_frame>mega_warmup) snprintf(ordinal,sizeof ordinal,"\"%llu\"",(unsigned long long)(mega_frame-mega_warmup-1));
+    snprintf(record,sizeof record,
+      "\"record_type\":\"frame\",\"population\":\"%s\",\"begin_ns\":\"%llu\",\"end_ns\":\"%llu\",\"measured_ordinal\":%s,\"status\":\"measured\",\"unit\":\"ns\",\"scope\":\"frame_effect_returns\",\"duration_ns\":\"%llu\"",
+      population,(unsigned long long)(mega_previous_end?mega_previous_end:mega_begin),
+      (unsigned long long)end,ordinal,(unsigned long long)(end-(mega_previous_end?mega_previous_end:mega_begin)));
+    // Frame identity zero is startup; subsequent identities index the frozen schedule.
+    mega_reference(record);
+    mega_record(record); mega_previous_end=end; mega_frame++;
+  }
+  return result;
 }
 
 Term vulkan_release_run(Env e, Term* f, IoWork* work) {
@@ -392,6 +628,9 @@ Term vulkan_release_run(Env e, Term* f, IoWork* work) {
 }
 
 static void __attribute__((constructor)) voxel_vk_effects(void) {
+  #ifdef CID_VULKAN_VULKAN_CAPTURE
+  io_eff(CID_VULKAN_VULKAN_CAPTURE, vulkan_capture_run, 0);
+  #endif
   io_eff(CID_VULKAN_VULKAN_COLORS, vulkan_colors_run, 0);
   io_eff(CID_VULKAN_VULKAN_FRAME, vulkan_frame_run, 0);
   io_eff(CID_VULKAN_VULKAN_RELEASE, vulkan_release_run, 0);
