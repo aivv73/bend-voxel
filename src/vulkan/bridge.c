@@ -148,8 +148,13 @@ Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
   char path[4096];
   if (directory) {
     u64 rendered=mega_frame-1;
+    const char* diagnostic=getenv("MEGASCENE_PROXY_DIAGNOSTIC");
+    u64 hold=diagnostic && strcmp(diagnostic,"mixed-world")==0?1200:120;
+    u64 count=diagnostic && strcmp(diagnostic,"mixed-world")==0?3:9;
     int review=rendered==0 || rendered==(u64)mega_warmup+mega_measured ||
-      (getenv("MEGASCENE_HISTORY") ?
+      (diagnostic ? (rendered>mega_warmup && (rendered-mega_warmup-1)/hold<count &&
+                     (rendered-mega_warmup-1)%hold==hold/2) :
+       getenv("MEGASCENE_HISTORY") ?
         ((rendered>mega_warmup && (rendered-mega_warmup-1)%12==0 && rendered<=mega_warmup+1429) || rendered==mega_warmup+1561) :
        getenv("MEGASCENE_SUPPORT") ?
         ((rendered>mega_warmup && rendered<=mega_warmup+31 && (rendered-mega_warmup-1)%6==0) ||
@@ -297,9 +302,14 @@ static VoxelMegaBox mega_tree(Env e,Term tree,VoxelMegaBox** boxes,u32* count,u6
 }
 static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   int validation=getenv("MEGASCENE_VALIDATE")!=NULL;
-  int review=getenv("MEGASCENE_HISTORY") ? mega_frame==mega_warmup+1561 :
+  const char* diagnostic=getenv("MEGASCENE_PROXY_DIAGNOSTIC");
+  u64 hold=diagnostic && strcmp(diagnostic,"mixed-world")==0?1200:120;
+  u64 count=diagnostic && strcmp(diagnostic,"mixed-world")==0?3:9;
+  int review=diagnostic ? (mega_frame>mega_warmup && (mega_frame-mega_warmup-1)/hold<count &&
+                           (mega_frame-mega_warmup-1)%hold==hold/2) :
+    getenv("MEGASCENE_HISTORY") ? mega_frame==mega_warmup+1561 :
     getenv("MEGASCENE_SUPPORT") ? mega_frame>=mega_warmup+32 && mega_frame<=mega_warmup+43 :
-    !getenv("MEGASCENE_LOCALIZED") && getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
+    !getenv("MEGASCENE_PROXY_DIAGNOSTIC") && !getenv("MEGASCENE_LOCALIZED") && getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
     (mega_frame-mega_warmup-1)%300==60;
   if(!validation&&!review&&!mega_edit_pending&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
   u64 begin=voxel_vk_tick();
@@ -415,7 +425,9 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   if (getenv("VOXEL_STRESS"))
     fprintf(stdout,"bodies,%u,%u,%u,%u,%.6f\n",voxel_vk_generation-1,anchored,moving,translated,minimum_offset);
   if (mega_stream) {
-    frame.full_geometry=1; frame.ground_half_extent=mega_ground; frame.record=mega_record;
+    const char* profile=getenv("MEGASCENE_PROFILE");
+    frame.full_geometry=!(profile && strcmp(profile,"proxy")==0);
+    frame.ground_half_extent=mega_ground; frame.record=mega_record;
     frame.evidence_frame=mega_frame; frame.gpu_evidence=1;
     if ((!getenv("MEGASCENE_SUPPORT") && !getenv("MEGASCENE_HISTORY") && (anchored!=frame.body_count || moving || translated)) || (frame.aim_kind && !getenv("MEGASCENE_RAY_FILE")) || frame.night)
       err_fail("static Megascene state invariant failed");

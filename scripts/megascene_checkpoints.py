@@ -154,8 +154,9 @@ def audit(records, frozen, expected, expected_work, complete, thorough=False):
         from megascene_localized import audit as audit_localized
         return audit_localized(records, frozen, expected, expected_work, complete, thorough)
     failures, catalog = [], []
-    picking = frozen["schedule_id"] in ("picking-v1", "picking-v2")
-    traversal = picking or frozen["schedule_id"] in ("traversal-v1", "traversal-v2")
+    diagnostic = frozen.get("diagnostic") in ("mixed-world", "compact-reference")
+    picking = frozen["schedule_id"] in ("picking-v1", "picking-v2") or diagnostic and "-picking-" in frozen["schedule_id"]
+    traversal = picking or frozen["schedule_id"] in ("traversal-v1", "traversal-v2") or diagnostic
     if picking:
         from megascene_picking import expected_payload, audit as audit_picking
     elif traversal:
@@ -194,7 +195,7 @@ def audit(records, frozen, expected, expected_work, complete, thorough=False):
             require(len(ids) == len(set(ids)) and set(ids) <= set(body_hashes), "duplicate/unknown native draw")
             require(str(len(ids)) == work["main_body_draws"], "native draw inventory mismatch")
             require(integer(n["vertices_checked"]) == sum(integer(w["vertices"]) for w in observed_work), "incomplete native mesh checks")
-            require(integer(n["reference_visible"]) <= len(ids), "visible reference geometry missing")
+            require(integer(n["reference_visible"]) <= len(ids)+len(n.get("proxied_ids",[])), "visible reference geometry missing")
             require(work["mesh_rebuilt"] == (str(len(body_hashes)) if ordinal == 0 else "0"), "static mesh cache invalidation mismatch")
             require(work["shadow_refresh"] is (ordinal == 0) and work["shadow_body_draws"] == (str(len(body_hashes)) if ordinal == 0 else "0"), "static shadow cache invalidation mismatch")
             if previous:

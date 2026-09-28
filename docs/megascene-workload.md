@@ -283,6 +283,13 @@ unchanged world/picking/shadow semantics, and verify actual hysteresis/cache
 behavior. These are correctness diagnostics; performance claims need applicable
 calibration beyond the accepted static/history matrix.
 
+The implementation commands and evidence scopes are in
+[Megascene proxy diagnostics](megascene-proxy.md). In the mixed-world picking
+route, the preflight finds that the top-center ray hits owner 20 at the near
+pose. That hold disables picking; the two far holds use their independently
+checked declared miss. The compact picking route supplies the reachable aim
+suppression and subsequent proxy re-entry.
+
 ## Scale series and independent diagnostic controls
 
 Main mixed growth permits square neighborhood counts q >= 2. Its ordered area is

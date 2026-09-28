@@ -189,4 +189,7 @@ def audit(records,frozen):
         require(record["enabled"] is frame["picking"],"picking enable schedule mismatch")
         require(record["ray"]==frame["ray"],"actual ray differs from frozen center ray")
         require(record["result"]==frame["expected_pick"],"picking target/outcome mismatch at frame "+frame["frame"])
-    return {"status":"pass","samples":str(len(actual)),"enabled":"720","hits":"600","misses":"120","disabled":"3001"}
+    enabled = [f for f in frozen["frames"] if f["picking"]]
+    hits = sum(f["expected_pick"]["kind"] != "0" for f in enabled)
+    return {"status":"pass","samples":str(len(actual)),"enabled":str(len(enabled)),
+            "hits":str(hits),"misses":str(len(enabled)-hits),"disabled":str(len(actual)-len(enabled))}

@@ -126,7 +126,7 @@ def expected_payload(initial, frame):
     return {**initial, "view": {**initial["view"], **view}}
 
 
-def review_evidence(archive, frozen, records):
+def review_evidence(archive, frozen, records, profile="full"):
     """Bind off-sample captures and shadow coverage to each named review view."""
     import pathlib
     archive = pathlib.Path(archive)
@@ -157,7 +157,7 @@ def review_evidence(archive, frozen, records):
                         "shadow_fit_min_margin_texels": work.get("shadow_fit_min_margin_texels") if work else None,
                         "capture_recorded": recorded})
     return {"schema": SCHEMA, "record_type": "review", "schedule_sha256": hashlib.sha256(canonical(frozen)+b"\n").hexdigest(),
-            "profile": "full", "timing_scope": "separate complete validation replay; captures excluded from measured attempt",
+            "profile": profile, "timing_scope": "separate complete validation replay; captures excluded from measured attempt",
             "status": "incomplete" if missing else "awaiting_named_feature_review",
             "missing": missing, "views": entries,
             "classification_rule": "missing/stale geometry fails rendering_correctness; correctly rendered but unreadable major features fail visual_quality; pending review cannot pass fidelity"}

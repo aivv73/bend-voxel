@@ -45,16 +45,21 @@ def camera(s: D.State, cam: V.Camera) -> D.State:
   I.Control{_,keys,mx,my,looking,left,focused,cut,reset,quit} = control
   D.State{world,I.Control{cam,keys,mx,my,looking,left,focused,cut,reset,quit},pending,last}
 
-def aim(+state: D.State, +index: U32) -> IO(V.Aim):
+def choose.ray(scripted: Bool, raw: P.Ray, cam: V.Camera) -> P.Ray:
+  match scripted:
+    case True{}: P.scripted(raw,cam)
+    case False{}: P.center(raw,cam)
+
+def aim(+state: D.State, +index: U32, +scripted: Bool) -> IO(V.Aim):
   D.State{W.World{bodies,_,_,_,_,_,_},I.Control{cam,_,_,_,_,_,_,_,_,_},_,_} = state
   do IO<V.Aim>:
     raw : P.Ray <- VK.vulkan.pickray(index)
-    +ray : P.Ray = P.center(raw,cam)
+    +ray : P.Ray = choose.ray(scripted,raw,cam)
     +hit : V.Hit <- P.pick(bodies,ray)
     VK.vulkan.pickrecord(ray,hit)
     return V.hit.aim(hit)
 
-def loop(n: Nat, +index: U32, +width: U32, +height: U32, +enabled: Bool, win: Window, state: D.State) -> IO(Unit):
+def loop(n: Nat, +index: U32, +width: U32, +height: U32, +enabled: Bool, +scripted: Bool, win: Window, state: D.State) -> IO(Unit):
   match n:
     case 0n:
       do IO<Unit>:
@@ -68,12 +73,12 @@ def loop(n: Nat, +index: U32, +width: U32, +height: U32, +enabled: Bool, win: Wi
         VK.vulkan.mark(11)
         cam : V.Camera <- VK.vulkan.route(index,width,height)
         +updated : D.State = camera(updated,cam)
-        hit : V.Aim <- aim(updated,index)
+        hit : V.Aim <- aim(updated,index,scripted)
         VK.vulkan.mark(12)
         shown : Window & D.State & List<Event> <- VK.vulkan.frame(win,updated,hit,"MEGASCENE / PICKING / DEVELOPMENT OBSERVATION")
-        next(shown,enabled,w => s => loop(rest,(index + 1 : U32),width,height,enabled,w,s))
+        next(shown,enabled,w => s => loop(rest,(index + 1 : U32),width,height,enabled,scripted,w,s))
 
-def start(w: W.World, +width: U32, +height: U32, frames: Nat) -> IO(Unit):
+def start.mode(w: W.World, +width: U32, +height: U32, frames: Nat, +scripted: Bool) -> IO(Unit):
   do IO<Unit>:
     VK.vulkan.mark(7)
     win : Window <- IO.try(Window,Window.open("Megascene / Picking / Unqualified development observation",width,height))
@@ -81,8 +86,14 @@ def start(w: W.World, +width: U32, +height: U32, frames: Nat) -> IO(Unit):
     VK.vulkan.mark(8)
     cam : V.Camera <- VK.vulkan.route(0,width,height)
     +state : D.State = D.State{w,I.Control{cam,0,0,0,False{},False{},False{},False{},False{},False{}},Nil{},0}
-    hit : V.Aim <- aim(state,0)
+    hit : V.Aim <- aim(state,0,scripted)
     shown : Window & D.State & List<Event> <- VK.vulkan.frame(win,state,hit,"MEGASCENE / PICKING / DEVELOPMENT OBSERVATION")
     mode : Result<&1,&1,U32 & String,String> <- IO.get_env("MEGASCENE_VALIDATE")
     +enabled : Bool = validation(mode)
-    next(shown,enabled,w => s => loop(frames,1,width,height,enabled,w,s))
+    next(shown,enabled,w => s => loop(frames,1,width,height,enabled,scripted,w,s))
+
+def start(w: W.World, +width: U32, +height: U32, frames: Nat) -> IO(Unit):
+  start.mode(w,width,height,frames,False{})
+
+def start.proxy(w: W.World, +width: U32, +height: U32, frames: Nat) -> IO(Unit):
+  start.mode(w,width,height,frames,True{})

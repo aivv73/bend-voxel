@@ -116,6 +116,11 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
                         "source_ownership", "material_conservation", "finite_motion_bits", "drawable_coverage_and_winding",
                         "fresh_bend_native_transport", "native_mesh_slots_and_draw_ranges", "unculled_triangle_visibility",
                         "full_proxy_shadow_cache_transitions"])
+        if config.get("diagnostic"):
+            require(summary.get("proxy_diagnostic",{}).get("status") == "pass", "native proxy diagnostic failed")
+            value["proxy_diagnostic"] = summary["proxy_diagnostic"]
+            value["invariant_coverage"] += ["actual_proxy_membership", "render_pixel_80_100_hysteresis",
+                                            "reachable_aim_suppression", "retained_full_meshes_and_shadows"]
         if config["case"] in ("localized", "support", "history"):
             value["edited_work"] = result.get("edited_work")
             value["invariant_coverage"] += [config["case"]+"_exact_removal", "atomic_budget_rejection", "edit_history_and_intervals", "unchanged_geometry_caches", "pre_unsafe_edit_guards"]
@@ -165,6 +170,10 @@ def compare_attempt(config, archive, manifest, validation, summary, records):
                 require(result.get(field) == validation.get(field),
                         "history "+field+" differs from validation")
         require(not result["synthetic"], "synthetic checkpoints cannot qualify a real attempt")
+        if config.get("diagnostic"):
+            require(summary.get("proxy_diagnostic",{}).get("status") == "pass", "timed native proxy diagnostic failed")
+            require(mismatch(validation["proxy_diagnostic"], summary["proxy_diagnostic"], "proxy_diagnostic") is None,
+                    "timed proxy decisions/work differ from validation")
         diff = mismatch(validation["effective_render_identity"], render_identity(records), "effective_render_settings")
         if diff:
             result["failures"].append(diff)
