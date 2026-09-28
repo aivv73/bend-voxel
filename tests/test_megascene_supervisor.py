@@ -17,6 +17,24 @@ from megascene_supervisor import Campaign, POLICY, Reference, resource_stop, aud
 from megascene_inventory import read_json
 
 
+class CheckpointStreamRetention(unittest.TestCase):
+    def test_large_payload_remains_on_disk_with_frame_evidence(self):
+        from megascene_supervisor import Tail
+        from megascene_inventory import canonical
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/"cpu.jsonl"
+            identity={"campaign_id":"fixture","series_id":"fixture","attempt_id":"fixture"}
+            common={"schema":"megascene-evidence/1",**identity,"clock_id":"linux.CLOCK_MONOTONIC"}
+            payload={**common,"record_type":"checkpoint","sequence":"0","time_ns":"1", "payload":{"cells":["1"]*10000}}
+            frame={**common,"record_type":"frame","sequence":"1","time_ns":"2","frame":"0","begin_ns":"1","end_ns":"2"}
+            raw=canonical(payload)+b"\n"+canonical(frame)+b"\n";path.write_bytes(raw)
+            tail=Tail(path,identity,compact_cpu=True);tail.drain(final=True)
+            self.assertIsNone(tail.error)
+            self.assertEqual(tail.records[-1],frame)
+            self.assertNotIn("payload",tail.records[0])
+            self.assertEqual(path.read_bytes(),raw)
+
+
 class SupervisorBoundary(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -71,7 +89,7 @@ class SupervisorBoundary(unittest.TestCase):
 
     def test_native_allocation_identity_failure_and_totals(self):
         binary = self.root/'native-supervision'
-        subprocess.run(['g++','-O2','-std=c++17',str(ROOT/'tests/native_supervision.cpp'),'-lvulkan','-lX11',
+        subprocess.run(['g++','-O2','-std=c++17',str(ROOT/'tests/native_supervision.cpp'),'-lvulkan','-lX11','-lcrypto',
                         '-Wl,--wrap=vkAllocateMemory','-Wl,--wrap=vkFreeMemory','-Wl,--wrap=vkGetPhysicalDeviceMemoryProperties',
                         '-o',str(binary)],check=True)
         path = self.root/'native-allocations.jsonl'

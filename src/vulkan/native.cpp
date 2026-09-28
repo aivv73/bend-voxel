@@ -28,6 +28,8 @@ void check(VkResult result, const char* what) {
 }
 } // namespace
 #include "supervision.h"
+#include "checkpoint.h"
+#include "visibility_reference.h"
 namespace {
 void record_vk_failure(VkResult result,const char* what) {
   supervision::emit(supervision::allocations,supervision::allocation_seq,
@@ -540,6 +542,40 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   add_hud(g,frame);
   return g;
 }
+// Verify actual cached mesh slots and submitted draw ranges, independent of slot
+// allocation order. Culling is checked against unculled full-mesh triangles.
+void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
+  using checkpoint::require;
+  require(f.full_geometry&&cache.meshes.size()==f.body_count,"native full-mesh ownership mismatch");
+  require(cache.proxy_draws==0&&cache.shadow_draws.size()==f.body_count,"native shadow/proxy draw mismatch");
+  uint64_t vertices_checked=0,reference_visible=0;
+  std::vector<checkpoint::J> drawn_ids;
+  for(unsigned i=0;i<f.body_count;i++) {
+    const auto& b=f.bodies[i]; auto it=cache.meshes.find(b.id);
+    require(it!=cache.meshes.end(),"missing native mesh"); const auto& mesh=it->second;
+    require(mesh.revision==b.revision&&mesh.anchored==b.anchored&&mesh.count==b.vertex_count,"native mesh identity mismatch");
+    require(uint64_t(mesh.first)+mesh.count<=cache.geometry.vertices.size(),"native mesh range overflow");
+    for(unsigned j=0;j<b.vertex_count;j++) {
+      const auto& actual=cache.geometry.vertices[mesh.first+j]; const auto& expected=b.vertices[j];
+      auto color=material_color(f,expected.material,!b.anchored);
+      require(std::memcmp(&actual.position,expected.position,12)==0&&actual.side==expected.side&&
+        std::memcmp(&actual.color,&color,sizeof color)==0,"stale native mesh vertex/material");
+      vertices_checked++;
+    }
+    auto matches=[&](const Draw& d){return d.first==mesh.first&&d.count==mesh.count&&checkpoint::real(d.offset)==checkpoint::real(b.offset);};
+    auto drawn=std::count_if(cache.draws.begin(),cache.draws.end(),matches);
+    require(drawn<=1&&std::count_if(cache.shadow_draws.begin(),cache.shadow_draws.end(),matches)==1,"duplicate/missing native draw");
+    bool visible_reference=visibility_reference::body(b,f); reference_visible+=visible_reference;
+    require(!visible_reference||drawn==1,"visible full geometry was culled");
+    if(drawn) drawn_ids.push_back(checkpoint::number(b.id));
+  }
+  require(drawn_ids.size()==cache.draws.size(),"unknown native draw ownership");
+  auto record=checkpoint::object({{"drawn_ids",checkpoint::array(drawn_ids)},
+    {"record_type",checkpoint::quote("native_audit")},{"reference_visible",checkpoint::number(reference_visible)},
+    {"vertices_checked",checkpoint::number(vertices_checked)}});
+  f.record(record.substr(1,record.size()-2).c_str());
+}
+
 std::vector<uint32_t> spirv(const char* path) {
   std::ifstream in(path,std::ios::binary|std::ios::ate);
   if (!in) throw std::runtime_error(std::string("cannot open shader ")+path);
@@ -583,6 +619,7 @@ class Renderer {
   VkInstance instance=VK_NULL_HANDLE;
   VkSurfaceKHR surface=VK_NULL_HANDLE;
   VkPhysicalDevice physical=VK_NULL_HANDLE;
+  VkSurfaceCapabilitiesKHR frozen_surface{};
   VkDevice device=VK_NULL_HANDLE;
   VkQueue queue=VK_NULL_HANDLE;
   uint32_t family=0;
@@ -819,6 +856,7 @@ class Renderer {
         ci.presentMode==VK_PRESENT_MODE_IMMEDIATE_KHR?"immediate":"mailbox");
     }
     present_mode=ci.presentMode;
+    frozen_surface=caps;
     ci.clipped=VK_TRUE;
     check(vkCreateSwapchainKHR(device,&ci,nullptr,&swapchain),"create swapchain");
     check(vkGetSwapchainImagesKHR(device,swapchain,&n,nullptr),"get swapchain images");
@@ -1001,6 +1039,7 @@ public:
     auto start=Clock::now();
     bool scene_reused=false;
     Geometry& g=geometry(frame,geometry_cache,scene_reused);
+    if(frame.record) audit_native(frame,geometry_cache);
     auto after_geometry=Clock::now();
     uint64_t ns_after_geometry=frame.record?monotonic_ns():0;
     stage(frame,"geometry",ns_start,ns_after_geometry);
@@ -1059,6 +1098,13 @@ public:
       std::fprintf(stderr,"vulkan shadow refresh bodies %u rebuilt %u\n",
         frame.body_count,geometry_cache.rebuilt);
     ShadowMatrix light=shadow_dirty?shadow_matrix(frame):saved_shadow;
+    if(frame.record) {
+      auto fresh=shadow_matrix(frame);
+      if(std::memcmp(light.values,fresh.values,sizeof light.values))
+        throw std::runtime_error("stale native shadow transform");
+      for(float value:light.values) if(!std::isfinite(value))
+        throw std::runtime_error("nonfinite native shadow transform");
+    }
     if (frame.record) {
       char record[1024];
       float sx=std::sqrt(light.values[0]*light.values[0]+light.values[4]*light.values[4]+light.values[8]*light.values[8]);
@@ -1199,7 +1245,24 @@ public:
     timings.submit_present_us=microseconds(after_record,Clock::now());
     stage(frame,"submit_present",ns_after_record,frame.record?monotonic_ns():0);
     if (result==VK_ERROR_OUT_OF_DATE_KHR||result==VK_SUBOPTIMAL_KHR) {
-      if (frame.full_geometry) throw std::runtime_error("Megascene presentation changed during frozen attempt");
+      if (frame.full_geometry) {
+        if(result==VK_ERROR_OUT_OF_DATE_KHR) throw std::runtime_error("Megascene presentation became out of date");
+        // SUBOPTIMAL is a successful presentation, not an out-of-date error.
+        // The compositor can return it with unchanged properties. Retain the
+        // exact result and accept only the original frozen surface capabilities.
+        VkSurfaceCapabilitiesKHR caps{};
+        check(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical,surface,&caps),"recheck frozen surface");
+        if(caps.currentExtent.width!=frozen_surface.currentExtent.width||caps.currentExtent.height!=frozen_surface.currentExtent.height||
+           caps.currentTransform!=frozen_surface.currentTransform||caps.supportedTransforms!=frozen_surface.supportedTransforms||
+           caps.minImageCount!=frozen_surface.minImageCount||caps.maxImageCount!=frozen_surface.maxImageCount||
+           caps.minImageExtent.width!=frozen_surface.minImageExtent.width||caps.minImageExtent.height!=frozen_surface.minImageExtent.height||
+           caps.maxImageExtent.width!=frozen_surface.maxImageExtent.width||caps.maxImageExtent.height!=frozen_surface.maxImageExtent.height||
+           caps.maxImageArrayLayers!=frozen_surface.maxImageArrayLayers||caps.supportedCompositeAlpha!=frozen_surface.supportedCompositeAlpha||
+           caps.supportedUsageFlags!=frozen_surface.supportedUsageFlags)
+          throw std::runtime_error("Megascene surface properties changed during frozen attempt");
+        frame.record("\"record_type\":\"presentation_status\",\"result\":\"1000001003\",\"frozen_surface_unchanged\":true");
+        return;
+      }
       check(vkDeviceWaitIdle(device),"wait for swapchain recreation");
       clear_swapchain(); make_swapchain();
     } else check(result,"present frame");

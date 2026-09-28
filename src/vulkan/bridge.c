@@ -41,6 +41,23 @@ typedef struct {
   void (*record)(const char* fields); // Megascene CPU evidence, NULL for legacy.
 } VoxelVkFrame;
 
+// Checkpoint-only ABI: independently read tree leaves and current Bend geometry.
+typedef struct { float lo[3], hi[3]; uint32_t material; } VoxelMegaBox;
+typedef struct {
+  float speed;
+  uint32_t box_count;
+  const VoxelMegaBox* boxes;
+  uint64_t tree_nodes;
+} VoxelMegaBody;
+typedef struct {
+  const VoxelMegaBody* bodies;
+  uint32_t world[6]; // cells, fragments, removed, status, next ID, budget
+  float aim_radius;
+  uint64_t frame;
+  uint32_t warmup, measured;
+  const char* schedule_sha256;
+} VoxelMegaState;
+
 typedef struct {
   u32 geometry_us, fence_wait_us, vertex_upload_us, acquire_us;
   u32 command_record_us, submit_present_us;
@@ -76,7 +93,7 @@ static u64 voxel_vk_tick(void) {
 // no recorder and retain their original execution path.
 static FILE* mega_stream;
 static u64 mega_frame,mega_previous_end;
-static u32 mega_warmup;
+static u32 mega_warmup,mega_measured;
 static float mega_ground;
 #ifdef CID_VULKAN_VULKAN_MARK
 static void mega_record(const char* fields);
@@ -133,19 +150,7 @@ static float voxel_vk_float(Term t) {
   return out;
 }
 
-static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term faces, Term vertices) {
-  if (id >= voxel_vk_cache_capacity) {
-    u32 previous=voxel_vk_cache_capacity;
-    size_t capacity=previous ? previous : 256;
-    while (id >= capacity) capacity*=2;
-    if (capacity>UINT32_MAX) err_fail("Vulkan body ID overflow");
-    voxel_vk_cache=io_mem(realloc(voxel_vk_cache,capacity*sizeof *voxel_vk_cache));
-    memset(voxel_vk_cache+previous,0,(capacity-previous)*sizeof *voxel_vk_cache);
-    voxel_vk_cache_capacity=(u32)capacity;
-  }
-  VoxelVkTransport* entry=&voxel_vk_cache[id];
-  entry->seen=voxel_vk_generation;
-  if (entry->valid && entry->revision==revision) return entry;
+static void voxel_vk_read_transport(VoxelVkTransport* entry,u32 revision,Env e,Term faces,Term vertices) {
   free(entry->faces); entry->faces=NULL; entry->count=0;
   free(entry->vertices); entry->vertices=NULL; entry->vertex_count=0;
   size_t capacity=0;
@@ -187,6 +192,23 @@ static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term fa
   if (term_aux(vertices)!=CID_NIL || entry->vertex_count!=(size_t)entry->count*6)
     err_fail("bad Bend mesh vertex list");
   entry->revision=revision; entry->valid=1;
+
+}
+
+static VoxelVkTransport* voxel_vk_transport(u32 id, u32 revision, Env e, Term faces, Term vertices) {
+  if (id >= voxel_vk_cache_capacity) {
+    u32 previous=voxel_vk_cache_capacity;
+    size_t capacity=previous ? previous : 256;
+    while (id >= capacity) capacity*=2;
+    if (capacity>UINT32_MAX) err_fail("Vulkan body ID overflow");
+    voxel_vk_cache=io_mem(realloc(voxel_vk_cache,capacity*sizeof *voxel_vk_cache));
+    memset(voxel_vk_cache+previous,0,(capacity-previous)*sizeof *voxel_vk_cache);
+    voxel_vk_cache_capacity=(u32)capacity;
+  }
+  VoxelVkTransport* entry=&voxel_vk_cache[id];
+  entry->seen=voxel_vk_generation;
+  if (entry->valid && entry->revision==revision) return entry;
+  voxel_vk_read_transport(entry,revision,e,faces,vertices);
   return entry;
 }
 
@@ -208,6 +230,71 @@ static void voxel_vk_palette(Env e, Term colors) {
   if (term_aux(colors)!=CID_NIL) err_fail("extra Bend palette colors");
   voxel_vk_colors_ready=1;
 }
+
+#ifdef CID_VULKAN_VULKAN_MARK
+static VoxelMegaBox mega_tree(Env e,Term tree,VoxelMegaBox** boxes,u32* count,u64* nodes,unsigned depth) {
+  if(depth>128) err_fail("checkpoint tree depth exceeded");
+  u32 kind=term_aux(tree);
+  if(kind!=CID_SPATIAL_LEAF&&kind!=CID_SPATIAL_BRANCH) err_fail("checkpoint empty tree child");
+  u64 at=term_peek(e.mem,tree); VoxelMegaBox box;
+  (*nodes)++;
+  for(unsigned k=0;k<3;k++) {
+    box.lo[k]=voxel_vk_float(e.mem[at+k]); box.hi[k]=voxel_vk_float(e.mem[at+3+k]);
+    if(!isfinite(box.lo[k])||!isfinite(box.hi[k])||box.lo[k]>=box.hi[k]) err_fail("checkpoint invalid tree bounds");
+  }
+  box.material=(u32)e.mem[at+6];
+  if(kind==CID_SPATIAL_LEAF) {
+    if(*count==UINT32_MAX) err_fail("checkpoint cuboid count overflow");
+    *boxes=io_mem(realloc(*boxes,((size_t)*count+1)*sizeof **boxes)); (*boxes)[(*count)++]=box;
+  } else {
+    VoxelMegaBox a=mega_tree(e,e.mem[at+7],boxes,count,nodes,depth+1);
+    VoxelMegaBox b=mega_tree(e,e.mem[at+8],boxes,count,nodes,depth+1);
+    if(box.material) err_fail("checkpoint branch material");
+    for(unsigned k=0;k<3;k++) if(box.lo[k]!=fminf(a.lo[k],b.lo[k])||box.hi[k]!=fmaxf(a.hi[k],b.hi[k]))
+      err_fail("checkpoint tree summary mismatch");
+  }
+  return box;
+}
+static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
+  int validation=getenv("MEGASCENE_VALIDATE")!=NULL;
+  if(!validation&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
+  u64 begin=voxel_vk_tick();
+  VoxelMegaBody* raw=io_mem(calloc(frame->body_count,sizeof *raw));
+  VoxelVkBody* actual=io_mem(calloc(frame->body_count,sizeof *actual));
+  Term bodies=e.mem[st];
+  for(u32 i=0;i<frame->body_count;i++) {
+    if(term_aux(bodies)!=CID_CON) err_fail("checkpoint body list changed");
+    u64 link=term_peek(e.mem,bodies),at=term_peek(e.mem,e.mem[link]);
+    VoxelMegaBox* boxes=NULL; u64 nodes=0;
+    mega_tree(e,e.mem[at+5],&boxes,&raw[i].box_count,&nodes,0);
+    raw[i].boxes=boxes; raw[i].tree_nodes=nodes; raw[i].speed=voxel_vk_float(e.mem[at+3]);
+    VoxelVkTransport fresh={0};
+    voxel_vk_read_transport(&fresh,frame->bodies[i].revision,e,e.mem[at+6],e.mem[at+7]);
+    actual[i]=frame->bodies[i];
+    if(fresh.count!=actual[i].face_count||fresh.vertex_count!=actual[i].vertex_count||
+       memcmp(fresh.faces,actual[i].faces,fresh.count*sizeof *fresh.faces)||
+       memcmp(fresh.vertices,actual[i].vertices,fresh.vertex_count*sizeof *fresh.vertices))
+      err_fail("checkpoint stale native transport");
+    actual[i].faces=fresh.faces; actual[i].vertices=fresh.vertices;
+    bodies=e.mem[link+1];
+  }
+  VoxelMegaState state={0}; state.bodies=raw; state.frame=mega_frame;
+  for(unsigned i=0;i<6;i++) state.world[i]=(u32)e.mem[st+1+i];
+  state.aim_radius=voxel_vk_float(e.mem[al+3]); state.warmup=mega_warmup; state.measured=mega_measured;
+  state.schedule_sha256=mega_env("MEGASCENE_SCHEDULE_SHA256");
+  voxel_vk_load();
+  typedef int (*Check)(const VoxelVkFrame*,const VoxelMegaState*,char*,size_t);
+  Check check=(Check)dlsym(voxel_vk_library,"voxel_mega_checkpoint");
+  if(!check) err_fail("checkpoint capability unavailable");
+  VoxelVkFrame fresh_frame=*frame; fresh_frame.bodies=actual;
+  char error[1024]; if(!check(&fresh_frame,&state,error,sizeof error)) err_fail(error);
+  for(u32 i=0;i<frame->body_count;i++) { free((void*)raw[i].boxes); free((void*)actual[i].faces); free((void*)actual[i].vertices); }
+  free(raw); free(actual);
+  mega_stage("checkpoint",begin,voxel_vk_tick());
+}
+#else
+static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) { (void)e; (void)st; (void)al; (void)frame; }
+#endif
 
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
   if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
@@ -301,6 +388,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
     mega_record(record);
   }
   frame.bodies=voxel_vk_bodies;
+  if (mega_stream) voxel_mega_check(e,st,al,&frame);
   return frame;
 }
 
@@ -388,6 +476,14 @@ Term vulkan_colors_run(Env e, Term* f, IoWork* work) {
   io_sync();
   if (voxel_vk_colors_ready) err_fail("Bend palette already initialized");
   voxel_vk_palette(e,f[1]);
+  if (mega_stream) {
+    BendWin* win=(BendWin*)(intptr_t)io_hand_v(f[0]);
+    XSizeHints hints={0}; hints.flags=PMinSize|PMaxSize;
+    hints.min_width=hints.max_width=win->img->width;
+    hints.min_height=hints.max_height=win->img->height;
+    XSetWMNormalHints(win->dpy,win->win,&hints);
+    XSync(win->dpy,False);
+  }
   return f[0];
 }
 

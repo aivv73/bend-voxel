@@ -8,10 +8,9 @@ binary32 `0x3c888889` (1/60 second) before view preparation and rendering.
 Picking and edits are disabled; window input cannot move the camera or modify
 the world. Closing the window retains an incomplete prefix.
 
-These are **unqualified development observations**. Full validation replays,
-canonical timed checkpoints, GPU timestamps, feature qualification and
-instrumentation calibration belong
-to later slices of #47. None of their absent results is a pass. Completing the
+These are **unqualified development observations**. [Static replay validation and canonical timed checkpoints](megascene-validation.md)
+are implemented in issue #51. GPU timestamps, feature qualification and
+instrumentation calibration belong to later slices of #47. None of their absent results is a pass. Completing the
 static schedule is independent of benchmark, capacity or interactive qualification.
 The existing default demo and all five Light Atelier benchmarks retain their
 settings and report meanings.
@@ -19,7 +18,7 @@ settings and report meanings.
 ## Run a bounded observation
 
 Use Linux/X11, a Vulkan 1.3 device, Python 3.10+, Bend 2.0.32, clang, g++,
-glslc, and the Vulkan/X11 development libraries. `vulkaninfo` supplies optional
+glslc, and the Vulkan/X11/OpenSSL development libraries. `vulkaninfo` supplies optional
 additional environment provenance. Supervised runs also require NVIDIA NVML,
 `VK_EXT_memory_budget`, `VK_EXT_pci_bus_info`, and Linux libatomic. Missing
 required monitoring prevents launch; see [supervision](megascene-supervision.md).
@@ -95,12 +94,13 @@ markers. Native stages nest inside the renderer stage. Stage sums are not a
 frame total. Final bookkeeping and teardown are separate from measured frames.
 The reported initial inventory check compares actual Bend trees, faces and
 vertices with the existing independent integer reference after execution; it
-is scoped to initialization and is not a timed canonical checkpoint.
+is scoped to initialization. Separate complete validation and timed canonical
+checkpoints now cover the full static schedule; see the validation guide.
 
 The schedule never extends itself to reach ten seconds. Fewer than 1,000
 ordinary frames or ten measured seconds yields an explicitly insufficient
 population. Nearest-rank percentiles remain descriptive. Calibration,
-responsiveness, full correctness/fidelity, capacity and interactive outcomes
+responsiveness, visual quality, capacity and interactive outcomes
 remain inconclusive even when the observed schedule completes.
 
 ## Evidence and recovery
@@ -158,7 +158,9 @@ retention, ground bounds, shadow equivalence and presentation selection.
 Unsafe/native properties remain runtime/reference evidence, not formal proofs.
 
 See the [retained issue #49 observations](validation/megascene-static/README.md)
-for the bounded demonstration and regression results. The accepted
+for the bounded demonstration and regression results, and the
+[issue #51 validation evidence](validation/megascene-checkpoints/README.md)
+for complete replay and canonical checkpoint comparisons. The accepted
 [handoff](megascene-spec.md), [workload](megascene-workload.md) and
 [evidence contract](megascene-evidence.md) remain authoritative for later
 qualification work.

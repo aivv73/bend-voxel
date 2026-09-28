@@ -56,8 +56,19 @@ law palette_length:
 #   Full geometry retains proxy bookkeeping, fixed ground and 2048^2 shadows.
 #   Archive actual runtime artifacts and inputs before invocation; preserve
 #   frame-return intervals, missing evidence and abnormal completed prefixes.
-#   See docs/megascene-static.md. Full replay/checkpoint and calibration
-#   qualification remain future work: static observations cannot pass them.
+#   See docs/megascene-static.md. Static correctness is separate from
+#   calibration and performance qualification; missing evidence is not a pass.
+# - Validate each static artifact/workload/schedule/profile/thread configuration
+#   in a fresh complete replay before timing another fresh process. Reuse only
+#   matching actual artifact and execution identities. Charge validation time.
+# - Check actual ownership, tree summaries, material/anchor conservation,
+#   connectivity, drawable coverage/winding, native caches and visibility.
+#   Small independent dense references and large sparse checks have distinct
+#   scopes. Retain required timed checkpoints within normal frame work.
+# - Canonical occupancy/surfaces ignore equivalent partitions, never IDs,
+#   revisions, owners, anchors, motion bits, budget, next ID or view/schedule.
+#   Keep raw work inventories and useful field/body mismatch evidence.
+#   See docs/megascene-validation.md; all these checks are runtime evidence.
 # - Supervision samples host/device/process-attributed heaps every 100 ms,
 #   stops on required monitoring failure or data older than one second, and
 #   enforces independent reserves and the earliest applicable deadline.

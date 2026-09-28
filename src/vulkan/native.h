@@ -36,6 +36,23 @@ typedef struct {
   void (*record)(const char* fields); // Megascene CPU evidence, NULL for legacy.
 } VoxelVkFrame;
 
+// Checkpoint-only ABI: independently read tree leaves and current Bend geometry.
+typedef struct { float lo[3], hi[3]; uint32_t material; } VoxelMegaBox;
+typedef struct {
+  float speed;
+  uint32_t box_count;
+  const VoxelMegaBox* boxes;
+  uint64_t tree_nodes;
+} VoxelMegaBody;
+typedef struct {
+  const VoxelMegaBody* bodies;
+  uint32_t world[6]; // cells, fragments, removed, status, next ID, budget
+  float aim_radius;
+  uint64_t frame;
+  uint32_t warmup, measured;
+  const char* schedule_sha256;
+} VoxelMegaState;
+
 typedef struct {
   uint32_t geometry_us, fence_wait_us, vertex_upload_us, acquire_us;
   uint32_t command_record_us, submit_present_us;

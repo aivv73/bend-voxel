@@ -164,6 +164,27 @@ class Admission(unittest.TestCase):
             with self.assertRaises(ValueError):
                 verify("\n".join(canonical(r).decode() for r in changed)+"\n")
 
+    def test_equivalent_cuboid_partition_keeps_distinct_work_inventory(self):
+        path = self.bundles["small",45]
+        manifest = read_evidence(path/"manifest.json")
+        records = [read_json(line) for line in (path/"stdout.log").read_text().splitlines()]
+        body = records[1]
+        original = body["boxes"][0]
+        lo, hi = coordinate(original[0]),coordinate(original[3])
+        split = (lo+hi)//2
+        self.assertLess(lo,split)
+        a,b = original.copy(),original.copy()
+        a[3],b[0] = bits(split),bits(split)
+        body["boxes"][0:1] = [a,b]
+        body["cuboids"] = str(int(body["cuboids"])+1)
+        body["tree_nodes"] = str(int(body["tree_nodes"])+2)
+        result = inventory("\n".join(canonical(r).decode() for r in records)+"\n",generate("small",45),
+                           manifest["effective"],manifest["numeric_bounds"])
+        previous = read_evidence(path/"inventory.json")
+        self.assertEqual(result["cells"],previous["cells"])
+        self.assertEqual(result["authored_boxes"],previous["authored_boxes"])
+        self.assertEqual(int(result["cuboids"]),int(previous["cuboids"])+1)
+
     def test_small_engine_fixtures_against_dense_cells(self):
         # Independent fixtures: negative coordinates, partial face contacts,
         # multiple materials, and an internal cavity. All use production trees.

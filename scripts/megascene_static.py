@@ -1,7 +1,6 @@
 """Bounded static Vulkan development observations through the public runner.
 
-This slice never qualifies a benchmark: full replay/checkpoint validation,
-GPU measurements and calibration are future capabilities.
+This slice never qualifies a benchmark: GPU measurements, visual review qualification and calibration remain separate.
 """
 import hashlib
 import math
@@ -36,7 +35,9 @@ def settings(args, base):
     require(not any(p in ("build", "dist", "tmp") for p in archive.parts), "archive must be outside disposable build/dist/tmp directories")
     require(archive != output and output not in archive.parents and archive not in output.parents,
             "archive and output must be separate directory trees")
-    return {**base, "case": "static", "profile": "full", "resolution": args.resolution or "1920x1080",
+    require(not (args.validated and args.runtime_from), "choose --validated or --runtime-from")
+    require(not (args.validation_only and (args.validated or args.capture_opening)), "validation-only cannot reuse validation or request capture")
+    return {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": "static", "profile": "full", "resolution": args.resolution or "1920x1080",
             "warmup": str(warmup), "frames": str(frames), "schedule": "static-v1", "deadline_s": str(deadline),
             "capture_opening": args.capture_opening, "archive": str(archive),
             "schedule_kind": "accepted" if (warmup, frames) == (120, 3600) else "declared_development_prefix"}
@@ -56,8 +57,10 @@ def schedule(config):
             "schedule_id": "static-v1", "warmup_frames": config["warmup"], "measured_frames": config["frames"],
             "opening": camera, "frames": frames, "actions": [],
             "review_views": [{"name": "opening", "frame": "0", "features": ["building silhouettes", "span silhouettes", "major shadows"]}],
-            "required_checkpoints": ["initialization", "warmup_end", "completion"],
-            "checkpoint_implementation": "not_executed; later validation capability",
+            "required_checkpoints": [{"name": "initialization", "frame": "0"}, {"name": "review_opening", "frame": "0"},
+                                     {"name": "warmup_end", "frame": config["warmup"]},
+                                     {"name": "completion", "frame": str(int(config["warmup"])+int(config["frames"]))}],
+            "checkpoint_implementation": "megascene-checkpoint/1",
             "update_order": ["physics", "edit_disabled", "view_picking_disabled", "render"]}
 
 
@@ -104,11 +107,18 @@ def read_stream(path, attempt_id):
             now = integer(r["time_ns"])
             require(not records or now >= integer(records[-1]["time_ns"]), "nonmonotonic record time")
             integer(r["frame"])
-            require(r["record_type"] in {"worker_start", "stage", "static_state", "render_settings", "palette", "render_work", "frame", "opening_capture", "complete", "window_closed"}, "unknown evidence record type")
+            require(r["record_type"] in {"worker_start", "stage", "static_state", "render_settings", "palette", "render_work", "frame", "opening_capture", "complete", "window_closed", "checkpoint", "static_audit", "native_audit", "presentation_status"}, "unknown evidence record type")
             if r["record_type"] in ("frame", "stage"):
                 begin, end = integer(r["begin_ns"]), integer(r["end_ns"])
                 require(begin <= end <= now, "invalid interval boundaries")
                 require(integer(r["duration_ns"]) == end-begin and r["status"] == "measured" and r["unit"] == "ns", "invalid duration/status/unit")
+            if r["record_type"] == "checkpoint":
+                from megascene_checkpoints import checkpoint_bytes
+                import json
+                encoded = line.decode()
+                marker = encoded.index('"payload":')+len('"payload":')
+                _, end = json.JSONDecoder().raw_decode(encoded[marker:])
+                require(encoded[marker:marker+end].encode() == checkpoint_bytes(r["payload"]), "noncanonical checkpoint payload bytes")
             records.append(r)
         except (ValueError, KeyError, UnicodeError, TypeError) as exc:
             problems.append(str(exc))
@@ -147,6 +157,8 @@ def audit_observation(records, config, frames):
             stages = [r for r in items if r["record_type"] == "stage"]
             required = {"transport", "renderer", "geometry", "fence_wait", "vertex_upload", "acquire", "command_record", "submit_present", "events"}
             required |= {"generation", "initial_surfaces", "initial_inventory", "window_setup", "renderer_setup"} if f["frame"] == "0" else {"physics", "view"}
+            if any(r["record_type"] in ("checkpoint", "static_audit") for r in items):
+                required.add("checkpoint")
             require({r["stage"] for r in stages} == required and len(stages) == len(required), "missing or duplicate CPU stage")
             for r in stages:
                 require(int(r["end_ns"]) <= int(f["end_ns"]), "CPU stage ends outside its frame")
@@ -204,7 +216,7 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
               "termination": {"cause": cause, "exit_code": str(exit_code) if exit_code >= 0 else None,
                               "signal": str(-exit_code) if exit_code < 0 else None},
               "evidence_errors": problems,
-              "limitations": ["No full validation replay or canonical timed checkpoints.", "No GPU timing or calibration; supervised resource evidence is retained separately.",
+              "limitations": ["No GPU timing or calibration; supervised resource evidence is retained separately.",
                               "CPU intervals include instrumentation; no physical display latency claim.", "Unsafe/native behavior is runtime evidence, never a formal proof."],
               "measurement_availability": measurement("measured", "CPU frame-effect boundaries", "completed frame prefix", "frames", str(len(prefix)))
                   if prefix else measurement("not_executed", "no frame returned", "attempt", "frames")}
@@ -262,43 +274,65 @@ def execute(config, output, manifest, campaign):
                                              "static fixed-preset initialization", ["inputs.json"])
     frozen = schedule(config)
     snapshot(output/"schedule.json", frozen)
-    snapshot(output/"inputs.json", {"schema": SCHEMA, "record_type": "generation_inputs", "configuration": config,
+    snapshot(output/"inputs.json", {"schema": SCHEMA, "record_type": "generation_inputs", "configuration": {k: config[k] for k in ("preset", "seed", "side_m", "fragment_budget")},
                                     "owners": [{"id": str(i), "role": owner.role, "boxes": [b.record() for b in owner.boxes]} for i,owner in enumerate(owners,1)]})
     runtime = output/"runtime"
-    runtime.mkdir()
-    shutil.copytree(ROOT/"src", runtime/"src")
-    (runtime/"build").mkdir()
-    for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_supervisor.py", "megascene_monitor.py"):
-        shutil.copy2(ROOT/"scripts"/name, runtime/name)
-    (runtime/"src/megascene_entry.bend").write_text(worker_program(owners,config,frozen))
-    require(subprocess.check_output(["bend", "version"], text=True).strip() == "bend 2.0.32", "Megascene requires Bend 2.0.32")
-    commands = [["glslc", "--target-env=vulkan1.3", f"src/vulkan/{name}", "-o", f"build/vulkan-{name}.spv"] for name in ("scene.vert", "scene.frag", "shadow.vert")]
-    commands += [["g++", "-O2", "-std=c++17", "-fPIC", "-shared", "-Wall", "-Wextra", "-Wno-missing-field-initializers", "src/vulkan/native.cpp", "-lvulkan", "-lX11", "-o", "build/libvoxel_vulkan.so"],
-                 ["bend", "src/megascene_entry.bend", "-o", "worker.c"], ["bend", "src/megascene_entry.bend", "-o", "worker"]]
-    manifest["build"] = {"commands": commands, "working_directory": "runtime", "bend": "bend 2.0.32",
-                         "compilers": {name: subprocess.check_output([name, "--version"], text=True).splitlines()[0] for name in ("g++", "clang", "glslc")}}
-    manifest["source"] = provenance()
-    snapshot(output/"manifest.json",manifest)
-    for i,command in enumerate(commands):
-        run(command,runtime,output/f"build-{i}.stdout.log",output/f"build-{i}.stderr.log",120)
-    libs = runtime/"lib"
-    libs.mkdir()
-    dependencies = subprocess.check_output(["ldd", str(runtime/"worker"), str(runtime/"build/libvoxel_vulkan.so")], text=True)
-    (output/"dependencies.log").write_text(dependencies)
-    loader = None
-    for name in re.findall(r"(/[^\s:]+)",dependencies):
-        path = Path(name)
-        if path in (runtime/"worker", runtime/"build/libvoxel_vulkan.so"):
-            continue
-        if (libs/path.name).exists():
-            require((libs/path.name).read_bytes() == path.read_bytes(), "conflicting dependency names")
-        else:
-            shutil.copy2(path,libs/path.name)
-        if path.name.startswith("ld-linux"):
-            loader = path.name
-    require(loader, "static runner requires Linux/glibc")
-    manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
-    manifest["artifacts"] += [artifact(output/name,output) for name in ("inputs.json", "schedule.json")]
+    reuse = config.get("validated") or config.get("runtime_from")
+    source = None
+    if reuse:
+        from megascene_checkpoints import identity
+        source = Path(reuse).expanduser().resolve()
+        original = read_json((source/"manifest.json").read_text())
+        identity(original, source, original["effective"])
+        for key in ("case", "preset", "side_m", "seed", "fragment_budget", "resolution", "profile", "warmup", "frames", "schedule"):
+            require(config[key] == original["effective"][key], f"archived runtime configuration mismatch: {key}")
+        require(canonical(frozen) == canonical(read_json((source/"schedule.json").read_text())), "archived schedule mismatch")
+        shutil.copytree(source/"runtime", runtime)
+        manifest["build"] = original["build"]
+        manifest["source"] = original["source"]
+        loader = Path(original["worker_command"][0]).name
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+            shutil.copy2(ROOT/"scripts"/name, runtime/name)
+        manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
+        manifest["artifacts"] += [artifact(output/name,output) for name in ("inputs.json", "schedule.json")]
+    else:
+        runtime.mkdir()
+        shutil.copytree(ROOT/"src", runtime/"src")
+        (runtime/"build").mkdir()
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+            shutil.copy2(ROOT/"scripts"/name, runtime/name)
+        from megascene_references import program as reference_program
+        (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
+        (runtime/"src/megascene_entry.bend").write_text(worker_program(owners,config,frozen))
+        require(subprocess.check_output(["bend", "version"], text=True).strip() == "bend 2.0.32", "Megascene requires Bend 2.0.32")
+        commands = [["glslc", "--target-env=vulkan1.3", f"src/vulkan/{name}", "-o", f"build/vulkan-{name}.spv"] for name in ("scene.vert", "scene.frag", "shadow.vert")]
+        commands += [["g++", "-O2", "-std=c++17", "-fPIC", "-shared", "-Wall", "-Wextra", "-Wno-missing-field-initializers", "src/vulkan/native.cpp", "-lvulkan", "-lX11", "-lcrypto", "-o", "build/libvoxel_vulkan.so"],
+                     ["bend", "src/megascene_entry.bend", "-o", "worker.c"], ["bend", "src/megascene_entry.bend", "-o", "worker"],
+                     ["bend", "src/megascene_reference_entry.bend", "-o", "reference-worker"]]
+        manifest["build"] = {"commands": commands, "working_directory": "runtime", "bend": "bend 2.0.32",
+                             "compilers": {name: subprocess.check_output([name, "--version"], text=True).splitlines()[0] for name in ("g++", "clang", "glslc")}}
+        manifest["source"] = provenance()
+        snapshot(output/"manifest.json",manifest)
+        for i,command in enumerate(commands):
+            run(command,runtime,output/f"build-{i}.stdout.log",output/f"build-{i}.stderr.log",120)
+        libs = runtime/"lib"
+        libs.mkdir()
+        dependencies = subprocess.check_output(["ldd", str(runtime/"worker"), str(runtime/"build/libvoxel_vulkan.so")], text=True)
+        (output/"dependencies.log").write_text(dependencies)
+        loader = None
+        for name in re.findall(r"(/[^\s:]+)",dependencies):
+            path = Path(name)
+            if path in (runtime/"worker", runtime/"build/libvoxel_vulkan.so"):
+                continue
+            if (libs/path.name).exists():
+                require((libs/path.name).read_bytes() == path.read_bytes(), "conflicting dependency names")
+            else:
+                shutil.copy2(path,libs/path.name)
+            if path.name.startswith("ld-linux"):
+                loader = path.name
+        require(loader, "static runner requires Linux/glibc")
+        manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
+        manifest["artifacts"] += [artifact(output/name,output) for name in ("inputs.json", "schedule.json")]
     manifest["runtime"]["graphics_requirements"] = "compatible host Vulkan ICD/driver, kernel and X11 session; application libraries are retained"
     if shutil.which("vulkaninfo"):
         driver = subprocess.run(["vulkaninfo", "--summary"], capture_output=True, text=True, timeout=20)
@@ -319,7 +353,8 @@ def execute(config, output, manifest, campaign):
     manifest["worker_command"] = [f"runtime/lib/{loader}", "--library-path", "runtime/lib", "runtime/worker", "--gpu", "off", "--threads", config["threads"]]
     manifest["worker_environment"] = {"VOXEL_VULKAN_LIBRARY": "runtime/build/libvoxel_vulkan.so", "VOXEL_STRESS_PRESENT": "unpaced",
                                       "MEGASCENE_WARMUP": config["warmup"], "MEGASCENE_MEASURED": config["frames"],
-                                      "MEGASCENE_GROUND": str(int(config["side_m"])//2+8)}
+                                      "MEGASCENE_GROUND": str(int(config["side_m"])//2+8),
+                                      "MEGASCENE_SCHEDULE_SHA256": artifact(output/"schedule.json",output)["sha256"]}
     manifest["constants"] = {"lighting": "baseline-8c3ffad-daylight", "shadow_size": ["2048","2048"], "shadow_filter": "nearest compare LEQUAL; 3x3 receiver-plane PCF; depth bias 0.00005",
                              "projection": "0.05m near, infinite far, baseline focal 400 at 360px", "picking": False, "edits": False,
                              "palette": "runtime/src/color.bend", "lighting_constants": "runtime/src/vulkan/scene.frag",
@@ -334,7 +369,32 @@ def execute(config, output, manifest, campaign):
     snapshot(archive/"manifest.json",manifest)
     snapshot(output/"manifest.json",manifest)
     # Run directly from archived bytes. Raw committed records survive local cleanup.
+    from megascene_validation import validate_or_reuse, compare_attempt
+    validation = validate_or_reuse(config, archive, manifest, loader, campaign, source, owners, bounds)
+    snapshot(archive/"validation.json", validation)
+    manifest["capabilities"]["validation_replay"] = measurement(
+        "measured" if validation["status"] == "pass" else "incomplete",
+        "separate complete static replay; see validation.json", "static configuration", "frames",
+        validation.get("checked_frames") if validation["status"] == "pass" else None)
+    if config["validation_only"] or validation["status"] != "pass":
+        report_value = read_json((archive/"validation/summary.json").read_text()) if (archive/"validation/summary.json").exists() else report([],[],config,2,"prelaunch_failure",0,manifest["attempt_id"])
+        report_value["attempt_id"] = manifest["attempt_id"]
+        report_value["attempt_kind"] = "validation_only" if config["validation_only"] else "validation_failed"
+        report_value["measurement_scope"] = "validation execution cost; excluded from performance populations"
+        manifest["extensions"]["phase"] = "validation_complete" if validation["status"] == "pass" else "validation_failed"
+        report_value["state_correctness"] = outcome(validation["status"], "separate static validation", "complete declared static schedule", ["validation.json"])
+        report_value["validation"] = {"path": "validation.json", "status": validation["status"]}
+        snapshot(archive/"summary.json",report_value)
+        finish_archive(archive,output,manifest)
+        require(validation["status"] == "pass", "static validation failed; see validation.json")
+        return
+    from megascene_checkpoints import applicable, identity
+    from megascene_validation import verify_host_artifacts
+    applicable(validation,identity(manifest,archive,config))
+    verify_host_artifacts(validation)
     report_value, records = launch(config,archive,manifest,loader,campaign=campaign)
+    compare_attempt(config,archive,manifest,validation,report_value,records)
+
     try:
         achieved = inventory((archive/"stdout.log").read_text(),owners,config,bounds)
         snapshot(archive/"inventory.json",achieved)
@@ -378,6 +438,13 @@ def execute(config, output, manifest, campaign):
             "separate opening capture retained" if capture_ok else "requested opening capture incomplete",
             "capture availability only; visual quality remains unqualified", ["review.json", "captures/summary.json"])
     snapshot(archive/"summary.json",report_value)
+    finish_archive(archive,output,manifest)
+    require(capture_ok and report_value["schedule_completion"]["status"] == "pass" and report_value["initialization"]["status"] == "pass" and report_value["state_correctness"]["status"] == "pass",
+            "static invocation did not complete correctly; retained summary describes the prefix")
+
+
+def finish_archive(archive,output,manifest):
+    from megascene import artifact, snapshot
     manifest["evidence"] = [artifact(p,archive) for p in sorted(archive.rglob("*")) if p.is_file() and "runtime" not in p.relative_to(archive).parts and p.relative_to(archive).as_posix() != "manifest.json"]
     snapshot(archive/"manifest.json",manifest)
     for p in archive.rglob("*"):
@@ -385,19 +452,20 @@ def execute(config, output, manifest, campaign):
             dest = output/p.relative_to(archive)
             dest.parent.mkdir(parents=True,exist_ok=True)
             shutil.copy2(p,dest)
-    require(capture_ok and report_value["schedule_completion"]["status"] == "pass" and report_value["initialization"]["status"] == "pass",
-            "static invocation did not complete; retained summary describes the prefix")
 
 
-def launch(config, archive, manifest, loader, review=False, campaign=None):
+
+def launch(config, archive, manifest, loader, review=False, campaign=None, validation=False):
     from megascene import snapshot
-    destination = archive/"captures" if review else archive
+    destination = archive/"captures" if review else archive/"validation" if validation else archive
     env = {k:v for k,v in os.environ.items() if not k.startswith(("VOXEL_", "MEGASCENE_", "VK_", "LD_"))}
     env.update(manifest["worker_environment"])
     env.update(VOXEL_VULKAN_LIBRARY=str(archive/"runtime/build/libvoxel_vulkan.so"),
                MEGASCENE_EVENTS=str(destination/"cpu.jsonl"), MEGASCENE_ATTEMPT=manifest["attempt_id"],
                MEGASCENE_CAMPAIGN=manifest["campaign_id"], MEGASCENE_SERIES=manifest["series_id"],
                VK_LOADER_LAYERS_DISABLE="~all~")
+    if validation:
+        env["MEGASCENE_VALIDATE"] = "1"
     if review:
         env["MEGASCENE_CAPTURE"] = str(destination/"opening.ppm")
     command = [str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"), str(archive/"runtime/worker"),

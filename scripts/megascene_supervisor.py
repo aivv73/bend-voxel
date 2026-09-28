@@ -207,8 +207,9 @@ class Reference:
 
 class Tail:
     """Incremental JSONL parser; malformed/truncated bytes stay at original path."""
-    def __init__(self, path, identity):
+    def __init__(self, path, identity, compact_cpu=False):
         self.path, self.identity = path, identity
+        self.compact_cpu = compact_cpu
         self.offset, self.pending, self.records = 0, b'', []
         self.error = None
 
@@ -232,8 +233,14 @@ class Tail:
                     require(r['clock_id'] == 'linux.CLOCK_MONOTONIC', 'stream clock mismatch')
                     timestamp = integer(r['time_ns'])
                     require(not self.records or timestamp >= integer(self.records[-1]['time_ns']), 'stream time regressed')
-                    self.records.append(r)
-                    fresh.append(r)
+                    # Raw checkpoints remain in the append-only file. The
+                    # supervisor needs full frame records for the shared-recorder
+                    # comparison, and only sequence/time metadata for other CPU
+                    # records. Retaining every nested payload here causes large
+                    # garbage-collection pauses that starve resource supervision.
+                    kept = {k:r[k] for k in ("record_type", "sequence", "time_ns")} if self.compact_cpu and r["record_type"] != "frame" else r
+                    self.records.append(kept)
+                    fresh.append(kept)
                 except (ValueError, KeyError, TypeError, UnicodeError) as exc:
                     self.error = f'{self.path.name}: {exc}'
                     break
@@ -349,7 +356,7 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
     last_host, last_heap = None, None
     device = None
     host_pending = b''
-    tails = {name: Tail(destination/f'{name}.jsonl', identity) for name in ('cpu','heaps','allocations')}
+    tails = {name: Tail(destination/f'{name}.jsonl', identity, compact_cpu=name=='cpu') for name in ('cpu','heaps','allocations')}
     loaded_objects = set()
     known_worker_pids = {}
     observed_resources = []

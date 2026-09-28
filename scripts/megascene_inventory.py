@@ -112,6 +112,22 @@ def plane_sweep(front, back=()):
     return strips
 
 
+def occupancy_sweep(boxes):
+    """X slabs of Y slabs of material-labelled Z intervals; no dense cells."""
+    xs = sorted({c for box in boxes for c in (box.lo[0], box.hi[0])})
+    result = []
+    for lo, hi in zip(xs, xs[1:]):
+        rectangles = [(b.lo[1], b.hi[1], b.lo[2], b.hi[2], b.material)
+                      for b in boxes if b.lo[0] <= lo and hi <= b.hi[0]]
+        content = plane_sweep(rectangles)
+        if content:
+            if result and result[-1][1] == lo and result[-1][2] == content:
+                result[-1][1] = hi
+            else:
+                result.append([lo, hi, content])
+    return result
+
+
 def surface_reference(boxes):
     boundaries = defaultdict(list)
     for b in boxes:
@@ -217,7 +233,7 @@ def inventory(text, owners, config, numeric):
         for b in body["boxes"]:
             require(len(b) == 7, prefix + "invalid box")
             boxes.append(Box(tuple(map(coordinate, b[:3])), tuple(map(coordinate, b[3:6])), integer(b[6])))
-        require(Counter(boxes) == Counter(owner.boxes), prefix + "occupancy/material mismatch")
+        require(occupancy_sweep(boxes) == occupancy_sweep(owner.boxes), prefix + "occupancy/material mismatch")
         require(connected(boxes) and any(b.material == 1 for b in boxes), prefix + "connectivity/anchor mismatch")
         cells = checked(sum(volume(b) for b in boxes), "actual cell sum")
         require(body["cells"] == str(cells) and body["cuboids"] == str(len(boxes)) and

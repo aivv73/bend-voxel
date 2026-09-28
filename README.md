@@ -6,7 +6,7 @@ A destructible voxel demo built with [Bend 2](https://github.com/bendlang/bend) 
 
 ## Run
 
-Requires [Bend 2.0.32](https://github.com/bendlang/bend/releases/tag/v2.0.32), Linux with X11 or XWayland, a Vulkan 1.3 driver with Xlib surface support, Vulkan and X11 development headers, `glslc`, `g++`, and `make`.
+Requires [Bend 2.0.32](https://github.com/bendlang/bend/releases/tag/v2.0.32), Linux with X11 or XWayland, a Vulkan 1.3 driver with Xlib surface support, Vulkan, X11 and OpenSSL development headers, `glslc`, `g++`, and `make`.
 
 ```sh
 make run
@@ -39,7 +39,9 @@ The benchmarks need Python 3. See the [Light Atelier guide](docs/showcase.md) fo
 
 The separate [Megascene admission command](docs/megascene-admission.md) constructs
 and inventories the fixed 64/128 m districts before rendering. Admission does
-not qualify a Vulkan benchmark attempt. The [static Vulkan runner](docs/megascene-static.md)
+not qualify a Vulkan benchmark attempt. [Static replay validation](docs/megascene-validation.md)
+adds independent references, complete replays and exact timed state/geometry checkpoints.
+The [static Vulkan runner](docs/megascene-static.md)
 opens the frozen district view and archives bounded, unqualified development
 observations and an optional opening capture. Its [supervisor](docs/megascene-supervision.md)
 enforces resource reserves and deadlines, retains interrupted evidence, and

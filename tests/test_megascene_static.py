@@ -148,6 +148,20 @@ class StaticReports(unittest.TestCase):
             self.assertIsNone(failure["termination"]["exit_code"])
             self.assertFalse(failure["completed_prefix"]["startup"])
 
+    def test_validator_import_failure_retains_prelaunch_evidence(self):
+        from unittest.mock import patch
+        from megascene import main
+        with tempfile.TemporaryDirectory(prefix="megascene-import-test-",dir=Path.home()) as d:
+            root=Path(d)
+            with patch("megascene_static.execute",side_effect=ImportError("validator import fixture")):
+                code=main(["--case","static","--output",str(root/"output"),"--archive",str(root/"archive")])
+            self.assertEqual(code,2)
+            result=read_evidence(root/"output/summary.json")
+            self.assertEqual(result["termination"]["cause"],"prelaunch_failure")
+            self.assertIsNone(result["termination"]["exit_code"])
+            self.assertFalse(result["completed_prefix"]["startup"])
+            self.assertEqual(read_evidence(root/"archive/campaign.json")["state"],"ready")
+
     def test_public_rejections_precede_build(self):
         with tempfile.TemporaryDirectory() as d:
             for i,args in enumerate((["--profile","proxy"], ["--frames","3601"], ["--warmup","121"],
