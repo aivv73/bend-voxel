@@ -1,4 +1,8 @@
-# Small-preset traversal evidence, 2026-09-28
+# Small-preset `traversal-v1` evidence, 2026-09-28
+
+This report preserves the original failed cavity review. The later
+[`traversal-v2` camera-framing evidence](../megascene-traversal-v2/README.md)
+uses a distinct frozen schedule and does not change this result.
 
 The accepted `traversal-v1` route was executed on the small, seed-45 district at
 1920 × 1080, six CPU threads, full body geometry and 2048 × 2048 shadows. The
@@ -31,8 +35,8 @@ visual quality failed. This distinction is recorded in the archived
 The measured ordinary-frame interval was 5.02 seconds. The accepted ten-second
 minimum was not reached, so this run is not a benchmark pass or a qualified
 capacity endpoint. No schedule was extended to obtain one. The fixed route's
-cavity readability failure also leaves the required primary fidelity outcome
-unmet; issue #53 remains open pending an accepted fidelity remedy. An earlier
+cavity readability failure also left the original primary fidelity outcome
+unmet. An earlier
 retry stopped on stale resource monitoring and its incomplete evidence remains
 in the same campaign archive.
 

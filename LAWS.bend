@@ -45,6 +45,10 @@ law palette_length:
 #   in binary32 before replay. Picking and edits remain disabled. Validation
 #   checks every view, and timing retains named route checkpoints and return
 #   geometry. Moving views cannot rebuild unchanged full meshes or shadow fit.
+# - The user-approved issue #53 cavity-framing remedy uses traversal-v2 with
+#   eye (256,70,210), look (256,12,272) at both cavity visits. Preserve the
+#   exact traversal-v1 route and its failed readability review as evidence.
+#   Route versions cannot share validation or be silently interchanged.
 # - Required route captures occur in the separate validation process. Assess
 #   each named feature's geometry and readability with a bound capture, shadow
 #   fit and texel evidence. Missing review cannot pass visual quality; wrong

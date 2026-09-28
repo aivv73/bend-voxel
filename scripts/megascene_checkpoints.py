@@ -145,7 +145,7 @@ def checkpoint_catalog(frozen):
 def audit(records, frozen, expected, expected_work, complete, thorough=False):
     """Verify every replay frame, or the timed checkpoint catalog, with evidence."""
     failures, catalog = [], []
-    traversal = frozen["schedule_id"] == "traversal-v1"
+    traversal = frozen["schedule_id"] in ("traversal-v1", "traversal-v2")
     if traversal:
         from megascene_traversal import expected_payload
     expected_hash = hashlib.sha256(checkpoint_bytes(expected)).hexdigest()

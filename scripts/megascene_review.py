@@ -30,7 +30,7 @@ def assess(bundle, input_path, reviewer):
     require(not review["missing"], "required capture missing")
     frozen=read_json((root/"schedule.json").read_text())
     require(review["schedule_sha256"]==hashlib.sha256((root/"schedule.json").read_bytes()).hexdigest(), "stale review schedule")
-    require(frozen["schedule_id"]=="traversal-v1", "unsupported route")
+    require(frozen["schedule_id"] in ("traversal-v1", "traversal-v2"), "unsupported route")
     answers=read_json(Path(input_path).read_text())
     require(answers["schema"]=="megascene-feature-assessments/1" and isinstance(answers["views"],dict), "unsupported assessments")
     require(set(answers["views"])=={v["name"] for v in review["views"]}, "every named view needs assessment")

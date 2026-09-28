@@ -55,6 +55,48 @@ class FrozenRoute(unittest.TestCase):
         with self.assertRaises(ValueError):
             schedule({**self.config(),"frames":"3599"})
 
+    def test_v2_cavity_frames_show_bridge_floor_and_rim(self):
+        import math
+        def value(word):
+            return struct.unpack(">f",bytes.fromhex(word[2:]))[0]
+        def project(view, point):
+            eye=list(map(value,view["eye_m"]))
+            yaw,pitch=value(view["yaw"]),value(view["pitch"])
+            delta=[p-e for p,e in zip(point,eye)]
+            right=(-math.cos(yaw),0,math.sin(yaw))
+            up=(-math.sin(yaw)*math.sin(pitch),math.cos(pitch),-math.cos(yaw)*math.sin(pitch))
+            forward=(math.sin(yaw)*math.cos(pitch),math.sin(pitch),math.cos(yaw)*math.cos(pitch))
+            width=sum(a*b for a,b in zip(delta,right))
+            height=sum(a*b for a,b in zip(delta,up))
+            depth=sum(a*b for a,b in zip(delta,forward))
+            self.assertGreater(depth,0)
+            return 960+1200*width/depth,540-1200*height/depth
+
+        for preset in ("small","large"):
+            q=2 if preset=="small" else 4
+            v1=schedule({**self.config(preset),"schedule":"traversal-v1"})
+            v2=schedule({**self.config(preset),"schedule":"traversal-v2"})
+            self.assertEqual(v1["schedule_id"],"traversal-v1")
+            self.assertEqual(v2["schedule_id"],"traversal-v2")
+            self.assertEqual(v1["opening"],v2["opening"])
+            for index,neighborhood in ((3,0),(7,q*q-1)):
+                frame=121+300*index+60
+                origin_x=320*(neighborhood%q)-160*q
+                origin_z=320*(neighborhood//q)-160*q
+                center_x=(256+origin_x)/10
+                floor=(center_x,.8,(256+origin_z)/10)
+                bridge=(center_x,2.4,(272+origin_z)/10)
+                rim=(center_x,2.4,(304+origin_z)/10)
+                old_bridge_y=project(v1["frames"][frame]["camera"],bridge)[1]
+                self.assertLess(old_bridge_y,0)
+                view=v2["frames"][frame]["camera"]
+                floor_y,bridge_y,rim_y=(project(view,p)[1] for p in (floor,bridge,rim))
+                self.assertTrue(0<rim_y<bridge_y<floor_y<1080)
+                self.assertGreater(floor_y-bridge_y,200)
+                for edge_x in (224,288):
+                    edge=(edge_x+origin_x)/10,2.4,bridge[2]
+                    self.assertTrue(0<project(view,edge)[0]<1920)
+
     def test_synthetic_moving_checkpoint_rejects_stale_view(self):
         frozen=static_schedule({"side_m":"64","warmup":"1","frames":"2"})
         frozen["schedule_id"]="traversal-v1"

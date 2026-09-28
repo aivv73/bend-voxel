@@ -18,13 +18,15 @@ FEATURES = {
     "far": ["whole district extent", "major structures", "major shadows"],
     "sky": ["open sky"],
 }
+ROUTES = ("traversal-v1", "traversal-v2")
 
 
 def f32(value):
     return struct.unpack("<f", struct.pack("<f", value))[0]
 
 
-def pose(name, neighborhood, preset, seed):
+def pose(name, neighborhood, preset, seed, route):
+    require(route in ROUTES, "unsupported traversal route")
     q = 2 if preset == "small" else 4
     if name == "far":
         side = 32 * q
@@ -39,7 +41,8 @@ def pose(name, neighborhood, preset, seed):
             "opening": ((150,120,310),(76,48,76)),
             "wall": ((8,48,60),(16,48,60)),
             "interior": ((116,44,80),(20,44,80)),
-            "cavity": ((256,44,244),(256,8,256)),
+            "cavity": (((256,70,210),(256,12,272)) if route == "traversal-v2"
+                       else ((256,44,244),(256,8,256))),
             "assembly": ((284,90,160),(284,top,180)),
             "sky": ((160,120,160),(160,220,260)),
         }
@@ -60,7 +63,9 @@ def camera(eye, look):
 def schedule(config):
     warmup, measured = int(config["warmup"]), int(config["frames"])
     require(warmup == 120 and measured == 3600, "primary traversal requires the complete 120/3600 schedule")
-    endpoints = [pose(name,n,config["preset"],int(config["seed"])) for name,n in PHASES]
+    route = config.get("schedule", "traversal-v2")
+    require(route in ROUTES, "unsupported traversal route")
+    endpoints = [pose(name,n,config["preset"],int(config["seed"]),route) for name,n in PHASES]
     opening = camera(*endpoints[0])
     frames = []
     for frame in range(1+warmup+measured):
@@ -102,7 +107,7 @@ def schedule(config):
                     "pose": "opening", "features": ["unchanged return geometry", "major shadows"]})
     checkpoints.append({"name": "completion", "frame": str(warmup+measured)})
     return {"schema": SCHEMA, "record_type": "schedule", "fixed_step": "0x3c888889",
-            "schedule_id": "traversal-v1", "warmup_frames": str(warmup), "measured_frames": str(measured),
+            "schedule_id": route, "warmup_frames": str(warmup), "measured_frames": str(measured),
             "opening": opening, "frames": frames, "actions": [], "review_views": reviews,
             "required_checkpoints": checkpoints, "checkpoint_implementation": "megascene-checkpoint/1",
             "update_order": ["physics", "edit_disabled", "view_picking_disabled", "render"]}

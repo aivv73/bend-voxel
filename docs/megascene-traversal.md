@@ -8,18 +8,21 @@ campaign evidence and calibration.
 
 ## Run the frozen route
 
-The primary route is `traversal-v1`: startup and 120 warm-up frames at
+The current cavity-framing route is `traversal-v2`: startup and 120 warm-up frames at
 `opening(0)`, followed by twelve 300-frame phases. Each phase holds its pose for
 120 frames and interpolates eye and look coordinates for 180 frames to the next
 pose. The last phase interpolates to itself. The fixed binary32 view of every
 frame is stored in `schedule.json` and `camera.bin`; the worker reads those
 bits directly. Picking and edits are disabled. A shorter traversal is rejected.
+`traversal-v1` remains available with `--schedule traversal-v1` to reproduce
+its original failing cavity views. The [accepted camera amendment](megascene-workload.md#exact-camera-picking-and-review-schedule)
+changes only the two cavity endpoints and their adjacent interpolation frames.
 
 ```sh
-python3 scripts/megascene.py --case traversal --preset small --seed 45 \
+python3 scripts/megascene.py --case traversal --schedule traversal-v2 --preset small --seed 45 \
   --threads 6 --resolution 1920x1080 --validation-only \
   --output build/traversal-validation --archive "$HOME/megascene-evidence"
-python3 scripts/megascene.py --case traversal --preset small --seed 45 \
+python3 scripts/megascene.py --case traversal --schedule traversal-v2 --preset small --seed 45 \
   --threads 6 --resolution 1920x1080 --validated build/traversal-validation \
   --output build/traversal-timed --archive "$HOME/megascene-evidence"
 ```
@@ -75,3 +78,8 @@ The command retains the raw assessment input and updates `review.json`,
 `summary.json` and their hashes in `manifest.json`. Review the archived attempt,
 which is the retained evidence source. This is a runtime and human observation,
 not a formal Bend proof.
+
+The [2026-09-28 `traversal-v2` evidence](validation/megascene-traversal-v2/README.md)
+records readable cavity features at both visits while preserving the original
+failed `traversal-v1` review. Its short ordinary-frame interval leaves benchmark
+qualification inconclusive.

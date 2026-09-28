@@ -23,8 +23,13 @@ def settings(args, base):
     for name in ("diagnostic", "calibration", "search"):
         require(getattr(args, name) is None, f"--{name} is not implemented")
     require(args.profile in (None, "full"), "static supports only --profile full")
-    schedule_id = "traversal-v1" if args.case == "traversal" else "static-v1"
-    require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
+    if args.case == "traversal":
+        from megascene_traversal import ROUTES
+        require(args.schedule is None or args.schedule in ROUTES, "unsupported frozen schedule")
+        schedule_id = args.schedule or "traversal-v2"
+    else:
+        schedule_id = "static-v1"
+        require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
     require(args.resolution in (None, "640x360", "1920x1080"), "static resolutions are 640x360 and 1920x1080")
     warmup = integer(args.warmup if args.warmup is not None else "120")
     frames = integer(args.frames if args.frames is not None else "3600")
