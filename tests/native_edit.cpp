@@ -11,6 +11,13 @@ int main() {
   uint64_t leaves=0; assert(edit_subdivision(lo,hi,local,&leaves,0)); assert(leaves>1);
   float moved[]={-.05f,9.05f,.05f}; assert(edit_point_valid(moved,-1,local));
   assert(local[1]==100.5f);
+  float falling[]={-29.5f,4.f,-11.6f},span_lo[]={-304.f,42.f,-144.f},span_hi[]={-184.f,76.f,-136.f};
+  assert(!edit_point_valid(falling,-.196200043f,local));
+  assert(edit_remote_valid(falling,-.196200043f,span_lo,span_hi,local));
+  falling[2]=-14.f;
+  assert(!edit_remote_valid(falling,-.196200043f,span_lo,span_hi,local));
+  falling[2]=std::numeric_limits<float>::infinity();
+  assert(!edit_remote_valid(falling,-.196200043f,span_lo,span_hi,local));
   for(float invalid:{std::numeric_limits<float>::infinity(),std::numeric_limits<float>::quiet_NaN(),1025.f,0.123f}) {
     float bad[]={invalid,0,0}; assert(!edit_point_valid(bad,0,local));
     float low[]={invalid,0,0},high[]={1026.f,1,1}; assert(!edit_box_valid(low,high));

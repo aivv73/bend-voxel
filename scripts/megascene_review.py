@@ -21,7 +21,7 @@ def assess(bundle, input_path, reviewer):
     root=Path(bundle).expanduser().resolve()
     require(reviewer.strip(), "reviewer identity required")
     manifest=read_json((root/"manifest.json").read_text())
-    require(manifest["effective"]["case"] in ("traversal", "picking", "localized"), "traversal bundle required")
+    require(manifest["effective"]["case"] in ("traversal", "picking", "localized", "support"), "traversal bundle required")
     require(manifest["attempt_kind"] in ("validation_only", "development_observation"), "complete bundle required")
     summary=read_json((root/"summary.json").read_text())
     require(summary["schedule_completion"]["status"] == "pass" and
@@ -30,7 +30,7 @@ def assess(bundle, input_path, reviewer):
     require(not review["missing"], "required capture missing")
     frozen=read_json((root/"schedule.json").read_text())
     require(review["schedule_sha256"]==hashlib.sha256((root/"schedule.json").read_bytes()).hexdigest(), "stale review schedule")
-    require(frozen["schedule_id"] in ("traversal-v1", "traversal-v2", "picking-v1", "picking-v2", "localized-v1"), "unsupported route")
+    require(frozen["schedule_id"] in ("traversal-v1", "traversal-v2", "picking-v1", "picking-v2", "localized-v1", "support-v1"), "unsupported route")
     answers=read_json(Path(input_path).read_text())
     require(answers["schema"]=="megascene-feature-assessments/1" and isinstance(answers["views"],dict), "unsupported assessments")
     require(set(answers["views"])=={v["name"] for v in review["views"]}, "every named view needs assessment")
@@ -54,6 +54,22 @@ def assess(bundle, input_path, reviewer):
             key=view["name"]+"/"+feature["name"]
             if answer["geometry"]=="incorrect": bad_geometry.append(key)
             elif answer["readability"]!="readable": bad_quality.append(key)
+    # Preserve an occluded overview's assessment. Only its explicitly bound,
+    # independently assessed close-up can supply that same feature's readability.
+    covered=[]
+    for view in review['views']:
+        for feature in view['features']:
+            if 'covered_by' not in feature: continue
+            require(manifest['effective']['case']=='support', 'unexpected supplementary feature coverage')
+            detail=next((v for v in review['views'] if v['name']==feature['covered_by']),None)
+            require(detail is not None and detail.get('supplementary_to')==view['name'] and detail['frame']==view['frame'],
+                    'supplementary feature does not cover the same action state')
+            target=next((f for f in detail['features'] if f['name']==feature['name']),None)
+            require(target is not None, 'supplementary feature missing')
+            key=view['name']+'/'+feature['name']
+            if feature['geometry']=='correct' and target['geometry']=='correct' and target['readability']=='readable' and key in bad_quality:
+                bad_quality.remove(key);covered.append({'feature':key,'covered_by':detail['name']})
+    if covered: review['supplementary_coverage']=covered
     review["reviewer"]=reviewer
     review["reviewed_at_utc"]=datetime.now(timezone.utc).isoformat()
     review["status"]="incorrect_rendering" if bad_geometry else "insufficient_readability" if bad_quality else "pass"

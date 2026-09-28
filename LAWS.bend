@@ -199,3 +199,18 @@ law palette_material_order:
 #   frame return, including required checks/logging; CPU/GPU ordinary samples
 #   exclude that frame. One accepted edit leaves percentile qualification
 #   inconclusive; never add cuts or pool attempts to manufacture a pass.
+
+# Megascene support-v1 runtime contract (issue #56; not a formal claim):
+# - Cut A0/B0/A1/B1/A2/B2 at measured ordinals 0/6/12/18/24/30.
+#   Each cut removes exactly 16 material-3 cells. A first cut leaves an
+#   anchored 120-cell stump and an anchored span; a second leaves another
+#   anchored stump and releases the span with inherited offset/velocity.
+# - Actual distinct released body identities must move on every frame 31..42.
+#   Persist motion bits and canonical checkpoints, and compare them with the
+#   separately validated replay. Intended release times never establish motion.
+# - Existing vertical gravity and y=0 stopping remain unchanged. Translation
+#   preserves local occupancy/surfaces, IDs/revisions and full-mesh bytes/slots.
+#   Native draw/shadow evidence and named beam-feature captures cover rendering.
+# - Six edits remain percentile-inconclusive. Missing/rejected/no-op cuts or
+#   absent motion evidence cannot qualify schedule completion. See
+#   docs/megascene-support.md for independent reference/runtime evidence scope.

@@ -60,6 +60,7 @@ typedef struct {
   const char* schedule_sha256;
   const char* action_outcomes; // Canonical action history, including no-ops/rejections.
   unsigned action_frame;
+  unsigned action_id;
 } VoxelMegaState;
 
 typedef struct {
@@ -116,44 +117,53 @@ static void mega_reference(const char* fields) { (void)fields; }
 static void mega_stage(const char* name,u64 begin,u64 end) { (void)name; (void)begin; (void)end; }
 #endif
 #ifdef CID_VULKAN_VULKAN_CAPTURE
+static VoxelVkFrame mega_capture_frame;
+static void voxel_support_detail(BendWin* win);
+static void mega_capture_image(BendWin* win,const char* path) {
+  usleep(250000); // Validation only; allow the compositor to present the image.
+  XSync(win->dpy,False);
+  unsigned width=win->img->width,height=win->img->height;
+  XImage* image=XGetImage(win->dpy,win->win,0,0,width,height,AllPlanes,ZPixmap);
+  if(!image) err_fail("validation capture unavailable");
+  FILE* file=fopen(path,"wx");
+  if(!file) err_fail("cannot create validation capture");
+  fprintf(file,"P6\n%u %u\n255\n",width,height);
+  unsigned long masks[]={image->red_mask,image->green_mask,image->blue_mask};
+  for(unsigned y=0;y<height;y++) for(unsigned x=0;x<width;x++) {
+    unsigned long pixel=XGetPixel(image,x,y);
+    for(unsigned c=0;c<3;c++) {
+      unsigned long mask=masks[c],value=pixel&mask;
+      if(!mask) err_fail("unsupported capture channel mask");
+      while(!(mask&1)) { mask>>=1; value>>=1; }
+      if(fputc((int)(value*255/mask),file)==EOF) err_fail("capture write failed");
+    }
+  }
+  XDestroyImage(image);
+  if(fclose(file)) err_fail("capture flush failed");
+}
 Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
   const char* directory=getenv("MEGASCENE_CAPTURE_DIR");
   char path[4096];
   if (directory) {
     u64 rendered=mega_frame-1;
     int review=rendered==0 || rendered==(u64)mega_warmup+mega_measured ||
-      (getenv("MEGASCENE_LOCALIZED") ? rendered==(u64)mega_warmup+1 :
+      (getenv("MEGASCENE_SUPPORT") ?
+        ((rendered>mega_warmup && rendered<=mega_warmup+31 && (rendered-mega_warmup-1)%6==0) ||
+         rendered==mega_warmup+32 || rendered==mega_warmup+43) :
+       getenv("MEGASCENE_LOCALIZED") ? rendered==(u64)mega_warmup+1 :
        (rendered>mega_warmup && (rendered-mega_warmup-1)%300==60));
     if (!review) return f[0];
     if (snprintf(path,sizeof path,"%s/frame-%04llu.ppm",directory,(unsigned long long)rendered)>=(int)sizeof path)
       err_fail("capture path too long");
   }
   BendWin* win=(BendWin*)(intptr_t)io_hand_v(f[0]);
-  if (directory) usleep(250000); // Validation captures are outside measured samples.
-  XSync(win->dpy,False);
-  unsigned width=win->img->width,height=win->img->height;
-  XImage* image=XGetImage(win->dpy,win->win,0,0,width,height,AllPlanes,ZPixmap);
-  if (!image) err_fail("opening capture unavailable");
-  FILE* file=fopen(directory?path:mega_env("MEGASCENE_CAPTURE"),"wx");
-  if (!file) err_fail("cannot create opening capture");
-  fprintf(file,"P6\n%u %u\n255\n",width,height);
-  unsigned long masks[]={image->red_mask,image->green_mask,image->blue_mask};
-  for (unsigned y=0;y<height;y++) for (unsigned x=0;x<width;x++) {
-    unsigned long pixel=XGetPixel(image,x,y);
-    for (unsigned c=0;c<3;c++) {
-      unsigned long mask=masks[c],value=pixel&mask;
-      if (!mask) err_fail("unsupported capture channel mask");
-      while (!(mask&1)) { mask>>=1; value>>=1; }
-      if (fputc((int)(value*255/mask),file)==EOF) err_fail("capture write failed");
-    }
-  }
-  XDestroyImage(image);
-  if (fclose(file)) err_fail("capture flush failed");
+  mega_capture_image(win,directory?path:mega_env("MEGASCENE_CAPTURE"));
   if (directory) {
     char record[128];
     snprintf(record,sizeof record,"\"record_type\":\"capture\",\"rendered_frame\":\"%llu\"",(unsigned long long)(mega_frame-1));
     mega_record(record);
   } else mega_record("\"record_type\":\"opening_capture\"");
+  if(directory && getenv("MEGASCENE_SUPPORT")) voxel_support_detail(win);
   return f[0];
 }
 
@@ -283,7 +293,8 @@ static VoxelMegaBox mega_tree(Env e,Term tree,VoxelMegaBox** boxes,u32* count,u6
 }
 static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   int validation=getenv("MEGASCENE_VALIDATE")!=NULL;
-  int review=!getenv("MEGASCENE_LOCALIZED") && getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
+  int review=getenv("MEGASCENE_SUPPORT") ? mega_frame>=mega_warmup+32 && mega_frame<=mega_warmup+43 :
+    !getenv("MEGASCENE_LOCALIZED") && getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
     (mega_frame-mega_warmup-1)%300==60;
   if(!validation&&!review&&!mega_edit_pending&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
   u64 begin=voxel_vk_tick();
@@ -311,6 +322,7 @@ static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   state.aim_radius=voxel_vk_float(e.mem[al+3]); state.warmup=mega_warmup; state.measured=mega_measured;
   state.schedule_sha256=mega_env("MEGASCENE_SCHEDULE_SHA256");
   state.action_outcomes=mega_action_outcomes; state.action_frame=mega_edit_pending;
+  state.action_id=mega_edit_action;
   voxel_vk_load();
   typedef int (*Check)(const VoxelVkFrame*,const VoxelMegaState*,char*,size_t);
   Check check=(Check)dlsym(voxel_vk_library,"voxel_mega_checkpoint");
@@ -367,6 +379,12 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
     out->anchored=(u32)e.mem[at+4];
     anchored+=out->anchored;
     moving+=voxel_vk_float(e.mem[at+3])!=0;
+    if(mega_stream && getenv("MEGASCENE_SUPPORT") && !out->anchored) {
+      char motion[256];
+      snprintf(motion,sizeof motion,"\"record_type\":\"body_motion\",\"id\":\"%u\",\"revision\":\"%u\",\"offset_m\":\"0x%08x\",\"velocity_m_s\":\"0x%08x\"",
+        out->id,out->revision,(u32)e.mem[at+2],(u32)e.mem[at+3]);
+      mega_record(motion);
+    }
     translated+=out->offset!=0;
     if (out->offset<minimum_offset) minimum_offset=out->offset;
     Term tree=e.mem[at+5];
@@ -394,9 +412,9 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   if (mega_stream) {
     frame.full_geometry=1; frame.ground_half_extent=mega_ground; frame.record=mega_record;
     frame.evidence_frame=mega_frame; frame.gpu_evidence=1;
-    if (anchored!=frame.body_count || moving || translated || (frame.aim_kind && !getenv("MEGASCENE_RAY_FILE")) || frame.night)
+    if ((!getenv("MEGASCENE_SUPPORT") && (anchored!=frame.body_count || moving || translated)) || (frame.aim_kind && !getenv("MEGASCENE_RAY_FILE")) || frame.night)
       err_fail("static Megascene state invariant failed");
-    if(!getenv("MEGASCENE_LOCALIZED")) {
+    if(!getenv("MEGASCENE_LOCALIZED") && !getenv("MEGASCENE_SUPPORT")) {
     static u32 saved_state[14];
     u32 current_state[14];
     // Traversal may change only the camera; checkpoint comparison checks the
@@ -560,6 +578,12 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   u64 rendered = profile ? voxel_vk_tick() : 0;
   if (mega_stream) mega_stage("renderer",mega_render_begin,voxel_vk_tick());
   u64 mega_events_begin=mega_stream?voxel_vk_tick():0;
+#ifdef CID_VULKAN_VULKAN_CAPTURE
+  if(mega_stream && getenv("MEGASCENE_SUPPORT") && getenv("MEGASCENE_VALIDATE")) {
+    mega_capture_frame=frame;
+    mega_capture_frame.hud="MEGASCENE / SUPPORT CUTS / DEVELOPMENT OBSERVATION";
+  }
+#endif
   free(hud);
   voxel_vk_pump(win);
   XSync(win->dpy, False);
@@ -586,6 +610,7 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
     u64 end=voxel_vk_tick();
     char record[512];
     const char* population=!mega_frame?"startup":mega_frame<=mega_warmup?"warmup":"ordinary";
+    if(getenv("MEGASCENE_SUPPORT") && mega_frame>=mega_warmup+32 && mega_frame<=mega_warmup+43) population="motion";
 #ifdef CID_VULKAN_VULKAN_MARK
     if(mega_edit_pending) {
       population="edit";
@@ -609,6 +634,49 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   }
   return result;
 }
+
+#ifdef CID_VULKAN_VULKAN_CAPTURE
+static const char* mega_detail_phase;
+static void mega_detail_record(const char* fields) {
+  size_t size=strlen(fields)+160;
+  char* record=io_mem(malloc(size));
+  snprintf(record,size,"\"record_type\":\"detail_render\",\"rendered_frame\":\"%llu\",\"phase\":\"%s\",\"evidence\":{%s}",
+    (unsigned long long)(mega_frame-1),mega_detail_phase,fields);
+  mega_record(record); free(record);
+}
+static void voxel_support_detail(BendWin* win) {
+  u64 frame=mega_frame-1;
+  if(!getenv("MEGASCENE_VALIDATE") || frame<=mega_warmup || frame>mega_warmup+31 || (frame-mega_warmup-1)%6) return;
+  unsigned action=(unsigned)((frame-mega_warmup-1)/6);
+  FILE* file=fopen(mega_env("MEGASCENE_DETAIL_CAMERA_FILE"),"rb");
+  u32 views[30];
+  if(!file || fread(views,4,30,file)!=30 || fgetc(file)!=EOF || fclose(file)) err_fail("supplementary camera input unavailable");
+  u32* words=views+5*action;
+  VoxelVkFrame detail=mega_capture_frame;
+  for(unsigned i=0;i<5;i++) {
+    float value; memcpy(&value,words+i,4);
+    if(!isfinite(value)) err_fail("nonfinite supplementary camera");
+    if(i<3) detail.eye[i]=value; else if(i==3) detail.yaw=value; else detail.pitch=value;
+  }
+  detail.hud="MEGASCENE / SUPPORT CUT / VALIDATION DETAIL";
+  detail.record=mega_detail_record;
+  VoxelVkRender render=(VoxelVkRender)dlsym(voxel_vk_library,"voxel_vk_render_detail");
+  if(!render) err_fail("supplementary render unavailable");
+  VoxelVkTimings timings={0}; char error[512]={0};
+  mega_detail_phase="closeup";
+  if(!render(win->dpy,win->win,&detail,&timings,error,sizeof error)) err_fail(error);
+  char path[4096];
+  if(snprintf(path,sizeof path,"%s/detail-%04llu.ppm",mega_env("MEGASCENE_CAPTURE_DIR"),(unsigned long long)frame)>=(int)sizeof path) err_fail("detail path too long");
+  mega_capture_image(win,path);
+  char record[512];
+  snprintf(record,sizeof record,"\"record_type\":\"detail_capture\",\"rendered_frame\":\"%llu\",\"action\":\"%u\",\"camera\":{\"eye_m\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"],\"yaw\":\"0x%08x\",\"pitch\":\"0x%08x\"}",
+    (unsigned long long)frame,action,words[0],words[1],words[2],words[3],words[4]);
+  mega_record(record);
+  // Restore the frozen overview before returning the unchanged Bend state.
+  mega_detail_phase="restore"; detail=mega_capture_frame; detail.record=mega_detail_record;
+  if(!render(win->dpy,win->win,&detail,&timings,error,sizeof error)) err_fail(error);
+}
+#endif
 
 Term vulkan_release_run(Env e, Term* f, IoWork* work) {
   if (voxel_vk_release_fn) voxel_vk_release_fn();

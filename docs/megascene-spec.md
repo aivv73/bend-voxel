@@ -327,3 +327,16 @@ No universal proof of unsafe/native geometry is claimed. Such properties need
 the runtime/reference evidence in #44 and this handoff. Preserve existing safe
 claims in `LAWS.bend`; add only a brief scope-qualified pointer to accepted
 planning rules, without turning those rules into unsupported formal claims.
+
+## Issue #56 supplementary validation views
+
+On 2026-09-28, the user approved six supplementary close-up validation captures
+because the specified support overview occludes some new cut surfaces. Preserve
+the primary camera, all six cut times, timed workload, and frames 31/42 overview
+captures. Freeze one close-up per action before execution, render the unchanged
+post-cut world only in validation, and restore the primary view without advancing
+physics or action ordinals. Retain both overview and close-up assessments; a
+readable close-up can cover the same action's occluded cut feature, while any
+incorrect geometry still fails rendering correctness. These extra renders do not
+enter CPU/GPU performance populations. The primary schedule remains support-v1;
+its complete archived schedule identity includes the supplementary view inputs.

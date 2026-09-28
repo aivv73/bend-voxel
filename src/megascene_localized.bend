@@ -45,10 +45,10 @@ def camera(s: D.State, cam: V.Camera) -> D.State:
   I.Control{_,keys,mx,my,looking,left,focused,cut,reset,quit} = control
   D.State{world,I.Control{cam,keys,mx,my,looking,left,focused,cut,reset,quit},pending,last}
 
-def edit(state: D.State, +point: R.Vec) -> IO(D.State):
+def edit(state: D.State, +point: R.Vec, +action: U32) -> IO(D.State):
   D.State{+world,control,pending,last} = state
   do IO<D.State>:
-    VK.vulkan.editbegin(0,point)
+    VK.vulkan.editbegin(action,point)
     VK.vulkan.mark(19)
     E.guard(world,point)
     prepared : W.Edit <- IO.pure(W.Edit,W.carve.prepare(world,point))
@@ -62,12 +62,12 @@ def edit(state: D.State, +point: R.Vec) -> IO(D.State):
     VK.vulkan.mark(25)
     +world : W.World <- IO.pure(W.World,W.carve.finalize(surfaces))
     VK.vulkan.mark(26)
-    VK.vulkan.editrecord(world,0,point)
+    VK.vulkan.editrecord(world,action,point)
     return D.State{world,control,pending,last}
 
 def action(enabled: Bool, state: D.State, point: R.Vec) -> IO(D.State):
   match enabled:
-    case True{}: edit(state,point)
+    case True{}: edit(state,point,0)
     case False{}: IO.pure(D.State,state)
 
 def loop(n: Nat, +point: R.Vec, +index: U32, +width: U32, +height: U32, +enabled: Bool, win: Window, state: D.State) -> IO(Unit):

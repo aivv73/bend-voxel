@@ -103,24 +103,30 @@ def expected_payload(initial,edited,frame):
 
 
 def audit_actions(records,frozen):
+    """Required edits share exact action and CPU interval contracts."""
     actions=[r for r in records if r['record_type']=='action']
     begins=[r for r in records if r['record_type']=='edit_begin']
     edits=[r for r in records if r['record_type']=='edit']
-    require(len(actions)==len(begins)==len(edits)==1,'localized requires exactly one action and edit interval')
-    a,b,e=actions[0],begins[0],edits[0]
-    expected=action_outcome(frozen)
-    require(a['outcome']==expected,'required localized cut rejected, no-op, or incorrect removal')
-    require(all(r['frame']=='121' and r['action']=='0' for r in (a,b,e)), 'localized action frame/identity mismatch')
-    require(all(r['accepted'] is True and r['removed_cells']==expected['removed_cells'] for r in (a,e)), 'required localized action was not accepted')
-    frame=next(r for r in records if r['record_type']=='frame' and r['frame']=='121')
-    require(e['begin_ns']==b['begin_ns'] and e['end_ns']==frame['end_ns'] and
-            int(frame['begin_ns'])<=int(e['begin_ns'])<=int(e['end_ns']), 'edit interval boundary mismatch')
-    require(int(e['duration_ns'])==int(e['end_ns'])-int(e['begin_ns']), 'edit interval duration mismatch')
-    stages=[r for r in records if r['record_type']=='stage' and r['frame']=='121']
-    ordered=[next(r for r in stages if r['stage']==name) for name in ('physics','carve','connectivity','surfaces','commit','view')]
-    require(all(int(x['end_ns'])<=int(y['begin_ns']) for x,y in zip(ordered,ordered[1:])), 'physics/edit/view order mismatch')
-    require(int(ordered[0]['end_ns'])<=int(e['begin_ns'])<=int(ordered[1]['begin_ns']), 'edit begins outside scripted operation')
-    return {'status':'pass','actions':'1','accepted_edits':'1','removed_cells':expected['removed_cells'],'ordinary_frames':'3599'}
+    required=frozen['actions']
+    require(len(actions)==len(begins)==len(edits)==len(required),'required action/edit interval count mismatch')
+    removed=0
+    for planned,a,b,e in zip(required,actions,begins,edits):
+        expected={k:planned[k] for k in ('action','frame','target_m')} | {
+            'accepted':True,'outcome':'accepted','removed_cells':planned['expected_removed_cells']}
+        require(a['outcome']==expected,'required cut rejected, no-op, or incorrect removal')
+        require(all(r['frame']==planned['frame'] and r['action']==planned['action'] for r in (a,b,e)), 'action frame/identity mismatch')
+        require(all(r['accepted'] is True and r['removed_cells']==expected['removed_cells'] for r in (a,e)), 'required action was not accepted')
+        frame=next(r for r in records if r['record_type']=='frame' and r['frame']==planned['frame'])
+        require(e['begin_ns']==b['begin_ns'] and e['end_ns']==frame['end_ns'] and
+                int(frame['begin_ns'])<=int(e['begin_ns'])<=int(e['end_ns']), 'edit interval boundary mismatch')
+        require(int(e['duration_ns'])==int(e['end_ns'])-int(e['begin_ns']), 'edit interval duration mismatch')
+        stages=[r for r in records if r['record_type']=='stage' and r['frame']==planned['frame']]
+        ordered=[next(r for r in stages if r['stage']==name) for name in ('physics','carve','connectivity','surfaces','commit','view')]
+        require(all(int(x['end_ns'])<=int(y['begin_ns']) for x,y in zip(ordered,ordered[1:])), 'physics/edit/view order mismatch')
+        require(int(ordered[0]['end_ns'])<=int(e['begin_ns'])<=int(ordered[1]['begin_ns']), 'edit begins outside scripted operation')
+        removed+=int(expected['removed_cells'])
+    return {'status':'pass','actions':str(len(actions)),'accepted_edits':str(len(actions)),
+            'removed_cells':str(removed),'ordinary_frames':str(sum(f['phase']=='ordinary' for f in frozen['frames']))}
 
 
 def audit(records,frozen,initial,initial_work,complete,thorough=False,validated_work=None):

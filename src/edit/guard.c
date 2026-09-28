@@ -22,6 +22,24 @@ static int edit_box_valid(const float* lo,const float* hi) {
        floorf(lo[k])!=lo[k]||floorf(hi[k])!=hi[k]||lo[k]>=hi[k]) return 0;
   return 1;
 }
+// An unrelated translated body need not put the brush on a half-cell grid.
+// Certify separation on an unchanged X/Z axis in both exact metre arithmetic
+// and the actual rounded local coordinates. Its entire cut traversal returns
+// unchanged at the root. All tree counts/bounds are still checked below.
+static int edit_remote_valid(const float* point,float offset,const float* lo,const float* hi,float* local) {
+  if(!isfinite(offset)||fabsf(offset)>1024||!edit_box_valid(lo,hi)) return 0;
+  int separate=0;
+  for(unsigned k=0;k<3;k++) {
+    local[k]=(point[k]-(k==1?offset:0.f))*10.f;
+    if(!isfinite(point[k])||!isfinite(local[k])||fabsf(local[k])>1024) return 0;
+    if(k!=1) {
+      double exact=(double)point[k]*10.;
+      separate |= (exact < lo[k]-4. && local[k]<lo[k]-4.f) ||
+                  (exact > hi[k]+4. && local[k]>hi[k]+4.f);
+    }
+  }
+  return separate;
+}
 static int edit_predicate(const float* lo,const float* hi,const float* p,int far,int* hit) {
   float sums[3]; double exact=0;
   for(unsigned k=0;k<3;k++) {
@@ -84,8 +102,13 @@ Term megascene_edit_guard_run(Env e,Term* f,IoWork* work) {
   while(term_aux(list)==CID_CON) {
     uint64_t link=term_peek(e.mem,list),body=term_peek(e.mem,e.mem[link]); float local[3];
     uint32_t id=(uint32_t)e.mem[body];
+    Term tree=e.mem[body+5];
+    if(term_aux(tree)!=CID_SPATIAL_LEAF&&term_aux(tree)!=CID_SPATIAL_BRANCH) err_fail("edit numeric guard: tree layout");
+    uint64_t root=term_peek(e.mem,tree); float lo[3],hi[3];
+    for(unsigned k=0;k<3;k++) { lo[k]=edit_float(e.mem[root+k]); hi[k]=edit_float(e.mem[root+3+k]); }
     if(!id||id>=e.mem[world+5]||e.mem[body+4]>1||!isfinite(edit_float(e.mem[body+3]))||
-       !edit_point_valid(p,edit_float(e.mem[body+2]),local)) err_fail("edit numeric guard: ID/motion/target");
+       !(edit_point_valid(p,edit_float(e.mem[body+2]),local)||
+         edit_remote_valid(p,edit_float(e.mem[body+2]),lo,hi,local))) err_fail("edit numeric guard: ID/motion/target");
     edit_tree(e,e.mem[body+5],local,&cells,&leaves,0);
     count++; fragments+=!e.mem[body+4]; list=e.mem[link+1];
   }
