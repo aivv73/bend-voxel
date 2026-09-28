@@ -51,6 +51,14 @@ law palette_length:
 #   See docs/megascene-admission.md. These are runtime/reference checks only;
 #   admission does not prove unsafe geometry or qualify a Vulkan attempt.
 
+# - Static Vulkan development observations freeze the binary32 opening view
+#   and 1/60 step, disable picking/edits, and preserve physics-before-render.
+#   Full geometry retains proxy bookkeeping, fixed ground and 2048^2 shadows.
+#   Archive actual runtime artifacts and inputs before invocation; preserve
+#   frame-return intervals, missing evidence and abnormal completed prefixes.
+#   See docs/megascene-static.md. Full replay/checkpoint, resource and calibration
+#   qualification remain future work: static observations cannot pass them.
+
 # Stable material IDs are shared by the native bridge and generated assets.
 law material_ids:
   {[Material.foundation(),Material.concrete(),Material.frame(),

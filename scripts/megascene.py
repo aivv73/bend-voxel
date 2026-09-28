@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Separate, admission-only Megascene entry point. See docs/megascene-admission.md."""
+"""Separate Megascene admission and bounded static Vulkan entry point."""
 
 import argparse
 from datetime import datetime, timezone
@@ -29,15 +29,16 @@ class Parser(argparse.ArgumentParser):
 
 def parser():
     p = Parser(description=__doc__, allow_abbrev=False)
-    p.add_argument("--output", required=True, help="new directory for the retained admission bundle")
+    p.add_argument("--output", required=True, help="new directory for the local evidence bundle")
     p.add_argument("--case", default="admission")
     p.add_argument("--preset", choices=("small", "large"))
     p.add_argument("--side-m", help="fixed district side: 64 or 128")
     p.add_argument("--seed", default="45")
     p.add_argument("--threads", default="6")
     p.add_argument("--fragment-budget", default="2048")
-    # Reserve future capabilities explicitly: even a seemingly harmless setting
-    # must not be accepted while executing an admission-only workload instead.
+    p.add_argument("--capture-opening", action="store_true", help="separate opening capture after static observation")
+    p.add_argument("--deadline", help="bounded static invocation deadline in seconds (default 300)")
+    # Settings are admitted per capability; no silent fallback workload.
     for name in ("diagnostic", "resolution", "profile", "schedule", "frames", "warmup",
                  "archive", "calibration", "search"):
         p.add_argument("--" + name)
@@ -45,10 +46,11 @@ def parser():
 
 
 def configuration(args):
-    require(args.case == "admission", "only --case admission is implemented; no Vulkan case was executed")
-    for name in ("diagnostic", "resolution", "profile", "schedule", "frames", "warmup",
-                 "archive", "calibration", "search"):
-        require(getattr(args, name) is None, f"--{name} requires a later capability; request rejected")
+    require(args.case in ("admission", "static"), "only --case admission and static are implemented")
+    if args.case == "admission":
+        require(not args.capture_opening and args.deadline is None, "capture/deadline require --case static")
+        for name in ("diagnostic", "resolution", "profile", "schedule", "frames", "warmup", "archive", "calibration", "search"):
+            require(getattr(args, name) is None, f"--{name} requires --case static or a later capability; request rejected")
     seed, threads, budget = map(integer, (args.seed, args.threads, args.fragment_budget))
     require(seed in (45, 46), "supported seeds are 45 and 46")
     require(threads in (1, 6, 12), "supported thread counts are 1, 6 and 12")
@@ -57,8 +59,12 @@ def configuration(args):
     require(side in (None, 64, 128), "supported district sides are 64 and 128 metres")
     preset = args.preset or ("large" if side == 128 else "small")
     require(side is None or side == (64 if preset == "small" else 128), "contradictory preset and side")
-    return {"case": "admission", "preset": preset, "side_m": str(64 if preset == "small" else 128),
+    config = {"case": args.case, "preset": preset, "side_m": str(64 if preset == "small" else 128),
             "seed": str(seed), "threads": str(threads), "fragment_budget": str(budget)}
+    if args.case == "static":
+        from megascene_static import settings
+        return settings(args, config)
+    return config
 
 
 def snapshot(path, value):
@@ -260,11 +266,37 @@ def main(argv=None):
         config = configuration(args)
         manifest["effective"] = config
         require(output is not None, "a new --output directory is required")
-        execute(config, output, manifest)
-        print(f"Admitted {config['preset']} seed {config['seed']}: {output / 'inventory.json'}")
+        if config["case"] == "static":
+            from megascene_static import execute as execute_static
+            execute_static(config, output, manifest)
+            print(f"Unqualified static development observation: {output / 'summary.json'}")
+        else:
+            execute(config, output, manifest)
+            print(f"Admitted {config['preset']} seed {config['seed']}: {output / 'inventory.json'}")
         return 0
     except (ValueError, OSError, subprocess.SubprocessError, KeyError, TypeError) as error:
         reason = str(error)
+        if isinstance(manifest.get("effective"), dict) and manifest["effective"]["case"] == "static":
+            from megascene_static import report as static_report
+            archive = manifest.get("reproduction", {}).get("archive")
+            archived = Path(archive) if archive else None
+            if archived and (archived/"summary.json").exists():
+                for file in archived.rglob("*"):
+                    if file.is_file() and "runtime" not in file.relative_to(archived).parts:
+                        target = output/file.relative_to(archived)
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(file,target)
+            elif created_output:
+                report = static_report([], [reason], manifest["effective"], 2, "prelaunch_failure", 0, manifest["attempt_id"])
+                report["numeric_validity"] = manifest["numeric_admission"]
+                report["termination"] = {"cause": "prelaunch_failure", "exit_code": None, "signal": None, "reason": reason}
+                if archived and archived.is_dir():
+                    snapshot(archived/"manifest.json",manifest)
+                    snapshot(archived/"summary.json",report)
+                snapshot(output/"manifest.json",manifest)
+                snapshot(output/"summary.json",report)
+            print(reason, file=sys.stderr)
+            return 2
         report = summary("fail", reason)
         # A build, process, or validation failure is not a rejected setting and
         # must not masquerade as an observed capacity limit.

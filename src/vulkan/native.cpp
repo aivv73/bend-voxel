@@ -117,7 +117,7 @@ void add_hud(Geometry& g,const VoxelVkFrame& frame) {
     if (!end) break;
     hud=end+1;
   }
-  hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,
+  if (!frame.full_geometry) hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,
     palette_color(frame,HUD_RESET),scale);
 }
 Vec3 vector(const float* p) { return {p[0],p[1],p[2]}; }
@@ -416,7 +416,9 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   cache.proxy_rebuilt=cache.proxy_draws=cache.proxied_bodies=cache.visible_bodies=0;
   cache.proxy_vertices=0;
   if (!cache.scene_vertices) {
-    quad(g,{-512,0,-512},{-512,0,512},{512,0,512},{512,0,-512},
+    float h=frame.full_geometry ? frame.ground_half_extent : 512.f;
+    if (!std::isfinite(h) || h<=0) throw std::runtime_error("invalid visual ground bounds");
+    quad(g,{-h,0,-h},{-h,0,h},{h,0,h},{h,0,-h},
       palette_color(frame,GROUND_COLOR),3);
     cache.scene_vertices=6; cache.dirty.push_back({0,6});
   }
@@ -478,7 +480,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
     auto group=cache.group_for_body[i];
     if (visible(b,frame,basis)) {
       cache.visible_bodies++;
-      if (!group || !group->selected)
+      if (frame.full_geometry || !group || !group->selected)
         cache.draws.push_back({mesh.first,mesh.count,b.offset});
       else group->visible_bodies++;
     }
@@ -501,7 +503,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
       it->second.selected=group.selected;
     }
     cache.proxy_vertices+=it->second.count;
-    if (group.selected && group.visible_bodies && proxy_visible(group,frame,basis)) {
+    if (!frame.full_geometry && group.selected && group.visible_bodies && proxy_visible(group,frame,basis)) {
       cache.draws.push_back({it->second.first,it->second.count,0});
       cache.proxy_draws++; cache.proxied_bodies+=group.visible_bodies;
     }
@@ -538,6 +540,31 @@ std::vector<uint32_t> spirv(const char* path) {
   in.seekg(0); in.read(reinterpret_cast<char*>(code.data()),size);
   return code;
 }
+// These CPU markers share CLOCK_MONOTONIC with the runner and bridge. They
+// measure actual boundaries, including intervening instrumentation and waits.
+uint32_t float_bits(float value) {
+  uint32_t bits;
+  std::memcpy(&bits,&value,sizeof bits);
+  return bits;
+}
+uint64_t monotonic_ns() {
+  timespec now{};
+  if (clock_gettime(CLOCK_MONOTONIC,&now)) throw std::runtime_error("monotonic clock failed");
+  return uint64_t(now.tv_sec)*1000000000ull+uint64_t(now.tv_nsec);
+}
+void stage(const VoxelVkFrame& frame,const char* name,uint64_t begin,uint64_t end) {
+  if (!frame.record) return;
+  char record[512];
+  std::snprintf(record,sizeof record,
+    "\"record_type\":\"stage\",\"stage\":\"%s\",\"begin_ns\":\"%llu\",\"end_ns\":\"%llu\",\"duration_ns\":\"%llu\",\"status\":\"measured\",\"unit\":\"ns\",\"scope\":\"cpu_stage\"",
+    name,(unsigned long long)begin,(unsigned long long)end,(unsigned long long)(end-begin));
+  frame.record(record);
+}
+VkPresentModeKHR unpaced_mode(const std::vector<VkPresentModeKHR>& modes) {
+  for (auto mode:{VK_PRESENT_MODE_IMMEDIATE_KHR,VK_PRESENT_MODE_MAILBOX_KHR})
+    if (std::find(modes.begin(),modes.end(),mode)!=modes.end()) return mode;
+  throw std::runtime_error("unpaced Vulkan present mode unavailable");
+}
 struct Push { float eye_yaw[4],pitch_offset[4],viewport[4],shadow_matrix[16]; };
 static_assert(sizeof(Push)==112,"shadow push constants must fit Vulkan's 128-byte minimum");
 
@@ -552,6 +579,8 @@ class Renderer {
   uint32_t family=0;
   VkSwapchainKHR swapchain=VK_NULL_HANDLE;
   VkFormat format=VK_FORMAT_UNDEFINED;
+  VkPresentModeKHR present_mode=VK_PRESENT_MODE_FIFO_KHR;
+  bool settings_recorded=false;
   VkExtent2D extent{DEFAULT_WIDTH,DEFAULT_HEIGHT};
   std::vector<VkImage> images;
   std::vector<VkImageView> views;
@@ -776,14 +805,11 @@ class Renderer {
       std::vector<VkPresentModeKHR> modes(mode_count);
       check(vkGetPhysicalDeviceSurfacePresentModesKHR(physical,surface,&mode_count,modes.data()),
         "query present modes");
-      if (std::find(modes.begin(),modes.end(),VK_PRESENT_MODE_IMMEDIATE_KHR)!=modes.end())
-        ci.presentMode=VK_PRESENT_MODE_IMMEDIATE_KHR;
-      else if (std::find(modes.begin(),modes.end(),VK_PRESENT_MODE_MAILBOX_KHR)!=modes.end())
-        ci.presentMode=VK_PRESENT_MODE_MAILBOX_KHR;
-      else throw std::runtime_error("unpaced Vulkan present mode unavailable");
+      ci.presentMode=unpaced_mode(modes);
       std::fprintf(stderr,"stress_present_mode,%s\n",
         ci.presentMode==VK_PRESENT_MODE_IMMEDIATE_KHR?"immediate":"mailbox");
     }
+    present_mode=ci.presentMode;
     ci.clipped=VK_TRUE;
     check(vkCreateSwapchainKHR(device,&ci,nullptr,&swapchain),"create swapchain");
     check(vkGetSwapchainImagesKHR(device,swapchain,&n,nullptr),"get swapchain images");
@@ -934,13 +960,44 @@ public:
   }
   bool matches(Display* d,::Window w) const { return d==display&&w==window; }
   void render(const VoxelVkFrame& frame,VoxelVkTimings& timings) {
+    uint64_t ns_start=frame.record?monotonic_ns():0;
+    if (frame.full_geometry && (extent.width!=frame.width || extent.height!=frame.height))
+      throw std::runtime_error("Megascene actual swapchain resolution differs from frozen request");
+    if (frame.full_geometry && present_mode!=VK_PRESENT_MODE_IMMEDIATE_KHR && present_mode!=VK_PRESENT_MODE_MAILBOX_KHR)
+      throw std::runtime_error("Megascene requires immediate or mailbox presentation");
+    if (frame.record && !settings_recorded) {
+      VkPhysicalDeviceProperties p{}; vkGetPhysicalDeviceProperties(physical,&p);
+      char name[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE*2+1]{};
+      for (size_t i=0;i<std::strlen(p.deviceName);i++) std::snprintf(name+i*2,3,"%02x",(unsigned char)p.deviceName[i]);
+      char record[2048];
+      std::snprintf(record,sizeof record,
+        "\"record_type\":\"render_settings\",\"width\":\"%u\",\"height\":\"%u\",\"present_mode\":\"%s\","
+        "\"profile\":\"full\",\"ground_half_extent_m\":\"%.9g\",\"shadow_size\":\"%u\",\"night\":\"%u\","
+        "\"device_name_hex\":\"%s\",\"vendor_id\":\"%u\",\"device_id\":\"%u\",\"driver_version\":\"%u\",\"api_version\":\"%u\"",
+        extent.width,extent.height,present_mode==VK_PRESENT_MODE_IMMEDIATE_KHR?"immediate":"mailbox",
+        frame.ground_half_extent,SHADOW_SIZE,frame.night,name,p.vendorID,p.deviceID,p.driverVersion,p.apiVersion);
+      frame.record(record);
+      std::string palette="\"record_type\":\"palette\",\"colors\":[";
+      for (unsigned color=0;color<19;color++) {
+        char rgb[64];
+        std::snprintf(rgb,sizeof rgb,"%s[\"0x%08x\",\"0x%08x\",\"0x%08x\"]",color?",":"",
+          float_bits(frame.colors[color][0]),float_bits(frame.colors[color][1]),float_bits(frame.colors[color][2]));
+        palette+=rgb;
+      }
+      palette+="]"; frame.record(palette.c_str());
+      settings_recorded=true;
+    }
     auto start=Clock::now();
     bool scene_reused=false;
     Geometry& g=geometry(frame,geometry_cache,scene_reused);
     auto after_geometry=Clock::now();
+    uint64_t ns_after_geometry=frame.record?monotonic_ns():0;
+    stage(frame,"geometry",ns_start,ns_after_geometry);
     timings.geometry_us=microseconds(start,after_geometry);
     check(vkWaitForFences(device,1,&fence,VK_TRUE,UINT64_MAX),"wait for frame fence");
     auto after_fence=Clock::now();
+    uint64_t ns_after_fence=frame.record?monotonic_ns():0;
+    stage(frame,"fence_wait",ns_after_geometry,ns_after_fence);
     timings.fence_wait_us=microseconds(after_geometry,after_fence);
     bool new_buffer=ensure_vertices(g.vertices.size()*sizeof(Vertex));
     // The fence protects the single mapped arena. Its stable mesh slots survive
@@ -957,6 +1014,8 @@ public:
       upload(geometry_cache.scene_vertices,g.vertices.size()-geometry_cache.scene_vertices);
     }
     auto after_upload=Clock::now();
+    uint64_t ns_after_upload=frame.record?monotonic_ns():0;
+    stage(frame,"vertex_upload",ns_after_fence,ns_after_upload);
     if (std::getenv("VOXEL_STRESS")) {
       static uint32_t cache_frame;
       std::fprintf(stdout,"mesh_cache,%u,%u,%u,%zu,%u,%zu\n",cache_frame++,
@@ -971,9 +1030,12 @@ public:
     uint32_t index=0;
     VkResult acquire=vkAcquireNextImageKHR(device,swapchain,UINT64_MAX,acquired,VK_NULL_HANDLE,&index);
     auto after_acquire=Clock::now();
+    uint64_t ns_after_acquire=frame.record?monotonic_ns():0;
+    stage(frame,"acquire",ns_after_upload,ns_after_acquire);
     timings.acquire_us=microseconds(after_upload,after_acquire);
     if (acquire==VK_ERROR_OUT_OF_DATE_KHR) {
       check(vkDeviceWaitIdle(device),"wait for swapchain recreation");
+      if (frame.full_geometry) throw std::runtime_error("Megascene swapchain became out of date");
       clear_swapchain(); make_swapchain(); return;
     }
     if (acquire!=VK_SUCCESS&&acquire!=VK_SUBOPTIMAL_KHR) check(acquire,"acquire swapchain image");
@@ -986,6 +1048,22 @@ public:
       std::fprintf(stderr,"vulkan shadow refresh bodies %u rebuilt %u\n",
         frame.body_count,geometry_cache.rebuilt);
     ShadowMatrix light=shadow_dirty?shadow_matrix(frame):saved_shadow;
+    if (frame.record) {
+      char record[1024];
+      float sx=std::sqrt(light.values[0]*light.values[0]+light.values[4]*light.values[4]+light.values[8]*light.values[8]);
+      float sy=std::sqrt(light.values[1]*light.values[1]+light.values[5]*light.values[5]+light.values[9]*light.values[9]);
+      std::snprintf(record,sizeof record,
+        "\"record_type\":\"render_work\",\"body_count\":\"%u\",\"visible_bodies\":\"%u\",\"full_meshes\":\"%zu\","
+        "\"main_body_draws\":\"%zu\",\"proxy_draws\":\"%u\",\"proxy_groups\":\"%zu\",\"proxy_vertices\":\"%zu\","
+        "\"mesh_rebuilt\":\"%u\",\"proxy_rebuilt\":\"%u\",\"uploaded_bytes\":\"%zu\","
+        "\"shadow_refresh\":%s,\"shadow_body_draws\":\"%zu\",\"shadow_extent_m\":[\"0x%08x\",\"0x%08x\"],\"shadow_texel_m\":[\"0x%08x\",\"0x%08x\"]",
+        frame.body_count,geometry_cache.visible_bodies,geometry_cache.meshes.size(),geometry_cache.draws.size(),
+        geometry_cache.proxy_draws,geometry_cache.proxies.size(),geometry_cache.proxy_vertices,
+        geometry_cache.rebuilt,geometry_cache.proxy_rebuilt,uploaded_vertices*sizeof(Vertex),
+        shadow_dirty?"true":"false",shadow_dirty?geometry_cache.shadow_draws.size():0,
+        float_bits(2.f/sx),float_bits(2.f/sy),float_bits(2.f/(sx*SHADOW_SIZE)),float_bits(2.f/(sy*SHADOW_SIZE)));
+      frame.record(record);
+    }
     check(vkResetCommandBuffer(command,0),"reset command buffer");
     VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     check(vkBeginCommandBuffer(command,&bi),"begin command buffer");
@@ -1083,6 +1161,8 @@ public:
       VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,0);
     check(vkEndCommandBuffer(command),"end command buffer");
     auto after_record=Clock::now();
+    uint64_t ns_after_record=frame.record?monotonic_ns():0;
+    stage(frame,"command_record",ns_after_acquire,ns_after_record);
     timings.command_record_us=microseconds(after_acquire,after_record);
     check(vkResetFences(device,1,&fence),"reset frame fence");
     VkPipelineStageFlags wait_stage=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -1106,7 +1186,9 @@ public:
     present.swapchainCount=1; present.pSwapchains=&swapchain; present.pImageIndices=&index;
     VkResult result=vkQueuePresentKHR(queue,&present);
     timings.submit_present_us=microseconds(after_record,Clock::now());
+    stage(frame,"submit_present",ns_after_record,frame.record?monotonic_ns():0);
     if (result==VK_ERROR_OUT_OF_DATE_KHR||result==VK_SUBOPTIMAL_KHR) {
+      if (frame.full_geometry) throw std::runtime_error("Megascene presentation changed during frozen attempt");
       check(vkDeviceWaitIdle(device),"wait for swapchain recreation");
       clear_swapchain(); make_swapchain();
     } else check(result,"present frame");
@@ -1115,12 +1197,16 @@ public:
 std::unique_ptr<Renderer> renderer;
 }
 
-extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkFrame* frame,
+extern "C" int voxel_vk_render_profile(void* display,unsigned long window,const VoxelVkFrame* frame,
   VoxelVkTimings* timings,char* error,size_t error_cap) {
   try {
     if (!frame || !display || !window || !timings) throw std::runtime_error("invalid Vulkan frame");
     *timings={};
-    if (!renderer) renderer=std::make_unique<Renderer>(static_cast<Display*>(display),window);
+    if (!renderer) {
+      uint64_t begin=frame->record?monotonic_ns():0;
+      renderer=std::make_unique<Renderer>(static_cast<Display*>(display),window);
+      stage(*frame,"renderer_setup",begin,frame->record?monotonic_ns():0);
+    }
     if (!renderer->matches(static_cast<Display*>(display),window))
       throw std::runtime_error("Vulkan renderer window changed");
     renderer->render(*frame,*timings);
@@ -1132,5 +1218,12 @@ extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkF
     }
     return 0;
   }
+}
+// Preserve the original ABI for previously built Light Atelier executables.
+extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkFrame* frame,
+  VoxelVkTimings* timings,char* error,size_t error_cap) {
+  VoxelVkFrame legacy{};
+  if (frame) std::memcpy(&legacy,frame,offsetof(VoxelVkFrame,full_geometry));
+  return voxel_vk_render_profile(display,window,frame?&legacy:nullptr,timings,error,error_cap);
 }
 extern "C" void voxel_vk_release(void) { renderer.reset(); }

@@ -35,6 +35,10 @@ typedef struct {
   const VoxelVkBody* bodies;
   const char* hud;
   float colors[19][3]; // Material pairs, linear surfaces, display overlays.
+  // Additive explicit profile; zero retains the Light Atelier defaults.
+  unsigned full_geometry;
+  float ground_half_extent;
+  void (*record)(const char* fields); // Megascene CPU evidence, NULL for legacy.
 } VoxelVkFrame;
 
 typedef struct {
@@ -63,16 +67,59 @@ static int voxel_vk_colors_ready;
 
 static u64 voxel_vk_tick(void) {
   struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
+  if (clock_gettime(CLOCK_MONOTONIC, &now)) err_fail("monotonic clock failed");
   return (u64)now.tv_sec * 1000000000ull + (u64)now.tv_nsec;
 }
+
+// The marker effect is emitted before window creation in the static worker.
+// Keep it independent of Base's window effect ordering. Legacy workers have
+// no recorder and retain their original execution path.
+static FILE* mega_stream;
+static u64 mega_frame,mega_previous_end;
+static u32 mega_warmup;
+static float mega_ground;
+#ifdef CID_VULKAN_VULKAN_MARK
+static void mega_record(const char* fields);
+static void mega_stage(const char* name,u64 begin,u64 end);
+static const char* mega_env(const char* name);
+#else
+static void mega_record(const char* fields) { (void)fields; }
+static void mega_stage(const char* name,u64 begin,u64 end) { (void)name; (void)begin; (void)end; }
+#endif
+#ifdef CID_VULKAN_VULKAN_CAPTURE
+Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
+  BendWin* win=(BendWin*)(intptr_t)io_hand_v(f[0]);
+  XSync(win->dpy,False);
+  unsigned width=win->img->width,height=win->img->height;
+  XImage* image=XGetImage(win->dpy,win->win,0,0,width,height,AllPlanes,ZPixmap);
+  if (!image) err_fail("opening capture unavailable");
+  FILE* file=fopen(mega_env("MEGASCENE_CAPTURE"),"wx");
+  if (!file) err_fail("cannot create opening capture");
+  fprintf(file,"P6\n%u %u\n255\n",width,height);
+  unsigned long masks[]={image->red_mask,image->green_mask,image->blue_mask};
+  for (unsigned y=0;y<height;y++) for (unsigned x=0;x<width;x++) {
+    unsigned long pixel=XGetPixel(image,x,y);
+    for (unsigned c=0;c<3;c++) {
+      unsigned long mask=masks[c],value=pixel&mask;
+      if (!mask) err_fail("unsupported capture channel mask");
+      while (!(mask&1)) { mask>>=1; value>>=1; }
+      if (fputc((int)(value*255/mask),file)==EOF) err_fail("capture write failed");
+    }
+  }
+  XDestroyImage(image);
+  if (fclose(file)) err_fail("capture flush failed");
+  mega_record("\"record_type\":\"opening_capture\"");
+  return f[0];
+}
+
+#endif
 
 static void voxel_vk_load(void) {
   if (voxel_vk_library) return;
   const char* path = getenv("VOXEL_VULKAN_LIBRARY");
   voxel_vk_library = dlopen(path ? path : "./build/libvoxel_vulkan.so", RTLD_NOW | RTLD_LOCAL);
   if (!voxel_vk_library) err_fail(dlerror());
-  voxel_vk_render_fn = (VoxelVkRender)dlsym(voxel_vk_library, "voxel_vk_render");
+  voxel_vk_render_fn = (VoxelVkRender)dlsym(voxel_vk_library, "voxel_vk_render_profile");
   voxel_vk_release_fn = (VoxelVkRelease)dlsym(voxel_vk_library, "voxel_vk_release");
   if (!voxel_vk_render_fn || !voxel_vk_release_fn) err_fail("incomplete Vulkan renderer library");
 }
@@ -226,6 +273,31 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   }
   if (getenv("VOXEL_STRESS"))
     fprintf(stdout,"bodies,%u,%u,%u,%u,%.6f\n",voxel_vk_generation-1,anchored,moving,translated,minimum_offset);
+  if (mega_stream) {
+    frame.full_geometry=1; frame.ground_half_extent=mega_ground; frame.record=mega_record;
+    if (anchored!=frame.body_count || moving || translated || frame.aim_kind || frame.night)
+      err_fail("static Megascene state invariant failed");
+    static u32 saved_state[14];
+    u32 current_state[14];
+    // Scalar world state and all camera fields are bitwise frozen. Body IDs,
+    // revisions and zero offsets/velocities are checked separately below.
+    for (u32 i=0;i<6;i++) current_state[i]=(u32)e.mem[st+1+i];
+    for (u32 i=0;i<7;i++) current_state[6+i]=(u32)e.mem[st+7+i];
+    current_state[13]=frame.body_count;
+    if (!mega_frame) memcpy(saved_state,current_state,sizeof saved_state);
+    else if (memcmp(saved_state,current_state,sizeof saved_state)) err_fail("static world/camera changed");
+    for (u32 i=0;i<frame.body_count;i++)
+      if (voxel_vk_bodies[i].id!=i+1 || voxel_vk_bodies[i].revision!=0)
+        err_fail("static owner identity changed");
+    char record[1024];
+    snprintf(record,sizeof record,
+      "\"record_type\":\"static_state\",\"anchored\":\"%u\",\"moving\":\"%u\",\"translated\":\"%u\",\"aim_kind\":\"%u\","
+      "\"eye_m\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"],\"yaw\":\"0x%08x\",\"pitch\":\"0x%08x\","
+      "\"cells\":\"%u\",\"fragments\":\"%u\",\"removed\":\"%u\",\"next_id\":\"%u\",\"budget\":\"%u\"",
+      anchored,moving,translated,frame.aim_kind,(u32)e.mem[st+7],(u32)e.mem[st+8],(u32)e.mem[st+9],
+      (u32)e.mem[st+10],(u32)e.mem[st+11],(u32)e.mem[st+1],(u32)e.mem[st+2],(u32)e.mem[st+3],(u32)e.mem[st+5],(u32)e.mem[st+6]);
+    mega_record(record);
+  }
   frame.bodies=voxel_vk_bodies;
   return frame;
 }
@@ -318,6 +390,7 @@ Term vulkan_colors_run(Env e, Term* f, IoWork* work) {
 }
 
 Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
+  u64 mega_begin=mega_stream?voxel_vk_tick():0;
   int profile = getenv("VOXEL_STRESS") != NULL;
   u64 start = profile ? voxel_vk_tick() : 0;
   io_sync();
@@ -350,9 +423,13 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   char error[512] = {0};
   u64 prepared = profile ? voxel_vk_tick() : 0;
   VoxelVkTimings timings = {0};
+  if (mega_stream) mega_stage("transport",mega_begin,voxel_vk_tick());
+  u64 mega_render_begin=mega_stream?voxel_vk_tick():0;
   int ok = voxel_vk_render_fn(win->dpy, win->win, &frame, &timings, error, sizeof error);
   if (!ok) err_fail(error[0] ? error : "Vulkan frame failed");
   u64 rendered = profile ? voxel_vk_tick() : 0;
+  if (mega_stream) mega_stage("renderer",mega_render_begin,voxel_vk_tick());
+  u64 mega_events_begin=mega_stream?voxel_vk_tick():0;
   free(hud);
   voxel_vk_pump(win);
   XSync(win->dpy, False);
@@ -371,7 +448,24 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
       (unsigned long long)(render_us >= detailed ? render_us - detailed : 0),
       (unsigned long long)((ended - rendered) / 1000));
   }
-  return io_tup(e, f[0], io_tup(e, f[1], events));
+  Term result=io_tup(e, f[0], io_tup(e, f[1], events));
+  if (mega_stream) {
+    mega_stage("events",mega_events_begin,voxel_vk_tick());
+    // Last marker before handing control back to Bend. Recording this boundary
+    // and subsequent bookkeeping belongs to the following frame interval.
+    u64 end=voxel_vk_tick();
+    char record[512];
+    const char* population=!mega_frame?"startup":mega_frame<=mega_warmup?"warmup":"ordinary";
+    char ordinal[32]="null";
+    if (mega_frame>mega_warmup) snprintf(ordinal,sizeof ordinal,"\"%llu\"",(unsigned long long)(mega_frame-mega_warmup-1));
+    snprintf(record,sizeof record,
+      "\"record_type\":\"frame\",\"population\":\"%s\",\"begin_ns\":\"%llu\",\"end_ns\":\"%llu\",\"measured_ordinal\":%s,\"status\":\"measured\",\"unit\":\"ns\",\"scope\":\"frame_effect_returns\",\"duration_ns\":\"%llu\"",
+      population,(unsigned long long)(mega_previous_end?mega_previous_end:mega_begin),
+      (unsigned long long)end,ordinal,(unsigned long long)(end-(mega_previous_end?mega_previous_end:mega_begin)));
+    // Frame identity zero is startup; subsequent identities index the frozen schedule.
+    mega_record(record); mega_previous_end=end; mega_frame++;
+  }
+  return result;
 }
 
 Term vulkan_release_run(Env e, Term* f, IoWork* work) {
@@ -392,6 +486,9 @@ Term vulkan_release_run(Env e, Term* f, IoWork* work) {
 }
 
 static void __attribute__((constructor)) voxel_vk_effects(void) {
+  #ifdef CID_VULKAN_VULKAN_CAPTURE
+  io_eff(CID_VULKAN_VULKAN_CAPTURE, vulkan_capture_run, 0);
+  #endif
   io_eff(CID_VULKAN_VULKAN_COLORS, vulkan_colors_run, 0);
   io_eff(CID_VULKAN_VULKAN_FRAME, vulkan_frame_run, 0);
   io_eff(CID_VULKAN_VULKAN_RELEASE, vulkan_release_run, 0);

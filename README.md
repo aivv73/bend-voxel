@@ -39,7 +39,9 @@ The benchmarks need Python 3. See the [Light Atelier guide](docs/showcase.md) fo
 
 The separate [Megascene admission command](docs/megascene-admission.md) constructs
 and inventories the fixed 64/128 m districts before rendering. Admission does
-not qualify a Vulkan benchmark attempt.
+not qualify a Vulkan benchmark attempt. The [static Vulkan runner](docs/megascene-static.md)
+opens the frozen district view and archives bounded, unqualified development
+observations and an optional opening capture.
 
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),

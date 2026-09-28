@@ -26,10 +26,11 @@ output directory receives a rejection manifest/summary even for malformed
 arguments. An existing directory is never overwritten. Without a valid new
 destination the rejection is emitted to stderr.
 
-Rendering cases, diagnostics, resolutions, profiles, schedules, frame counts,
-calibration, campaign archives and search are later capabilities. Explicit
-requests for them are rejected, including seemingly default values such as
-`--profile full`; they do not execute an admission workload as a substitute.
+The admission case rejects rendering controls, including `--profile full`;
+it never substitutes admission for a rendering workload. Issue #49 adds a
+separate [static Vulkan case](megascene-static.md) with its own rendering,
+schedule and archive controls. Other scenarios, diagnostics, calibration and
+search remain later capabilities.
 
 ## Construction and numeric scope
 

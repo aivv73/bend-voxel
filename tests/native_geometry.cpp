@@ -135,6 +135,25 @@ static void expect_render_lod() {
   expect_fresh(frame,cache,5);
   assert(cache.proxy_draws==1 && cache.proxied_bodies==5);
   assert(cache.draws.size()==1 && cache.proxy_rebuilt==1);
+  // The primary profile changes selection only: full visible meshes, identical
+  // eligibility, retained proxies, full shadow work and fixed declared ground.
+  VoxelVkFrame full=frame;
+  full.full_geometry=1; full.ground_half_extent=40;
+  GeometryCache full_cache;
+  expect_fresh(full,full_cache,5);
+  assert(full_cache.proxies.size()==cache.proxies.size());
+  assert(full_cache.proxy_vertices==cache.proxy_vertices);
+  assert(full_cache.proxy_rebuilt==1 && full_cache.proxy_draws==0);
+  assert(full_cache.draws.size()==5 && full_cache.shadow_draws.size()==5);
+  assert(full_cache.meshes.size()==5 && full_cache.proxied_bodies==0);
+  for (size_t i=0;i<6;i++) {
+    auto p=full_cache.geometry.vertices[i].position;
+    assert(std::abs(p.x)==40 && std::abs(p.z)==40 && p.y==0);
+  }
+  expect_fresh(full,full_cache,0);
+  assert(full_cache.proxy_rebuilt==0 && full_cache.draws.size()==5);
+  auto old_shadow=shadow_matrix(frame),full_shadow=shadow_matrix(full);
+  assert(std::memcmp(old_shadow.values,full_shadow.values,sizeof old_shadow.values)==0);
   faces[0].material=5; bodies[0].revision++;
   expect_fresh(frame,cache,1);
   assert(proxy_material(bodies[0])==5); // New plaster participates in LOD safely.
@@ -184,6 +203,11 @@ static void expect_render_lod() {
 }
 
 int main() {
+  assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR,VK_PRESENT_MODE_IMMEDIATE_KHR})==VK_PRESENT_MODE_IMMEDIATE_KHR);
+  assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR})==VK_PRESENT_MODE_MAILBOX_KHR);
+  bool unsupported=false;
+  try { unpaced_mode({VK_PRESENT_MODE_FIFO_KHR}); } catch (const std::runtime_error&) { unsupported=true; }
+  assert(unsupported);
   expect_bend_palette();
   expect_bend_body_vertices();
   expect_shadow_bounds();

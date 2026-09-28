@@ -16,3 +16,11 @@ def vulkan.frame(window: Window, state: D.State, aim: V.Aim, hud: String) -> IO(
 def vulkan.release(window: Window) -> IO(Window):
   import "./vulkan/bridge.c"
   import "./vulkan/bridge.js"
+
+# Separate opt-in static-runner evidence and outside-timing opening capture.
+def vulkan.mark(code: U32) -> IO(Unit):
+  import "./vulkan/record.c"
+  import "./vulkan/bridge.js"
+def vulkan.capture(window: Window) -> IO(Window):
+  import "./vulkan/bridge.c"
+  import "./vulkan/bridge.js"

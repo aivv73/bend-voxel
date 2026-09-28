@@ -30,6 +30,10 @@ typedef struct {
   const VoxelVkBody* bodies;
   const char* hud;
   float colors[19][3]; // Material pairs, linear surfaces, display overlays.
+  // Additive explicit profile; zero retains the Light Atelier defaults.
+  unsigned full_geometry;
+  float ground_half_extent;
+  void (*record)(const char* fields); // Megascene CPU evidence, NULL for legacy.
 } VoxelVkFrame;
 
 typedef struct {
@@ -39,6 +43,8 @@ typedef struct {
 
 int voxel_vk_render(void* display, unsigned long window, const VoxelVkFrame* frame,
                     VoxelVkTimings* timings, char* error, size_t error_cap);
+int voxel_vk_render_profile(void* display, unsigned long window, const VoxelVkFrame* frame,
+                            VoxelVkTimings* timings, char* error, size_t error_cap);
 void voxel_vk_release(void);
 
 #ifdef __cplusplus
