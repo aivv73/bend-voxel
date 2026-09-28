@@ -5,7 +5,7 @@ static const char *mega_attempt,*mega_campaign,*mega_series;
 static u64 mega_frame;
 static void* mega_reference_memory;
 static int mega_edit_pending;
-static char mega_action_outcomes[4096];
+static char mega_action_outcomes[65536];
 Term test_record_start_run(Env e,Term* f,IoWork* work) {
   io_sync();
   mega_stream=stdout; mega_attempt=mega_campaign=mega_series="fixture";

@@ -153,7 +153,40 @@ void vertices(const VoxelVkBody& b) {
     require(shared.size()==2&&shared[0][u]!=shared[1][u]&&shared[0][v]!=shared[1][v],"duplicate or incomplete drawable triangles");
   }
 }
+struct CachedBody {
+  uint32_t revision,anchored;
+  uint64_t tree_nodes;
+  std::array<float,3> lo,hi;
+  std::vector<VoxelMegaBox> raw_boxes;
+  std::vector<VoxelVkFace> faces;
+  std::vector<VoxelVkVertex> vertices;
+  std::vector<Box> boxes;
+  J occupied,surface,work;
+};
+template<class T> bool same_bytes(const std::vector<T>& saved,const T* current,size_t count) {
+  return saved.size()==count && (!count || std::memcmp(saved.data(),current,count*sizeof(T))==0);
+}
+J body_value(const VoxelVkBody& b,const VoxelMegaBody& raw,const J& occupied,const J& surface) {
+  return object({{"anchored",b.anchored?"true":"false"},{"id",number(b.id)},{"occupancy",occupied},
+    {"offset_m",real(b.offset)},{"revision",number(b.revision)},{"surface",surface},{"velocity_m_s",real(raw.speed)}});
+}
 J body(const VoxelVkBody& b,const VoxelMegaBody& raw,J& work,std::vector<Box>& global) {
+  // Reuse the expensive independent topology/surface check only when every
+  // geometry byte, bound and label equals a previously checked body. Motion is
+  // serialized afresh on every frame. A stale revision alone never hits.
+  static std::map<uint32_t,CachedBody> audited;
+  auto it=audited.find(b.id);
+  if(it!=audited.end()) {
+    const auto& c=it->second;
+    if(c.revision==b.revision && c.anchored==b.anchored && c.tree_nodes==raw.tree_nodes &&
+       std::memcmp(c.lo.data(),b.lo,sizeof b.lo)==0 && std::memcmp(c.hi.data(),b.hi,sizeof b.hi)==0 &&
+       same_bytes(c.raw_boxes,raw.boxes,raw.box_count) && same_bytes(c.faces,b.faces,b.face_count) &&
+       same_bytes(c.vertices,b.vertices,b.vertex_count)) {
+      global.insert(global.end(),c.boxes.begin(),c.boxes.end());
+      work=c.work;
+      return body_value(b,raw,c.occupied,c.surface);
+    }
+  }
   require(b.anchored<=1,"invalid anchor boolean");
   std::vector<Box> boxes; uint64_t cells=0,protected_cells=0;
   for(unsigned i=0;i<raw.box_count;i++) {
@@ -189,8 +222,12 @@ J body(const VoxelVkBody& b,const VoxelMegaBody& raw,J& work,std::vector<Box>& g
   work=object({{"cells",number(cells)},{"cuboids",number(raw.box_count)},{"id",number(b.id)},
     {"protected_cells",number(protected_cells)},{"surface_rectangles",number(b.face_count)},
     {"tree_nodes",number(raw.tree_nodes)},{"vertices",number(b.vertex_count)}});
-  return object({{"anchored",b.anchored?"true":"false"},{"id",number(b.id)},{"occupancy",occupied},
-    {"offset_m",real(b.offset)},{"revision",number(b.revision)},{"surface",surface},{"velocity_m_s",real(raw.speed)}});
+  CachedBody next{b.revision,b.anchored,raw.tree_nodes,{b.lo[0],b.lo[1],b.lo[2]},
+    {b.hi[0],b.hi[1],b.hi[2]},{raw.boxes,raw.boxes+raw.box_count},
+    {b.faces,b.faces+b.face_count},{b.vertices,b.vertices+b.vertex_count},
+    boxes,occupied,surface,work};
+  audited[b.id]=std::move(next);
+  return body_value(b,raw,occupied,surface);
 }
 void emit(const VoxelVkFrame& f,const VoxelMegaState& s) {
   std::vector<unsigned> order; for(unsigned i=0;i<f.body_count;i++) order.push_back(i);
@@ -218,9 +255,13 @@ void emit(const VoxelVkFrame& f,const VoxelMegaState& s) {
   if(s.frame==0) { names.push_back(quote("initialization")); names.push_back(quote("review_opening")); }
   if(s.frame==s.warmup) names.push_back(quote("warmup_end"));
   if(s.action_frame) names.push_back(quote("action_"+std::to_string(s.action_id)));
+  if(std::getenv("MEGASCENE_HISTORY") && s.action_frame && (s.action_id==11 || s.action_id==47 || s.action_id==119))
+    names.push_back(quote("after_cut_"+std::to_string(s.action_id+1)));
+  if(std::getenv("MEGASCENE_HISTORY") && s.frame==uint64_t(s.warmup)+1561)
+    names.push_back(quote("history_overview"));
   if(std::getenv("MEGASCENE_SUPPORT") && s.frame>=uint64_t(s.warmup)+32 && s.frame<=uint64_t(s.warmup)+43)
     names.push_back(quote("motion_"+std::to_string(s.frame-s.warmup-1)));
-  if(!std::getenv("MEGASCENE_LOCALIZED") && !std::getenv("MEGASCENE_SUPPORT") && std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
+  if(!std::getenv("MEGASCENE_LOCALIZED") && !std::getenv("MEGASCENE_SUPPORT") && !std::getenv("MEGASCENE_HISTORY") && std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
      s.frame<=uint64_t(s.warmup)+s.measured &&
      (s.frame-s.warmup-1)%300==60) {
     unsigned phase=unsigned((s.frame-s.warmup-1)/300);

@@ -160,6 +160,8 @@ def summarize(records, errors, cpu_frames, config):
                 if 31<=ordinal<=42: return "motion"
             if config.get("case") == "localized" and frame == int(config["warmup"])+1:
                 return "edit"
+            if config.get("case") == "history" and frame>int(config["warmup"]) and (frame-int(config["warmup"])-1)%12==0 and frame<=int(config["warmup"])+1429:
+                return "edit"
             return "startup" if frame == 0 else "warmup" if frame <= int(config["warmup"]) else "ordinary"
         populations[name] = distribution([r["value"] for r in resolved if r["status"] == "measured" and population(r) == name])
     return {"status": state, "scope": SCOPE, "unit": "ns", "capability": capability,

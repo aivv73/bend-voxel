@@ -214,3 +214,21 @@ law palette_material_order:
 # - Six edits remain percentile-inconclusive. Missing/rejected/no-op cuts or
 #   absent motion evidence cannot qualify schedule completion. See
 #   docs/megascene-support.md for independent reference/runtime evidence scope.
+
+# Megascene history-v1 runtime contract (issue #57; not a formal claim):
+# - Freeze 120 binary32 targets and the camera track before replay. Cut at
+#   measured ordinals 12*k for k=0..119. Every cut must remove fresh editable
+#   material in the evolving world; a rejected/no-op cut stops the worker.
+# - Revisit prior terrain damage, release and then cut each moving beam, and
+#   address the remaining anchored bridge stubs. Compare every intermediate
+#   owner, component, material, surface, motion bit and lifetime ID with an
+#   independent reference, including the twelve release-to-target windows.
+# - Preserve every cut checkpoint, checkpoints after cuts 12/48/120, and the
+#   far/completion views. Check actual mesh/proxy/shadow transitions and keep
+#   ordinary, edit, moving, overview and settled-tail populations separate.
+# - Numeric guards and native/cache behavior depend on unsafe/foreign code;
+#   only runtime/reference and retained Vulkan evidence can establish them.
+# - An unchanged checkpoint body may reuse its canonical geometry check only
+#   after exact raw boxes, faces, vertices, bounds, revision and anchor match a
+#   previously audited body. Re-read motion and view each frame; changing
+#   geometry under the same revision must miss this validation cache.

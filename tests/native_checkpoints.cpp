@@ -72,6 +72,14 @@ int main(int argc,char** argv) {
   }
   char error[1024];
   if(!voxel_mega_checkpoint(&frame,&state,error,sizeof error)) { std::fprintf(stderr,"%s\n",error); return 2; }
+  if(mode=="cache_repeat" || mode=="cache_changed") {
+    state.frame=1;
+    if(mode=="cache_changed") boxes[0].material=2; // Same ID/revision, different raw geometry.
+    if(!voxel_mega_checkpoint(&frame,&state,error,sizeof error)) {
+      std::fprintf(stderr,"%s\n",error); return 2;
+    }
+    if(mode=="cache_changed") return 3;
+  }
   // The same logical mesh can occupy a different native allocation slot.
   frame.full_geometry=1; frame.ground_half_extent=40; GeometryCache cache; bool reused; geometry(frame,cache,reused);
   frame.record=[](const char*){}; audit_native(frame,cache);

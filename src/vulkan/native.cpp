@@ -558,7 +558,7 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
     require(mesh.revision==b.revision&&mesh.anchored==b.anchored&&mesh.count==b.vertex_count,"native mesh identity mismatch");
     require(uint64_t(mesh.first)+mesh.count<=cache.geometry.vertices.size(),"native mesh range overflow");
     mesh_slots[std::to_string(b.id)]=checkpoint::array({checkpoint::number(mesh.first),checkpoint::number(mesh.count)});
-    if(std::getenv("MEGASCENE_SUPPORT"))
+    if(std::getenv("MEGASCENE_SUPPORT") || std::getenv("MEGASCENE_HISTORY"))
       mesh_hashes[std::to_string(b.id)]=checkpoint::quote(checkpoint::hash(
         std::string(reinterpret_cast<const char*>(b.vertices),size_t(b.vertex_count)*sizeof *b.vertices)));
     for(unsigned j=0;j<b.vertex_count;j++) {
@@ -597,7 +597,7 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
     {"mesh_slots",checkpoint::object(mesh_slots)},{"proxy_cache_sha256",checkpoint::object(proxy_hashes)},
     {"record_type",checkpoint::quote("native_audit")},{"reference_visible",checkpoint::number(reference_visible)},
     {"vertices_checked",checkpoint::number(vertices_checked)}};
-  if(std::getenv("MEGASCENE_SUPPORT")) fields["mesh_sha256"]=checkpoint::object(mesh_hashes);
+  if(std::getenv("MEGASCENE_SUPPORT") || std::getenv("MEGASCENE_HISTORY")) fields["mesh_sha256"]=checkpoint::object(mesh_hashes);
   auto record=checkpoint::object(fields);
   f.record(record.substr(1,record.size()-2).c_str());
 }

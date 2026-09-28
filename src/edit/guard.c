@@ -11,7 +11,7 @@ static int edit_point_valid(const float* point,float offset,float* local) {
     float relative=point[k]-(k==1?offset:0.f);
     local[k]=relative*10.f;
     if(!isfinite(point[k])||!isfinite(local[k])||fabsf(local[k])>1024 ||
-       floorf(local[k]*2.f)!=local[k]*2.f ||
+       fabsf(local[k]*2.f-roundf(local[k]*2.f))>0.0001f ||
        fabs((double)local[k]-((double)point[k]-(k==1?offset:0.))*10.)>0.00001) return 0;
   }
   return 1;
@@ -23,20 +23,18 @@ static int edit_box_valid(const float* lo,const float* hi) {
   return 1;
 }
 // An unrelated translated body need not put the brush on a half-cell grid.
-// Certify separation on an unchanged X/Z axis in both exact metre arithmetic
-// and the actual rounded local coordinates. Its entire cut traversal returns
-// unchanged at the root. All tree counts/bounds are still checked below.
+// Certify separation on any axis in both exact metre arithmetic and the
+// actual rounded local coordinates. A vertical separation is needed when a
+// moved beam is cut over terrain. Its traversal returns unchanged at the root.
 static int edit_remote_valid(const float* point,float offset,const float* lo,const float* hi,float* local) {
   if(!isfinite(offset)||fabsf(offset)>1024||!edit_box_valid(lo,hi)) return 0;
   int separate=0;
   for(unsigned k=0;k<3;k++) {
     local[k]=(point[k]-(k==1?offset:0.f))*10.f;
     if(!isfinite(point[k])||!isfinite(local[k])||fabsf(local[k])>1024) return 0;
-    if(k!=1) {
-      double exact=(double)point[k]*10.;
-      separate |= (exact < lo[k]-4. && local[k]<lo[k]-4.f) ||
-                  (exact > hi[k]+4. && local[k]>hi[k]+4.f);
-    }
+    double exact=((double)point[k]-(k==1?(double)offset:0.))*10.;
+    separate |= (exact < lo[k]-4. && local[k]<lo[k]-4.f) ||
+                (exact > hi[k]+4. && local[k]>hi[k]+4.f);
   }
   return separate;
 }

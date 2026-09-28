@@ -80,7 +80,7 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
                  str(archive/"runtime/picking-reference-worker"), "--gpu", "off", "--threads", config["threads"]],
                 archive/"runtime", destination/"picking-reference.stdout.log", destination/"picking-reference.stderr.log", 30)
             value["picking_references"] = check_picking((destination/"picking-reference.stdout.log").read_text())
-        if config["case"] in ("localized", "support"):
+        if config["case"] in ("localized", "support", "history"):
             from megascene_edit_references import check as check_edits
             run([str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"),
                  str(archive/"runtime/edit-reference-worker"), "--gpu", "off", "--threads", config["threads"]],
@@ -92,6 +92,12 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
                  str(archive/"runtime/support-reference-worker"), "--gpu", "off", "--threads", config["threads"]],
                 archive/"runtime", destination/"support-reference.stdout.log", destination/"support-reference.stderr.log", 30)
             value["support_references"] = check_support((destination/"support-reference.stdout.log").read_text())
+        if config["case"] == "history":
+            from megascene_history_references import check as check_history
+            run([str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"),
+                 str(archive/"runtime/history-reference-worker"), "--gpu", "off", "--threads", config["threads"]],
+                archive/"runtime", destination/"history-reference.stdout.log", destination/"history-reference.stderr.log", 30)
+            value["history_references"] = check_history((destination/"history-reference.stdout.log").read_text())
         summary, records = launch(config, archive, validation_manifest, loader, campaign=campaign, validation=True)
         summary["attempt_kind"] = "validation_replay"
         frozen = read_json((archive/"schedule.json").read_text())
@@ -110,13 +116,17 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
                         "source_ownership", "material_conservation", "finite_motion_bits", "drawable_coverage_and_winding",
                         "fresh_bend_native_transport", "native_mesh_slots_and_draw_ranges", "unculled_triangle_visibility",
                         "full_proxy_shadow_cache_transitions"])
-        if config["case"] in ("localized", "support"):
+        if config["case"] in ("localized", "support", "history"):
             value["edited_work"] = result.get("edited_work")
             value["invariant_coverage"] += [config["case"]+"_exact_removal", "atomic_budget_rejection", "edit_history_and_intervals", "unchanged_geometry_caches", "pre_unsafe_edit_guards"]
         if config["case"] == "support":
             value["moving_window"] = result.get("moving_window")
             value["beam_features"] = result.get("beam_features")
             value["invariant_coverage"] += ["two_support_paths_and_stumps", "three_distinct_spans_frames_31_42", "binary32_motion_and_floor", "translation_preserves_full_mesh"]
+        if config["case"] == "history":
+            value["moving_window"] = result.get("moving_window")
+            value["moved_targets"] = result.get("moved_targets")
+            value["invariant_coverage"] += ["twelve_moving_spans_and_targets", "bridge_stub_revisits", "every_cut_state_and_geometry"]
         if config["case"] == "picking":
             from megascene_picking import audit as audit_picking
             value["picking"] = audit_picking(records, frozen)
@@ -145,11 +155,15 @@ def compare_attempt(config, archive, manifest, validation, summary, records):
         frozen = read_json((archive/"schedule.json").read_text())
         result = audit(records, frozen, validation["expected"], validation["actual_work"],
                        summary["schedule_completion"]["status"] == "pass")
-        if config["case"] in ("localized", "support"):
+        if config["case"] in ("localized", "support", "history"):
             require(result.get("edited_work") == validation.get("edited_work"), "post-edit work differs from validation")
         if config["case"] == "support":
             for field in ("checkpoints", "moving_window", "beam_features"):
                 require(result.get(field) == validation.get(field), "support "+field+" differs from validation")
+        if config["case"] == "history":
+            for field in ("checkpoints", "moving_window", "moved_targets"):
+                require(result.get(field) == validation.get(field),
+                        "history "+field+" differs from validation")
         require(not result["synthetic"], "synthetic checkpoints cannot qualify a real attempt")
         diff = mismatch(validation["effective_render_identity"], render_identity(records), "effective_render_settings")
         if diff:
@@ -161,10 +175,10 @@ def compare_attempt(config, archive, manifest, validation, summary, records):
     if config["case"] == "picking" and result["status"] == "pass":
         from megascene_picking import audit as audit_picking
         summary["picking"] = audit_picking(records, frozen)
-    if config["case"] == "support":
+    if config["case"] in ("support", "history"):
         summary["moving_window"] = result.get("moving_window")
         if result["status"] != "pass":
-            summary["schedule_completion"] = outcome("inconclusive", "required support execution evidence failed", "complete support schedule", ["comparison.json"])
+            summary["schedule_completion"] = outcome("inconclusive", "required replay evidence failed", "complete "+config["case"]+" schedule", ["comparison.json"])
     snapshot(archive/"comparison.json", result)
     summary["validation"] = {"path": "validation.json", "attempt_id": validation["attempt_id"],
                              "reused": validation["reused"], "duration_ns": validation.get("duration_ns")}
