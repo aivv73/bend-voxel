@@ -210,14 +210,15 @@ void emit(const VoxelVkFrame& f,const VoxelMegaState& s) {
   J view=object({{"aim",object({{"kind",number(f.aim_kind)},{"position_m",array({real(f.aim[0]),real(f.aim[1]),real(f.aim[2])})},{"radius_m",real(s.aim_radius)}})},
     {"eye_m",array({real(f.eye[0]),real(f.eye[1]),real(f.eye[2])})},{"height",number(f.height)},
     {"pitch",real(f.pitch)},{"width",number(f.width)},{"yaw",real(f.yaw)}});
-  J payload=object({{"action_outcomes","[]"},{"bodies",array(bodies)},{"budget",number(s.world[5])},
+  J payload=object({{"action_outcomes",s.action_outcomes?s.action_outcomes:"[]"},{"bodies",array(bodies)},{"budget",number(s.world[5])},
     {"cells",number(s.world[0])},{"fixed_step",quote("0x3c888889")},{"fragments",number(s.world[1])},
     {"next_id",number(s.world[4])},{"removed",number(s.world[2])},{"schedule_sha256",quote(s.schedule_sha256)},
     {"schema",quote("megascene-checkpoint/1")},{"status",number(s.world[3])},{"view",view}});
   std::vector<J> names;
   if(s.frame==0) { names.push_back(quote("initialization")); names.push_back(quote("review_opening")); }
   if(s.frame==s.warmup) names.push_back(quote("warmup_end"));
-  if(std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
+  if(s.action_frame) names.push_back(quote("action_0"));
+  if(!std::getenv("MEGASCENE_LOCALIZED") && std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
      s.frame<=uint64_t(s.warmup)+s.measured &&
      (s.frame-s.warmup-1)%300==60) {
     unsigned phase=unsigned((s.frame-s.warmup-1)/300);

@@ -64,6 +64,19 @@ class NativeCheckpoints(unittest.TestCase):
         self.assertEqual(diff['field'],'payload/bodies/body:1/velocity_m_s')
         self.assertEqual(diff['actual'],'0x80000000')
 
+    def test_rejection_and_noop_remain_in_canonical_checkpoints(self):
+        initial=self.record()['payload']
+        for mode,status in (('rejection','3'),('noop','2')):
+            record=self.record(mode); payload=record['payload']
+            self.assertEqual(record['names'],['action_0'])
+            self.assertEqual(payload['status'],status)
+            self.assertEqual(payload['removed'],'0')
+            self.assertEqual(len(payload['action_outcomes']),1)
+            self.assertFalse(payload['action_outcomes'][0]['accepted'])
+            self.assertEqual({k:v for k,v in payload.items() if k not in ('status','action_outcomes')},
+                             {k:v for k,v in initial.items() if k not in ('status','action_outcomes')})
+            self.assertEqual(record['sha256'],digest(payload))
+
 
 class CanonicalContracts(unittest.TestCase):
     def test_exact_schema_vocabulary_and_numbers(self):

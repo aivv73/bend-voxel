@@ -63,6 +63,13 @@ int main(int argc,char** argv) {
   VoxelVkFrame frame{}; frame.width=640; frame.height=360; frame.bodies=&body; frame.body_count=1;
   frame.record=[](const char* text){ std::printf("{%s}\n",text); };
   VoxelMegaState state{&raw,{16,0,0,1,2,2048},0.f,0,0,1,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"};
+  if(mode=="rejection" || mode=="noop") {
+    state.frame=121; state.warmup=120; state.measured=3600; state.action_frame=1;
+    state.world[3]=mode=="rejection"?3:2;
+    state.action_outcomes=mode=="rejection"?
+      "[{\"accepted\":false,\"action\":\"0\",\"frame\":\"121\",\"outcome\":\"rejected_budget\",\"removed_cells\":\"0\",\"target_m\":[\"0x00000000\",\"0x00000000\",\"0x00000000\"]}]":
+      "[{\"accepted\":false,\"action\":\"0\",\"frame\":\"121\",\"outcome\":\"no_op\",\"removed_cells\":\"0\",\"target_m\":[\"0x00000000\",\"0x00000000\",\"0x00000000\"]}]";
+  }
   char error[1024];
   if(!voxel_mega_checkpoint(&frame,&state,error,sizeof error)) { std::fprintf(stderr,"%s\n",error); return 2; }
   // The same logical mesh can occupy a different native allocation slot.

@@ -551,11 +551,13 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
   require(cache.proxy_draws==0&&cache.shadow_draws.size()==f.body_count,"native shadow/proxy draw mismatch");
   uint64_t vertices_checked=0,reference_visible=0;
   std::vector<checkpoint::J> drawn_ids;
+  checkpoint::Object mesh_slots,proxy_hashes;
   for(unsigned i=0;i<f.body_count;i++) {
     const auto& b=f.bodies[i]; auto it=cache.meshes.find(b.id);
     require(it!=cache.meshes.end(),"missing native mesh"); const auto& mesh=it->second;
     require(mesh.revision==b.revision&&mesh.anchored==b.anchored&&mesh.count==b.vertex_count,"native mesh identity mismatch");
     require(uint64_t(mesh.first)+mesh.count<=cache.geometry.vertices.size(),"native mesh range overflow");
+    mesh_slots[std::to_string(b.id)]=checkpoint::array({checkpoint::number(mesh.first),checkpoint::number(mesh.count)});
     for(unsigned j=0;j<b.vertex_count;j++) {
       const auto& actual=cache.geometry.vertices[mesh.first+j]; const auto& expected=b.vertices[j];
       auto color=material_color(f,expected.material,!b.anchored);
@@ -571,7 +573,25 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
     if(drawn) drawn_ids.push_back(checkpoint::number(b.id));
   }
   require(drawn_ids.size()==cache.draws.size(),"unknown native draw ownership");
+  require(cache.proxies.size()==cache.groups.size(),"stale native proxy ownership");
+  for(const auto& [key,proxy]:cache.proxies) {
+    const auto& group=cache.groups.at(key);
+    require(proxy.members==group.members && uint64_t(proxy.first)+proxy.count<=cache.geometry.vertices.size(),"stale native proxy members/range");
+    Geometry expected;
+    for(auto index:group.bodies) proxy_box(expected,f.bodies[index],f);
+    require(expected.triangles==proxy.count,"native proxy vertex count");
+    std::vector<checkpoint::J> vertices;
+    for(unsigned j=0;j<proxy.count;j++) {
+      const auto& v=cache.geometry.vertices[proxy.first+j]; const auto& want=expected.vertices[j];
+      require(std::memcmp(&v.position,&want.position,sizeof v.position)==0 &&
+        std::memcmp(&v.color,&want.color,sizeof v.color)==0 && v.side==want.side,"stale native proxy contents");
+      vertices.push_back(checkpoint::array({checkpoint::real(v.position.x),checkpoint::real(v.position.y),checkpoint::real(v.position.z),
+        checkpoint::real(v.color.x),checkpoint::real(v.color.y),checkpoint::real(v.color.z),checkpoint::number(v.side)}));
+    }
+    proxy_hashes[std::to_string(key)]=checkpoint::quote(checkpoint::hash(checkpoint::array(vertices)));
+  }
   auto record=checkpoint::object({{"drawn_ids",checkpoint::array(drawn_ids)},
+    {"mesh_slots",checkpoint::object(mesh_slots)},{"proxy_cache_sha256",checkpoint::object(proxy_hashes)},
     {"record_type",checkpoint::quote("native_audit")},{"reference_visible",checkpoint::number(reference_visible)},
     {"vertices_checked",checkpoint::number(vertices_checked)}});
   f.record(record.substr(1,record.size()-2).c_str());

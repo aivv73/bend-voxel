@@ -21,7 +21,7 @@ def assess(bundle, input_path, reviewer):
     root=Path(bundle).expanduser().resolve()
     require(reviewer.strip(), "reviewer identity required")
     manifest=read_json((root/"manifest.json").read_text())
-    require(manifest["effective"]["case"] in ("traversal", "picking"), "traversal bundle required")
+    require(manifest["effective"]["case"] in ("traversal", "picking", "localized"), "traversal bundle required")
     require(manifest["attempt_kind"] in ("validation_only", "development_observation"), "complete bundle required")
     summary=read_json((root/"summary.json").read_text())
     require(summary["schedule_completion"]["status"] == "pass" and
@@ -30,7 +30,7 @@ def assess(bundle, input_path, reviewer):
     require(not review["missing"], "required capture missing")
     frozen=read_json((root/"schedule.json").read_text())
     require(review["schedule_sha256"]==hashlib.sha256((root/"schedule.json").read_bytes()).hexdigest(), "stale review schedule")
-    require(frozen["schedule_id"] in ("traversal-v1", "traversal-v2", "picking-v1", "picking-v2"), "unsupported route")
+    require(frozen["schedule_id"] in ("traversal-v1", "traversal-v2", "picking-v1", "picking-v2", "localized-v1"), "unsupported route")
     answers=read_json(Path(input_path).read_text())
     require(answers["schema"]=="megascene-feature-assessments/1" and isinstance(answers["views"],dict), "unsupported assessments")
     require(set(answers["views"])=={v["name"] for v in review["views"]}, "every named view needs assessment")
@@ -65,12 +65,12 @@ def assess(bundle, input_path, reviewer):
     review["assessment_input"]=artifact(raw,root)
     snapshot(root/"review.json",review)
     if bad_geometry:
-        summary["rendering_correctness"]=outcome("fail","named feature rendering incorrect", "primary traversal full-profile fidelity",["review.json","assessments.json"])
-        summary["visual_quality"]=outcome("inconclusive","rendering incorrect; readability cannot qualify", "primary traversal full-profile fidelity",["review.json"])
+        summary["rendering_correctness"]=outcome("fail","named feature rendering incorrect", "primary full-profile fidelity",["review.json","assessments.json"])
+        summary["visual_quality"]=outcome("inconclusive","rendering incorrect; readability cannot qualify", "primary full-profile fidelity",["review.json"])
     else:
         summary["visual_quality"]=outcome("fail" if bad_quality else "pass",
             "required major feature unreadable" if bad_quality else "all named features visible and readable",
-            "primary traversal full-profile fidelity",["review.json","assessments.json"])
+            "primary full-profile fidelity",["review.json","assessments.json"])
     summary["review"]={"path":"review.json","status":review["status"],"reviewer":reviewer}
     snapshot(root/"summary.json",summary)
     manifest["evidence"]=[artifact(root/item["path"],root) for item in manifest["evidence"]

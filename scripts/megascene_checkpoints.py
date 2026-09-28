@@ -144,6 +144,9 @@ def checkpoint_catalog(frozen):
 
 def audit(records, frozen, expected, expected_work, complete, thorough=False):
     """Verify every replay frame, or the timed checkpoint catalog, with evidence."""
+    if frozen["schedule_id"] == "localized-v1":
+        from megascene_localized import audit as audit_localized
+        return audit_localized(records, frozen, expected, expected_work, complete, thorough)
     failures, catalog = [], []
     picking = frozen["schedule_id"] in ("picking-v1", "picking-v2")
     traversal = picking or frozen["schedule_id"] in ("traversal-v1", "traversal-v2")
@@ -271,7 +274,7 @@ def compare_threads(bundles):
             differences.append({"threads": manifest["effective"]["threads"], **diff})
     return {"schema": SCHEMA, "record_type": "thread_comparison", "synthetic": False,
             "status": "fail" if differences else "pass", "threads": ["1", "6", "12"],
-            "scope": "exact static logical state and geometry; separate validation per thread count",
+            "scope": "exact logical state and geometry; separate validation per thread count",
             "differences": differences, "bundles": list(map(str,bundles)),
             "work_inventories": {m["effective"]["threads"]: c["actual_work"] for m,_,c in summaries}}
 

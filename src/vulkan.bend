@@ -1,5 +1,6 @@
 import Base
 import ./demo.bend as D
+import ./world.bend as W
 import ./render.bend as V
 import ./math.bend as R
 import ./megascene_picking.bend as P
@@ -37,5 +38,14 @@ def vulkan.pickray(index: U32) -> IO(P.Ray):
   import "./vulkan/record.c"
   import "./vulkan/bridge.js"
 def vulkan.pickrecord(ray: P.Ray, hit: V.Hit) -> IO(Unit):
+  import "./vulkan/record.c"
+  import "./vulkan/bridge.js"
+
+# Action acceptance and frame-return response evidence. The action remains in
+# canonical history even when it is rejected or removes no cells.
+def vulkan.editbegin(action: U32, point: R.Vec) -> IO(Unit):
+  import "./vulkan/record.c"
+  import "./vulkan/bridge.js"
+def vulkan.editrecord(world: W.World, action: U32, point: R.Vec) -> IO(Unit):
   import "./vulkan/record.c"
   import "./vulkan/bridge.js"

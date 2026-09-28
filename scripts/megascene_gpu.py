@@ -151,9 +151,11 @@ def summarize(records, errors, cpu_frames, config):
     state = next(iter(statuses)) if len(statuses) == 1 and not errors else "incomplete" if expected or errors else "not_executed"
     from megascene_static import distribution
     populations = {}
-    for name in ("startup", "warmup", "ordinary"):
+    for name in ("startup", "warmup", "ordinary", "edit"):
         def population(r):
             frame = int(r["frame"])
+            if config.get("case") == "localized" and frame == int(config["warmup"])+1:
+                return "edit"
             return "startup" if frame == 0 else "warmup" if frame <= int(config["warmup"]) else "ordinary"
         populations[name] = distribution([r["value"] for r in resolved if r["status"] == "measured" and population(r) == name])
     return {"status": state, "scope": SCOPE, "unit": "ns", "capability": capability,

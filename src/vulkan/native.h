@@ -53,6 +53,8 @@ typedef struct {
   uint64_t frame;
   uint32_t warmup, measured;
   const char* schedule_sha256;
+  const char* action_outcomes; // Canonical action history, including no-ops/rejections.
+  unsigned action_frame;
 } VoxelMegaState;
 
 typedef struct {

@@ -1,0 +1,25 @@
+#define EDIT_NUMERIC_ONLY
+#include "../src/edit/guard.c"
+#include <cassert>
+#include <limits>
+int main() {
+  float point[]={-16.f,2.4f,-16.f},local[3];
+  assert(edit_point_valid(point,0,local));
+  assert(local[0]==-160 && local[1]==24);
+  float lo[]={-320.f,8.f,-320.f},hi[]={320.f,24.f,320.f};
+  assert(edit_box_valid(lo,hi));
+  uint64_t leaves=0; assert(edit_subdivision(lo,hi,local,&leaves,0)); assert(leaves>1);
+  float moved[]={-.05f,9.05f,.05f}; assert(edit_point_valid(moved,-1,local));
+  assert(local[1]==100.5f);
+  for(float invalid:{std::numeric_limits<float>::infinity(),std::numeric_limits<float>::quiet_NaN(),1025.f,0.123f}) {
+    float bad[]={invalid,0,0}; assert(!edit_point_valid(bad,0,local));
+    float low[]={invalid,0,0},high[]={1026.f,1,1}; assert(!edit_box_valid(low,high));
+  }
+  float p[]={0,0,0};
+  for(int x=-5;x<5;x++) for(int y=-5;y<5;y++) for(int z=-5;z<5;z++) {
+    float a[]={float(x),float(y),float(z)},b[]={float(x+1),float(y+1),float(z+1)};
+    int near,far; assert(edit_predicate(a,b,p,0,&near)&&edit_predicate(a,b,p,1,&far));
+    double d=(x+.5)*(x+.5)+(y+.5)*(y+.5)+(z+.5)*(z+.5);
+    assert(near==(d<=4.00001)&&far==near);
+  }
+}

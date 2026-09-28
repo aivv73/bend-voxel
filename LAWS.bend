@@ -183,3 +183,19 @@ law palette_material_order:
      Color.surface(Color.frame(),False{}),Color.surface(Color.frame(),True{}),
      Color.surface(Color.machinery(),False{}),Color.surface(Color.machinery(),True{}),
      Color.surface(Color.plaster(),False{}),Color.surface(Color.plaster(),True{})] : List<&2,R.Vec>}
+
+# - Issue #55 localized-v1 executes exactly one 20 cm terrain cut at measured
+#   frame 0 after physics, then holds its frozen view for unchanged-world
+#   observations. Its 16 removed concrete cells must agree with an independent
+#   reference. A required rejection/no-op cannot satisfy schedule completion.
+# - Preserve every action outcome in canonical checkpoint history, including
+#   rejection and no-op. Atomic rejection preserves body geometry/cache data,
+#   IDs/revisions, next ID, budget, materials, anchors and motion; only the
+#   documented status/removal telemetry changes.
+# - Guard actual carve predicates, counts, ID growth and native size bounds
+#   before unsafe work. Validate local surfaces and unchanged full/proxy mesh
+#   contents at runtime. These rules are never unsafe-dependent formal proofs.
+# - Edit response runs from before the scripted operation through its rendered
+#   frame return, including required checks/logging; CPU/GPU ordinary samples
+#   exclude that frame. One accepted edit leaves percentile qualification
+#   inconclusive; never add cuts or pool attempts to manufacture a pass.

@@ -47,6 +47,10 @@ static float mega_ground;
 static const char *mega_attempt, *mega_campaign, *mega_series;
 static void* mega_reference_memory;
 static u64 mega_reference_sequence;
+static u64 mega_edit_begin;
+static u32 mega_edit_action,mega_edit_removed,mega_edit_status;
+static int mega_edit_pending;
+static char mega_action_outcomes[4096]="[]";
 static void mega_reference(const char* fields) {
   char record[MEGA_REFERENCE_SLOT-8];
   int n=snprintf(record,sizeof record,
@@ -155,6 +159,36 @@ Term vulkan_pickrecord_run(Env e, Term* f, IoWork* work) {
   return term_pak(CID_UNIT,0);
 }
 #endif
+#ifdef CID_VULKAN_VULKAN_EDITBEGIN
+Term vulkan_editbegin_run(Env e, Term* f, IoWork* work) {
+  io_sync();
+  if(!mega_stream || mega_edit_pending) err_fail("invalid edit start");
+  mega_edit_begin=mega_tick(); mega_edit_action=(u32)f[0]; mega_edit_pending=1;
+  char record[256];
+  snprintf(record,sizeof record,"\"record_type\":\"edit_begin\",\"action\":\"%u\",\"begin_ns\":\"%llu\"",mega_edit_action,(unsigned long long)mega_edit_begin);
+  mega_reference(record); mega_record(record); term_sink(e,f[1]);
+  return term_pak(CID_UNIT,0);
+}
+Term vulkan_editrecord_run(Env e, Term* f, IoWork* work) {
+  io_sync();
+  if(!mega_stream || !mega_edit_pending || (u32)f[1]!=mega_edit_action) err_fail("invalid edit outcome");
+  u64 world=term_peek(e.mem,f[0]),point=term_peek(e.mem,f[2]);
+  mega_edit_removed=(u32)e.mem[world+3]; mega_edit_status=(u32)e.mem[world+4];
+  if(mega_edit_status<1||mega_edit_status>3||(mega_edit_status!=1&&mega_edit_removed)) err_fail("invalid edit status/removal");
+  const char* accepted=mega_edit_status==1&&mega_edit_removed?"true":"false";
+  const char* outcome=mega_edit_status==3?"rejected_budget":mega_edit_removed?"accepted":"no_op";
+  char action[512],record[768];
+  snprintf(action,sizeof action,"{\"accepted\":%s,\"action\":\"%u\",\"frame\":\"%llu\",\"outcome\":\"%s\",\"removed_cells\":\"%u\",\"target_m\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"]}",
+    accepted,mega_edit_action,(unsigned long long)mega_frame,outcome,mega_edit_removed,(u32)e.mem[point],(u32)e.mem[point+1],(u32)e.mem[point+2]);
+  size_t length=strlen(mega_action_outcomes),extra=strlen(action);
+  if(length+extra+2>=sizeof mega_action_outcomes) err_fail("action history capacity exceeded");
+  snprintf(mega_action_outcomes+length-1,sizeof mega_action_outcomes-length+1,"%s%s]",length>2?",":"",action);
+  snprintf(record,sizeof record,"\"record_type\":\"action\",\"action\":\"%u\",\"accepted\":%s,\"removed_cells\":\"%u\",\"outcome\":%s",mega_edit_action,accepted,mega_edit_removed,action);
+  mega_reference(record); mega_record(record);
+  term_sink(e,f[0]); term_sink(e,f[2]);
+  return term_pak(CID_UNIT,0);
+}
+#endif
 Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
   io_sync();
   u32 code=(u32)f[0];
@@ -197,6 +231,10 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
     mega_stream=NULL;
   } else if (code==17) {
     mega_record("\"record_type\":\"window_closed\"");
+  } else if(code>=19 && code<=26) {
+    static const char* stages[]={"carve","connectivity","surfaces","commit"};
+    if(code&1) mega_stage_begin[code]=now;
+    else mega_stage(stages[(code-20)/2],mega_stage_begin[code-1],now);
   } else {
     static const char* stages[]={"", "generation", "initial_surfaces", "initial_inventory", "window_setup", "physics", "view", "teardown"};
     if (code>14) err_fail("invalid Megascene marker");
@@ -208,6 +246,10 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
 
 static void __attribute__((constructor)) mega_effects(void) {
   io_eff(CID_VULKAN_VULKAN_MARK,vulkan_mark_run,0);
+#ifdef CID_VULKAN_VULKAN_EDITBEGIN
+  io_eff(CID_VULKAN_VULKAN_EDITBEGIN,vulkan_editbegin_run,0);
+  io_eff(CID_VULKAN_VULKAN_EDITRECORD,vulkan_editrecord_run,0);
+#endif
 #ifdef CID_VULKAN_VULKAN_PICKRAY
   io_eff(CID_VULKAN_VULKAN_PICKRAY,vulkan_pickray_run,0);
   io_eff(CID_VULKAN_VULKAN_PICKRECORD,vulkan_pickrecord_run,0);

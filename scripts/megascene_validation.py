@@ -80,6 +80,12 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
                  str(archive/"runtime/picking-reference-worker"), "--gpu", "off", "--threads", config["threads"]],
                 archive/"runtime", destination/"picking-reference.stdout.log", destination/"picking-reference.stderr.log", 30)
             value["picking_references"] = check_picking((destination/"picking-reference.stdout.log").read_text())
+        if config["case"] == "localized":
+            from megascene_edit_references import check as check_edits
+            run([str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"),
+                 str(archive/"runtime/edit-reference-worker"), "--gpu", "off", "--threads", config["threads"]],
+                archive/"runtime", destination/"edit-reference.stdout.log", destination/"edit-reference.stderr.log", 30)
+            value["edit_references"] = check_edits((destination/"edit-reference.stdout.log").read_text())
         summary, records = launch(config, archive, validation_manifest, loader, campaign=campaign, validation=True)
         summary["attempt_kind"] = "validation_replay"
         frozen = read_json((archive/"schedule.json").read_text())
@@ -98,6 +104,9 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
                         "source_ownership", "material_conservation", "finite_motion_bits", "drawable_coverage_and_winding",
                         "fresh_bend_native_transport", "native_mesh_slots_and_draw_ranges", "unculled_triangle_visibility",
                         "full_proxy_shadow_cache_transitions"])
+        if config["case"] == "localized":
+            value["edited_work"] = result.get("edited_work")
+            value["invariant_coverage"] += ["localized_exact_removal", "atomic_budget_rejection", "edit_history_and_intervals", "unchanged_geometry_caches", "pre_unsafe_edit_guards"]
         if config["case"] == "picking":
             from megascene_picking import audit as audit_picking
             value["picking"] = audit_picking(records, frozen)
@@ -126,6 +135,8 @@ def compare_attempt(config, archive, manifest, validation, summary, records):
         frozen = read_json((archive/"schedule.json").read_text())
         result = audit(records, frozen, validation["expected"], validation["actual_work"],
                        summary["schedule_completion"]["status"] == "pass")
+        if config["case"] == "localized":
+            require(result.get("edited_work") == validation.get("edited_work"), "post-edit work differs from validation")
         require(not result["synthetic"], "synthetic checkpoints cannot qualify a real attempt")
         diff = mismatch(validation["effective_render_identity"], render_identity(records), "effective_render_settings")
         if diff:

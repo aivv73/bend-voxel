@@ -58,6 +58,8 @@ typedef struct {
   uint64_t frame;
   uint32_t warmup, measured;
   const char* schedule_sha256;
+  const char* action_outcomes; // Canonical action history, including no-ops/rejections.
+  unsigned action_frame;
 } VoxelMegaState;
 
 typedef struct {
@@ -98,6 +100,12 @@ static u64 mega_frame,mega_previous_end;
 static u32 mega_warmup,mega_measured;
 static float mega_ground;
 #ifdef CID_VULKAN_VULKAN_MARK
+static u64 mega_edit_begin;
+static u32 mega_edit_action,mega_edit_removed,mega_edit_status;
+static int mega_edit_pending;
+static char mega_action_outcomes[4096];
+#endif
+#ifdef CID_VULKAN_VULKAN_MARK
 static void mega_record(const char* fields);
 static void mega_reference(const char* fields);
 static void mega_stage(const char* name,u64 begin,u64 end);
@@ -114,7 +122,8 @@ Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
   if (directory) {
     u64 rendered=mega_frame-1;
     int review=rendered==0 || rendered==(u64)mega_warmup+mega_measured ||
-      (rendered>mega_warmup && (rendered-mega_warmup-1)%300==60);
+      (getenv("MEGASCENE_LOCALIZED") ? rendered==(u64)mega_warmup+1 :
+       (rendered>mega_warmup && (rendered-mega_warmup-1)%300==60));
     if (!review) return f[0];
     if (snprintf(path,sizeof path,"%s/frame-%04llu.ppm",directory,(unsigned long long)rendered)>=(int)sizeof path)
       err_fail("capture path too long");
@@ -274,9 +283,9 @@ static VoxelMegaBox mega_tree(Env e,Term tree,VoxelMegaBox** boxes,u32* count,u6
 }
 static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   int validation=getenv("MEGASCENE_VALIDATE")!=NULL;
-  int review=getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
+  int review=!getenv("MEGASCENE_LOCALIZED") && getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
     (mega_frame-mega_warmup-1)%300==60;
-  if(!validation&&!review&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
+  if(!validation&&!review&&!mega_edit_pending&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
   u64 begin=voxel_vk_tick();
   VoxelMegaBody* raw=io_mem(calloc(frame->body_count,sizeof *raw));
   VoxelVkBody* actual=io_mem(calloc(frame->body_count,sizeof *actual));
@@ -301,6 +310,7 @@ static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   for(unsigned i=0;i<6;i++) state.world[i]=(u32)e.mem[st+1+i];
   state.aim_radius=voxel_vk_float(e.mem[al+3]); state.warmup=mega_warmup; state.measured=mega_measured;
   state.schedule_sha256=mega_env("MEGASCENE_SCHEDULE_SHA256");
+  state.action_outcomes=mega_action_outcomes; state.action_frame=mega_edit_pending;
   voxel_vk_load();
   typedef int (*Check)(const VoxelVkFrame*,const VoxelMegaState*,char*,size_t);
   Check check=(Check)dlsym(voxel_vk_library,"voxel_mega_checkpoint");
@@ -386,6 +396,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
     frame.evidence_frame=mega_frame; frame.gpu_evidence=1;
     if (anchored!=frame.body_count || moving || translated || (frame.aim_kind && !getenv("MEGASCENE_RAY_FILE")) || frame.night)
       err_fail("static Megascene state invariant failed");
+    if(!getenv("MEGASCENE_LOCALIZED")) {
     static u32 saved_state[14];
     u32 current_state[14];
     // Traversal may change only the camera; checkpoint comparison checks the
@@ -398,6 +409,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
     for (u32 i=0;i<frame.body_count;i++)
       if (voxel_vk_bodies[i].id!=i+1 || voxel_vk_bodies[i].revision!=0)
         err_fail("static owner identity changed");
+    }
     char record[1024];
     snprintf(record,sizeof record,
       "\"record_type\":\"static_state\",\"anchored\":\"%u\",\"moving\":\"%u\",\"translated\":\"%u\",\"aim_kind\":\"%u\","
@@ -574,6 +586,17 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
     u64 end=voxel_vk_tick();
     char record[512];
     const char* population=!mega_frame?"startup":mega_frame<=mega_warmup?"warmup":"ordinary";
+#ifdef CID_VULKAN_VULKAN_MARK
+    if(mega_edit_pending) {
+      population="edit";
+      if(end<mega_edit_begin) err_fail("edit clock reversed");
+      snprintf(record,sizeof record,
+        "\"record_type\":\"edit\",\"action\":\"%u\",\"accepted\":%s,\"removed_cells\":\"%u\",\"begin_ns\":\"%llu\",\"end_ns\":\"%llu\",\"duration_ns\":\"%llu\",\"status\":\"measured\",\"unit\":\"ns\",\"scope\":\"scripted_operation_to_frame_return\"",
+        mega_edit_action,mega_edit_status==1&&mega_edit_removed?"true":"false",mega_edit_removed,
+        (unsigned long long)mega_edit_begin,(unsigned long long)end,(unsigned long long)(end-mega_edit_begin));
+      mega_reference(record); mega_record(record); mega_edit_pending=0;
+    }
+#endif
     char ordinal[32]="null";
     if (mega_frame>mega_warmup) snprintf(ordinal,sizeof ordinal,"\"%llu\"",(unsigned long long)(mega_frame-mega_warmup-1));
     snprintf(record,sizeof record,
