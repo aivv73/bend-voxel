@@ -22,8 +22,10 @@ The [first cavity capture](cavity-first.png) and
 archived 1080p PPM captures at frames 1081 and 2281. The bridge spans the open
 cavity in both views; the lower floor, rim and sidewalls are individually
 visible. Codex reviewed all 14 captures and 41 named feature assessments,
-marking cavity depth and bridge correct and readable at both visits. This is an
-operator visual judgment, not a formal proof or a second user review. The raw
+marking cavity depth and bridge correct and readable at both visits. The user
+separately confirmed **Readable** for both linked 1080p cavity captures. The
+[confirmation record](user-confirmation.json) binds that response to the two
+raw capture hashes. This visual judgment is not a formal proof. The raw
 captures, input assessments, capture hashes and updated `review.json` remain in
 the attempt archive. State correctness, rendering correctness and visual quality
 all passed. The occupied-body shadow fit retained at least 232.99 texels of
@@ -34,7 +36,7 @@ ten-second minimum. This is not a benchmark pass or a qualified capacity
 endpoint. The campaign archive is
 `/home/aivv/megascene-issue53-v2/13f036f9-b271-432b-9e4a-d1126685e730/907efea6-31c1-4426-8b1f-9f580b58065e/bfb53a28-121f-4114-b573-3aaf0c244d62`.
 Earlier attempts stopped on stale resource monitoring and retain their
-incomplete evidence in the same campaign. The passing attempt's 56 evidence
+incomplete evidence in the same campaign. The passing attempt's 57 evidence
 hashes and all runtime artifacts were reverified after visual review.
 
 The camera change does not alter the renderer or canonical world state. Native
