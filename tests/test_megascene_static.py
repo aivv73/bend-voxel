@@ -180,18 +180,25 @@ class StaticVulkan(unittest.TestCase):
             self.assertEqual(result["completed_prefix"]["measured"],"2")
             self.assertEqual(result["schedule_completion"]["status"],"pass")
             self.assertEqual(result["interactive_pass"]["status"],"inconclusive")
+            self.assertEqual(result["supervision"]["allocation_ledger"]["live_bytes"],"0")
+            self.assertGreater(int(result["supervision"]["allocation_ledger"]["peak_bytes"]),0)
+            self.assertEqual(result["supervision"]["reference_records"],"4")
+            self.assertFalse(result["supervision"]["errors"])
+            self.assertTrue((retained/"resources.jsonl").exists())
             self.assertTrue((retained/"captures/opening.ppm").read_bytes().startswith(b"P6\n640 360\n255\n"))
             # Recover only archived runtime bytes at a different path, with no
             # live checkout library/shader dependency. No new compiler invocation.
             recovered = base/"recovered"
             shutil.copytree(retained/"runtime",recovered/"runtime")
             invocation = read_evidence(retained/"invocation.json")
-            replay_env = {k:v for k,v in os.environ.items() if not k.startswith(("VOXEL_","MEGASCENE_","VK_","LD_"))}
-            replay_env.update({k:v.replace(str(retained),str(recovered)) for k,v in invocation["environment"].items()})
-            replay_command = [v.replace(str(retained),str(recovered)) for v in invocation["command"]]
-            replay = subprocess.run(replay_command,cwd=recovered/"runtime",env=replay_env,capture_output=True,text=True,timeout=30)
-            self.assertEqual(replay.returncode,0,replay.stderr)
-            self.assertEqual(replay.stdout,(retained/"stdout.log").read_text())
+            from megascene_static import launch
+            from megascene_supervisor import Campaign
+            campaign = Campaign(archive)
+            loader = Path(invocation["command"][0]).name
+            replay_result, _ = launch(manifest["effective"], recovered, manifest, loader, campaign=campaign)
+            campaign.close(True)
+            self.assertEqual(replay_result["termination"]["cause"],"normal_exit",replay_result)
+            self.assertEqual((recovered/"stdout.log").read_text(),(retained/"stdout.log").read_text())
             records,errors = read_stream(recovered/"cpu.jsonl",manifest["attempt_id"])
             self.assertFalse(errors)
             self.assertEqual(len([r for r in records if r["record_type"] == "frame"]),4)

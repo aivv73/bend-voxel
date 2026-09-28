@@ -80,10 +80,12 @@ static u32 mega_warmup;
 static float mega_ground;
 #ifdef CID_VULKAN_VULKAN_MARK
 static void mega_record(const char* fields);
+static void mega_reference(const char* fields);
 static void mega_stage(const char* name,u64 begin,u64 end);
 static const char* mega_env(const char* name);
 #else
 static void mega_record(const char* fields) { (void)fields; }
+static void mega_reference(const char* fields) { (void)fields; }
 static void mega_stage(const char* name,u64 begin,u64 end) { (void)name; (void)begin; (void)end; }
 #endif
 #ifdef CID_VULKAN_VULKAN_CAPTURE
@@ -463,6 +465,7 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
       population,(unsigned long long)(mega_previous_end?mega_previous_end:mega_begin),
       (unsigned long long)end,ordinal,(unsigned long long)(end-(mega_previous_end?mega_previous_end:mega_begin)));
     // Frame identity zero is startup; subsequent identities index the frozen schedule.
+    mega_reference(record);
     mega_record(record); mega_previous_end=end; mega_frame++;
   }
   return result;

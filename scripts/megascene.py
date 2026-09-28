@@ -31,6 +31,8 @@ def parser():
     p = Parser(description=__doc__, allow_abbrev=False)
     p.add_argument("--output", required=True, help="new directory for the local evidence bundle")
     p.add_argument("--case", default="admission")
+    p.add_argument("--campaign", help="persistent campaign archive root; static defaults to --archive")
+    p.add_argument("--additional-allowance", help="explicit additional seconds for an existing interrupted/exhausted campaign")
     p.add_argument("--preset", choices=("small", "large"))
     p.add_argument("--side-m", help="fixed district side: 64 or 128")
     p.add_argument("--seed", default="45")
@@ -47,6 +49,11 @@ def parser():
 
 def configuration(args):
     require(args.case in ("admission", "static"), "only --case admission and static are implemented")
+    require(args.additional_allowance is None or args.campaign or args.archive, "additional allowance requires a campaign archive")
+    if args.additional_allowance is not None:
+        require(1 <= integer(args.additional_allowance) <= 86400, "additional allowance must be 1..86400 seconds")
+    if args.case == "static" and args.campaign:
+        require(Path(args.campaign).expanduser().resolve() == Path(args.archive or "").expanduser().resolve(), "static campaign must use its archive root")
     if args.case == "admission":
         require(not args.capture_opening and args.deadline is None, "capture/deadline require --case static")
         for name in ("diagnostic", "resolution", "profile", "schedule", "frames", "warmup", "archive", "calibration", "search"):
@@ -77,6 +84,11 @@ def snapshot(path, value):
         os.fsync(f.fileno())
     try:
         os.replace(temporary, path)
+        descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
     finally:
         temporary.unlink(missing_ok=True)
 
@@ -91,6 +103,10 @@ def run(command, cwd, stdout, stderr, timeout):
     environment = dict(os.environ)
     for name in ("LD_PRELOAD", "LD_LIBRARY_PATH", "LD_AUDIT"):
         environment.pop(name, None)
+    from megascene_supervisor import active_campaign
+    if active_campaign is not None:
+        require(active_campaign.remaining_ns() > 0, "campaign allowance exhausted")
+        timeout = min(timeout, active_campaign.remaining_ns()/1e9)
     with stdout.open("w") as out, stderr.open("w") as err:
         result = subprocess.run(command, cwd=cwd, stdout=out, stderr=err, env=environment,
                                 timeout=timeout, check=False)
@@ -234,6 +250,8 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     output = None
     created_output = False
+    campaign = None
+    completed = False
     manifest = {"schema": SCHEMA, "record_type": "manifest", "attempt_kind": "admission", "synthetic": False,
                 "attempt_id": str(uuid.uuid4()), "campaign_id": None, "series_id": None,
                 "utc_start": datetime.now(timezone.utc).isoformat(),
@@ -266,13 +284,20 @@ def main(argv=None):
         config = configuration(args)
         manifest["effective"] = config
         require(output is not None, "a new --output directory is required")
+        campaign_root = args.campaign or (args.archive if config["case"] == "static" else None)
+        if campaign_root:
+            import megascene_supervisor
+            campaign = megascene_supervisor.Campaign(Path(campaign_root).expanduser().resolve(), integer(args.additional_allowance) if args.additional_allowance else 0)
+            megascene_supervisor.active_campaign = campaign
+            manifest["campaign_id"] = campaign.value["campaign_id"]
         if config["case"] == "static":
             from megascene_static import execute as execute_static
-            execute_static(config, output, manifest)
+            execute_static(config, output, manifest, campaign)
             print(f"Unqualified static development observation: {output / 'summary.json'}")
         else:
             execute(config, output, manifest)
             print(f"Admitted {config['preset']} seed {config['seed']}: {output / 'inventory.json'}")
+        completed = True
         return 0
     except (ValueError, OSError, subprocess.SubprocessError, KeyError, TypeError) as error:
         reason = str(error)
@@ -289,7 +314,7 @@ def main(argv=None):
             elif created_output:
                 report = static_report([], [reason], manifest["effective"], 2, "prelaunch_failure", 0, manifest["attempt_id"])
                 report["numeric_validity"] = manifest["numeric_admission"]
-                report["termination"] = {"cause": "prelaunch_failure", "exit_code": None, "signal": None, "reason": reason}
+                report["termination"] = {"cause": "campaign_deadline" if campaign is not None and not campaign.remaining_ns() else "prelaunch_failure", "exit_code": None, "signal": None, "reason": reason}
                 if archived and archived.is_dir():
                     snapshot(archived/"manifest.json",manifest)
                     snapshot(archived/"summary.json",report)
@@ -313,6 +338,21 @@ def main(argv=None):
             snapshot(output / "summary.json", report)
         print(canonical(report).decode(), file=sys.stderr)
         return 2
+
+    finally:
+        if campaign is not None:
+            # Build, validation, controls and failed attempts all share the lease.
+            if manifest.get("effective", {}).get("case") == "admission":
+                campaign.attempt(manifest["attempt_id"], output/"summary.json", "admission_complete" if completed else "admission_failure")
+            elif not any(a['attempt_id'] == manifest['attempt_id'] for a in campaign.value['attempts']):
+                cause = "prelaunch_failure"
+                if (output/"summary.json").exists():
+                    import json
+                    cause = json.loads((output/"summary.json").read_text())["termination"]["cause"]
+                campaign.attempt(manifest["attempt_id"], output/"summary.json", cause)
+            campaign.close(completed)
+            import megascene_supervisor
+            megascene_supervisor.active_campaign = None
 
 
 if __name__ == "__main__":

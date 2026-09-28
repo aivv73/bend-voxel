@@ -21,8 +21,17 @@
 
 namespace {
 constexpr uint32_t DEFAULT_WIDTH=640, DEFAULT_HEIGHT=360;
+void record_vk_failure(VkResult result,const char* what);
 void check(VkResult result, const char* what) {
+  if(result!=VK_SUCCESS) record_vk_failure(result,what);
   if (result!=VK_SUCCESS) throw std::runtime_error(std::string(what)+": Vulkan "+std::to_string(result));
+}
+} // namespace
+#include "supervision.h"
+namespace {
+void record_vk_failure(VkResult result,const char* what) {
+  supervision::emit(supervision::allocations,supervision::allocation_seq,
+    "\"record_type\":\"vulkan_error\",\"operation\":\""+std::string(what)+"\",\"vk_result\":\""+std::to_string(result)+"\"");
 }
 struct Vec3 { float x,y,z; };
 Vec3 operator+(Vec3 a,Vec3 b) { return {a.x+b.x,a.y+b.y,a.z+b.z}; }
@@ -628,7 +637,7 @@ class Renderer {
     VkMemoryRequirements req{}; vkGetImageMemoryRequirements(device,depth,&req);
     VkMemoryAllocateInfo ai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
     ai.allocationSize=req.size; ai.memoryTypeIndex=memory_type(req.memoryTypeBits,VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    check(vkAllocateMemory(device,&ai,nullptr,&depth_memory),"allocate depth image");
+    check(supervision::allocate(device,physical,&ai,&depth_memory),"allocate depth image");
     check(vkBindImageMemory(device,depth,depth_memory,0),"bind depth image");
     VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
     vi.image=depth; vi.viewType=VK_IMAGE_VIEW_TYPE_2D; vi.format=VK_FORMAT_D32_SFLOAT;
@@ -652,7 +661,7 @@ class Renderer {
     VkMemoryAllocateInfo ai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
     ai.allocationSize=req.size;
     ai.memoryTypeIndex=memory_type(req.memoryTypeBits,VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    check(vkAllocateMemory(device,&ai,nullptr,&shadow_memory),"allocate sun shadow image");
+    check(supervision::allocate(device,physical,&ai,&shadow_memory),"allocate sun shadow image");
     check(vkBindImageMemory(device,shadow_image,shadow_memory,0),"bind sun shadow image");
     VkImageViewCreateInfo vi{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
     vi.image=shadow_image; vi.viewType=VK_IMAGE_VIEW_TYPE_2D; vi.format=VK_FORMAT_D32_SFLOAT;
@@ -702,7 +711,7 @@ class Renderer {
     depth_view=VK_NULL_HANDLE;
     if (depth) vkDestroyImage(device,depth,nullptr);
     depth=VK_NULL_HANDLE;
-    if (depth_memory) vkFreeMemory(device,depth_memory,nullptr);
+    if (depth_memory) supervision::free(device,depth_memory);
     depth_memory=VK_NULL_HANDLE;
     if (swapchain) vkDestroySwapchainKHR(device,swapchain,nullptr);
     swapchain=VK_NULL_HANDLE;
@@ -837,7 +846,7 @@ class Renderer {
     if (bytes<=capacity) return false;
     if (mapped) vkUnmapMemory(device,vertex_memory);
     if (vertices) vkDestroyBuffer(device,vertices,nullptr);
-    if (vertex_memory) vkFreeMemory(device,vertex_memory,nullptr);
+    if (vertex_memory) supervision::free(device,vertex_memory);
     capacity=std::max<VkDeviceSize>(bytes,capacity?capacity*2:1024*1024);
     VkBufferCreateInfo bi{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
     bi.size=capacity; bi.usage=VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -848,7 +857,7 @@ class Renderer {
     ai.allocationSize=req.size;
     ai.memoryTypeIndex=memory_type(req.memoryTypeBits,VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT|
       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    check(vkAllocateMemory(device,&ai,nullptr,&vertex_memory),"allocate vertex buffer");
+    check(supervision::allocate(device,physical,&ai,&vertex_memory),"allocate vertex buffer");
     check(vkBindBufferMemory(device,vertices,vertex_memory,0),"bind vertex buffer");
     check(vkMapMemory(device,vertex_memory,0,capacity,0,&mapped),"map vertex buffer");
     return true;
@@ -894,6 +903,7 @@ public:
       if (physical) break;
     }
     if (!physical) throw std::runtime_error("no Vulkan 1.3 graphics/present queue");
+    supervision::verify(physical);
     float priority=1;
     VkDeviceQueueCreateInfo qi{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO};
     qi.queueFamilyIndex=family; qi.queueCount=1; qi.pQueuePriorities=&priority;
@@ -935,11 +945,12 @@ public:
   }
   ~Renderer() {
     if (device) {
-      vkDeviceWaitIdle(device);
+      VkResult idle=vkDeviceWaitIdle(device);
+      if(idle!=VK_SUCCESS) record_vk_failure(idle,"device teardown wait");
       clear_swapchain();
       if (mapped) vkUnmapMemory(device,vertex_memory);
       if (vertices) vkDestroyBuffer(device,vertices,nullptr);
-      if (vertex_memory) vkFreeMemory(device,vertex_memory,nullptr);
+      if (vertex_memory) supervision::free(device,vertex_memory);
       if (acquired) vkDestroySemaphore(device,acquired,nullptr);
       if (fence) vkDestroyFence(device,fence,nullptr);
       if (pool) vkDestroyCommandPool(device,pool,nullptr);
@@ -949,7 +960,7 @@ public:
       if (shadow_sampler) vkDestroySampler(device,shadow_sampler,nullptr);
       if (shadow_view) vkDestroyImageView(device,shadow_view,nullptr);
       if (shadow_image) vkDestroyImage(device,shadow_image,nullptr);
-      if (shadow_memory) vkFreeMemory(device,shadow_memory,nullptr);
+      if (shadow_memory) supervision::free(device,shadow_memory);
       if (vs) vkDestroyShaderModule(device,vs,nullptr);
       if (fs) vkDestroyShaderModule(device,fs,nullptr);
       if (shadow_vs) vkDestroyShaderModule(device,shadow_vs,nullptr);
@@ -1227,3 +1238,18 @@ extern "C" int voxel_vk_render(void* display,unsigned long window,const VoxelVkF
   return voxel_vk_render_profile(display,window,frame?&legacy:nullptr,timings,error,error_cap);
 }
 extern "C" void voxel_vk_release(void) { renderer.reset(); }
+
+// The worker calls this before generation, so long pure computations cannot
+// suppress heap monitoring. A separate probe establishes preflight capability;
+// its usage is never attributed to the worker.
+extern "C" int voxel_mega_start(char* error,size_t cap) {
+  try { supervision::start(); return 1; }
+  catch(const std::exception& e) { std::snprintf(error,cap,"%s",e.what()); return 0; }
+}
+extern "C" int voxel_mega_probe(char* output,size_t cap) {
+  try {
+    supervision::setup();
+    std::string result="{"+supervision::sample()+"}";
+    std::snprintf(output,cap,"%s",result.c_str()); supervision::finish(); return 1;
+  } catch(const std::exception& e) { std::snprintf(output,cap,"%s",e.what()); supervision::finish(); return 0; }
+}

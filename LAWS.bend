@@ -56,8 +56,22 @@ law palette_length:
 #   Full geometry retains proxy bookkeeping, fixed ground and 2048^2 shadows.
 #   Archive actual runtime artifacts and inputs before invocation; preserve
 #   frame-return intervals, missing evidence and abnormal completed prefixes.
-#   See docs/megascene-static.md. Full replay/checkpoint, resource and calibration
+#   See docs/megascene-static.md. Full replay/checkpoint and calibration
 #   qualification remain future work: static observations cannot pass them.
+# - Supervision samples host/device/process-attributed heaps every 100 ms,
+#   stops on required monitoring failure or data older than one second, and
+#   enforces independent reserves and the earliest applicable deadline.
+# - Commit minimal reference records to bounded preallocated shared slots.
+#   Never reuse a slot or discard committed evidence after worker termination.
+#   Overflow, gaps, damaged required records or persistence failure invalidate
+#   completion; preserve raw bytes and the usable prefix.
+# - Vulkan allocation identities and exact ledger totals are distinct from
+#   process residency and driver-estimated heap budgets. An exit signal alone
+#   never establishes allocation exhaustion. Retain the known supervisor cause.
+# - Campaign validation/control/attempt time shares one persisted allowance;
+#   interruption/exhaustion requires an explicit addition, never a ticket reset.
+#   These native/OS rules require runtime/reference tests, not formal claims.
+#   See docs/megascene-supervision.md.
 
 # Stable material IDs are shared by the native bridge and generated assets.
 law material_ids:

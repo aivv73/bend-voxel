@@ -1,7 +1,7 @@
 """Bounded static Vulkan development observations through the public runner.
 
 This slice never qualifies a benchmark: full replay/checkpoint validation,
-resource supervision, GPU measurements and calibration are future capabilities.
+GPU measurements and calibration are future capabilities.
 """
 import hashlib
 import math
@@ -204,7 +204,7 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
               "termination": {"cause": cause, "exit_code": str(exit_code) if exit_code >= 0 else None,
                               "signal": str(-exit_code) if exit_code < 0 else None},
               "evidence_errors": problems,
-              "limitations": ["No full validation replay or canonical timed checkpoints.", "No resource supervision, GPU timing, allocation accounting or calibration.",
+              "limitations": ["No full validation replay or canonical timed checkpoints.", "No GPU timing or calibration; supervised resource evidence is retained separately.",
                               "CPU intervals include instrumentation; no physical display latency claim.", "Unsafe/native behavior is runtime evidence, never a formal proof."],
               "measurement_availability": measurement("measured", "CPU frame-effect boundaries", "completed frame prefix", "frames", str(len(prefix)))
                   if prefix else measurement("not_executed", "no frame returned", "attempt", "frames")}
@@ -244,10 +244,10 @@ def retained_copy(source, target):
                 os.fsync(stream.fileno())
 
 
-def execute(config, output, manifest):
+def execute(config, output, manifest, campaign):
     # Import common admission utilities only at execution to keep the CLI stable.
     from megascene import ROOT, artifact, provenance, run, snapshot
-    manifest.update(attempt_kind="development_observation", campaign_id=str(uuid.uuid4()), series_id=str(uuid.uuid4()))
+    manifest.update(attempt_kind="development_observation", campaign_id=campaign.value["campaign_id"], series_id=str(uuid.uuid4()))
     manifest["qualification"] = "unqualified_development_observation"
     manifest["extensions"]["phase"] = "static_build"
     owners = generate(config["preset"], int(config["seed"]))
@@ -268,7 +268,7 @@ def execute(config, output, manifest):
     runtime.mkdir()
     shutil.copytree(ROOT/"src", runtime/"src")
     (runtime/"build").mkdir()
-    for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py"):
+    for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_supervisor.py", "megascene_monitor.py"):
         shutil.copy2(ROOT/"scripts"/name, runtime/name)
     (runtime/"src/megascene_entry.bend").write_text(worker_program(owners,config,frozen))
     require(subprocess.check_output(["bend", "version"], text=True).strip() == "bend 2.0.32", "Megascene requires Bend 2.0.32")
@@ -311,6 +311,8 @@ def execute(config, output, manifest):
                           "range": "unsigned 64-bit nanoseconds; no U32 microsecond conversion", "scope": "launch/frame/stage CPU wall time"}
     manifest["capabilities"] = {name: measurement("not_executed", "later capability", name, unit) for name,unit in
                                  (("gpu", "ns"), ("resources", "bytes"), ("allocations", "bytes"), ("calibration", "ratio"), ("validation_replay", "frames"))}
+    for name in ("resources", "allocations"):
+        manifest["capabilities"][name] = measurement("not_ready", "required supervision checked before work; see supervision.json", name, "bytes")
     archive = Path(config["archive"])/manifest["campaign_id"]/manifest["series_id"]/manifest["attempt_id"]
     manifest["reproduction"] = {"archive": str(archive), "status": "preparing_archive",
                                 "scope": "actual application executable/native library/shaders/source/frozen inputs and linked libraries; host graphics stack required"}
@@ -324,9 +326,7 @@ def execute(config, output, manifest):
                              "shadow_fit": "runtime/src/vulkan/native.cpp:shadow_matrix", "fixed_step": frozen["fixed_step"],
                              "proxy_bookkeeping": "retained; visible full meshes forced", "ground_half_extent_m": str(int(config["side_m"])//2+8)}
     snapshot(output/"manifest.json",manifest)
-    snapshot(output/"campaign.json", {"schema": SCHEMA, "record_type": "campaign", "campaign_id": manifest["campaign_id"],
-        "utc_start": manifest["utc_start"], "initial_allowance_s": "7200", "additional_allowances": [], "archive": str(Path(config["archive"])),
-        "scope": "one bounded development observation plus optional opening capture; no search campaign", "policy": "docs/megascene-spec.md"})
+    snapshot(output/"campaign.json", campaign.value)
     snapshot(output/"series.json", {"schema": SCHEMA, "record_type": "series", "series_id": manifest["series_id"],
         "configuration": config, "schedule_sha256": artifact(output/"schedule.json", output)["sha256"]})
     retained_copy(output,archive)
@@ -334,7 +334,7 @@ def execute(config, output, manifest):
     snapshot(archive/"manifest.json",manifest)
     snapshot(output/"manifest.json",manifest)
     # Run directly from archived bytes. Raw committed records survive local cleanup.
-    report_value, records = launch(config,archive,manifest,loader)
+    report_value, records = launch(config,archive,manifest,loader,campaign=campaign)
     try:
         achieved = inventory((archive/"stdout.log").read_text(),owners,config,bounds)
         snapshot(archive/"inventory.json",achieved)
@@ -344,6 +344,13 @@ def execute(config, output, manifest):
     manifest["admission"] = report_value["initialization"]
     report_value["numeric_validity"] = manifest["numeric_admission"]
     manifest["effective_render_settings"] = report_value["effective_render_settings"]
+    supervised = report_value["supervision"]
+    for name in ("resources", "allocations"):
+        manifest["capabilities"][name] = measurement(
+            "measured" if supervised["termination"]["cause"] == "normal_exit" else "incomplete",
+            "see supervision.json and attributed raw streams", name,
+            "records", supervised["resource_samples" if name == "resources" else "allocation_records"]
+            if supervised["termination"]["cause"] == "normal_exit" else None)
     manifest["extensions"]["phase"] = "complete"
     snapshot(archive/"summary.json",report_value)
     capture_ok = True
@@ -357,7 +364,7 @@ def execute(config, output, manifest):
         capture_manifest["artifacts"] = [{**entry, "path": "../"+entry["path"]} for entry in manifest["artifacts"]]
         capture_manifest["parent_attempt_id"] = manifest["attempt_id"]
         snapshot(capture/"manifest.json",capture_manifest)
-        capture_report, _ = launch(config,archive,capture_manifest,loader,review=True)
+        capture_report, _ = launch(config,archive,capture_manifest,loader,review=True,campaign=campaign)
         snapshot(capture/"summary.json",capture_report)
         capture_ok = capture_report["schedule_completion"]["status"] == "pass" and (capture/"opening.ppm").exists()
         ppm = capture/"opening.ppm"
@@ -382,7 +389,7 @@ def execute(config, output, manifest):
             "static invocation did not complete; retained summary describes the prefix")
 
 
-def launch(config, archive, manifest, loader, review=False):
+def launch(config, archive, manifest, loader, review=False, campaign=None):
     from megascene import snapshot
     destination = archive/"captures" if review else archive
     env = {k:v for k,v in os.environ.items() if not k.startswith(("VOXEL_", "MEGASCENE_", "VK_", "LD_"))}
@@ -395,88 +402,22 @@ def launch(config, archive, manifest, loader, review=False):
         env["MEGASCENE_CAPTURE"] = str(destination/"opening.ppm")
     command = [str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"), str(archive/"runtime/worker"),
                "--gpu", "off", "--threads", config["threads"]]
-    invocation = {"schema": SCHEMA, "record_type": "invocation", "attempt_id": manifest["attempt_id"],
-        "command": command, "cwd": str(archive/"runtime"), "environment": {k:env[k] for k in env if k.startswith(("MEGASCENE_", "VOXEL_", "VK_"))},
-        "clock_id": "linux.CLOCK_MONOTONIC", "review_only": review}
-    snapshot(destination/"invocation.json", invocation)
-    cause = "normal_exit"
-    start = time.monotonic_ns()
-    with (destination/"stdout.log").open("w") as out, (destination/"stderr.log").open("w") as err:
-        start = time.monotonic_ns()
-        process = subprocess.Popen(command,cwd=archive/"runtime",env=env,stdout=out,stderr=err,start_new_session=True)
-        last_frame = None
-        offset, pending = 0, b""
-        loaded_objects = set()
-        try:
-            while process.poll() is None:
-                try:
-                    maps = Path(f"/proc/{process.pid}/maps").read_text()
-                    loaded_objects.update(line.split(None,5)[5] for line in maps.splitlines() if len(line.split(None,5)) == 6 and line.split(None,5)[5].startswith("/"))
-                except OSError:
-                    pass
-                stream_path = destination/"cpu.jsonl"
-                if stream_path.exists():
-                    with stream_path.open("rb") as stream:
-                        stream.seek(offset)
-                        pending += stream.read()
-                        offset = stream.tell()
-                    lines = pending.split(b"\n")
-                    pending = lines.pop()
-                    for line in lines:
-                        try:
-                            record = read_json(line.decode())
-                            if record.get("record_type") == "frame":
-                                last_frame = integer(record["end_ns"])
-                        except (ValueError, KeyError, UnicodeError, TypeError):
-                            pass # Full schema/prefix validation below, never qualify this data.
-                now = time.monotonic_ns()
-                if now-start >= int(config["deadline_s"])*1_000_000_000:
-                    cause = "case_deadline"
-                elif last_frame is None and now-start >= 120_000_000_000:
-                    cause = "startup_deadline"
-                elif last_frame is not None and now-last_frame >= 30_000_000_000:
-                    cause = "completion_watchdog"
-                if cause != "normal_exit":
-                    os.killpg(process.pid,signal.SIGKILL)
-                    break
-                time.sleep(.05)
-            process.wait()
-        except KeyboardInterrupt:
-            cause = "external_interruption"
-            os.killpg(process.pid,signal.SIGTERM)
-            try:
-                process.wait(timeout=3)
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid,signal.SIGKILL)
-                process.wait()
-        except BaseException:
-            if process.poll() is None:
-                os.killpg(process.pid,signal.SIGKILL)
-                process.wait()
-            raise
-    invocation["launch_ns"] = str(start)
-    invocation["process_end_ns"] = str(time.monotonic_ns())
-    invocation["loaded_object_scope"] = "sampled process maps; not a complete dynamic-loader trace; host graphics stack required"
-    invocation["loaded_objects"] = []
-    for name in sorted(loaded_objects):
-        path = Path(name)
-        if path.is_file():
-            invocation["loaded_objects"].append({"path": name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
-    snapshot(destination/"invocation.json",invocation)
-    records,problems = read_stream(destination/"cpu.jsonl",manifest["attempt_id"])
-    if cause == "normal_exit":
-        if any(r["record_type"] == "window_closed" for r in records):
-            cause = "external_interruption"
-        elif process.returncode:
-            cause = "unexplained_crash" if process.returncode < 0 else "worker_error"
-    error_text = (destination/"stderr.log").read_text(errors="replace")
-    if cause == "worker_error" and "unpaced Vulkan present mode unavailable" in error_text:
+    from megascene_supervisor import supervise
+    remaining = campaign.remaining_ns() if campaign is not None else 0
+    supervised = supervise(command, archive/"runtime", env, destination, manifest, config, remaining)
+    records, problems = read_stream(destination/"cpu.jsonl", manifest["attempt_id"])
+    problems += supervised["errors"]
+    termination = supervised["termination"]
+    code = int(termination["exit_code"]) if termination["exit_code"] is not None else -int(termination["signal"]) if termination["signal"] else 2
+    cause = termination["cause"]
+    if cause == "worker_error" and "unpaced Vulkan present mode unavailable" in (destination/"stderr.log").read_text(errors="replace"):
         cause = "unsupported_presentation"
-    elif cause == "worker_error" and re.search(r": Vulkan -4\b", error_text):
-        cause = "device_loss"
-    elif cause == "worker_error" and re.search(r": Vulkan -[12]\b", error_text):
-        cause = "allocation_error"
-    result = report(records,problems,config,process.returncode,cause,start,manifest["attempt_id"],review)
-    result["termination"]["reason"] = "process completed" if cause == "normal_exit" else "see stderr.log and committed CPU prefix; no capacity inference from exit status"
-    snapshot(destination/"summary.json",result)
-    return result,records
+        termination["cause"] = cause
+    result = report(records, problems, config, code, cause, int(supervised["launch_ns"]), manifest["attempt_id"], review)
+    result["termination"] = termination
+    result["supervision"] = supervised
+    result["reference_completed_prefix"] = {"frames": supervised["completed_frame_prefix"], "actions": supervised["completed_actions"]}
+    snapshot(destination/"summary.json", result)
+    if campaign is not None:
+        campaign.attempt(manifest["attempt_id"], destination/"summary.json", cause)
+    return result, records

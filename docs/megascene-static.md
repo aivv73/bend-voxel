@@ -9,8 +9,8 @@ Picking and edits are disabled; window input cannot move the camera or modify
 the world. Closing the window retains an incomplete prefix.
 
 These are **unqualified development observations**. Full validation replays,
-canonical timed checkpoints, resource supervision, allocation accounting,
-GPU timestamps, feature qualification and instrumentation calibration belong
+canonical timed checkpoints, GPU timestamps, feature qualification and
+instrumentation calibration belong
 to later slices of #47. None of their absent results is a pass. Completing the
 static schedule is independent of benchmark, capacity or interactive qualification.
 The existing default demo and all five Light Atelier benchmarks retain their
@@ -20,7 +20,10 @@ settings and report meanings.
 
 Use Linux/X11, a Vulkan 1.3 device, Python 3.10+, Bend 2.0.32, clang, g++,
 glslc, and the Vulkan/X11 development libraries. `vulkaninfo` supplies optional
-additional environment provenance. The command builds and archives its own
+additional environment provenance. Supervised runs also require NVIDIA NVML,
+`VK_EXT_memory_budget`, `VK_EXT_pci_bus_info`, and Linux libatomic. Missing
+required monitoring prevents launch; see [supervision](megascene-supervision.md).
+The command builds and archives its own
 actual runtime; a prior `make build` is unnecessary.
 
 ```sh
@@ -48,7 +51,8 @@ accepted 120/3600 configuration. Other schedules, profiles, diagnostics,
 calibration and search requests are rejected. Counts are never clamped.
 `--deadline` optionally lowers the 300-second case deadline. Basic bounds also
 stop startup after 120 seconds and a lack of completed frames after 30 seconds.
-These bounds do not implement the future resource-reserve supervisor.
+The [resource supervisor](megascene-supervision.md) enforces reserves, sample
+freshness, shared reference persistence, and the persistent campaign allowance.
 
 `--capture-opening` launches another fresh process from the same archived
 executable, world, profile and frozen opening view. It captures the startup
@@ -115,7 +119,7 @@ The archive contains the actual executable, generated C and Bend inputs,
 application native library, shaders, source/generator/reference code and linked
 ELF libraries/loader. Execution uses those archived application bytes and
 shader working directory. The host Vulkan ICD, driver/kernel and X11 session
-remain platform requirements; sampled loaded-object paths/hashes and actual
+remain platform requirements; sampled loaded-object paths and actual
 renderer device/driver properties document them. This is not a self-contained
 OS/graphics-driver image. Unrelated environment variables and secrets are not
 recorded. Inherited `VOXEL_*`, `MEGASCENE_*`, `VK_*` and loader overrides are
@@ -124,9 +128,11 @@ removed; configured settings and disabled implicit Vulkan layers are recorded.
 `invocation.json` stores the exact executable command, working directory,
 controlled environment and launch time. To recover at another directory, copy
 the complete runtime and frozen inputs, verify manifest SHA-256 identities, and
-relocate its absolute archive paths in that invocation. Use a new evidence
-path and attempt identity: the recorder refuses to overwrite an existing
-stream. The opt-in integration test exercises relocation without compiling or
+invoke the retained `megascene_static.launch` with the recovered runtime, a new
+evidence path/attempt identity and the existing `Campaign` allowance. The
+supervisor must create the shared recorder and release the worker preflight
+gate; directly running the executable no longer supplies that boundary.
+Recorders refuse to overwrite existing streams. The opt-in integration test exercises relocation without compiling or
 loading the checkout's application library/shaders.
 
 Failures retain stdout/stderr, actual exit code or signal, known deadline or

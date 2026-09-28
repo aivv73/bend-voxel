@@ -1,18 +1,61 @@
 #include <time.h>
+#include <dlfcn.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+// Shared append-only recorder ABI v1. Linux, lock-free aligned 64-bit atomics.
+// Slots are never reused: a killed producer cannot erase a committed record.
+#ifndef MEGASCENE_REFERENCE_H
+#define MEGASCENE_REFERENCE_H
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
+#if __GCC_ATOMIC_LLONG_LOCK_FREE != 2
+#error Megascene requires lock-free 64-bit shared atomics
+#endif
+#define MEGA_REFERENCE_MAGIC 0x4d45474152454631ull
+#define MEGA_REFERENCE_SLOT 1024
+struct MegaReferenceHeader { uint64_t magic, capacity, written, overflow; };
+struct MegaReferenceSlot { uint64_t committed; char payload[MEGA_REFERENCE_SLOT-8]; };
+static inline int mega_reference_commit(void* memory, const char* payload, size_t size) {
+  struct MegaReferenceHeader* h=(struct MegaReferenceHeader*)memory;
+  uint64_t n=__atomic_load_n(&h->written,__ATOMIC_RELAXED);
+  if (h->magic!=MEGA_REFERENCE_MAGIC || n>=h->capacity || size>=MEGA_REFERENCE_SLOT-8) {
+    __atomic_store_n(&h->overflow,1,__ATOMIC_RELEASE); return 0;
+  }
+  struct MegaReferenceSlot* slot=(struct MegaReferenceSlot*)(h+1)+n;
+  memcpy(slot->payload,payload,size); slot->payload[size]=0;
+  __atomic_store_n(&slot->committed,n+1,__ATOMIC_RELEASE);
+  __atomic_store_n(&h->written,n+1,__ATOMIC_RELEASE);
+  return 1;
+}
+#endif
+
+#ifndef MEGA_REFERENCE_ONLY
 static u64 mega_tick(void) {
   struct timespec now;
   if (clock_gettime(CLOCK_MONOTONIC,&now)) err_fail("monotonic clock failed");
   return (u64)now.tv_sec*1000000000ull+(u64)now.tv_nsec;
 }
-// Opt-in Megascene recorder. Each committed line is flushed directly into the
-// durable attempt directory. This is development evidence, not the later
-// shared calibration recorder or resource supervisor.
+// Detailed events stream directly to the archive. The minimal reference path
+// commits to supervisor-owned preallocated shared memory before ordinary logging.
 static FILE* mega_stream;
 static u64 mega_sequence, mega_frame, mega_previous_end;
 static u64 mega_stage_begin[32];
 static u32 mega_warmup, mega_measured;
 static float mega_ground;
 static const char *mega_attempt, *mega_campaign, *mega_series;
+static void* mega_reference_memory;
+static u64 mega_reference_sequence;
+static void mega_reference(const char* fields) {
+  char record[MEGA_REFERENCE_SLOT-8];
+  int n=snprintf(record,sizeof record,
+    "{\"schema\":\"megascene-evidence/1\",\"campaign_id\":\"%s\",\"series_id\":\"%s\",\"attempt_id\":\"%s\",\"sequence\":\"%llu\",\"clock_id\":\"linux.CLOCK_MONOTONIC\",\"time_ns\":\"%llu\",\"frame\":\"%llu\",%s}\n",
+    mega_campaign,mega_series,mega_attempt,(unsigned long long)mega_reference_sequence++,
+    (unsigned long long)mega_tick(),(unsigned long long)mega_frame,fields);
+  if(n<0 || n>=(int)sizeof record || !mega_reference_commit(mega_reference_memory,record,(size_t)n))
+    err_fail("Megascene reference overflow");
+}
 static void mega_record(const char* fields) {
   if (!mega_stream) return;
   u64 now=mega_tick();
@@ -61,6 +104,23 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
     if (mega_stream) err_fail("Megascene recorder already open");
     mega_stream=fopen(mega_env("MEGASCENE_EVENTS"),"wx");
     if (!mega_stream) err_fail("cannot create Megascene evidence stream");
+    int fd=open(mega_env("MEGASCENE_REFERENCE"),O_RDWR);
+    struct stat st;
+    if(fd<0 || fstat(fd,&st) || st.st_size<32) err_fail("shared reference recorder unavailable");
+    mega_reference_memory=mmap(NULL,(size_t)st.st_size,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
+    close(fd);
+    if(mega_reference_memory==MAP_FAILED) err_fail("shared reference mapping failed");
+    struct MegaReferenceHeader* h=(struct MegaReferenceHeader*)mega_reference_memory;
+    if(h->magic!=MEGA_REFERENCE_MAGIC || h->capacity!=(st.st_size-32)/MEGA_REFERENCE_SLOT || h->written || h->overflow)
+      err_fail("invalid shared reference capacity/state");
+    const char* lib=mega_env("VOXEL_VULKAN_LIBRARY");
+    void* native=dlopen(lib,RTLD_NOW|RTLD_LOCAL);
+    int (*start)(char*,size_t)=native?(int (*)(char*,size_t))dlsym(native,"voxel_mega_start"):NULL;
+    char error[512];
+    if(!start) err_fail("native supervision unavailable");
+    if(!start(error,sizeof error)) err_fail(error);
+    // Supervisor checks process-attributed heap samples before allowing work.
+    while(access(mega_env("MEGASCENE_GO"),F_OK)) usleep(1000);
     mega_record("\"record_type\":\"worker_start\"");
   } else if (code==15) {
     mega_record("\"record_type\":\"complete\"");
@@ -80,3 +140,5 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
 static void __attribute__((constructor)) mega_effects(void) {
   io_eff(CID_VULKAN_VULKAN_MARK,vulkan_mark_run,0);
 }
+
+#endif // MEGA_REFERENCE_ONLY
