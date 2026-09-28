@@ -1,0 +1,515 @@
+{
+  "scope": "Independent scratch integer-box/dense-cell model only; no production generator, global checkpoint, shader, Vulkan, visual or measured benchmark validation. History occupancy checks freeze moving-beam targets in their known local frame; they do not replay the entire moving world.",
+  "variants": [
+    {
+      "v": 0,
+      "inventory": {
+        "terrain": 2419968,
+        "building": 173568,
+        "span0": 4352,
+        "span1": 4352,
+        "span2": 4352,
+        "irregular": 8608
+      },
+      "cells": 2615200,
+      "source_boxes": 51
+    },
+    {
+      "v": 1,
+      "inventory": {
+        "terrain": 2426112,
+        "building": 177792,
+        "span0": 4360,
+        "span1": 4360,
+        "span2": 4360,
+        "irregular": 9104
+      },
+      "cells": 2626088,
+      "source_boxes": 51
+    },
+    {
+      "v": 2,
+      "inventory": {
+        "terrain": 2432256,
+        "building": 182016,
+        "span0": 4368,
+        "span1": 4368,
+        "span2": 4368,
+        "irregular": 8608
+      },
+      "cells": 2635984,
+      "source_boxes": 51
+    },
+    {
+      "v": 3,
+      "inventory": {
+        "terrain": 2438400,
+        "building": 186240,
+        "span0": 4376,
+        "span1": 4376,
+        "span2": 4376,
+        "irregular": 9104
+      },
+      "cells": 2646872,
+      "source_boxes": 51
+    }
+  ],
+  "support": [
+    {
+      "v": 0,
+      "removed_each": 16,
+      "after_first": [
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        },
+        {
+          "cells": 4216,
+          "anchored": true,
+          "bottom": 24
+        }
+      ],
+      "after_last": [
+        {
+          "cells": 4080,
+          "anchored": false,
+          "bottom": 42
+        },
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        },
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        }
+      ]
+    },
+    {
+      "v": 1,
+      "removed_each": 16,
+      "after_first": [
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        },
+        {
+          "cells": 4224,
+          "anchored": true,
+          "bottom": 24
+        }
+      ],
+      "after_last": [
+        {
+          "cells": 4088,
+          "anchored": false,
+          "bottom": 42
+        },
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        },
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        }
+      ]
+    },
+    {
+      "v": 2,
+      "removed_each": 16,
+      "after_first": [
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        },
+        {
+          "cells": 4232,
+          "anchored": true,
+          "bottom": 24
+        }
+      ],
+      "after_last": [
+        {
+          "cells": 4096,
+          "anchored": false,
+          "bottom": 42
+        },
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        },
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        }
+      ]
+    },
+    {
+      "v": 3,
+      "removed_each": 16,
+      "after_first": [
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        },
+        {
+          "cells": 4240,
+          "anchored": true,
+          "bottom": 24
+        }
+      ],
+      "after_last": [
+        {
+          "cells": 4104,
+          "anchored": false,
+          "bottom": 42
+        },
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        },
+        {
+          "cells": 120,
+          "anchored": true,
+          "bottom": 24
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "side_m": 64,
+      "seed": 45,
+      "accepted": 120,
+      "removed": 2440,
+      "by_action_min": [
+        16,
+        32,
+        16,
+        14,
+        16,
+        32,
+        28,
+        16,
+        16,
+        16
+      ],
+      "neighborhoods": 4
+    },
+    {
+      "side_m": 64,
+      "seed": 46,
+      "accepted": 120,
+      "removed": 2440,
+      "by_action_min": [
+        16,
+        32,
+        16,
+        14,
+        16,
+        32,
+        28,
+        16,
+        16,
+        16
+      ],
+      "neighborhoods": 4
+    },
+    {
+      "side_m": 128,
+      "seed": 45,
+      "accepted": 120,
+      "removed": 2472,
+      "by_action_min": [
+        16,
+        32,
+        16,
+        14,
+        16,
+        32,
+        32,
+        16,
+        16,
+        16
+      ],
+      "neighborhoods": 12
+    },
+    {
+      "side_m": 128,
+      "seed": 46,
+      "accepted": 120,
+      "removed": 2472,
+      "by_action_min": [
+        16,
+        32,
+        16,
+        14,
+        16,
+        32,
+        32,
+        16,
+        16,
+        16
+      ],
+      "neighborhoods": 12
+    }
+  ],
+  "motion": {
+    "31": [
+      {
+        "release_frame": 6,
+        "offset_m": -0.8515627384185791,
+        "lowest_world_y_m": 3.348437261581421,
+        "speed_m_s": -4.087501049041748
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.23026254773139954,
+        "lowest_world_y_m": 3.9697374522686006,
+        "speed_m_s": -2.125500440597534
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.001362500130198896,
+        "lowest_world_y_m": 4.198637499869801,
+        "speed_m_s": -0.16350001096725464
+      }
+    ],
+    "32": [
+      {
+        "release_frame": 6,
+        "offset_m": -0.9210502505302429,
+        "lowest_world_y_m": 3.2789497494697573,
+        "speed_m_s": -4.251000881195068
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.2670500576496124,
+        "lowest_world_y_m": 3.9329499423503878,
+        "speed_m_s": -2.2890005111694336
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.005450000520795584,
+        "lowest_world_y_m": 4.194549999479205,
+        "speed_m_s": -0.3270000219345093
+      }
+    ],
+    "33": [
+      {
+        "release_frame": 6,
+        "offset_m": -0.993262767791748,
+        "lowest_world_y_m": 3.206737232208252,
+        "speed_m_s": -4.414500713348389
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.3065625727176666,
+        "lowest_world_y_m": 3.8934374272823336,
+        "speed_m_s": -2.452500581741333
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.012262500822544098,
+        "lowest_world_y_m": 4.187737499177456,
+        "speed_m_s": -0.4905000329017639
+      }
+    ],
+    "34": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.0682002305984497,
+        "lowest_world_y_m": 3.1317997694015505,
+        "speed_m_s": -4.578000545501709
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.34880009293556213,
+        "lowest_world_y_m": 3.851199907064438,
+        "speed_m_s": -2.6160006523132324
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.021800002083182335,
+        "lowest_world_y_m": 4.178199997916818,
+        "speed_m_s": -0.6540000438690186
+      }
+    ],
+    "35": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.1458626985549927,
+        "lowest_world_y_m": 3.0541373014450075,
+        "speed_m_s": -4.741500377655029
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.39376261830329895,
+        "lowest_world_y_m": 3.8062373816967012,
+        "speed_m_s": -2.779500722885132
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.034062501043081284,
+        "lowest_world_y_m": 4.165937498956919,
+        "speed_m_s": -0.8175000548362732
+      }
+    ],
+    "36": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.226250171661377,
+        "lowest_world_y_m": 2.9737498283386232,
+        "speed_m_s": -4.90500020980835
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.4414501190185547,
+        "lowest_world_y_m": 3.7585498809814455,
+        "speed_m_s": -2.9430007934570312
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.04904999956488609,
+        "lowest_world_y_m": 4.150950000435114,
+        "speed_m_s": -0.9810000658035278
+      }
+    ],
+    "37": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.3093626499176025,
+        "lowest_world_y_m": 2.8906373500823976,
+        "speed_m_s": -5.06850004196167
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.49186262488365173,
+        "lowest_world_y_m": 3.7081373751163484,
+        "speed_m_s": -3.1065008640289307
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.06676250696182251,
+        "lowest_world_y_m": 4.133237493038178,
+        "speed_m_s": -1.1445000171661377
+      }
+    ],
+    "38": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.3952001333236694,
+        "lowest_world_y_m": 2.8047998666763307,
+        "speed_m_s": -5.23199987411499
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.5450001358985901,
+        "lowest_world_y_m": 3.65499986410141,
+        "speed_m_s": -3.27000093460083
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.08720000833272934,
+        "lowest_world_y_m": 4.112799991667271,
+        "speed_m_s": -1.308000087738037
+      }
+    ],
+    "39": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.4837626218795776,
+        "lowest_world_y_m": 2.7162373781204225,
+        "speed_m_s": -5.3954997062683105
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.6008626818656921,
+        "lowest_world_y_m": 3.599137318134308,
+        "speed_m_s": -3.4335010051727295
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.11036251485347748,
+        "lowest_world_y_m": 4.089637485146523,
+        "speed_m_s": -1.4715001583099365
+      }
+    ],
+    "40": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.5750501155853271,
+        "lowest_world_y_m": 2.624949884414673,
+        "speed_m_s": -5.558999538421631
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.6594502329826355,
+        "lowest_world_y_m": 3.5405497670173647,
+        "speed_m_s": -3.597001075744629
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.13625001907348633,
+        "lowest_world_y_m": 4.063749980926514,
+        "speed_m_s": -1.635000228881836
+      }
+    ],
+    "41": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.6690624952316284,
+        "lowest_world_y_m": 2.5309375047683718,
+        "speed_m_s": -5.722499370574951
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.7207627296447754,
+        "lowest_world_y_m": 3.479237270355225,
+        "speed_m_s": -3.7605011463165283
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.1648625284433365,
+        "lowest_world_y_m": 4.035137471556664,
+        "speed_m_s": -1.7985002994537354
+      }
+    ],
+    "42": [
+      {
+        "release_frame": 6,
+        "offset_m": -1.765799880027771,
+        "lowest_world_y_m": 2.434200119972229,
+        "speed_m_s": -5.8859992027282715
+      },
+      {
+        "release_frame": 18,
+        "offset_m": -0.7848002314567566,
+        "lowest_world_y_m": 3.4151997685432436,
+        "speed_m_s": -3.9240012168884277
+      },
+      {
+        "release_frame": 30,
+        "offset_m": -0.19620004296302795,
+        "lowest_world_y_m": 4.003799957036972,
+        "speed_m_s": -1.9620003700256348
+      }
+    ],
+    "offset12_speed12": [
+      -0.19620004296302795,
+      -1.9620003700256348
+    ]
+  }
+}
