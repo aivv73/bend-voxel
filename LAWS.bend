@@ -46,6 +46,10 @@ law palette_length:
 #   diagnostics with explicit limited equivalence evidence; they never qualify
 #   benchmark passes or endpoints. Qualifying runs retain all required checks.
 #   See docs/megascene-spec.md for the handoff and calibration protocol.
+# - Fixed-preset initial admission now checks disjointness, positive-face
+#   connectivity, anchors, arithmetic bounds and actual production inventory.
+#   See docs/megascene-admission.md. These are runtime/reference checks only;
+#   admission does not prove unsafe geometry or qualify a Vulkan attempt.
 
 # Stable material IDs are shared by the native bridge and generated assets.
 law material_ids:

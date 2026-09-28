@@ -37,6 +37,10 @@ make benchmark-faces
 
 The benchmarks need Python 3. See the [Light Atelier guide](docs/showcase.md) for Blender assets, the [benchmark guide](docs/stress-benchmark.md) for workloads and results, and the [renderer guide](docs/vulkan-renderer.md) for implementation details.
 
+The separate [Megascene admission command](docs/megascene-admission.md) constructs
+and inventories the fixed 64/128 m districts before rendering. Admission does
+not qualify a Vulkan benchmark attempt.
+
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),
 pinned in `lean-toolchain`; install it with `elan toolchain install leanprover/lean4:v4.34.0`.
