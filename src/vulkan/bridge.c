@@ -109,12 +109,23 @@ static void mega_stage(const char* name,u64 begin,u64 end) { (void)name; (void)b
 #endif
 #ifdef CID_VULKAN_VULKAN_CAPTURE
 Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
+  const char* directory=getenv("MEGASCENE_CAPTURE_DIR");
+  char path[4096];
+  if (directory) {
+    u64 rendered=mega_frame-1;
+    int review=rendered==0 || rendered==(u64)mega_warmup+mega_measured ||
+      (rendered>mega_warmup && (rendered-mega_warmup-1)%300==60);
+    if (!review) return f[0];
+    if (snprintf(path,sizeof path,"%s/frame-%04llu.ppm",directory,(unsigned long long)rendered)>=(int)sizeof path)
+      err_fail("capture path too long");
+  }
   BendWin* win=(BendWin*)(intptr_t)io_hand_v(f[0]);
+  if (directory) usleep(250000); // Validation captures are outside measured samples.
   XSync(win->dpy,False);
   unsigned width=win->img->width,height=win->img->height;
   XImage* image=XGetImage(win->dpy,win->win,0,0,width,height,AllPlanes,ZPixmap);
   if (!image) err_fail("opening capture unavailable");
-  FILE* file=fopen(mega_env("MEGASCENE_CAPTURE"),"wx");
+  FILE* file=fopen(directory?path:mega_env("MEGASCENE_CAPTURE"),"wx");
   if (!file) err_fail("cannot create opening capture");
   fprintf(file,"P6\n%u %u\n255\n",width,height);
   unsigned long masks[]={image->red_mask,image->green_mask,image->blue_mask};
@@ -129,7 +140,11 @@ Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
   }
   XDestroyImage(image);
   if (fclose(file)) err_fail("capture flush failed");
-  mega_record("\"record_type\":\"opening_capture\"");
+  if (directory) {
+    char record[128];
+    snprintf(record,sizeof record,"\"record_type\":\"capture\",\"rendered_frame\":\"%llu\"",(unsigned long long)(mega_frame-1));
+    mega_record(record);
+  } else mega_record("\"record_type\":\"opening_capture\"");
   return f[0];
 }
 
@@ -259,7 +274,9 @@ static VoxelMegaBox mega_tree(Env e,Term tree,VoxelMegaBox** boxes,u32* count,u6
 }
 static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   int validation=getenv("MEGASCENE_VALIDATE")!=NULL;
-  if(!validation&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
+  int review=getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
+    (mega_frame-mega_warmup-1)%300==60;
+  if(!validation&&!review&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
   u64 begin=voxel_vk_tick();
   VoxelMegaBody* raw=io_mem(calloc(frame->body_count,sizeof *raw));
   VoxelVkBody* actual=io_mem(calloc(frame->body_count,sizeof *actual));
@@ -371,13 +388,13 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
       err_fail("static Megascene state invariant failed");
     static u32 saved_state[14];
     u32 current_state[14];
-    // Scalar world state and all camera fields are bitwise frozen. Body IDs,
-    // revisions and zero offsets/velocities are checked separately below.
+    // Traversal may change only the camera; checkpoint comparison checks the
+    // exact view bits while this guard protects world scalar state.
     for (u32 i=0;i<6;i++) current_state[i]=(u32)e.mem[st+1+i];
-    for (u32 i=0;i<7;i++) current_state[6+i]=(u32)e.mem[st+7+i];
+    for (u32 i=0;i<7;i++) current_state[6+i]=getenv("MEGASCENE_CAMERA_FILE")?0:(u32)e.mem[st+7+i];
     current_state[13]=frame.body_count;
     if (!mega_frame) memcpy(saved_state,current_state,sizeof saved_state);
-    else if (memcmp(saved_state,current_state,sizeof saved_state)) err_fail("static world/camera changed");
+    else if (memcmp(saved_state,current_state,sizeof saved_state)) err_fail("Megascene unchanged world state changed");
     for (u32 i=0;i<frame.body_count;i++)
       if (voxel_vk_bodies[i].id!=i+1 || voxel_vk_bodies[i].revision!=0)
         err_fail("static owner identity changed");

@@ -202,7 +202,41 @@ static void expect_render_lod() {
   assert(cache.draws.size()==3);
 }
 
+static void expect_visibility_fixtures() {
+  auto check=[](std::array<float,3> lo,std::array<float,3> hi,float offset,
+                std::array<float,3> eye,bool expected) {
+    std::vector<VoxelVkVertex> vertices;
+    for(unsigned side=0;side<6;side++) {
+      unsigned axis=side/2,u=(axis+1)%3,v=(axis+2)%3;
+      auto corner=[&](unsigned a,unsigned b) {
+        std::array<float,3> p=lo;
+        p[axis]=side%2?hi[axis]:lo[axis];
+        p[u]=a?hi[u]:lo[u]; p[v]=b?hi[v]:lo[v];
+        return VoxelVkVertex{{p[0]*.1f,p[1]*.1f,p[2]*.1f},side,2};
+      };
+      for(auto [a,b]:std::initializer_list<std::pair<unsigned,unsigned>>{{0,0},{1,0},{1,1},{0,0},{1,1},{0,1}})
+        vertices.push_back(corner(a,b));
+    }
+    VoxelVkBody body{};
+    body.id=1; body.offset=offset;
+    std::copy(lo.begin(),lo.end(),body.lo);
+    std::copy(hi.begin(),hi.end(),body.hi);
+    body.vertex_count=vertices.size(); body.vertices=vertices.data();
+    VoxelVkFrame frame{}; frame.width=640; frame.height=360;
+    std::copy(eye.begin(),eye.end(),frame.eye);
+    bool reference=visibility_reference::body(body,frame);
+    assert(reference==expected);
+    if(reference) assert(visible(body,frame,ViewBasis(frame)));
+  };
+  check({8,-1,9},{12,1,12},0,{0,0,0},true); // Frustum side boundary.
+  check({-10,-10,-10},{10,10,10},0,{0,0,0},true); // Eye inside the owner.
+  check({-35,10,-30},{-25,20,-20},-.5f,{-3,1,-4},true); // Signed/translated.
+  check({-1,-1,0},{1,1,1},0,{0,0,0},true); // Near-plane intersection.
+  check({-1,-1,-20},{1,1,-10},0,{0,0,0},false);
+}
+
 int main() {
+  expect_visibility_fixtures();
   assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR,VK_PRESENT_MODE_IMMEDIATE_KHR})==VK_PRESENT_MODE_IMMEDIATE_KHR);
   assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR})==VK_PRESENT_MODE_MAILBOX_KHR);
   bool unsupported=false;

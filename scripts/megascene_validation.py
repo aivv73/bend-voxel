@@ -41,7 +41,7 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
     started = time.monotonic_ns()
     value = {"schema": SCHEMA, "record_type": "validation", "synthetic": False,
              "status": "fail", "attempt_id": None, "reused": False,
-             "scope": "complete declared static schedule; independent dense fixtures and sparse/runtime/native checks",
+             "scope": "complete declared "+config["case"]+" schedule; independent dense fixtures and sparse/runtime/native checks",
              "failures": [], "checked_frames": "0"}
     try:
         actual_identity = identity(manifest, archive, config)
@@ -92,7 +92,7 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
                         "source_ownership", "material_conservation", "finite_motion_bits", "drawable_coverage_and_winding",
                         "fresh_bend_native_transport", "native_mesh_slots_and_draw_ranges", "unculled_triangle_visibility",
                         "full_proxy_shadow_cache_transitions"])
-        summary["state_correctness"] = outcome(value["status"], "independent initial references and every-frame sparse checks", "complete declared static schedule", ["comparison.json"])
+        summary["state_correctness"] = outcome(value["status"], "independent initial references and every-frame sparse checks", "complete declared "+config["case"]+" schedule", ["comparison.json"])
         snapshot(destination/"summary.json", summary)
         # No artifact is permitted to change during validation.
         require(identity(manifest, archive, config) == actual_identity, "artifacts changed during validation")
@@ -126,10 +126,10 @@ def compare_attempt(config, archive, manifest, validation, summary, records):
     snapshot(archive/"comparison.json", result)
     summary["validation"] = {"path": "validation.json", "attempt_id": validation["attempt_id"],
                              "reused": validation["reused"], "duration_ns": validation.get("duration_ns")}
-    summary["state_correctness"] = outcome(result["status"], "exact required checkpoints agree with separately validated configuration" if result["status"] == "pass" else "static checkpoint/validation mismatch",
-        "complete declared static schedule", ["validation.json", "comparison.json", "cpu.jsonl"])
-    summary["rendering_correctness"] = outcome(result["status"], "drawable geometry, native cache and unculled visibility checks" if result["status"] == "pass" else "static geometry/native evidence incomplete or mismatched",
-        "static geometry/cache/visibility; visual quality remains separate", ["validation.json", "comparison.json"])
+    summary["state_correctness"] = outcome(result["status"], "exact required checkpoints agree with separately validated configuration" if result["status"] == "pass" else "checkpoint/validation mismatch",
+        "complete declared "+config["case"]+" schedule", ["validation.json", "comparison.json", "cpu.jsonl"])
+    summary["rendering_correctness"] = outcome(result["status"], "drawable geometry, native cache and unculled visibility checks" if result["status"] == "pass" else "geometry/native evidence incomplete or mismatched",
+        config["case"]+" geometry/cache/visibility; visual quality remains separate", ["validation.json", "comparison.json"])
     # Correctness never promotes calibration, visual quality, performance,
     # capacity qualification, or the parent feature's implementation acceptance.
     snapshot(archive/"summary.json", summary)

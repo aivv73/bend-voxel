@@ -51,11 +51,11 @@ def parser():
 
 
 def configuration(args):
-    require(args.case in ("admission", "static"), "only --case admission and static are implemented")
+    require(args.case in ("admission", "static", "traversal"), "only --case admission, static and traversal are implemented")
     require(args.additional_allowance is None or args.campaign or args.archive, "additional allowance requires a campaign archive")
     if args.additional_allowance is not None:
         require(1 <= integer(args.additional_allowance) <= 86400, "additional allowance must be 1..86400 seconds")
-    if args.case == "static" and args.campaign:
+    if args.case in ("static", "traversal") and args.campaign:
         require(Path(args.campaign).expanduser().resolve() == Path(args.archive or "").expanduser().resolve(), "static campaign must use its archive root")
     if args.case == "admission":
         require(not args.validation_only and args.validated is None and args.runtime_from is None, "validation options require --case static")
@@ -72,7 +72,7 @@ def configuration(args):
     require(side is None or side == (64 if preset == "small" else 128), "contradictory preset and side")
     config = {"case": args.case, "preset": preset, "side_m": str(64 if preset == "small" else 128),
             "seed": str(seed), "threads": str(threads), "fragment_budget": str(budget)}
-    if args.case == "static":
+    if args.case in ("static", "traversal"):
         from megascene_static import settings
         return settings(args, config)
     return config
@@ -288,16 +288,16 @@ def main(argv=None):
         config = configuration(args)
         manifest["effective"] = config
         require(output is not None, "a new --output directory is required")
-        campaign_root = args.campaign or (args.archive if config["case"] == "static" else None)
+        campaign_root = args.campaign or (args.archive if config["case"] in ("static", "traversal") else None)
         if campaign_root:
             import megascene_supervisor
             campaign = megascene_supervisor.Campaign(Path(campaign_root).expanduser().resolve(), integer(args.additional_allowance) if args.additional_allowance else 0)
             megascene_supervisor.active_campaign = campaign
             manifest["campaign_id"] = campaign.value["campaign_id"]
-        if config["case"] == "static":
+        if config["case"] in ("static", "traversal"):
             from megascene_static import execute as execute_static
             execute_static(config, output, manifest, campaign)
-            print(f"Unqualified static development observation: {output / 'summary.json'}")
+            print(f"Unqualified {config['case']} development observation: {output / 'summary.json'}")
         else:
             execute(config, output, manifest)
             print(f"Admitted {config['preset']} seed {config['seed']}: {output / 'inventory.json'}")
@@ -305,7 +305,7 @@ def main(argv=None):
         return 0
     except (ValueError, OSError, subprocess.SubprocessError, KeyError, TypeError, ImportError) as error:
         reason = str(error)
-        if isinstance(manifest.get("effective"), dict) and manifest["effective"]["case"] == "static":
+        if isinstance(manifest.get("effective"), dict) and manifest["effective"]["case"] in ("static", "traversal"):
             from megascene_static import report as static_report
             archive = manifest.get("reproduction", {}).get("archive")
             archived = Path(archive) if archive else None

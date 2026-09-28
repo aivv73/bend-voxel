@@ -24,3 +24,9 @@ def vulkan.mark(code: U32) -> IO(Unit):
 def vulkan.capture(window: Window) -> IO(Window):
   import "./vulkan/bridge.c"
   import "./vulkan/bridge.js"
+
+# The runner freezes every binary32 camera before either replay. The native
+# effect reads those bits by frame index; no libm interpolation runs in a worker.
+def vulkan.route(index: U32, width: U32, height: U32) -> IO(V.Camera):
+  import "./vulkan/record.c"
+  import "./vulkan/bridge.js"

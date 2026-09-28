@@ -46,6 +46,9 @@ opens the frozen district view and archives bounded, unqualified development
 observations and an optional opening capture. Its [supervisor](docs/megascene-supervision.md)
 enforces resource reserves and deadlines, retains interrupted evidence, and
 accounts for a persistent campaign allowance.
+The [primary traversal runner](docs/megascene-traversal.md) freezes the full
+camera route, checks moving-view visibility and cache reuse, and archives
+separate feature captures and review outcomes.
 
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),

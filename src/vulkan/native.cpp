@@ -1110,12 +1110,27 @@ public:
       std::fprintf(stderr,"vulkan shadow refresh bodies %u rebuilt %u\n",
         frame.body_count,geometry_cache.rebuilt);
     ShadowMatrix light=shadow_dirty?shadow_matrix(frame):saved_shadow;
+    float shadow_min_margin_texels=INFINITY;
     if(frame.record) {
       auto fresh=shadow_matrix(frame);
       if(std::memcmp(light.values,fresh.values,sizeof light.values))
         throw std::runtime_error("stale native shadow transform");
       for(float value:light.values) if(!std::isfinite(value))
         throw std::runtime_error("nonfinite native shadow transform");
+      for(uint32_t i=0;i<frame.body_count;i++) for(unsigned corner=0;corner<8;corner++) {
+        const auto& b=frame.bodies[i];
+        float x=(corner&1?b.hi[0]:b.lo[0])*.1f;
+        float y=(corner&2?b.hi[1]:b.lo[1])*.1f+b.offset;
+        float z=(corner&4?b.hi[2]:b.lo[2])*.1f;
+        float sx=light.values[0]*x+light.values[4]*y+light.values[8]*z+light.values[12];
+        float sy=light.values[1]*x+light.values[5]*y+light.values[9]*z+light.values[13];
+        float sz=light.values[2]*x+light.values[6]*y+light.values[10]*z+light.values[14];
+        if(!std::isfinite(sx)||!std::isfinite(sy)||!std::isfinite(sz)||
+           std::abs(sx)>1.0001f||std::abs(sy)>1.0001f||sz<-.0001f||sz>1.0001f)
+          throw std::runtime_error("occupied geometry outside sun shadow fit");
+        shadow_min_margin_texels=std::min(shadow_min_margin_texels,
+          std::min(1.f-std::abs(sx),1.f-std::abs(sy))*SHADOW_SIZE*.5f);
+      }
     }
     if (frame.record) {
       char record[1024];
@@ -1125,12 +1140,13 @@ public:
         "\"record_type\":\"render_work\",\"body_count\":\"%u\",\"visible_bodies\":\"%u\",\"full_meshes\":\"%zu\","
         "\"main_body_draws\":\"%zu\",\"proxy_draws\":\"%u\",\"proxy_groups\":\"%zu\",\"proxy_vertices\":\"%zu\","
         "\"mesh_rebuilt\":\"%u\",\"proxy_rebuilt\":\"%u\",\"uploaded_bytes\":\"%zu\","
-        "\"shadow_refresh\":%s,\"shadow_body_draws\":\"%zu\",\"shadow_extent_m\":[\"0x%08x\",\"0x%08x\"],\"shadow_texel_m\":[\"0x%08x\",\"0x%08x\"]",
+        "\"shadow_refresh\":%s,\"shadow_body_draws\":\"%zu\",\"shadow_extent_m\":[\"0x%08x\",\"0x%08x\"],\"shadow_texel_m\":[\"0x%08x\",\"0x%08x\"],\"shadow_fit_min_margin_texels\":\"0x%08x\"",
         frame.body_count,geometry_cache.visible_bodies,geometry_cache.meshes.size(),geometry_cache.draws.size(),
         geometry_cache.proxy_draws,geometry_cache.proxies.size(),geometry_cache.proxy_vertices,
         geometry_cache.rebuilt,geometry_cache.proxy_rebuilt,uploaded_vertices*sizeof(Vertex),
         shadow_dirty?"true":"false",shadow_dirty?geometry_cache.shadow_draws.size():0,
-        float_bits(2.f/sx),float_bits(2.f/sy),float_bits(2.f/(sx*SHADOW_SIZE)),float_bits(2.f/(sy*SHADOW_SIZE)));
+        float_bits(2.f/sx),float_bits(2.f/sy),float_bits(2.f/(sx*SHADOW_SIZE)),float_bits(2.f/(sy*SHADOW_SIZE)),
+        float_bits(shadow_min_margin_texels));
       frame.record(record);
     }
     check(vkResetCommandBuffer(command,0),"reset command buffer");

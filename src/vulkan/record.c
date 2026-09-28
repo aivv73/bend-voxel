@@ -86,6 +86,38 @@ static u32 mega_number(const char* name,u32 maximum) {
   if (*end || n>maximum || *value<'0' || *value>'9') err_fail("invalid Megascene numeric setting");
   return (u32)n;
 }
+
+#ifdef CID_VULKAN_VULKAN_ROUTE
+static u32* mega_route;
+static u32 mega_route_count;
+Term vulkan_route_run(Env e, Term* f, IoWork* work) {
+  io_sync();
+  if (!mega_stream) err_fail("route requested outside Megascene replay");
+  if (!mega_route) {
+    FILE* input=fopen(mega_env("MEGASCENE_CAMERA_FILE"),"rb");
+    if (!input || fseek(input,0,SEEK_END)) err_fail("frozen camera input unavailable");
+    long size=ftell(input);
+    mega_route_count=1+mega_warmup+mega_measured;
+    if (size!=(long)mega_route_count*20 || fseek(input,0,SEEK_SET)) err_fail("frozen camera count mismatch");
+    mega_route=io_mem(malloc((size_t)size));
+    if (fread(mega_route,1,(size_t)size,input)!=(size_t)size || fclose(input))
+      err_fail("incomplete frozen camera input");
+  }
+  u32 index=(u32)f[0];
+  if (index>=mega_route_count || index!=mega_frame) err_fail("frozen camera frame mismatch");
+  u32* words=mega_route+5*index;
+  for (u32 i=0;i<5;i++) {
+    float value;
+    memcpy(&value,words+i,4);
+    if (!isfinite(value)) err_fail("nonfinite frozen camera");
+  }
+  if (cid_arity(CID_RENDER_CAMERA)!=7) err_fail("Bend camera layout changed");
+  u64 camera=heap_alloc(e,cls_fit(7));
+  for (u32 i=0;i<5;i++) e.mem[camera+i]=words[i];
+  e.mem[camera+5]=f[1]; e.mem[camera+6]=f[2];
+  return term_ctr(CID_RENDER_CAMERA,camera);
+}
+#endif
 Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
   io_sync();
   u32 code=(u32)f[0];
@@ -139,6 +171,9 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
 
 static void __attribute__((constructor)) mega_effects(void) {
   io_eff(CID_VULKAN_VULKAN_MARK,vulkan_mark_run,0);
+#ifdef CID_VULKAN_VULKAN_ROUTE
+  io_eff(CID_VULKAN_VULKAN_ROUTE,vulkan_route_run,0);
+#endif
 }
 
 #endif // MEGA_REFERENCE_ONLY

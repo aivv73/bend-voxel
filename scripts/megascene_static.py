@@ -23,12 +23,16 @@ def settings(args, base):
     for name in ("diagnostic", "calibration", "search"):
         require(getattr(args, name) is None, f"--{name} is not implemented")
     require(args.profile in (None, "full"), "static supports only --profile full")
-    require(args.schedule in (None, "static-v1"), "only the frozen static-v1 schedule is supported")
+    schedule_id = "traversal-v1" if args.case == "traversal" else "static-v1"
+    require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
     require(args.resolution in (None, "640x360", "1920x1080"), "static resolutions are 640x360 and 1920x1080")
     warmup = integer(args.warmup if args.warmup is not None else "120")
     frames = integer(args.frames if args.frames is not None else "3600")
     deadline = integer(args.deadline if args.deadline is not None else "300")
     require(0 <= warmup <= 120 and 1 <= frames <= 3600, "development schedules require 0..120 warmup and 1..3600 measured frames")
+    if args.case == "traversal":
+        require((warmup, frames) == (120, 3600), "primary traversal requires the complete 120/3600 schedule")
+        require(not args.capture_opening, "traversal captures come from the separate validation replay")
     require(1 <= deadline <= 300, "development deadline must be 1..300 seconds")
     require(args.archive, "--case static requires an explicit durable --archive destination")
     archive = Path(args.archive).expanduser().resolve()
@@ -38,13 +42,16 @@ def settings(args, base):
             "archive and output must be separate directory trees")
     require(not (args.validated and args.runtime_from), "choose --validated or --runtime-from")
     require(not (args.validation_only and (args.validated or args.capture_opening)), "validation-only cannot reuse validation or request capture")
-    return {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": "static", "profile": "full", "resolution": args.resolution or "1920x1080",
-            "warmup": str(warmup), "frames": str(frames), "schedule": "static-v1", "deadline_s": str(deadline),
+    return {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": args.case, "profile": "full", "resolution": args.resolution or "1920x1080",
+            "warmup": str(warmup), "frames": str(frames), "schedule": schedule_id, "deadline_s": str(deadline),
             "capture_opening": args.capture_opening, "archive": str(archive),
             "schedule_kind": "accepted" if (warmup, frames) == (120, 3600) else "declared_development_prefix"}
 
 
 def schedule(config):
+    if config.get("case") == "traversal":
+        from megascene_traversal import schedule as traversal_schedule
+        return traversal_schedule(config)
     origin = -int(config["side_m"])*5
     eye = [(150+origin)/10, 12, (310+origin)/10]
     delta = [-74, -72, -234]
@@ -67,7 +74,8 @@ def schedule(config):
 
 def worker_program(owners, config, frozen):
     source = bend_program(owners, int(config["fragment_budget"])).split("def main()", 1)[0]
-    source = source.replace("import Base", "import Base\nimport ./src/megascene_static.bend as Static\nimport ./src/vulkan.bend as VK\nimport ./src/render.bend as V")
+    module = "megascene_traversal" if config["case"] == "traversal" else "megascene_static"
+    source = source.replace("import Base", f"import Base\nimport ./src/{module}.bend as Static\nimport ./src/vulkan.bend as VK\nimport ./src/render.bend as V")
     def real(value):
         decoded = struct.unpack(">f", bytes.fromhex(value[2:]))[0]
         return f"(0.0 - {abs(decoded)!r} : F32)" if decoded < 0 else repr(decoded)
@@ -86,7 +94,7 @@ def worker_program(owners, config, frozen):
     VK.vulkan.mark(5)
     M.emit(world)
     VK.vulkan.mark(6)
-    Static.start(world,{cam},{width},{height},{int(config['warmup'])+int(config['frames'])}n)
+    Static.start(world,{f'{width},{height}' if config['case'] == 'traversal' else f'{cam},{width},{height}'},{int(config['warmup'])+int(config['frames'])}n)
 '''
     return source.replace("./src/", "./")
 
@@ -108,7 +116,7 @@ def read_stream(path, attempt_id):
             now = u64(r["time_ns"])
             require(not records or now >= integer(records[-1]["time_ns"]), "nonmonotonic record time")
             integer(r["frame"])
-            require(r["record_type"] in {"worker_start", "stage", "static_state", "render_settings", "palette", "render_work", "frame", "opening_capture", "complete", "window_closed", "checkpoint", "static_audit", "native_audit", "presentation_status"}, "unknown evidence record type")
+            require(r["record_type"] in {"worker_start", "stage", "static_state", "render_settings", "palette", "render_work", "frame", "opening_capture", "capture", "complete", "window_closed", "checkpoint", "static_audit", "native_audit", "presentation_status"}, "unknown evidence record type")
             if r["record_type"] in ("frame", "stage"):
                 begin, end = u64(r["begin_ns"]), u64(r["end_ns"])
                 require(begin <= end <= now, "invalid interval boundaries")
@@ -139,7 +147,7 @@ def audit_observation(records, config, frames):
                     (width, height, "full", "2048", "0"), "effective rendering settings mismatch")
             require(actual["present_mode"] in ("immediate", "mailbox"), "unsupported presentation mode")
             require(str(actual["ground_half_extent_m"]) == str(int(config["side_m"])//2+8), "ground bounds mismatch")
-        opening = schedule(config)["opening"]
+        frozen = schedule(config)
         owners = 21 if config["preset"] == "small" else 81
         by_frame = {}
         for r in records:
@@ -150,7 +158,8 @@ def audit_observation(records, config, frames):
             work = [r for r in items if r["record_type"] == "render_work"]
             require(len(state) == len(work) == 1, "missing or duplicate state/render work")
             state, work = state[0], work[0]
-            require({k:state[k] for k in opening} == opening, "actual view differs from frozen opening")
+            camera = frozen["frames"][int(f["frame"])]["camera"]
+            require({k:state[k] for k in camera} == camera, "actual view differs from frozen camera schedule")
             require(state["anchored"] == str(owners) and all(state[k] == "0" for k in ("moving", "translated", "aim_kind", "fragments", "removed")), "static state mismatch")
             require(state["cells"] == ("10503360" if owners == 21 else "42096576") and state["next_id"] == str(owners+1) and state["budget"] == config["fragment_budget"], "static world inventory mismatch")
             require(work["body_count"] == work["full_meshes"] == str(owners), "full meshes missing")
@@ -292,6 +301,9 @@ def execute(config, output, manifest, campaign):
                                              "static fixed-preset initialization", ["inputs.json"])
     frozen = schedule(config)
     snapshot(output/"schedule.json", frozen)
+    if config["case"] == "traversal":
+        from megascene_traversal import camera_bytes
+        (output/"camera.bin").write_bytes(camera_bytes(frozen))
     snapshot(output/"inputs.json", {"schema": SCHEMA, "record_type": "generation_inputs", "configuration": {k: config[k] for k in ("preset", "seed", "side_m", "fragment_budget")},
                                     "owners": [{"id": str(i), "role": owner.role, "boxes": [b.record() for b in owner.boxes]} for i,owner in enumerate(owners,1)]})
     runtime = output/"runtime"
@@ -309,15 +321,15 @@ def execute(config, output, manifest, campaign):
         manifest["build"] = original["build"]
         manifest["source"] = original["source"]
         loader = Path(original["worker_command"][0]).name
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
-        manifest["artifacts"] += [artifact(output/name,output) for name in ("inputs.json", "schedule.json")]
+        manifest["artifacts"] += [artifact(output/name,output) for name in (("inputs.json", "schedule.json", "camera.bin") if config["case"] == "traversal" else ("inputs.json", "schedule.json"))]
     else:
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
@@ -350,7 +362,7 @@ def execute(config, output, manifest, campaign):
                 loader = path.name
         require(loader, "static runner requires Linux/glibc")
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
-        manifest["artifacts"] += [artifact(output/name,output) for name in ("inputs.json", "schedule.json")]
+        manifest["artifacts"] += [artifact(output/name,output) for name in (("inputs.json", "schedule.json", "camera.bin") if config["case"] == "traversal" else ("inputs.json", "schedule.json"))]
     manifest["runtime"]["graphics_requirements"] = "compatible host Vulkan ICD/driver, kernel and X11 session; application libraries are retained"
     if shutil.which("vulkaninfo"):
         driver = subprocess.run(["vulkaninfo", "--summary"], capture_output=True, text=True, timeout=20)
@@ -374,6 +386,8 @@ def execute(config, output, manifest, campaign):
                                       "MEGASCENE_WARMUP": config["warmup"], "MEGASCENE_MEASURED": config["frames"],
                                       "MEGASCENE_GROUND": str(int(config["side_m"])//2+8),
                                       "MEGASCENE_SCHEDULE_SHA256": artifact(output/"schedule.json",output)["sha256"]}
+    if config["case"] == "traversal":
+        manifest["worker_environment"]["MEGASCENE_CAMERA_FILE"] = "../camera.bin"
     manifest["constants"] = {"lighting": "baseline-8c3ffad-daylight", "shadow_size": ["2048","2048"], "shadow_filter": "nearest compare LEQUAL; 3x3 receiver-plane PCF; depth bias 0.00005",
                              "projection": "0.05m near, infinite far, baseline focal 400 at 360px", "picking": False, "edits": False,
                              "palette": "runtime/src/color.bend", "lighting_constants": "runtime/src/vulkan/scene.frag",
@@ -391,9 +405,15 @@ def execute(config, output, manifest, campaign):
     from megascene_validation import validate_or_reuse, compare_attempt
     validation = validate_or_reuse(config, archive, manifest, loader, campaign, source, owners, bounds)
     snapshot(archive/"validation.json", validation)
+    traversal_review = None
+    if config["case"] == "traversal":
+        from megascene_traversal import review_evidence
+        replay_records, _ = read_stream(archive/"validation"/"cpu.jsonl", validation["attempt_id"])
+        traversal_review = review_evidence(archive, frozen, replay_records)
+        snapshot(archive/"review.json", traversal_review)
     manifest["capabilities"]["validation_replay"] = measurement(
         "measured" if validation["status"] == "pass" else "incomplete",
-        "separate complete static replay; see validation.json", "static configuration", "frames",
+        "separate complete "+config["case"]+" replay; see validation.json", config["case"]+" configuration", "frames",
         validation.get("checked_frames") if validation["status"] == "pass" else None)
     if config["validation_only"] or validation["status"] != "pass":
         report_value = read_json((archive/"validation/summary.json").read_text()) if (archive/"validation/summary.json").exists() else report([],[],config,2,"prelaunch_failure",0,manifest["attempt_id"])
@@ -401,11 +421,17 @@ def execute(config, output, manifest, campaign):
         report_value["attempt_kind"] = "validation_only" if config["validation_only"] else "validation_failed"
         report_value["measurement_scope"] = "validation execution cost; excluded from performance populations"
         manifest["extensions"]["phase"] = "validation_complete" if validation["status"] == "pass" else "validation_failed"
-        report_value["state_correctness"] = outcome(validation["status"], "separate static validation", "complete declared static schedule", ["validation.json"])
+        report_value["state_correctness"] = outcome(validation["status"], "separate "+config["case"]+" validation", "complete declared "+config["case"]+" schedule", ["validation.json"])
+        if config["case"] == "traversal":
+            report_value["rendering_correctness"] = outcome(validation["status"], "native visibility, cache and shadow fit replay", "complete declared traversal schedule", ["validation.json", "validation/comparison.json"])
         report_value["validation"] = {"path": "validation.json", "status": validation["status"]}
+        if traversal_review is not None:
+            report_value["visual_quality"] = outcome("inconclusive", "named feature assessments remain pending" if not traversal_review["missing"] else "required traversal captures missing",
+                "primary traversal full-profile fidelity", ["review.json"])
+            report_value["review"] = {"path": "review.json", "status": traversal_review["status"]}
         snapshot(archive/"summary.json",report_value)
         finish_archive(archive,output,manifest)
-        require(validation["status"] == "pass", "static validation failed; see validation.json")
+        require(validation["status"] == "pass", config["case"]+" validation failed; see validation.json")
         return
     from megascene_checkpoints import applicable, identity
     from megascene_validation import verify_host_artifacts
@@ -413,6 +439,10 @@ def execute(config, output, manifest, campaign):
     verify_host_artifacts(validation)
     report_value, records = launch(config,archive,manifest,loader,campaign=campaign)
     compare_attempt(config,archive,manifest,validation,report_value,records)
+    if traversal_review is not None:
+        report_value["visual_quality"] = outcome("inconclusive", "named feature assessments remain pending" if not traversal_review["missing"] else "required traversal captures missing",
+            "primary traversal full-profile fidelity", ["review.json"])
+        report_value["review"] = {"path": "review.json", "status": traversal_review["status"]}
 
     try:
         achieved = inventory((archive/"stdout.log").read_text(),owners,config,bounds)
@@ -459,7 +489,7 @@ def execute(config, output, manifest, campaign):
     snapshot(archive/"summary.json",report_value)
     finish_archive(archive,output,manifest)
     require(capture_ok and report_value["schedule_completion"]["status"] == "pass" and report_value["initialization"]["status"] == "pass" and report_value["state_correctness"]["status"] == "pass",
-            "static invocation did not complete correctly; retained summary describes the prefix")
+            config["case"]+" invocation did not complete correctly; retained summary describes the prefix")
 
 
 def finish_archive(archive,output,manifest):
@@ -489,6 +519,10 @@ def launch(config, archive, manifest, loader, review=False, campaign=None, valid
                VK_LOADER_LAYERS_DISABLE="~all~")
     if validation:
         env["MEGASCENE_VALIDATE"] = "1"
+        if config["case"] == "traversal":
+            captures = destination/"captures"
+            captures.mkdir(exist_ok=True)
+            env["MEGASCENE_CAPTURE_DIR"] = str(captures)
     if review:
         env["MEGASCENE_CAPTURE"] = str(destination/"opening.ppm")
     command = [str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"), str(archive/"runtime/worker"),

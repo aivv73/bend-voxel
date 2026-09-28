@@ -41,6 +41,15 @@ law palette_length:
 #   incorrect state/rendering. These future gates are not yet implemented.
 # - Canonical decision: https://github.com/aivv73/bend-voxel/issues/44
 #   Runtime/reference checks must cover all unsafe/native-dependent properties.
+# - The primary traversal freezes every startup, warm-up and measured camera
+#   in binary32 before replay. Picking and edits remain disabled. Validation
+#   checks every view, and timing retains named route checkpoints and return
+#   geometry. Moving views cannot rebuild unchanged full meshes or shadow fit.
+# - Required route captures occur in the separate validation process. Assess
+#   each named feature's geometry and readability with a bound capture, shadow
+#   fit and texel evidence. Missing review cannot pass visual quality; wrong
+#   rendering and insufficient readability have different outcomes. These are
+#   runtime/reference/human checks, never unsafe-dependent formal proofs.
 # - Accepted #45 refinements: proxy thresholds retain render-pixel scaling.
 #   Calibration-off controls may omit intermediate timed checkpoints only as
 #   diagnostics with explicit limited equivalence evidence; they never qualify
