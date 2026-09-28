@@ -1,6 +1,7 @@
 #define EDIT_NUMERIC_ONLY
 #include "../src/edit/guard.c"
 #include <cassert>
+#include <initializer_list>
 #include <limits>
 int main() {
   float point[]={-16.f,2.4f,-16.f},local[3];
@@ -9,6 +10,9 @@ int main() {
   float lo[]={-320.f,8.f,-320.f},hi[]={320.f,24.f,320.f};
   assert(edit_box_valid(lo,hi));
   uint64_t leaves=0; assert(edit_subdivision(lo,hi,local,&leaves,0)); assert(leaves>1);
+  float positive_decimal[]={-24.4f,7.303800106f,22.8f};
+  assert(edit_point_valid(positive_decimal,-.196200043f,local));
+  assert(fabsf(local[2]-228.f)<.0001f);
   float moved[]={-.05f,9.05f,.05f}; assert(edit_point_valid(moved,-1,local));
   assert(local[1]==100.5f);
   float falling[]={-29.5f,4.f,-11.6f},span_lo[]={-304.f,42.f,-144.f},span_hi[]={-184.f,76.f,-136.f};
@@ -16,6 +20,11 @@ int main() {
   assert(edit_remote_valid(falling,-.196200043f,span_lo,span_hi,local));
   falling[2]=-14.f;
   assert(!edit_remote_valid(falling,-.196200043f,span_lo,span_hi,local));
+  float terrain_lo[]={-320.f,0.f,-320.f},terrain_hi[]={320.f,24.f,320.f};
+  float beam_cut[]={-24.4f,7.203800201f,-14.f};
+  assert(edit_remote_valid(beam_cut,0.f,terrain_lo,terrain_hi,local));
+  terrain_hi[1]=72.f;
+  assert(!edit_remote_valid(beam_cut,0.f,terrain_lo,terrain_hi,local));
   falling[2]=std::numeric_limits<float>::infinity();
   assert(!edit_remote_valid(falling,-.196200043f,span_lo,span_hi,local));
   for(float invalid:{std::numeric_limits<float>::infinity(),std::numeric_limits<float>::quiet_NaN(),1025.f,0.123f}) {

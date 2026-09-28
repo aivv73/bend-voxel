@@ -51,11 +51,19 @@ class NativeCheckpoints(unittest.TestCase):
 
     def test_reject_corruption_before_normalization(self):
         reasons={'overlap':'duplicate','missing':'coverage','duplicate':'duplicate','material':'coverage',
-                 'winding':'winding','tree':'tree node','stale_native':'stale native mesh'}
+                 'winding':'winding','tree':'tree node','stale_native':'stale native mesh',
+                 'cache_changed':'anchor mismatch'}
         for mode, reason in reasons.items():
             result=subprocess.run([str(self.binary),mode],capture_output=True,text=True)
             self.assertEqual(result.returncode,2,(mode,result.stdout,result.stderr))
             self.assertIn(reason,result.stderr,mode)
+
+    def test_unchanged_geometry_cache_preserves_checkpoint_bytes(self):
+        result=subprocess.run([str(self.binary),'cache_repeat'],capture_output=True,text=True,check=True)
+        first,second=(read_json(line) for line in result.stdout.splitlines())
+        self.assertEqual(first['sha256'],second['sha256'])
+        self.assertEqual(first['body_sha256'],second['body_sha256'])
+        self.assertEqual(first['work'],second['work'])
 
     def test_signed_zero_and_body_field_diagnostics(self):
         a,b=self.record()['payload'],self.record('negative_zero')['payload']

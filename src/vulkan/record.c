@@ -50,7 +50,7 @@ static u64 mega_reference_sequence;
 static u64 mega_edit_begin;
 static u32 mega_edit_action,mega_edit_removed,mega_edit_status;
 static int mega_edit_pending;
-static char mega_action_outcomes[4096]="[]";
+static char mega_action_outcomes[65536]="[]";
 static void mega_reference(const char* fields) {
   char record[MEGA_REFERENCE_SLOT-8];
   int n=snprintf(record,sizeof record,
