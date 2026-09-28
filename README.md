@@ -49,6 +49,8 @@ accounts for a persistent campaign allowance.
 The [primary traversal runner](docs/megascene-traversal.md) freezes the full
 camera route, checks moving-view visibility and cache reuse, and archives
 separate feature captures and review outcomes.
+The [bounded picking runner](docs/megascene-picking.md) replays the same route
+with declared hit/miss holds, independent target references and numeric guards.
 
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),

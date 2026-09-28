@@ -142,4 +142,45 @@ class SupervisorBoundary(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'additional-allowance'): Campaign(path)
 
 
+class BackgroundDurability(unittest.TestCase):
+    def test_blocked_flush_does_not_block_supervision_or_queue_unbounded_work(self):
+        import threading
+        from megascene_supervisor import Durability
+        entered, release = threading.Event(), threading.Event()
+        calls=[]
+        def flush():
+            calls.append(1)
+            entered.set()
+            if len(calls)==1:
+                if not release.wait(5): raise AssertionError('supervisor blocked behind flush')
+        writer=Durability(flush)
+        try:
+            writer.request()
+            self.assertTrue(entered.wait(1))
+            pending=writer.pending
+            for _ in range(100):
+                writer.request()
+                writer.check()
+                self.assertIs(writer.pending,pending)
+            self.assertEqual(len(calls),1)
+        finally:
+            release.set()
+            writer.finish()
+        self.assertEqual(len(calls),2)  # Final prefix always synchronized.
+
+    def test_background_and_final_flush_failures_propagate(self):
+        from megascene_supervisor import Durability
+        def fail(): raise OSError('injected durable write failure')
+        writer=Durability(fail)
+        writer.request()
+        writer.pending.exception(timeout=1)
+        with self.assertRaisesRegex(OSError,'injected durable write failure'):
+            writer.check()
+        with self.assertRaisesRegex(OSError,'injected durable write failure'):
+            writer.finish()
+        writer=Durability(fail)
+        with self.assertRaisesRegex(OSError,'injected durable write failure'):
+            writer.finish()
+
+
 if __name__ == '__main__': unittest.main()

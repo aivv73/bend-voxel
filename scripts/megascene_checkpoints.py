@@ -145,8 +145,11 @@ def checkpoint_catalog(frozen):
 def audit(records, frozen, expected, expected_work, complete, thorough=False):
     """Verify every replay frame, or the timed checkpoint catalog, with evidence."""
     failures, catalog = [], []
-    traversal = frozen["schedule_id"] in ("traversal-v1", "traversal-v2")
-    if traversal:
+    picking = frozen["schedule_id"] in ("picking-v1", "picking-v2")
+    traversal = picking or frozen["schedule_id"] in ("traversal-v1", "traversal-v2")
+    if picking:
+        from megascene_picking import expected_payload, audit as audit_picking
+    elif traversal:
         from megascene_traversal import expected_payload
     expected_hash = hashlib.sha256(checkpoint_bytes(expected)).hexdigest()
     body_hashes = {body["id"]: digest(body) for body in expected["bodies"]}
@@ -160,6 +163,8 @@ def audit(records, frozen, expected, expected_work, complete, thorough=False):
     frame_records = [r for r in records if r["record_type"] == "frame"]
     try:
         require(complete, "complete declared schedule unavailable")
+        if picking:
+            audit_picking(records, frozen)
         require([w["id"] for w in observed_work] == [w["id"] for w in expected_work], "work inventory ownership mismatch")
         for actual, reference in zip(observed_work, expected_work):
             require(actual.keys() == reference.keys(), "incomplete actual work inventory")
@@ -218,7 +223,7 @@ def audit(records, frozen, expected, expected_work, complete, thorough=False):
     except (ValueError, KeyError, TypeError) as exc:
         failures.append({"reason": str(exc)})
     return {"schema": SCHEMA, "record_type": "checkpoint_comparison", "synthetic": any(r.get("synthetic", False) for r in records), "status": "fail" if failures else "pass",
-            "scope": ("complete traversal replay" if traversal else "complete static replay") if thorough else "required checkpoints and native frames",
+            "scope": ("complete picking replay" if picking else "complete traversal replay" if traversal else "complete static replay") if thorough else "required checkpoints and native frames",
             "failures": failures, "checkpoints": catalog, "checked_frames": str(len(frames)),
             "native_frames": str(len(native)), "actual_work": observed_work,
             "representation_work": {"equal_to_validation": representation_diff is None, "first_difference": representation_diff}}

@@ -74,6 +74,12 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
             archive/"runtime", destination/"reference.stdout.log", destination/"reference.stderr.log", 30)
         value["independent_references"] = check((destination/"reference.stdout.log").read_text())
         value["independent_references"]["duration_ns"] = str(time.monotonic_ns()-reference_start)
+        if config["case"] == "picking":
+            from megascene_picking_references import check as check_picking
+            run([str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"),
+                 str(archive/"runtime/picking-reference-worker"), "--gpu", "off", "--threads", config["threads"]],
+                archive/"runtime", destination/"picking-reference.stdout.log", destination/"picking-reference.stderr.log", 30)
+            value["picking_references"] = check_picking((destination/"picking-reference.stdout.log").read_text())
         summary, records = launch(config, archive, validation_manifest, loader, campaign=campaign, validation=True)
         summary["attempt_kind"] = "validation_replay"
         frozen = read_json((archive/"schedule.json").read_text())
@@ -92,6 +98,11 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
                         "source_ownership", "material_conservation", "finite_motion_bits", "drawable_coverage_and_winding",
                         "fresh_bend_native_transport", "native_mesh_slots_and_draw_ranges", "unculled_triangle_visibility",
                         "full_proxy_shadow_cache_transitions"])
+        if config["case"] == "picking":
+            from megascene_picking import audit as audit_picking
+            value["picking"] = audit_picking(records, frozen)
+            summary["picking"] = value["picking"]
+            value["invariant_coverage"] += ["declared_picking_targets", "strict_256m_reach", "actual_ray_and_owner_material", "pre_unsafe_numeric_guards"]
         summary["state_correctness"] = outcome(value["status"], "independent initial references and every-frame sparse checks", "complete declared "+config["case"]+" schedule", ["comparison.json"])
         snapshot(destination/"summary.json", summary)
         # No artifact is permitted to change during validation.
@@ -123,6 +134,9 @@ def compare_attempt(config, archive, manifest, validation, summary, records):
     except (ValueError, KeyError, TypeError, OSError, subprocess.SubprocessError) as exc:
         failures.append({"reason": str(exc)})
         result = {"schema": SCHEMA, "record_type": "checkpoint_comparison", "status": "fail", "failures": failures}
+    if config["case"] == "picking" and result["status"] == "pass":
+        from megascene_picking import audit as audit_picking
+        summary["picking"] = audit_picking(records, frozen)
     snapshot(archive/"comparison.json", result)
     summary["validation"] = {"path": "validation.json", "attempt_id": validation["attempt_id"],
                              "reused": validation["reused"], "duration_ns": validation.get("duration_ns")}

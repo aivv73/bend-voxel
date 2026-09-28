@@ -3,6 +3,7 @@
 Linux shared recorder v1 uses acquire/release 64-bit atomics and non-reused slots.
 No resource, persistence, or synthetic result can qualify benchmark completion.
 """
+from concurrent.futures import ThreadPoolExecutor
 import ctypes
 import fcntl
 import json
@@ -124,6 +125,37 @@ class Stream:
             self.file.close()
 
 
+class Durability:
+    """One flush in flight; disk latency must not starve reserve supervision.
+
+    Records are appended unbuffered before submission and never removed. A
+    final barrier waits for the in-flight flush and synchronizes the last prefix.
+    Flush errors are propagated to the supervisor's persistence-failure path.
+    """
+    def __init__(self, sync):
+        self.sync = sync
+        self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="megascene-durability")
+        self.pending = None
+
+    def check(self):
+        if self.pending is not None and self.pending.done():
+            self.pending.result()
+            self.pending = None
+
+    def request(self):
+        self.check()
+        if self.pending is None:
+            self.pending = self.executor.submit(self.sync)
+
+    def finish(self):
+        try:
+            if self.pending is not None:
+                self.pending.result()
+            self.sync()
+        finally:
+            self.executor.shutdown(wait=True)
+
+
 class Reference:
     MAGIC = 0x4d45474152454631
     SLOT = 1024
@@ -148,7 +180,7 @@ class Reference:
         self.frame_count = 0
         self.frame_end = None
 
-    def drain(self):
+    def drain(self, sync=True):
         while self.count < self.capacity:
             offset = 32+self.count*self.SLOT
             commit = self.acquire(self.base+offset, 2)  # __ATOMIC_ACQUIRE
@@ -180,15 +212,17 @@ class Reference:
             if kind in ('action', 'edit'):
                 require(type(record['accepted']) is bool, 'missing scalar action acceptance')
                 integer(record['removed_cells'])
-            # Preserve original worker timestamp and sequence. Acknowledge only
-            # after persistence; a supervisor crash leaves the shared bytes intact.
+            # Preserve original worker timestamp and sequence. Slots are never
+            # reused; a supervisor crash leaves committed shared bytes intact.
+            # The supervisor's durability task flushes the append-only copy.
             self.stream.write(record)
             self.records.append(record)
             if kind == 'frame':
                 self.frame_count += 1
                 self.frame_end = record['end_ns']
             self.count += 1
-        self.stream.flush()
+        if sync:
+            self.stream.flush()
         require(not self.acquire(self.base+24, 2), 'reference recorder overflow')
         return self.records
 
@@ -361,11 +395,14 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
     known_worker_pids = {}
     observed_resources = []
     def persist_files():
-        for name in ('cpu.jsonl','heaps.jsonl','allocations.jsonl','stdout.log','stderr.log'):
+        for name in ('cpu.jsonl','heaps.jsonl','allocations.jsonl','stdout.log','stderr.log',
+                     'reference.jsonl','reference.shared','resources.jsonl'):
             path = destination/name
             if path.exists():
                 with path.open('rb') as f:
                     os.fsync(f.fileno())
+    durability = Durability(persist_files)
+    durability_complete = False
     def final_resource(sample):
         nonlocal cause, reason, last_host, last_heap
         observed_resources.append(sample)
@@ -464,7 +501,8 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
                     if heap.get('status') == 'measured' and (not stop or stop[0] != 'monitoring_failure'):
                         last_heap = integer(heap['sample_begin_ns'])
                 tails['cpu'].drain(); tails['allocations'].drain()
-                reference.drain()
+                reference.drain(sync=False)
+                durability.check()
                 completed = [r for r in reference.records if r['record_type'] in ('frame','edit')]
                 if completed:
                     last_frame = integer(completed[-1]['end_ns'])
@@ -488,7 +526,7 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
                     elif monitor.poll() is not None and process.poll() is None:
                         cause, reason = 'monitoring_failure', 'host/device monitor exited'
                 if now-last_sync >= POLICY['cadence_ns']:
-                    persist_files(); resources.flush(); last_sync = now
+                    durability.request(); last_sync = now
                     try:
                         maps = Path(f'/proc/{process.pid}/maps').read_text()
                         loaded_objects.update(line.split(None,5)[5] for line in maps.splitlines() if len(line.split(None,5)) == 6 and line.split(None,5)[5].startswith('/'))
@@ -529,7 +567,7 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
         for sig, handler in old_handlers.items():
             signal.signal(sig, handler)
         try:
-            reference.drain()
+            reference.drain(sync=False)
             reference.audit_tail()
         except (OSError, ValueError, KeyError, TypeError, UnicodeError) as exc:
             errors.append(str(exc))
@@ -543,8 +581,8 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
             if tail.error:
                 errors.append(tail.error)
         try:
-            persist_files()
-            resources.flush()
+            durability.finish()
+            durability_complete = True
         except OSError as exc:
             errors.append('required persistence failed: '+str(exc))
             if cause == 'normal_exit':
@@ -622,6 +660,7 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
                 'allocation_ledger':ledger_summary,
                 'synthetic':identity.get('synthetic',False),
                 'resource_cadence':resource_summary,
+                'durability':{'mode':'single_background_flush', 'final_barrier':durability_complete},
                 'observed_maxima':{field: str(max(int(r[field]) for r in valid_resources if field in r)) for field in ('rss_bytes',) if any(field in r for r in valid_resources)},
                 'observed_minima':{field: str(min(int(r[field]) for r in valid_resources if field in r)) for field in ('available_ram_bytes','device_free_bytes') if any(field in r for r in valid_resources)},
                 'heap_observed_maxima':{heap: str(max(int(h['usage_bytes']) for r in valid_resources for h in r.get('heaps',[]) if h['heap'] == heap))

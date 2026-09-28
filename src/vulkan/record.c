@@ -118,6 +118,43 @@ Term vulkan_route_run(Env e, Term* f, IoWork* work) {
   return term_ctr(CID_RENDER_CAMERA,camera);
 }
 #endif
+#ifdef CID_VULKAN_VULKAN_PICKRAY
+static u32* mega_rays;
+Term vulkan_pickray_run(Env e, Term* f, IoWork* work) {
+  io_sync();
+  if(!mega_stream || (u32)f[0]!=mega_frame) err_fail("picking frame mismatch");
+  u32 count=1+mega_warmup+mega_measured;
+  if(!mega_rays) {
+    FILE* input=fopen(mega_env("MEGASCENE_RAY_FILE"),"rb");
+    if(!input) err_fail("frozen rays unavailable");
+    mega_rays=io_mem(malloc((size_t)count*28));
+    if(fread(mega_rays,28,count,input)!=count || fgetc(input)!=EOF || fclose(input)) err_fail("frozen ray count mismatch");
+  }
+  if((u32)f[0]>=count || cid_arity(CID_MEGASCENE_PICKING_RAY)!=7) err_fail("picking input layout mismatch");
+  u32* words=mega_rays+7*(u32)f[0];
+  if(words[0]>1) err_fail("invalid picking enable bit");
+  u64 ray=heap_alloc(e,cls_fit(7));
+  for(u32 i=0;i<7;i++) e.mem[ray+i]=words[i];
+  return term_ctr(CID_MEGASCENE_PICKING_RAY,ray);
+}
+Term vulkan_pickrecord_run(Env e, Term* f, IoWork* work) {
+  io_sync();
+  if(!mega_stream || cid_arity(CID_RENDER_HIT)!=7) err_fail("picking recorder unavailable");
+  u64 ray=term_peek(e.mem,f[0]), hit=term_peek(e.mem,f[1]);
+  char ray_json[256],record[1024];
+  if(e.mem[ray]) snprintf(ray_json,sizeof ray_json,
+    "{\"origin_m\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"],\"direction\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"]}",
+    (u32)e.mem[ray+1],(u32)e.mem[ray+2],(u32)e.mem[ray+3],(u32)e.mem[ray+4],(u32)e.mem[ray+5],(u32)e.mem[ray+6]);
+  else strcpy(ray_json,"null");
+  snprintf(record,sizeof record,
+    "\"record_type\":\"picking\",\"enabled\":%s,\"ray\":%s,\"result\":{\"owner\":\"%u\",\"material\":\"%u\",\"kind\":\"%u\",\"distance_m\":\"0x%08x\",\"position_m\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"]}",
+    e.mem[ray]?"true":"false",ray_json,(u32)e.mem[hit+5],(u32)e.mem[hit+6],(u32)e.mem[hit+4],
+    (u32)e.mem[hit+3],(u32)e.mem[hit],(u32)e.mem[hit+1],(u32)e.mem[hit+2]);
+  mega_record(record);
+  term_sink(e,f[0]); term_sink(e,f[1]);
+  return term_pak(CID_UNIT,0);
+}
+#endif
 Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
   io_sync();
   u32 code=(u32)f[0];
@@ -171,6 +208,10 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
 
 static void __attribute__((constructor)) mega_effects(void) {
   io_eff(CID_VULKAN_VULKAN_MARK,vulkan_mark_run,0);
+#ifdef CID_VULKAN_VULKAN_PICKRAY
+  io_eff(CID_VULKAN_VULKAN_PICKRAY,vulkan_pickray_run,0);
+  io_eff(CID_VULKAN_VULKAN_PICKRECORD,vulkan_pickrecord_run,0);
+#endif
 #ifdef CID_VULKAN_VULKAN_ROUTE
   io_eff(CID_VULKAN_VULKAN_ROUTE,vulkan_route_run,0);
 #endif

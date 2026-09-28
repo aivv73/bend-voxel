@@ -49,6 +49,12 @@ law palette_length:
 #   eye (256,70,210), look (256,12,272) at both cavity visits. Preserve the
 #   exact traversal-v1 route and its failed readability review as evidence.
 #   Route versions cannot share validation or be silently interchanged.
+# - Issue #54 picking uses the same versioned camera route. Enable only the
+#   declared wall/interior/cavity/assembly/sky holds; preserve strict <256 m
+#   reach, target identity, explicit disabled samples and unchanged geometry.
+#   Admit frozen targets with an independent reference before timing; guard
+#   actual cell/metre/offset/distance operations before unsafe ray traversal.
+#   Picking, native caches and these guards require runtime/reference evidence.
 # - Required route captures occur in the separate validation process. Assess
 #   each named feature's geometry and readability with a bound capture, shadow
 #   fit and texel evidence. Missing review cannot pass visual quality; wrong

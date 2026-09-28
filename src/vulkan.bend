@@ -2,6 +2,7 @@ import Base
 import ./demo.bend as D
 import ./render.bend as V
 import ./math.bend as R
+import ./megascene_picking.bend as P
 
 # Linux native Vulkan backend. Bend computes the static palette at startup.
 def vulkan.colors(window: Window, colors: List<&2,R.Vec>) -> IO(Window):
@@ -28,5 +29,13 @@ def vulkan.capture(window: Window) -> IO(Window):
 # The runner freezes every binary32 camera before either replay. The native
 # effect reads those bits by frame index; no libm interpolation runs in a worker.
 def vulkan.route(index: U32, width: U32, height: U32) -> IO(V.Camera):
+  import "./vulkan/record.c"
+  import "./vulkan/bridge.js"
+
+# Frozen picking input and actual identified result, including disabled samples.
+def vulkan.pickray(index: U32) -> IO(P.Ray):
+  import "./vulkan/record.c"
+  import "./vulkan/bridge.js"
+def vulkan.pickrecord(ray: P.Ray, hit: V.Hit) -> IO(Unit):
   import "./vulkan/record.c"
   import "./vulkan/bridge.js"

@@ -384,7 +384,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
   if (mega_stream) {
     frame.full_geometry=1; frame.ground_half_extent=mega_ground; frame.record=mega_record;
     frame.evidence_frame=mega_frame; frame.gpu_evidence=1;
-    if (anchored!=frame.body_count || moving || translated || frame.aim_kind || frame.night)
+    if (anchored!=frame.body_count || moving || translated || (frame.aim_kind && !getenv("MEGASCENE_RAY_FILE")) || frame.night)
       err_fail("static Megascene state invariant failed");
     static u32 saved_state[14];
     u32 current_state[14];

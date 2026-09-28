@@ -151,3 +151,15 @@ property is represented as formally proven.
 
 See the [retained verification](validation/megascene-supervision/README.md) for
 the complete static invocation, injected outcomes and regression logs.
+
+## Persistence during complete picking replays
+
+Issue #54's complete replay exposed synchronous `fsync` stalls that delayed
+otherwise timely host and heap samples. The supervisor now performs durability
+flushes on one I/O worker with at most one flush in flight. The normal 100 ms
+request cadence, unbuffered append-only writes, non-reused committed slots and
+resource freshness/reserve/deadline checks remain. A flush failure propagates
+as a persistence failure; finalization waits for outstanding I/O and flushes
+the final prefix before accepting the evidence. `supervision.json` records
+`durability.mode` and whether the final barrier completed. Blocked-flush and
+failed-flush fixtures cover this runtime boundary independently of picking.

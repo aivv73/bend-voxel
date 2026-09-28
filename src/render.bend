@@ -9,6 +9,13 @@ type Camera is Data:
 type Aim is Data:
   Aim{point: R.Vec, distance: F32, kind: U32}
 
+# Picking retains the winning leaf's identity without changing Aim or tie order.
+type Hit is Data:
+  Hit{aim: Aim, owner: U32, material: U32}
+def hit.aim(h: Hit) -> Aim:
+  Hit{a,_,_} = h
+  a
+
 def camera.size(width: U32, height: U32) -> Camera:
   Camera{R.Vec{9.0, 11.0, 25.0}, (0.0 - 2.8084 : F32), (0.0 - 0.30 : F32),width,height}
 def camera() -> Camera:
@@ -58,39 +65,51 @@ def aim.choose(on: Bool, p: R.Vec, t: F32, kind: U32, old: Aim) -> Aim:
   match on:
     case True{}: Aim{p,t,kind}
     case False{}: old
-def ray.leaf(r: Interval, material: U32, +o: R.Vec, +d: R.Vec, +best: Aim) -> Aim:
+def hit.choose(on: Bool, p: R.Vec, t: F32, kind: U32, owner: U32, material: U32, old: Hit) -> Hit:
+  match on:
+    case True{}: Hit{Aim{p,t,kind},owner,material}
+    case False{}: old
+def hit.leaf(r: Interval, +material: U32, owner: U32, +o: R.Vec, +d: R.Vec, +best: Hit) -> Hit:
   Interval{+near,far} = r
-  Aim{_,limit,_} = best
+  Hit{Aim{_,limit,_},_,_} = best
   +t = R.pick((near >= 0.0 : F32),near,far)
-  aim.choose(((t >= 0.0) && (t < limit) : F32),R.Vec.add(o,R.Vec.scale(d,t)),t,
-    R.word(M.is_anchor(material),2,1),best)
+  hit.choose(((t >= 0.0) && (t < limit) : F32),R.Vec.add(o,R.Vec.scale(d,t)),t,
+    R.word(M.is_anchor(material),2,1),owner,material,best)
 @unsafe
-def ray.tree.go(on: Bool, t: S.Tree, +offset: F32, +o: R.Vec, +d: R.Vec, best: Aim) -> Aim:
+def hit.tree.go(on: Bool, t: S.Tree, +owner: U32, +offset: F32, +o: R.Vec, +d: R.Vec, best: Hit) -> Hit:
   match on t:
     case False{} _: best
     case True{} S.Empty{}: best
     case True{} S.Leaf{+b}:
       S.Box{_,_,m} = b
-      ray.leaf(ray.box(b,o,d,offset),m,o,d,best)
+      hit.leaf(ray.box(b,o,d,offset),m,owner,o,d,best)
     case True{} S.Branch{_,a,b}:
-      ray.tree(b,offset,o,d,ray.tree(a,offset,o,d,best))
+      hit.tree(b,owner,offset,o,d,hit.tree(a,owner,offset,o,d,best))
 @unsafe
-def ray.tree(+t: S.Tree, +offset: F32, +o: R.Vec, +d: R.Vec, +best: Aim) -> Aim:
-  ray.tree.go(ray.possible(ray.box(S.bounds(t),o,d,offset),best),t,offset,o,d,best)
-def ray.bodies(bs: List<&2,W.Body>, +o: R.Vec, +d: R.Vec, best: Aim) -> Aim:
+def hit.tree(+t: S.Tree, +owner: U32, +offset: F32, +o: R.Vec, +d: R.Vec, +best: Hit) -> Hit:
+  hit.tree.go(ray.possible(ray.box(S.bounds(t),o,d,offset),hit.aim(best)),t,owner,offset,o,d,best)
+def hit.bodies(bs: List<&2,W.Body>, +o: R.Vec, +d: R.Vec, best: Hit) -> Hit:
   match bs:
     case Nil{}: best
-    case W.Body{_,_,offset,_,_,t,_,_} <> rest:
-      ray.bodies(rest,o,d,ray.tree(t,offset,o,d,best))
-def ray.start(bs: List<&2,W.Body>, +o: R.Vec, +d: R.Vec) -> Aim:
+    case W.Body{id,_,offset,_,_,t,_,_} <> rest:
+      hit.bodies(rest,o,d,hit.tree(t,id,offset,o,d,best))
+def hit.start(bs: List<&2,W.Body>, +o: R.Vec, +d: R.Vec) -> Hit:
   R.Vec{_,y,_} = o
   R.Vec{_,+dy,_} = d
   +t = (0.0 - y / R.pick((F32.abs(dy) > 0.000001 : F32),dy,0.000001) : F32)
-  ray.bodies(bs,o,d,aim.choose(((dy < 0.0) && (t < 256.0) && (t >= 0.0) : F32),
-    R.Vec.add(o,R.Vec.scale(d,t)),t,3,Aim{R.Vec{0.0,0.0,0.0},256.0,0}))
-def ray.cam(c: R.Cam, bs: List<&2,W.Body>, mx: F32, my: F32) -> Aim:
-  R.Cam{eye,right,up,fwd,+focal,+cx,+cy,_,_,_} = c
-  ray.start(bs,eye,R.Vec.unit(R.Vec.add(fwd,R.Vec.add(R.Vec.scale(right,((mx - cx) / focal : F32)),R.Vec.scale(up,((cy - my) / focal : F32))))))
+  hit.bodies(bs,o,d,Hit{aim.choose(((dy < 0.0) && (t < 256.0) && (t >= 0.0) : F32),
+    R.Vec.add(o,R.Vec.scale(d,t)),t,3,Aim{R.Vec{0.0,0.0,0.0},256.0,0}),0,0})
+# Existing interactive/public entry points use the same identified traversal.
+def ray.tree(t: S.Tree, offset: F32, o: R.Vec, d: R.Vec, best: Aim) -> Aim:
+  hit.aim(hit.tree(t,0,offset,o,d,Hit{best,0,0}))
+def ray.start(bs: List<&2,W.Body>, o: R.Vec, d: R.Vec) -> Aim:
+  hit.aim(hit.start(bs,o,d))
+def ray.direction(c: R.Cam, mx: F32, my: F32) -> R.Vec:
+  R.Cam{_,right,up,fwd,+focal,+cx,+cy,_,_,_} = c
+  R.Vec.unit(R.Vec.add(fwd,R.Vec.add(R.Vec.scale(right,((mx - cx) / focal : F32)),R.Vec.scale(up,((cy - my) / focal : F32)))))
+def ray.cam(+c: R.Cam, bs: List<&2,W.Body>, mx: F32, my: F32) -> Aim:
+  R.Cam{eye,_,_,_,_,_,_,_,_,_} = c
+  ray.start(bs,eye,ray.direction(c,mx,my))
 def aim(active: Bool, bs: List<&2,W.Body>, c: Camera, mx: U32, my: U32) -> Aim:
   match active:
     case True{}: ray.cam(cam(c),bs,U32.to_f32(mx),U32.to_f32(my))
