@@ -27,3 +27,11 @@ def center(ray: Ray, +camera: V.Camera) -> Ray:
   Ray{active,_,_} = ray
   V.Camera{eye,_,_,+width,+height} = camera
   Ray{active,eye,V.ray.direction(V.cam(camera),(U32.to_f32(width) * 0.5 : F32),(U32.to_f32(height) * 0.5 : F32))}
+
+# The proxy reference's reachable aimed-at hold uses a frozen pointer ray
+# whose direction differs from the camera-center miss. The runner admits the
+# source-face hit, and the runtime guard checks its actual numeric operations.
+def scripted(ray: Ray, camera: V.Camera) -> Ray:
+  Ray{active,_,direction} = ray
+  V.Camera{eye,_,_,_,_} = camera
+  Ray{active,eye,direction}

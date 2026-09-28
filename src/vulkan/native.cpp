@@ -129,7 +129,7 @@ void add_hud(Geometry& g,const VoxelVkFrame& frame) {
     if (!end) break;
     hud=end+1;
   }
-  if (!frame.full_geometry) hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,
+  if (!frame.full_geometry && !frame.record) hud_text(g,float(width)-63.f*scale,20.f*scale,"RESET",5,
     palette_color(frame,HUD_RESET),scale);
 }
 Vec3 vector(const float* p) { return {p[0],p[1],p[2]}; }
@@ -428,7 +428,7 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
   cache.proxy_rebuilt=cache.proxy_draws=cache.proxied_bodies=cache.visible_bodies=0;
   cache.proxy_vertices=0;
   if (!cache.scene_vertices) {
-    float h=frame.full_geometry ? frame.ground_half_extent : 512.f;
+    float h=frame.record ? frame.ground_half_extent : frame.full_geometry ? frame.ground_half_extent : 512.f;
     if (!std::isfinite(h) || h<=0) throw std::runtime_error("invalid visual ground bounds");
     quad(g,{-h,0,-h},{-h,0,h},{h,0,h},{h,0,-h},
       palette_color(frame,GROUND_COLOR),3);
@@ -545,13 +545,16 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
 }
 // Verify actual cached mesh slots and submitted draw ranges, independent of slot
 // allocation order. Culling is checked against unculled full-mesh triangles.
+uint32_t float_bits(float value);
 void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
   using checkpoint::require;
-  require(f.full_geometry&&cache.meshes.size()==f.body_count,"native full-mesh ownership mismatch");
-  require(cache.proxy_draws==0&&cache.shadow_draws.size()==f.body_count,"native shadow/proxy draw mismatch");
+  require(cache.meshes.size()==f.body_count,"native full-mesh ownership mismatch");
+  require(cache.shadow_draws.size()==f.body_count,"native shadow draw mismatch");
   uint64_t vertices_checked=0,reference_visible=0;
   std::vector<checkpoint::J> drawn_ids;
-  checkpoint::Object mesh_slots,proxy_hashes,mesh_hashes;
+  std::vector<checkpoint::J> selected_ids,proxied_ids;
+  checkpoint::Object mesh_slots,proxy_hashes,mesh_hashes,group_evidence;
+  ViewBasis basis(f);
   for(unsigned i=0;i<f.body_count;i++) {
     const auto& b=f.bodies[i]; auto it=cache.meshes.find(b.id);
     require(it!=cache.meshes.end(),"missing native mesh"); const auto& mesh=it->second;
@@ -572,10 +575,15 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
     auto drawn=std::count_if(cache.draws.begin(),cache.draws.end(),matches);
     require(drawn<=1&&std::count_if(cache.shadow_draws.begin(),cache.shadow_draws.end(),matches)==1,"duplicate/missing native draw");
     bool visible_reference=visibility_reference::body(b,f); reference_visible+=visible_reference;
-    require(!visible_reference||drawn==1,"visible full geometry was culled");
+    auto group=cache.group_for_body[i];
+    bool selected=!f.full_geometry && group && group->selected;
+    if(group && group->selected) selected_ids.push_back(checkpoint::number(b.id));
+    if(selected && visible(b,f,basis)) proxied_ids.push_back(checkpoint::number(b.id));
+    require(!visible_reference||selected||drawn==1,"visible full geometry was culled");
+    require(!selected||!drawn,"selected proxy body retained a main full draw");
     if(drawn) drawn_ids.push_back(checkpoint::number(b.id));
   }
-  require(drawn_ids.size()==cache.draws.size(),"unknown native draw ownership");
+  require(drawn_ids.size()+cache.proxy_draws==cache.draws.size(),"unknown native draw ownership");
   require(cache.proxies.size()==cache.groups.size(),"stale native proxy ownership");
   for(const auto& [key,proxy]:cache.proxies) {
     const auto& group=cache.groups.at(key);
@@ -592,8 +600,18 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
         checkpoint::real(v.color.x),checkpoint::real(v.color.y),checkpoint::real(v.color.z),checkpoint::number(v.side)}));
     }
     proxy_hashes[std::to_string(key)]=checkpoint::quote(checkpoint::hash(checkpoint::array(vertices)));
+    std::vector<checkpoint::J> members;
+    for(auto index:group.bodies) members.push_back(checkpoint::number(f.bodies[index].id));
+    char metric[16]; std::snprintf(metric,sizeof metric,"0x%08x",float_bits(proxy_pixels(group,f,basis)));
+    group_evidence[std::to_string(key)]=checkpoint::object({
+      {"members",checkpoint::array(members)},{"metric_bits",checkpoint::quote(metric)},
+      {"selected",group.selected?"true":"false"},
+      {"aim_suppressed",proxy_near_aim(group,f)?"true":"false"},
+      {"visible_bodies",checkpoint::number(group.visible_bodies)}});
   }
   checkpoint::Object fields={{"drawn_ids",checkpoint::array(drawn_ids)},
+    {"selected_ids",checkpoint::array(selected_ids)},{"proxied_ids",checkpoint::array(proxied_ids)},
+    {"proxy_group_evidence",checkpoint::object(group_evidence)},
     {"mesh_slots",checkpoint::object(mesh_slots)},{"proxy_cache_sha256",checkpoint::object(proxy_hashes)},
     {"record_type",checkpoint::quote("native_audit")},{"reference_visible",checkpoint::number(reference_visible)},
     {"vertices_checked",checkpoint::number(vertices_checked)}};
@@ -1045,9 +1063,9 @@ public:
       vkGetPhysicalDeviceQueueFamilyProperties(physical,&count,families.data());
       gpu_queries.start(device,family,properties.limits.timestampPeriod,families.at(family).timestampValidBits,3721);
     }
-    if (frame.full_geometry && (extent.width!=frame.width || extent.height!=frame.height))
+    if (frame.record && (extent.width!=frame.width || extent.height!=frame.height))
       throw std::runtime_error("Megascene actual swapchain resolution differs from frozen request");
-    if (frame.full_geometry && present_mode!=VK_PRESENT_MODE_IMMEDIATE_KHR && present_mode!=VK_PRESENT_MODE_MAILBOX_KHR)
+    if (frame.record && present_mode!=VK_PRESENT_MODE_IMMEDIATE_KHR && present_mode!=VK_PRESENT_MODE_MAILBOX_KHR)
       throw std::runtime_error("Megascene requires immediate or mailbox presentation");
     if (frame.record && !settings_recorded) {
       VkPhysicalDeviceProperties p{}; vkGetPhysicalDeviceProperties(physical,&p);
@@ -1056,10 +1074,10 @@ public:
       char record[2048];
       std::snprintf(record,sizeof record,
         "\"record_type\":\"render_settings\",\"width\":\"%u\",\"height\":\"%u\",\"present_mode\":\"%s\","
-        "\"profile\":\"full\",\"ground_half_extent_m\":\"%.9g\",\"shadow_size\":\"%u\",\"night\":\"%u\","
+        "\"profile\":\"%s\",\"ground_half_extent_m\":\"%.9g\",\"shadow_size\":\"%u\",\"night\":\"%u\","
         "\"device_name_hex\":\"%s\",\"vendor_id\":\"%u\",\"device_id\":\"%u\",\"driver_version\":\"%u\",\"api_version\":\"%u\"",
         extent.width,extent.height,present_mode==VK_PRESENT_MODE_IMMEDIATE_KHR?"immediate":"mailbox",
-        frame.ground_half_extent,SHADOW_SIZE,frame.night,name,p.vendorID,p.deviceID,p.driverVersion,p.apiVersion);
+        frame.full_geometry?"full":"proxy",frame.ground_half_extent,SHADOW_SIZE,frame.night,name,p.vendorID,p.deviceID,p.driverVersion,p.apiVersion);
       frame.record(record);
       std::string palette="\"record_type\":\"palette\",\"colors\":[";
       for (unsigned color=0;color<19;color++) {
@@ -1158,16 +1176,19 @@ public:
       }
     }
     if (frame.record) {
-      char record[1024];
+      size_t retained_full_vertices=0;
+      for(const auto& [id,mesh]:geometry_cache.meshes) retained_full_vertices+=mesh.count;
+      char record[1536];
       float sx=std::sqrt(light.values[0]*light.values[0]+light.values[4]*light.values[4]+light.values[8]*light.values[8]);
       float sy=std::sqrt(light.values[1]*light.values[1]+light.values[5]*light.values[5]+light.values[9]*light.values[9]);
       std::snprintf(record,sizeof record,
         "\"record_type\":\"render_work\",\"body_count\":\"%u\",\"visible_bodies\":\"%u\",\"full_meshes\":\"%zu\","
-        "\"main_body_draws\":\"%zu\",\"proxy_draws\":\"%u\",\"proxy_groups\":\"%zu\",\"proxy_vertices\":\"%zu\","
-        "\"mesh_rebuilt\":\"%u\",\"proxy_rebuilt\":\"%u\",\"uploaded_bytes\":\"%zu\","
+        "\"main_body_draws\":\"%zu\",\"proxy_draws\":\"%u\",\"proxied_bodies\":\"%u\",\"proxy_groups\":\"%zu\",\"proxy_vertices\":\"%zu\","
+        "\"full_vertices\":\"%zu\",\"resident_vertex_bytes\":\"%zu\",\"mesh_rebuilt\":\"%u\",\"proxy_rebuilt\":\"%u\",\"uploaded_bytes\":\"%zu\","
         "\"shadow_refresh\":%s,\"shadow_body_draws\":\"%zu\",\"shadow_extent_m\":[\"0x%08x\",\"0x%08x\"],\"shadow_texel_m\":[\"0x%08x\",\"0x%08x\"],\"shadow_fit_min_margin_texels\":\"0x%08x\"",
-        frame.body_count,geometry_cache.visible_bodies,geometry_cache.meshes.size(),geometry_cache.draws.size(),
-        geometry_cache.proxy_draws,geometry_cache.proxies.size(),geometry_cache.proxy_vertices,
+        frame.body_count,geometry_cache.visible_bodies,geometry_cache.meshes.size(),geometry_cache.draws.size()-geometry_cache.proxy_draws,
+        geometry_cache.proxy_draws,geometry_cache.proxied_bodies,geometry_cache.proxies.size(),geometry_cache.proxy_vertices,
+        retained_full_vertices,geometry_cache.geometry.vertices.capacity()*sizeof(Vertex),
         geometry_cache.rebuilt,geometry_cache.proxy_rebuilt,uploaded_vertices*sizeof(Vertex),
         shadow_dirty?"true":"false",shadow_dirty?geometry_cache.shadow_draws.size():0,
         float_bits(2.f/sx),float_bits(2.f/sy),float_bits(2.f/(sx*SHADOW_SIZE)),float_bits(2.f/(sy*SHADOW_SIZE)),

@@ -51,6 +51,9 @@ camera route, checks moving-view visibility and cache reuse, and archives
 separate feature captures and review outcomes.
 The [bounded picking runner](docs/megascene-picking.md) replays the same route
 with declared hit/miss holds, independent target references and numeric guards.
+The separate [proxy diagnostics](docs/megascene-proxy.md) pair full and proxy
+traversal/picking on mixed-world and compact-reference routes, with actual
+selection, hysteresis, aim, retained-work and midpoint-capture evidence.
 The [localized cut runner](docs/megascene-localized.md) performs one frozen terrain
 edit, checks exact removal and atomic rejection, and keeps its single edit
 response separate from ordinary-frame measurements.

@@ -261,7 +261,17 @@ void emit(const VoxelVkFrame& f,const VoxelMegaState& s) {
     names.push_back(quote("history_overview"));
   if(std::getenv("MEGASCENE_SUPPORT") && s.frame>=uint64_t(s.warmup)+32 && s.frame<=uint64_t(s.warmup)+43)
     names.push_back(quote("motion_"+std::to_string(s.frame-s.warmup-1)));
-  if(!std::getenv("MEGASCENE_LOCALIZED") && !std::getenv("MEGASCENE_SUPPORT") && !std::getenv("MEGASCENE_HISTORY") && std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
+  const char* diagnostic=std::getenv("MEGASCENE_PROXY_DIAGNOSTIC");
+  if(diagnostic && s.frame>s.warmup && s.frame<=uint64_t(s.warmup)+s.measured) {
+    uint64_t ordinal=s.frame-s.warmup-1;
+    uint64_t hold=std::strcmp(diagnostic,"mixed-world")==0?1200:120;
+    uint64_t count=std::strcmp(diagnostic,"mixed-world")==0?3:9;
+    if(ordinal/hold<count && ordinal%hold==hold/2)
+      names.push_back(quote("review_"+(std::strcmp(diagnostic,"mixed-world")==0?
+        std::vector<std::string>{"far_entry","near_exit","far_reentry"}[ordinal/hold]:
+        "hold_"+std::to_string(ordinal/hold))));
+  }
+  if(!diagnostic && !std::getenv("MEGASCENE_LOCALIZED") && !std::getenv("MEGASCENE_SUPPORT") && !std::getenv("MEGASCENE_HISTORY") && std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
      s.frame<=uint64_t(s.warmup)+s.measured &&
      (s.frame-s.warmup-1)%300==60) {
     unsigned phase=unsigned((s.frame-s.warmup-1)/300);

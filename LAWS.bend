@@ -232,3 +232,21 @@ law palette_material_order:
 #   after exact raw boxes, faces, vertices, bounds, revision and anchor match a
 #   previously audited body. Re-read motion and view each frame; changing
 #   geometry under the same revision must miss this validation cache.
+
+# Proxy diagnostics for issue #58 (runtime/reference rules, not formal laws):
+# - Keep mixed-world and compact-reference routes separate from the primary
+#   traversal/picking routes. Pair full and proxy profiles on identical frozen
+#   world, physics, camera, warm-up and picking histories.
+# - Use the centered 640-cell tile key and existing 80/100 render-pixel
+#   hysteresis, including render-height scaling. Check actual eligible member
+#   IDs, measured pixel margins, selected IDs, aim suppression and re-entry.
+# - The compact right-lobe ray must hit actual body 4 within 256 m. A declared
+#   miss that turns into a hit invalidates that picking hold; do not retarget.
+# - Keep full meshes and full-mesh shadow draws resident in proxy runs. Count
+#   main-pass full and proxy draws separately, with uploads, rebuilds, resident
+#   vertex arena and Vulkan allocations in their actual scopes. Camera/aim
+#   switches must not alter world or shadow geometry.
+# - Required midpoint captures and separate validation are necessary for each
+#   profile/case. Missing evidence or wrong hysteresis never passes. Fewer
+#   draws do not establish equal appearance, less resident world state, or a
+#   performance pass without applicable calibration.
