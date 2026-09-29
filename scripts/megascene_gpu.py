@@ -163,7 +163,8 @@ def summarize(records, errors, cpu_frames, config):
             if config.get("case") == "history" and frame>int(config["warmup"]) and (frame-int(config["warmup"])-1)%12==0 and frame<=int(config["warmup"])+1429:
                 return "edit"
             return "startup" if frame == 0 else "warmup" if frame <= int(config["warmup"]) else "ordinary"
-        populations[name] = distribution([r["value"] for r in resolved if r["status"] == "measured" and population(r) == name])
+        populations[name] = distribution([r["value"] for r in resolved if r["status"] == "measured" and
+                                          (population(r) == name or name == "ordinary" and population(r) == "motion")])
     return {"status": state, "scope": SCOPE, "unit": "ns", "capability": capability,
             "required_evidence_complete": usable, "counts": counts, "intervals": resolved, "populations": populations,
             "errors": errors, "evidence": ["gpu.jsonl"],

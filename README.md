@@ -42,8 +42,8 @@ and inventories the fixed 64/128 m districts before rendering. Admission does
 not qualify a Vulkan benchmark attempt. [Static replay validation](docs/megascene-validation.md)
 adds independent references, complete replays and exact timed state/geometry checkpoints.
 The [static Vulkan runner](docs/megascene-static.md)
-opens the frozen district view and archives bounded, unqualified development
-observations and an optional opening capture. Its [supervisor](docs/megascene-supervision.md)
+opens the frozen district view and archives bounded observations and an optional
+opening capture. Its [supervisor](docs/megascene-supervision.md)
 enforces resource reserves and deadlines, retains interrupted evidence, and
 accounts for a persistent campaign allowance.
 The [primary traversal runner](docs/megascene-traversal.md) freezes the full
@@ -68,6 +68,9 @@ The [history and span controls](docs/megascene-schedule-variants.md) run the
 The [terrain pressure controls](docs/megascene-controls.md) replay spread,
 material-detail, surface-detail, fill-support, fill-history and body-rich-history
 variants with separate validation identities and actual inventory evidence.
+The [attempt reporter](docs/megascene-report.md) reads retained raw evidence and
+classifies correctness, fidelity, completion, availability, populations,
+calibration, responsiveness, capacity and termination independently.
 
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),

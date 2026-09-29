@@ -1,7 +1,4 @@
-"""Bounded Vulkan development observations through the public runner.
-
-This slice never qualifies a benchmark: visual review qualification and calibration remain separate.
-"""
+"""Bounded Vulkan observations through the public Megascene runner."""
 import hashlib
 import math
 import os
@@ -353,7 +350,8 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
             "status": "inconclusive", "reason": "required native proxy evidence incomplete or invalid"}
     populations = {}
     for name in (("warmup", "ordinary", "edit", "motion") if config.get("case")=="support" else ("warmup", "ordinary", "edit")):
-        values = [int(r["end_ns"])-int(r["begin_ns"]) for r in prefix if r["population"] == name]
+        values = [int(r["end_ns"])-int(r["begin_ns"]) for r in prefix if
+                  r["population"] == name or name == "ordinary" and r["population"] == "motion"]
         populations[name] = {**distribution(values), "observation_interval_ns": str(sum(values))}
     result["populations"] = populations
     ordinary = populations["ordinary"]
@@ -505,7 +503,7 @@ def execute(config, output, manifest, campaign):
         manifest["build"] = original["build"]
         manifest["source"] = original["source"]
         loader = Path(original["worker_command"][0]).name
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
         manifest["artifacts"] += [artifact(output/name,output) for name in input_names]
@@ -513,7 +511,7 @@ def execute(config, output, manifest, campaign):
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
@@ -707,6 +705,10 @@ def execute(config, output, manifest, campaign):
             "separate opening capture retained" if capture_ok else "requested opening capture incomplete",
             "capture availability only; visual quality remains unqualified", ["review.json", "captures/summary.json"])
     snapshot(archive/"summary.json",report_value)
+    from megascene_report import report_bundle
+    report_value = report_bundle(archive)
+    snapshot(archive/"summary.json",report_value)
+    manifest["qualification"] = report_value["qualification"]
     finish_archive(archive,output,manifest)
     require(capture_ok and report_value["schedule_completion"]["status"] == "pass" and report_value["initialization"]["status"] == "pass" and report_value["state_correctness"]["status"] == "pass",
             config["case"]+" invocation did not complete correctly; retained summary describes the prefix")

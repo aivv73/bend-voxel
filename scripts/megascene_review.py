@@ -91,6 +91,11 @@ def assess(bundle, input_path, reviewer):
             "primary full-profile fidelity",["review.json","assessments.json"])
     summary["review"]={"path":"review.json","status":review["status"],"reviewer":reviewer}
     snapshot(root/"summary.json",summary)
+    # Lightweight review fixtures have no retained attempt streams. A real
+    # attempt always has both a versioned manifest and committed CPU evidence.
+    if manifest.get("schema") == "megascene-evidence/1" and (root/"cpu.jsonl").is_file():
+        from megascene_report import report_bundle
+        snapshot(root/"summary.json",report_bundle(root))
     manifest["evidence"]=[artifact(root/item["path"],root) for item in manifest["evidence"]
                           if item["path"] not in ("review.json","summary.json","assessments.json")]
     manifest["evidence"] += [artifact(root/name,root) for name in ("review.json","summary.json","assessments.json")]

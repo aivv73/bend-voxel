@@ -139,7 +139,7 @@ class SupportSchedule(unittest.TestCase):
         self.assertTrue(checked['synthetic']);self.assertEqual(len(checked['beam_features']),6)
         r=report(raw,[],CONFIG,0,'normal_exit',10**15-100,'fixture',gpu_records=gpu_fixtures(3721))
         self.assertEqual(r['schedule_completion']['status'],'pass',r['evidence_errors'])
-        for population,count in (('ordinary','3582'),('edit','6'),('motion','12')):
+        for population,count in (('ordinary','3594'),('edit','6'),('motion','12')):
             self.assertEqual(r['populations'][population]['count'],count)
             self.assertEqual(r['gpu_execution']['populations'][population]['count'],count)
         self.assertEqual(r['accepted_edits']['count'],'6');self.assertEqual(r['accepted_edits']['max'],93)
