@@ -63,6 +63,9 @@ mesh, shadow and named beam-feature evidence.
 The [history runner](docs/megascene-history.md) replays 120 frozen irregular cuts,
 checks every evolving edit and retains the separate history and moving-span
 populations.
+The [terrain pressure controls](docs/megascene-controls.md) replay spread,
+material-detail and surface-detail variants with separate validation identities
+and actual inventory evidence.
 
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),

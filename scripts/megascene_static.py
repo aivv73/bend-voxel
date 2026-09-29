@@ -15,14 +15,20 @@ import time
 import uuid
 
 from megascene_inventory import SCHEMA, canonical, integer, inventory, measurement, outcome, read_json, require
-from megascene_recipe import admit_sources, bend_program, bits, checked, generate
+from megascene_recipe import admit_sources, bend_program, bits, checked, envelope_cells, generate, CONTROLS
 from megascene_gpu import u64
 
 
 def settings(args, base):
     for name in ("calibration", "search"):
         require(getattr(args, name) is None, f"--{name} is not implemented")
-    diagnostic = args.diagnostic
+    control = args.diagnostic if args.diagnostic in CONTROLS else None
+    diagnostic = None if control else args.diagnostic
+    if control:
+        require((args.case, control) in (("static", "spread"), ("static", "material-detail"),
+                ("localized", "material-detail"), ("static", "surface-detail")), "unsupported control/case combination")
+        require(base["preset"] == "small" and base["seed"] == "45" and base["threads"] == "6"
+                and args.resolution in (None, "1920x1080"), "terrain controls require small/seed-45/1080p/6 threads")
     if diagnostic is not None:
         from megascene_proxy import DIAGNOSTICS
         require(diagnostic in DIAGNOSTICS and args.case in ("traversal", "picking"), "proxy diagnostics require traversal or picking")
@@ -38,10 +44,10 @@ def settings(args, base):
         schedule_id = f"proxy-{diagnostic}-{args.case}-v1" if diagnostic else args.schedule or args.case+"-v2"
         require(args.schedule is None or args.schedule == schedule_id, "unsupported frozen schedule")
     elif args.case in ("localized", "support", "history"):
-        schedule_id = args.case+"-v1"
+        schedule_id = f"{control}-{args.case}-v1" if control else args.case+"-v1"
         require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
     else:
-        schedule_id = "static-v1"
+        schedule_id = f"{control}-static-v1" if control else "static-v1"
         require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
     require(args.resolution in (None, "640x360", "1920x1080"), "supported replay resolutions are 640x360 and 1920x1080")
     warmup = integer(args.warmup if args.warmup is not None else "120")
@@ -51,6 +57,8 @@ def settings(args, base):
     if args.case in ("traversal", "picking", "localized", "support", "history"):
         require((warmup, frames) == (120, 3600), "primary replay requires the complete 120/3600 schedule")
         require(not args.capture_opening, "replay captures come from the separate validation replay")
+    if control:
+        require((warmup, frames) == (120, 3600), "terrain controls require the complete 120/3600 schedule")
     require(1 <= deadline <= 300, "development deadline must be 1..300 seconds")
     require(args.archive, "Vulkan replays require an explicit durable --archive destination")
     archive = Path(args.archive).expanduser().resolve()
@@ -60,7 +68,7 @@ def settings(args, base):
             "archive and output must be separate directory trees")
     require(not (args.validated and args.runtime_from), "choose --validated or --runtime-from")
     require(not (args.validation_only and (args.validated or args.capture_opening)), "validation-only cannot reuse validation or request capture")
-    return {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": args.case, "diagnostic": diagnostic, "profile": args.profile or "full", "resolution": args.resolution or "1920x1080",
+    return {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": args.case, "diagnostic": diagnostic, "control": control, "envelope_side_m": str(envelope_cells(base["preset"], control)//10), "profile": args.profile or "full", "resolution": args.resolution or "1920x1080",
             "warmup": str(warmup), "frames": str(frames), "schedule": schedule_id, "deadline_s": str(deadline),
             "capture_opening": args.capture_opening, "archive": str(archive),
             "schedule_kind": "accepted" if (warmup, frames) == (120, 3600) else "declared_development_prefix"}
@@ -85,7 +93,7 @@ def schedule(config, owners=None):
     if config.get("case") == "traversal":
         from megascene_traversal import schedule as traversal_schedule
         return traversal_schedule(config)
-    origin = -int(config["side_m"])*5
+    origin = -int(config.get("envelope_side_m", config["side_m"]))*5
     eye = [(150+origin)/10, 12, (310+origin)/10]
     delta = [-74, -72, -234]
     camera = {"eye_m": list(map(bits, eye)), "yaw": bits(math.atan2(delta[0], delta[2])),
@@ -95,7 +103,7 @@ def schedule(config, owners=None):
                "camera": camera, "picking": False, "actions": []}
               for i in range(1+int(config["warmup"])+int(config["frames"]))]
     return {"schema": SCHEMA, "record_type": "schedule", "fixed_step": "0x3c888889",
-            "schedule_id": "static-v1", "warmup_frames": config["warmup"], "measured_frames": config["frames"],
+            "schedule_id": config.get("schedule", "static-v1"), "warmup_frames": config["warmup"], "measured_frames": config["frames"],
             "opening": camera, "frames": frames, "actions": [],
             "review_views": [{"name": "opening", "frame": "0", "features": ["building silhouettes", "span silhouettes", "major shadows"]}],
             "required_checkpoints": [{"name": "initialization", "frame": "0"}, {"name": "review_opening", "frame": "0"},
@@ -188,7 +196,7 @@ def audit_observation(records, config, frames):
             require((actual["width"], actual["height"], actual["profile"], actual["shadow_size"], actual["night"]) ==
                     (width, height, config["profile"], "2048", "0"), "effective rendering settings mismatch")
             require(actual["present_mode"] in ("immediate", "mailbox"), "unsupported presentation mode")
-            require(str(actual["ground_half_extent_m"]) == str(int(config["side_m"])//2+8), "ground bounds mismatch")
+            require(str(actual["ground_half_extent_m"]) == str(int(config.get("envelope_side_m", config["side_m"]))//2+8), "ground bounds mismatch")
         frozen = schedule(config)
         owners = 4 if config.get("diagnostic") == "compact-reference" else 21 if config["preset"] == "small" else 81
         source_cells = int(config.get("source_cells", "10503360" if owners == 21 else "42096576"))
@@ -410,10 +418,12 @@ def execute(config, output, manifest, campaign):
         from megascene_proxy import owners as diagnostic_owners
         owners = diagnostic_owners(config)
     else:
-        owners = generate(config["preset"], int(config["seed"]))
-    bounds = admit_sources(owners, int(config["side_m"])*5, int(config["fragment_budget"]))
-    if config.get("diagnostic") == "compact-reference":
-        config["source_cells"] = bounds["cells"]
+        owners = generate(config["preset"], int(config["seed"]), config.get("control"))
+    bounds = admit_sources(owners, int(config["envelope_side_m"])*5, int(config["fragment_budget"]))
+    config["source_cells"] = bounds["cells"]
+    if config.get("control"):
+        from megascene_controls import source_effects
+        bounds["control_effects"] = source_effects(config, owners)
     # This initial-state bound covers full meshes, retained box proxies, ground
     # and HUD. Edit cases additionally rely on evolving pre-edit native guards.
     render_vertices = checked(int(bounds["vertex_bound"])+36*len(owners)+6+50000, "static render vertices")
@@ -451,7 +461,7 @@ def execute(config, output, manifest, campaign):
     if config["case"] in ("traversal", "picking", "localized", "support", "history"):
         from megascene_traversal import camera_bytes
         (output/"camera.bin").write_bytes(camera_bytes(frozen))
-    snapshot(output/"inputs.json", {"schema": SCHEMA, "record_type": "generation_inputs", "configuration": {k: config[k] for k in ("preset", "seed", "side_m", "fragment_budget")},
+    snapshot(output/"inputs.json", {"schema": SCHEMA, "record_type": "generation_inputs", "configuration": {k: config[k] for k in ("preset", "seed", "side_m", "envelope_side_m", "control", "fragment_budget")},
                                     "owners": [{"id": str(i), "role": owner.role, "boxes": [b.record() for b in owner.boxes]} for i,owner in enumerate(owners,1)]})
     runtime = output/"runtime"
     reuse = config.get("validated") or config.get("runtime_from")
@@ -461,7 +471,7 @@ def execute(config, output, manifest, campaign):
         source = Path(reuse).expanduser().resolve()
         original = read_json((source/"manifest.json").read_text())
         identity(original, source, original["effective"])
-        keys = ("case", "preset", "side_m", "seed", "fragment_budget", "resolution", "diagnostic", "warmup", "frames", "schedule")
+        keys = ("case", "preset", "side_m", "envelope_side_m", "seed", "fragment_budget", "resolution", "diagnostic", "control", "warmup", "frames", "schedule")
         if config.get("validated"):
             keys += ("profile",)
         for key in keys:
@@ -471,7 +481,7 @@ def execute(config, output, manifest, campaign):
         manifest["build"] = original["build"]
         manifest["source"] = original["source"]
         loader = Path(original["worker_command"][0]).name
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
         manifest["artifacts"] += [artifact(output/name,output) for name in input_names]
@@ -479,7 +489,7 @@ def execute(config, output, manifest, campaign):
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
@@ -554,7 +564,7 @@ def execute(config, output, manifest, campaign):
     manifest["worker_command"] = [f"runtime/lib/{loader}", "--library-path", "runtime/lib", "runtime/worker", "--gpu", "off", "--threads", config["threads"]]
     manifest["worker_environment"] = {"VOXEL_VULKAN_LIBRARY": "runtime/build/libvoxel_vulkan.so", "VOXEL_STRESS_PRESENT": "unpaced",
                                       "MEGASCENE_WARMUP": config["warmup"], "MEGASCENE_MEASURED": config["frames"],
-                                      "MEGASCENE_GROUND": str(int(config["side_m"])//2+8),
+                                      "MEGASCENE_GROUND": str(int(config["envelope_side_m"])//2+8),
                                       "MEGASCENE_SCHEDULE_SHA256": artifact(output/"schedule.json",output)["sha256"]}
     if config.get("diagnostic"):
         manifest["worker_environment"]["MEGASCENE_PROXY_DIAGNOSTIC"] = config["diagnostic"]
@@ -571,7 +581,7 @@ def execute(config, output, manifest, campaign):
                              "projection": "0.05m near, infinite far, baseline focal 400 at 360px", "picking": config["case"] == "picking", "edits": config["case"] in ("localized", "support", "history"),
                              "palette": "runtime/src/color.bend", "lighting_constants": "runtime/src/vulkan/scene.frag",
                              "shadow_fit": "runtime/src/vulkan/native.cpp:shadow_matrix", "fixed_step": frozen["fixed_step"],
-                             "proxy_bookkeeping": "retained; visible full meshes forced" if config["profile"] == "full" else "retained; actual 80/100 render-pixel selection", "ground_half_extent_m": str(int(config["side_m"])//2+8)}
+                             "proxy_bookkeeping": "retained; visible full meshes forced" if config["profile"] == "full" else "retained; actual 80/100 render-pixel selection", "ground_half_extent_m": str(int(config["envelope_side_m"])//2+8)}
     snapshot(output/"manifest.json",manifest)
     snapshot(output/"campaign.json", campaign.value)
     snapshot(output/"series.json", {"schema": SCHEMA, "record_type": "series", "series_id": manifest["series_id"],

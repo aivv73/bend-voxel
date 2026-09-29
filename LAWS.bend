@@ -250,3 +250,21 @@ law palette_material_order:
 #   profile/case. Missing evidence or wrong hysteresis never passes. Fewer
 #   draws do not establish equal appearance, less resident world state, or a
 #   performance pass without applicable calibration.
+
+# Megascene terrain pressure controls (issue #59; runtime/reference scope):
+# - Spread uses 640-cell neighborhood spacing, a centered 960-cell small
+#   envelope, and real two-cell-wide protected/removable terrain connectors.
+#   Its terrain remains one positive-face-connected owner; empty gaps contribute
+#   no occupied work. Ground coverage follows the changed envelope.
+# - Material detail alternates materials 2 and 5 in four-cell local-X bands
+#   only on removable terrain. Occupancy, ownership, protected cells and bounds
+#   remain fixed. The localized brush target remains fixed; its camera aims
+#   inside the even band to avoid a material-boundary ray.
+# - Surface detail removes 64 disjoint two-by-two-by-two pits per neighborhood,
+#   exactly 512 cells each. Terrain remains connected and anchored.
+# - Each control has a separate frozen schedule and validation identity. Record
+#   actual cells, material inventory, cuboids, exposed surfaces, ownership and
+#   bounds. Nominal control labels and missing Vulkan evidence never pass.
+# - These claims depend on unsafe Bend and native rendering; independent source
+#   references, runtime inventory and complete Vulkan replay provide evidence,
+#   not formal proofs.
