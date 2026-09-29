@@ -25,7 +25,7 @@ def f32(value):
     return struct.unpack("<f", struct.pack("<f", value))[0]
 
 
-def pose(name, neighborhood, preset, seed, route):
+def pose(name, neighborhood, preset, seed, route, control=None):
     require(route in ROUTES, "unsupported traversal route")
     q = 2 if preset == "small" else 4
     if name == "far":
@@ -49,6 +49,12 @@ def pose(name, neighborhood, preset, seed, route):
         source, target = local[name]
         eye = ((source[0]+ox)/10,source[1]/10,(source[2]+oz)/10)
         look = ((target[0]+ox)/10,target[1]/10,(target[2]+oz)/10)
+        if control == "body-rich" and name == "interior":
+            eye = ((40+ox)/10,4.8,(80+oz)/10)
+            look = ((40+ox)/10,4.8,(132+oz)/10)
+    if control == "fill":
+        eye = (eye[0],eye[1]+.8,eye[2])
+        look = (look[0],look[1]+.8,look[2])
     return eye, look
 
 

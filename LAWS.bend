@@ -268,3 +268,18 @@ law palette_material_order:
 # - These claims depend on unsafe Bend and native rendering; independent source
 #   references, runtime inventory and complete Vulkan replay provide evidence,
 #   not formal proofs.
+
+# Megascene fill and initial-owner pressure controls (issue #60; runtime/reference scope):
+# - Fill inserts an eight-cell concrete layer at Y=[8,16), shifts the original
+#   terrain above Y=8 and all structures, local targets and views upward eight
+#   cells, and leaves the protected foundation at Y=0. The cavity retains its
+#   sixteen-cell depth and the declared Y=[0,128) envelope.
+# - Body-rich splits each building at X=[72,80), discards that real gap and
+#   retains two separately anchored connected owners. Initial owners become
+#   1+6*N (25 for the small preset); other source roles stay in place.
+# - Body-rich history action 6 targets the remaining back wall and uses its
+#   declared eye. Every required removal is checked against actual occupancy
+#   before replay; failed or missing evidence cannot complete the variant.
+# - Each variant has separate schedule, admission, checkpoint and achieved
+#   material/owner/surface/density/bounds evidence. Native/unsafe behavior is
+#   covered by independent reference and complete Vulkan replay, not proof.

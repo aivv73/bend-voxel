@@ -47,7 +47,7 @@ class Owner:
     boxes: list
 
 
-CONTROLS = ("spread", "material-detail", "surface-detail")
+CONTROLS = ("spread", "material-detail", "surface-detail", "fill", "body-rich")
 
 
 def envelope_cells(preset, control=None):
@@ -74,6 +74,12 @@ def generate(preset, seed, control=None):
             def add(owner, x, y, z, material):
                 def append(x0, x1, y0, y1, z0, z1, m):
                     owner.boxes.append(Box((x0+ox,y0,z0+oz),(x1+ox,y1,z1+oz),m))
+                if control == "fill":
+                    if owner is terrain:
+                        if y[0] >= 8:
+                            y = (y[0]+8,y[1]+8)
+                    else:
+                        y = (y[0]+8,y[1]+8)
                 if control == "surface-detail" and owner is terrain and (x,y,z) == ((224,288),(8,24),(0,240)):
                     append(224,288,8,22,0,240,material)
                     cursor = 224
@@ -110,8 +116,11 @@ def generate(preset, seed, control=None):
                 ((184,208),(24,28),(64,96),2),
             ]:
                 add(terrain, x, y, z, m)
+            if control == "fill":
+                # The lower layers and y=0 foundation stay in place. The new
+                # concrete fills the whole patch between old and raised layers.
+                terrain.boxes.append(Box((ox,8,oz),(ox+320,16,oz+320),2))
             building = Owner("building", n, [])
-            owners.append(building)
             h = 80 + 2 * v
             for x in ((16,24),(128,136)):
                 for z in ((16,24),(128,136)):
@@ -136,6 +145,17 @@ def generate(preset, seed, control=None):
                 ((48,72),(h,h+3),(120,136),3),
             ]:
                 add(building, x, y, z, m)
+            if control == "body-rich":
+                left = Owner("building_left", n, [])
+                right = Owner("building_right", n, [])
+                for box in building.boxes:
+                    for piece, x0, x1 in ((left, box.lo[0], ox+72), (right, ox+80, box.hi[0])):
+                        lo, hi = max(box.lo[0], x0), min(box.hi[0], x1)
+                        if lo < hi:
+                            piece.boxes.append(Box((lo,*box.lo[1:]),(hi,*box.hi[1:]),box.material))
+                owners.extend((left,right))
+            else:
+                owners.append(building)
             for j in range(3):
                 span = Owner(f"span{j}", n, [])
                 owners.append(span)

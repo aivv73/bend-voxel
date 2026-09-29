@@ -83,28 +83,32 @@ def _target(k, config):
     top = 58+v%2
     local = ((160+12*r,24,160+8*r),(18,48,48+12*r),(25,40,z+4),
              (163+12*r,24,160+8*r),(127,40,z+4),None,
-             (78,48,54+3*r),(284+3*r,top,180+3*r),
+             ((40+3*r,48,134) if config.get('control') == 'body-rich' else (78,48,54+3*r)),
+             (284+3*r,top,180+3*r),
              ((236,230,226)[r],23,272),((276,282,286)[r],23,272))[a]
+    lift = 8 if config.get('control') == 'fill' else 0
     if a == 5:
-        offset = value(motion(12,42)[0])
+        offset = value(motion(12,42+lift)[0])
         target = [bits(f32((76+ox)*f32(.1))),
-                  bits(f32(f32((beam+2)*f32(.1))+offset)),
+                  bits(f32(f32((beam+2+lift)*f32(.1))+offset)),
                   bits(f32((z+4+oz)*f32(.1)))]
     else:
-        target = [bits(x/10) for x in (local[0]+ox,local[1],local[2]+oz)]
+        target = [bits(x/10) for x in (local[0]+ox,local[1]+lift,local[2]+oz)]
     return n,r,a,v,local,target
 
 
 def _view(a, n, r, v, local, target, config):
     ox, oz = _origin(n,config['preset'])
     point = list(map(value,target))
+    lift = .8 if config.get('control') == 'fill' else 0
     if a in (0,3): eye = [point[0],point[1]+2,point[2]+1]
-    elif a == 1: eye = [(8+ox)/10,4.8,point[2]]
-    elif a in (2,4): eye = [point[0],4.,(176+24*r+16+oz)/10]
+    elif a == 1: eye = [(8+ox)/10,4.8+lift,point[2]]
+    elif a in (2,4): eye = [point[0],4.+lift,(176+24*r+16+oz)/10]
     elif a == 5: eye = [point[0],point[1]+2,point[2]+1.2]
-    elif a == 6: eye = [(100+ox)/10,4.8,point[2]]
-    elif a == 7: eye = [point[0],(58+v%2+32)/10,point[2]-2]
-    else: eye = [point[0],4.4,(256+oz)/10]
+    elif a == 6: eye = [((40+3*r if config.get('control')=='body-rich' else 100)+ox)/10,4.8+lift,
+                         (120+oz)/10 if config.get('control')=='body-rich' else point[2]]
+    elif a == 7: eye = [point[0],(58+v%2+32)/10+lift,point[2]-2]
+    else: eye = [point[0],4.4+lift,(256+oz)/10]
     return camera(eye,point), eye
 
 
@@ -138,13 +142,15 @@ def _cut(bodies, source, local, frame):
 
 def schedule(config):
     require((config['warmup'],config['frames']) == ('120','3600'), 'history requires the complete 120/3600 schedule')
-    require(config.get('schedule','history-v1')=='history-v1','unsupported history schedule')
-    key=tuple(config[name] for name in ('preset','seed','side_m','warmup','frames','fragment_budget'))
+    require(config.get('schedule','history-v1')==
+            (config.get('control')+'-history-v1' if config.get('control') else 'history-v1'),
+            'unsupported history schedule')
+    key=tuple(config.get(name) for name in ('preset','seed','side_m','warmup','frames','fragment_budget','control'))
     if key in _SCHEDULE_CACHE:
         return _SCHEDULE_CACHE[key]
-    owners=generate(config['preset'],int(config['seed']))
+    owners=generate(config['preset'],int(config['seed']),config.get('control'))
     bodies=[Body(i,o.boxes,True) for i,o in enumerate(owners,1)]
-    opening=camera(*pose('opening',0,config['preset'],int(config['seed']),'traversal-v2'))
+    opening=camera(*pose('opening',0,config['preset'],int(config['seed']),'traversal-v2',config.get('control')))
     actions=[];views=[];removed_total=0
     for k,frame in enumerate(CUT_FRAMES):
         n,r,a,v,local,target=_target(k,config)
@@ -167,9 +173,10 @@ def schedule(config):
                         'pre_edit_ray':ray,'pre_edit_hit':{key:str(val) for key,val in hit.items() if key!='point'},
                         'reference_components':str(len(created))})
         views.append(view)
-    require(removed_total==(2440 if config['preset']=='small' else 2472),
-            'history source removal total differs from accepted recipe')
-    far_eye,far_look=pose('far',None,config['preset'],int(config['seed']),'traversal-v2')
+    if not config.get('control'):
+        require(removed_total==(2440 if config['preset']=='small' else 2472),
+                'history source removal total differs from accepted recipe')
+    far_eye,far_look=pose('far',None,config['preset'],int(config['seed']),'traversal-v2',config.get('control'))
     far=camera(far_eye,far_look)
     frames=[]
     last=views[-1]
@@ -193,15 +200,28 @@ def schedule(config):
     points += [{'name':'after_cut_'+str(count),'frame':str(frame)} for count,frame in NAMED]
     points += [{'name':'history_overview','frame':'1681'},{'name':'completion','frame':'3720'}]
     review=[{'name':'opening','frame':'0','features':['district and structures']}]
-    review += [{'name':'cut_'+str(k),'frame':str(frame),'features':['removed material','new exposed surfaces']} for k,frame in enumerate(CUT_FRAMES)]
+    review += [{'name':'cut_'+str(k),'frame':str(frame),
+                'features':['remaining back wall','new exposed back-wall surfaces']
+                    if config.get('control')=='body-rich' and k%10==6 else
+                    ['removed material','new exposed surfaces']} for k,frame in enumerate(CUT_FRAMES)]
     review += [{'name':'history_overview','frame':'1681','features':['cumulative destruction','remaining anchored material']},
                {'name':'completion','frame':'3720','features':['retained geometry','settled fragments']}]
-    frozen={'schema':SCHEMA,'record_type':'schedule','schedule_id':'history-v1','fixed_step':'0x3c888889',
+    frozen={'schema':SCHEMA,'record_type':'schedule','schedule_id':config.get('schedule','history-v1'),'fixed_step':'0x3c888889',
             'warmup_frames':'120','measured_frames':'3600','opening':opening,'frames':frames,'actions':actions,
             'review_views':review,'required_checkpoints':points,'checkpoint_implementation':'megascene-checkpoint/1',
             'update_order':['physics','edit','view_picking_disabled','render'],
             'history_populations':{'cuts_1_12':['0','143'],'cuts_13_48':['144','575'],
                                    'cuts_49_120':['576','1439'],'overview':['1440','1559'],'tail':['1560','3599']}}
+    if config.get('control') == 'body-rich':
+        eye,look=pose('interior',0,config['preset'],int(config['seed']),'traversal-v2','body-rich')
+        ray=ray_to(eye,look)
+        hit=exact_pick([(i,box,0.) for i,owner in enumerate(owners,1) for box in owner.boxes],
+                       eye,list(map(value,ray['direction'])))
+        require((hit['owner'],hit['material'],hit['kind'])==('2','5','1') and hit['distance']<256,
+                'body-rich interior view misses the remaining removable back wall')
+        frozen['diagnostic_views']=[{'name':'interior_remaining_wall','camera':camera(eye,look),
+                                     'eye_m':list(map(bits,eye)),'look_m':list(map(bits,look)),
+                                     'expected_owner':'2','expected_material':'5','reference_hit':hit}]
     _SCHEDULE_CACHE[key]=frozen
     return frozen
 
@@ -297,7 +317,7 @@ class Reference:
         self.bodies.append([b for b in self.bodies[-1] if b.ident!=source.ident]+new_bodies)
         if within==4:
             released=[b for b in new_bodies if not b.anchored]
-            require(len(released)==1 and released[0].bottom==42,
+            require(len(released)==1 and released[0].bottom==42+(8 if self.frozen.get('schedule_id')=='fill-history-v1' else 0),
                     'history support cut did not release the declared span')
             self.releases[int(action['action'])//10]={'body_id':str(released[0].ident),'frame':str(frame)}
         diff=mismatch(state,actual)
