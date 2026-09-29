@@ -17,10 +17,79 @@ def finite_bit_float(value):
     return number
 
 
+def assess_static(root, manifest, input_path, reviewer):
+    """Assess the separately captured static opening without changing timed work."""
+    require(manifest.get("synthetic") is False and manifest["attempt_kind"] == "development_observation",
+            "real timed static attempt required")
+    summary=read_json((root/"summary.json").read_text())
+    require(summary["schedule_completion"]["status"] == "pass" and
+            summary["state_correctness"]["status"] == "pass" and
+            summary["opening_capture"]["status"] == "pass", "complete validated static capture required")
+    review=read_json((root/"review.json").read_text())
+    frozen=read_json((root/"schedule.json").read_text())
+    require(review["schedule_sha256"]==hashlib.sha256((root/"schedule.json").read_bytes()).hexdigest() and
+            review["view"] == "opening", "stale opening review schedule")
+    capture=review["capture"]
+    require(capture is not None and (root/capture["path"]).is_file() and
+            artifact(root/capture["path"],root)==capture, "opening capture missing or changed")
+    required=frozen["review_views"]
+    require(len(required)==1 and required[0]["name"]=="opening", "unexpected static review views")
+    answers=read_json(Path(input_path).read_text())
+    require(answers["schema"]=="megascene-feature-assessments/1" and
+            isinstance(answers["views"],dict) and set(answers["views"])=={"opening"},
+            "opening assessment missing")
+    selected=answers["views"]["opening"]
+    require(isinstance(selected,dict) and set(selected)==set(required[0]["features"]),
+            "every opening feature needs assessment")
+    bad_geometry=[];bad_quality=[]
+    for name in required[0]["features"]:
+        answer=selected[name]
+        require(answer["geometry"] in ("correct","incorrect") and
+                answer["readability"] in ("readable","insufficient","unassessable"),
+                "invalid opening feature classification")
+        require(answer["geometry"]=="correct" or answer["readability"]=="unassessable",
+                "incorrect geometry cannot receive readability pass")
+        if answer["geometry"]!="correct" or answer["readability"]!="readable":
+            require(isinstance(answer.get("note"),str) and answer["note"].strip(),
+                    "nonpassing opening feature needs an explanation")
+        if answer["geometry"]=="incorrect": bad_geometry.append(name)
+        elif answer["readability"]!="readable": bad_quality.append(name)
+    raw=root/"assessments.json"
+    require(not raw.exists(), "assessments already recorded")
+    review.update(status="incorrect_rendering" if bad_geometry else
+                  "insufficient_readability" if bad_quality else "pass",
+                  reviewer=reviewer,reviewed_at_utc=datetime.now(timezone.utc).isoformat(),
+                  features=selected,incorrect_geometry_features=bad_geometry,
+                  insufficient_readability_features=bad_quality)
+    snapshot(raw,answers)
+    review["assessment_input"]=artifact(raw,root)
+    snapshot(root/"review.json",review)
+    if bad_geometry:
+        summary["rendering_correctness"]=outcome("fail","opening geometry incorrect","static full profile",["review.json","assessments.json"])
+        summary["visual_quality"]=outcome("inconclusive","opening geometry incorrect","static full profile",["review.json","assessments.json"])
+    else:
+        summary["visual_quality"]=outcome("fail" if bad_quality else "pass",
+            "opening feature unreadable" if bad_quality else "all opening features visible and readable",
+            "static full profile",["review.json","assessments.json"])
+    summary["review"]={"path":"review.json","status":review["status"],"reviewer":reviewer}
+    snapshot(root/"summary.json",summary)
+    if (root/"cpu.jsonl").is_file():
+        from megascene_report import report_bundle
+        snapshot(root/"summary.json",report_bundle(root))
+    manifest["evidence"]=[item for item in manifest["evidence"] if item["path"] not in
+                          ("review.json","summary.json","assessments.json")]
+    manifest["evidence"] += [artifact(root/name,root) for name in ("review.json","summary.json","assessments.json")]
+    manifest["evidence"].sort(key=lambda item:item["path"])
+    snapshot(root/"manifest.json",manifest)
+    return review["status"]
+
+
 def assess(bundle, input_path, reviewer):
     root=Path(bundle).expanduser().resolve()
     require(reviewer.strip(), "reviewer identity required")
     manifest=read_json((root/"manifest.json").read_text())
+    if manifest["effective"]["case"] == "static":
+        return assess_static(root,manifest,input_path,reviewer)
     require(manifest["effective"]["case"] in ("traversal", "picking", "localized", "support", "history"), "replay bundle required")
     require(manifest["attempt_kind"] in ("validation_only", "development_observation"), "complete bundle required")
     summary=read_json((root/"summary.json").read_text())

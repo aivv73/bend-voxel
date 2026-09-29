@@ -93,6 +93,17 @@ law palette_length:
 #   shrink, skip or retarget. Evolving edit/pick/native checks remain necessary.
 # - Scale properties that depend on unsafe/native code require retained
 #   runtime and independent reference evidence, never a formal proof claim.
+# - Issue #67 search orders six real Vulkan cases breadth first through the
+#   supported discrete scales, then confirms observations within one exact
+#   workload identity. Three agreeing process attempts establish ordinary
+#   endpoints; explicit allocation failures permit only one diagnostic retry.
+#   Calibration, independent seed, diagnostics and thread comparisons keep
+#   separate scopes. Resource, monitoring, numeric and fragment-budget stops
+#   are policy observations, never physical exhaustion. Chronological search
+#   evidence and an explicit added allowance govern resume. Later review or
+#   calibration reclassification appends evidence rather than replacing an
+#   attempt. These are
+#   runtime/reference rules, not formal claims about unsafe/native execution.
 
 # - Static Vulkan development observations freeze the binary32 opening view
 #   and 1/60 step, disable picking/edits, and preserve physics-before-render.
