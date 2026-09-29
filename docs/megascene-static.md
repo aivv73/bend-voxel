@@ -18,7 +18,7 @@ settings and report meanings.
 
 ## Run a bounded observation
 
-Use Linux/X11, a Vulkan 1.3 device, Python 3.10+, Bend 2.0.32, clang, g++,
+Use Linux/X11, a Vulkan 1.3 device, Python 3.10+, Bend 2.0.34, clang, g++,
 glslc, and the Vulkan/X11/OpenSSL development libraries. `vulkaninfo` supplies optional
 additional environment provenance. Supervised runs also require NVIDIA NVML,
 `VK_EXT_memory_budget`, `VK_EXT_pci_bus_info`, and Linux libatomic. Missing

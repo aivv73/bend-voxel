@@ -355,7 +355,7 @@ static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) { (v
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
   if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
     err_fail("bad Vulkan scene state");
-  // With Bend 2.0.32: State = World(7), Control(Camera(7) + 9), pending, last.
+  // With Bend 2.0.34: State = World(7), Control(Camera(7) + 9), pending, last.
   if (cid_arity(CID_DEMO_STATE)!=25 || cid_arity(CID_WORLD_WORLD)!=7 ||
       cid_arity(CID_INPUT_CONTROL)!=16 || cid_arity(CID_RENDER_AIM)!=5 ||
       cid_arity(CID_WORLD_BODY)!=8 || cid_arity(CID_SPATIAL_FACE)!=8 ||

@@ -6,7 +6,7 @@ A destructible voxel demo built with [Bend 2](https://github.com/bendlang/bend) 
 
 ## Run
 
-Requires [Bend 2.0.32](https://github.com/bendlang/bend/releases/tag/v2.0.32), Linux with X11 or XWayland, a Vulkan 1.3 driver with Xlib surface support, Vulkan, X11 and OpenSSL development headers, `glslc`, `g++`, and `make`.
+Requires [Bend 2.0.34](https://github.com/bendlang/bend/releases/tag/v2.0.34), Linux with X11 or XWayland, a Vulkan 1.3 driver with Xlib surface support, Vulkan, X11 and OpenSSL development headers, `glslc`, `g++`, and `make`.
 
 ```sh
 make run

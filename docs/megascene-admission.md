@@ -11,7 +11,7 @@ python3 scripts/megascene.py --side-m 128 --seed 46 --threads 6 --output build/m
 ```
 
 Use a new output directory for every invocation. The command requires Python
-3.10+, Bend 2.0.32, its native C compiler, and Linux/glibc. No display or Vulkan
+3.10+, Bend 2.0.34, its native C compiler, and Linux/glibc. No display or Vulkan
 device is used. The explicit command is `--case admission`, which is also the
 default. Small/large mean the accepted 64/128 metre centered districts; seeds
 45/46 and thread counts 1/6/12 are supported. Defaults are small, seed 45, six

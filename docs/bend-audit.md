@@ -1,6 +1,6 @@
 # Bend idiom and parallelism audit (2026-09-27)
 
-This audit uses the installed, project-pinned Bend 2.0.32: `bend guide`,
+This audit used the then-installed, project-pinned Bend 2.0.32: `bend guide`,
 `bend guide shaders`, `bend --help`, and `bend base`. It covers every repository
 `.bend` file (including generated assets, tests, laws, and proofs), plus
 `src/vulkan/native.cpp`, its header, and the native bridge. Existing uncommitted

@@ -530,7 +530,7 @@ def execute(config, output, manifest, campaign):
             from megascene_history_references import program as history_reference_program
             (runtime/"src/megascene_history_reference_entry.bend").write_text(history_reference_program())
         (runtime/"src/megascene_entry.bend").write_text(worker_program(owners,config,frozen))
-        require(subprocess.check_output(["bend", "version"], text=True).strip() == "bend 2.0.32", "Megascene requires Bend 2.0.32")
+        require(subprocess.check_output(["bend", "version"], text=True).strip() == "bend 2.0.34", "Megascene requires Bend 2.0.34")
         commands = [["glslc", "--target-env=vulkan1.3", f"src/vulkan/{name}", "-o", f"build/vulkan-{name}.spv"] for name in ("scene.vert", "scene.frag", "shadow.vert")]
         commands += [["g++", "-O2", "-std=c++17", "-fPIC", "-shared", "-Wall", "-Wextra", "-Wno-missing-field-initializers", "src/vulkan/native.cpp", "-lvulkan", "-lX11", "-lcrypto", "-o", "build/libvoxel_vulkan.so"],
                      ["bend", "src/megascene_entry.bend", "-o", "worker.c"], ["bend", "src/megascene_entry.bend", "-o", "worker"],
@@ -543,7 +543,7 @@ def execute(config, output, manifest, campaign):
             commands.append(["bend", "src/megascene_support_reference_entry.bend", "-o", "support-reference-worker"])
         if config["case"] == "history":
             commands.append(["bend", "src/megascene_history_reference_entry.bend", "-o", "history-reference-worker"])
-        manifest["build"] = {"commands": commands, "working_directory": "runtime", "bend": "bend 2.0.32",
+        manifest["build"] = {"commands": commands, "working_directory": "runtime", "bend": "bend 2.0.34",
                              "compilers": {name: subprocess.check_output([name, "--version"], text=True).splitlines()[0] for name in ("g++", "clang", "glslc")}}
         manifest["source"] = provenance()
         snapshot(output/"manifest.json",manifest)

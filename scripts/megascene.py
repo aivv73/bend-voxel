@@ -186,7 +186,7 @@ def execute(config, output, manifest):
         shutil.copyfile(ROOT / "scripts" / name, runtime / name)
     (runtime / "input.bend").write_text(bend_program(owners, int(config["fragment_budget"])))
     version = subprocess.run(["bend", "version"], capture_output=True, text=True, check=True).stdout.strip()
-    require(version == "bend 2.0.32", "Megascene is pinned to Bend 2.0.32")
+    require(version == "bend 2.0.34", "Megascene is pinned to Bend 2.0.34")
     manifest["runtime"]["bend"] = version
     manifest["source"] = provenance()
     manifest["build"] = {"command": ["bend", "input.bend", "-o", "worker"],
