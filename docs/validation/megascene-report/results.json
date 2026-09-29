@@ -1,0 +1,58 @@
+{
+  "observations": [
+    {
+      "accepted_edits": "0",
+      "archive": "/home/aivv/megascene-issue51-evidence/2b024983-0863-4005-beda-5b16088db1b5/e40abb4b-2642-4973-a43c-e908835f7616/fe843437-3536-4bf6-b50b-e814bbac9f74",
+      "attempt_id": "fe843437-3536-4bf6-b50b-e814bbac9f74",
+      "case": "static",
+      "evidence_errors": [
+        "GPU: GPU evidence stream unavailable",
+        "GPU: missing GPU capability or teardown completion",
+        "required GPU evidence incomplete"
+      ],
+      "gpu_status": "inconclusive",
+      "measured_interval_ns": "4098474764",
+      "ordinary_count": "3600",
+      "statuses": {
+        "calibration": "inconclusive",
+        "confirmed_endpoint": "inconclusive",
+        "interactive_pass": "inconclusive",
+        "numeric_validity": "pass",
+        "population_qualification": "inconclusive",
+        "qualified_capacity": "inconclusive",
+        "rendering_correctness": "pass",
+        "responsiveness": "inconclusive",
+        "schedule_completion": "pass",
+        "state_correctness": "pass",
+        "visual_quality": "inconclusive",
+        "workload_completion": "inconclusive"
+      }
+    },
+    {
+      "accepted_edits": "1",
+      "archive": "/home/aivv/megascene-issue55/41412612-0c02-4cb4-ac06-dbd576b7afe6/d2bc5641-2861-4198-a137-0302e322154f/41a670a9-7e9c-4934-bf59-d5c30ea8c09d",
+      "attempt_id": "41a670a9-7e9c-4934-bf59-d5c30ea8c09d",
+      "case": "localized",
+      "evidence_errors": [],
+      "gpu_status": "pass",
+      "measured_interval_ns": "5939671417",
+      "ordinary_count": "3599",
+      "statuses": {
+        "calibration": "inconclusive",
+        "confirmed_endpoint": "inconclusive",
+        "interactive_pass": "inconclusive",
+        "numeric_validity": "pass",
+        "population_qualification": "inconclusive",
+        "qualified_capacity": "pass",
+        "rendering_correctness": "pass",
+        "responsiveness": "inconclusive",
+        "schedule_completion": "pass",
+        "state_correctness": "pass",
+        "visual_quality": "pass",
+        "workload_completion": "pass"
+      }
+    }
+  ],
+  "record_type": "report_verification",
+  "schema": "megascene-evidence/1"
+}
