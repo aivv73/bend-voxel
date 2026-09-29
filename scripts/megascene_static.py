@@ -194,7 +194,7 @@ def read_stream(path, attempt_id):
     return records, problems
 
 
-def audit_observation(records, config, frames):
+def audit_observation(records, config, frames, frozen=None):
     errors = []
     try:
         settings_records = [r for r in records if r["record_type"] == "render_settings"]
@@ -206,7 +206,7 @@ def audit_observation(records, config, frames):
                     (width, height, config["profile"], "2048", "0"), "effective rendering settings mismatch")
             require(actual["present_mode"] in ("immediate", "mailbox"), "unsupported presentation mode")
             require(str(actual["ground_half_extent_m"]) == str(int(config.get("envelope_side_m", config["side_m"]))//2+8), "ground bounds mismatch")
-        frozen = schedule(config)
+        frozen = frozen if frozen is not None else schedule(config)
         owners = (4 if config.get("diagnostic") == "compact-reference" else
                   (25 if config["preset"] == "small" else 97) if config.get("control") == "body-rich" else
                   21 if config["preset"] == "small" else 81)
@@ -274,10 +274,10 @@ def distribution(values):
             **{f"p{p}": ordered[math.ceil(len(values)*p/100)-1] for p in (50,95,99)}, "max": max(values)}
 
 
-def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, review=False, gpu_records=None, gpu_problems=None):
+def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, review=False, gpu_records=None, gpu_problems=None, frozen=None):
     frames = [r for r in records if r["record_type"] == "frame"]
     prefix = []
-    frozen = schedule(config)
+    frozen = frozen if frozen is not None else schedule(config)
     for r in frames:
         i = len(prefix)
         expected = frozen["frames"][i]["phase"] if i<len(frozen["frames"]) else None
@@ -286,7 +286,7 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
             problems.append("frame sequence/population/boundary mismatch")
             break
         prefix.append(r)
-    problems = list(problems) + audit_observation(records, config, prefix)
+    problems = list(problems) + audit_observation(records, config, prefix, frozen)
     proxy_result = None
     if config.get("diagnostic") and len(prefix) == len(frozen["frames"]):
         try:
@@ -483,7 +483,9 @@ def execute(config, output, manifest, campaign):
         from megascene_traversal import camera_bytes
         (output/"camera.bin").write_bytes(camera_bytes(frozen))
     snapshot(output/"inputs.json", {"schema": SCHEMA, "record_type": "generation_inputs", "configuration": {k: config[k] for k in ("preset", "seed", "side_m", "envelope_side_m", "control", "fragment_budget")},
-                                    "owners": [{"id": str(i), "role": owner.role, "boxes": [b.record() for b in owner.boxes]} for i,owner in enumerate(owners,1)]})
+                                    "owners": [{"id": str(i), "role": owner.role,
+                                                "neighborhood": None if owner.neighborhood is None else str(owner.neighborhood),
+                                                "boxes": [b.record() for b in owner.boxes]} for i,owner in enumerate(owners,1)]})
     runtime = output/"runtime"
     reuse = config.get("validated") or config.get("runtime_from")
     source = None
@@ -762,8 +764,9 @@ def launch(config, archive, manifest, loader, review=False, campaign=None, valid
         termination["cause"] = cause
     from megascene_gpu import read_stream as read_gpu
     gpu_records, gpu_problems = read_gpu(destination/"gpu.jsonl", manifest)
+    frozen = read_json((archive/"schedule.json").read_text())
     result = report(records, problems, config, code, cause, int(supervised["launch_ns"]), manifest["attempt_id"], review,
-                    gpu_records, gpu_problems)
+                    gpu_records, gpu_problems, frozen)
     result["termination"] = termination
     result["supervision"] = supervised
     result["reference_completed_prefix"] = {"frames": supervised["completed_frame_prefix"], "actions": supervised["completed_actions"]}

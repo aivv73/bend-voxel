@@ -298,3 +298,17 @@ law palette_material_order:
 # - Each variant has separate schedule, admission, checkpoint and achieved
 #   material/owner/surface/density/bounds evidence. Native/unsafe behavior is
 #   covered by independent reference and complete Vulkan replay, not proof.
+
+# Archived static/localized reproduction (issue #63; runtime/reference scope):
+# - Retrieve the exact executable, native library, linked libraries, shaders,
+#   generated source, generator, configuration and frozen schedule from the
+#   recorded durable archive. Verify their SHA-256 bytes before execution.
+# - A fresh validation and timed replay use those restored inputs and their
+#   original thread/profile/frame settings. Compare initial inventory and
+#   canonical state, action and geometry checkpoints with the source attempt.
+# - A missing/tampered artifact, changed configuration, failed replay, damaged
+#   stream or mismatch cannot pass reproduction. Keep incomplete attempts and
+#   partial archive writes under distinct identities without overwriting bytes.
+# - Actual host graphics dependencies and elapsed time are recorded separately;
+#   reproduction does not prove cross-platform equality or performance gates.
+#   Native/unsafe behavior remains runtime/reference evidence, not formal proof.

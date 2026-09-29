@@ -131,14 +131,12 @@ recorded. Inherited `VOXEL_*`, `MEGASCENE_*`, `VK_*` and loader overrides are
 removed; configured settings and disabled implicit Vulkan layers are recorded.
 
 `invocation.json` stores the exact executable command, working directory,
-controlled environment and launch time. To recover at another directory, copy
-the complete runtime and frozen inputs, verify manifest SHA-256 identities, and
-invoke the retained `megascene_static.launch` with the recovered runtime, a new
-evidence path/attempt identity and the existing `Campaign` allowance. The
-supervisor must create the shared recorder and release the worker preflight
-gate; directly running the executable no longer supplies that boundary.
-Recorders refuse to overwrite existing streams. The opt-in integration test exercises relocation without compiling or
-loading the checkout's application library/shaders.
+controlled environment and launch time. Use the [archive reproduction command](megascene-reproduction.md)
+to retrieve and verify the complete runtime and frozen inputs in a clean
+location. It creates new validation and timed attempts through the supervisor.
+Recorders refuse to overwrite existing streams. The opt-in integration test
+exercises relocation without compiling or loading the checkout's application
+library/shaders.
 
 Failures retain stdout/stderr, actual exit code or signal, known deadline or
 external-stop cause, and completed frame prefix. A signal alone is not evidence

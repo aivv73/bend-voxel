@@ -252,6 +252,9 @@ def execute(config, output, manifest):
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if any(arg == "--reproduce-from" or arg.startswith("--reproduce-from=") for arg in argv):
+        from megascene_reproduce import main as reproduce
+        return reproduce(argv)
     output = None
     created_output = False
     campaign = None

@@ -385,7 +385,7 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
         missing.append("evidence_integrity")
     if not reference or any("reference" in e.lower() for e in errors):
         missing.append("reference_evidence")
-    if result["attempt_kind"] in ("calibration_off","validation_only","validation_replay","opening_capture","admission"):
+    if result["attempt_kind"] in ("calibration_off","validation_only","validation_replay","opening_capture","admission","reproduction"):
         missing.append("nonqualifying_attempt_kind")
     if cause in RESERVE_CAUSES or cause in ("required_edit_rejection","allocation_error","device_loss"):
         failures.append(cause)

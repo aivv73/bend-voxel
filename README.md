@@ -71,6 +71,8 @@ variants with separate validation identities and actual inventory evidence.
 The [attempt reporter](docs/megascene-report.md) reads retained raw evidence and
 classifies correctness, fidelity, completion, availability, populations,
 calibration, responsiveness, capacity and termination independently.
+The [archive reproduction command](docs/megascene-reproduction.md) restores
+saved static and localized runtimes and frozen inputs for exact checkpoint comparison.
 
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),
