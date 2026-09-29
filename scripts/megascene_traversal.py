@@ -5,6 +5,7 @@ import struct
 
 from megascene_inventory import SCHEMA, canonical, digest, integer, require
 from megascene_recipe import bits
+from megascene_scale import side_count
 
 PHASES = (("opening", 0), ("wall", 0), ("interior", 0), ("cavity", 0),
           ("assembly", 0), ("far", None), ("opening", -1), ("cavity", -1),
@@ -27,7 +28,7 @@ def f32(value):
 
 def pose(name, neighborhood, preset, seed, route, control=None):
     require(route in ROUTES, "unsupported traversal route")
-    q = 2 if preset == "small" else 4
+    q = side_count(preset)
     if name == "far":
         side = 32 * q
         eye, look = (0, .75*side, 1.25*side), (0, 2.4, 0)
@@ -106,7 +107,7 @@ def schedule(config):
         review_name = f"review_route_{i:02d}"
         features = FEATURES[name]+(["unchanged return geometry"] if i >= 6 else [])
         reviews.append({"name": review_name, "frame": frame, "pose": name,
-                        "neighborhood": None if n is None else str((2 if config["preset"] == "small" else 4)**2-1 if n == -1 else n),
+                        "neighborhood": None if n is None else str(side_count(config["preset"])**2-1 if n == -1 else n),
                         "features": features})
         checkpoints.append({"name": review_name, "frame": frame})
     reviews.append({"name": "completion", "frame": str(warmup+measured),

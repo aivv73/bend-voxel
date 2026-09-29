@@ -79,6 +79,21 @@ law palette_length:
 #   See docs/megascene-admission.md. These are runtime/reference checks only;
 #   admission does not prove unsafe geometry or qualify a Vulkan attempt.
 
+# Mixed-district scale admission (issue #66; runtime/reference scope):
+# - A square scale q>=2 has q*q neighborhoods, each retaining its 320-cell
+#   patch, five initial structure owners, cell size, vertical envelope and
+#   row-major ownership. Supported q=2..5 is an operational range, not a
+#   measured physical ceiling; unsupported requests retain rejection evidence.
+# - Growth minimizes distance to twice q^2; area-midpoint refinement uses
+#   interior integer q and lower ties. Adjacent q values stop discretely.
+# - History uses the smallest stride >=5 coprime to q^2, and each group's
+#   revisit index counts actual prior visits to its mapped neighborhood.
+# - Freeze all case cameras, rays, targets and required actions before unsafe
+#   replay. Reject unreachable or unsupported numeric operations; do not
+#   shrink, skip or retarget. Evolving edit/pick/native checks remain necessary.
+# - Scale properties that depend on unsafe/native code require retained
+#   runtime and independent reference evidence, never a formal proof claim.
+
 # - Static Vulkan development observations freeze the binary32 opening view
 #   and 1/60 step, disable picking/edits, and preserve physics-before-render.
 #   Full geometry retains proxy bookkeeping, fixed ground and 2048^2 shadows.

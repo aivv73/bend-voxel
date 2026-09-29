@@ -13,6 +13,7 @@ import uuid
 
 from megascene_inventory import SCHEMA, canonical, integer, inventory, measurement, outcome, read_json, require
 from megascene_recipe import admit_sources, bend_program, bits, checked, envelope_cells, generate, CONTROLS
+from megascene_scale import side_count, operational_bounds, admit_schedule, preflight
 from megascene_gpu import u64
 
 
@@ -51,7 +52,9 @@ def settings(args, base):
     elif args.case in ("localized", "support", "history"):
         variants = {"history-12-v1", "history-48-v1", "support-1-span-v1", "support-2-span-v1"}
         schedule_id = (args.schedule if args.schedule in variants and not control else
-                       f"{control}-{args.case}-v1" if control else args.case+"-v1")
+                       f"{control}-{args.case}-v1" if control else
+                       "history-v2" if args.case == "history" and base["preset"] not in ("small","large") else
+                       args.case+"-v1")
         if schedule_id in variants:
             require((args.case == "history" and schedule_id.startswith("history-")) or
                     (args.case == "support" and schedule_id.startswith("support-")),
@@ -217,10 +220,12 @@ def audit_observation(records, config, frames, frozen=None):
             require(actual["present_mode"] in ("immediate", "mailbox"), "unsupported presentation mode")
             require(str(actual["ground_half_extent_m"]) == str(int(config.get("envelope_side_m", config["side_m"]))//2+8), "ground bounds mismatch")
         frozen = frozen if frozen is not None else schedule(config)
+        q = side_count(config["preset"])
         owners = (4 if config.get("diagnostic") == "compact-reference" else
-                  (25 if config["preset"] == "small" else 97) if config.get("control") == "body-rich" else
-                  21 if config["preset"] == "small" else 81)
-        source_cells = int(config.get("source_cells", "10503360" if owners == 21 else "42096576"))
+                  1+6*q*q if config.get("control") == "body-rich" else 1+5*q*q)
+        require(q in (2,4) or "source_cells" in config,
+                "actual candidate source cell count required for observation audit")
+        source_cells = int(config.get("source_cells", "10503360" if q == 2 else "42096576"))
         by_frame = {}
         for r in records:
             by_frame.setdefault(r["frame"], []).append(r)
@@ -450,8 +455,12 @@ def execute(config, output, manifest, campaign):
         from megascene_proxy import owners as diagnostic_owners
         owners = diagnostic_owners(config)
     else:
-        owners = generate(config["preset"], int(config["seed"]), config.get("control"))
-    bounds = admit_sources(owners, int(config["envelope_side_m"])*5, int(config["fragment_budget"]))
+        owners = preflight(generate,config["preset"], int(config["seed"]), config.get("control"))
+    bounds = preflight(admit_sources,owners, int(config["envelope_side_m"])*5, int(config["fragment_budget"]))
+    bounds["operational"] = preflight(operational_bounds,side_count(config["preset"]),len(owners),int(bounds["cells"]),
+        sum(map(int,bounds["surface_rectangle_bounds"])),int(bounds["vertex_bound"]),
+        int(config["warmup"])+int(config["frames"])+1,int(config["fragment_budget"]),
+        tuple(map(int,config["resolution"].split("x"))))
     config["source_cells"] = bounds["cells"]
     if config.get("control"):
         from megascene_controls import source_effects
@@ -461,9 +470,10 @@ def execute(config, output, manifest, campaign):
     render_vertices = checked(int(bounds["vertex_bound"])+36*len(owners)+6+50000, "static render vertices")
     bounds["static_native_byte_bound"] = str(checked(render_vertices*64*2, "static native arena capacity"))
     manifest["numeric_bounds"] = bounds
-    manifest["numeric_admission"] = outcome("pass", "fixed all-anchored inputs; no edits/motion; bounded frame and native sizes",
-                                             "static fixed-preset initialization", ["inputs.json"])
-    frozen = schedule(config, owners)
+    manifest["numeric_admission"] = outcome("pass", "checked source and declared operational scale envelope",
+                                             "candidate source, frame and native sizes", ["inputs.json"])
+    frozen = preflight(schedule,config, owners)
+    bounds["frozen_schedule"] = preflight(admit_schedule,config,frozen)
     if config["case"] == "history":
         created=sum(int(a["reference_components"]) for a in frozen["actions"])
         removed=sum(int(a["expected_removed_cells"]) for a in frozen["actions"])
@@ -517,7 +527,7 @@ def execute(config, output, manifest, campaign):
         manifest["source"] = original["source"]
         loader = Path(original["worker_command"][0]).name
         if not config.get("validated"):
-            for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+            for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
                 shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
         manifest["artifacts"] += [artifact(output/name,output) for name in input_names]
@@ -525,7 +535,7 @@ def execute(config, output, manifest, campaign):
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
