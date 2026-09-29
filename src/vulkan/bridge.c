@@ -665,9 +665,14 @@ static void voxel_support_detail(BendWin* win) {
   u64 frame=mega_frame-1;
   if(!getenv("MEGASCENE_VALIDATE") || frame<=mega_warmup || frame>mega_warmup+31 || (frame-mega_warmup-1)%6) return;
   unsigned action=(unsigned)((frame-mega_warmup-1)/6);
+  const char* count_text=mega_env("MEGASCENE_DETAIL_CAMERA_COUNT");
+  char* end=NULL;
+  unsigned long count=strtoul(count_text,&end,10);
+  if(!end || *end || (count!=2 && count!=4 && count!=6)) err_fail("invalid supplementary camera count");
+  if(action>=count) return;
   FILE* file=fopen(mega_env("MEGASCENE_DETAIL_CAMERA_FILE"),"rb");
   u32 views[30];
-  if(!file || fread(views,4,30,file)!=30 || fgetc(file)!=EOF || fclose(file)) err_fail("supplementary camera input unavailable");
+  if(!file || fread(views,4,5*count,file)!=5*count || fgetc(file)!=EOF || fclose(file)) err_fail("supplementary camera input unavailable");
   u32* words=views+5*action;
   VoxelVkFrame detail=mega_capture_frame;
   for(unsigned i=0;i<5;i++) {

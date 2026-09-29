@@ -45,7 +45,16 @@ def settings(args, base):
         schedule_id = f"proxy-{diagnostic}-{args.case}-v1" if diagnostic else args.schedule or args.case+"-v2"
         require(args.schedule is None or args.schedule == schedule_id, "unsupported frozen schedule")
     elif args.case in ("localized", "support", "history"):
-        schedule_id = f"{control}-{args.case}-v1" if control else args.case+"-v1"
+        variants = {"history-12-v1", "history-48-v1", "support-1-span-v1", "support-2-span-v1"}
+        schedule_id = (args.schedule if args.schedule in variants and not control else
+                       f"{control}-{args.case}-v1" if control else args.case+"-v1")
+        if schedule_id in variants:
+            require((args.case == "history" and schedule_id.startswith("history-")) or
+                    (args.case == "support" and schedule_id.startswith("support-")),
+                    "variant schedule/case mismatch")
+            require(base["preset"] == "small" and base["seed"] == "45" and base["threads"] == "6"
+                    and args.resolution in (None, "1920x1080"),
+                    "history/span controls require small/seed-45/1080p/6 threads")
         require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
     else:
         schedule_id = f"{control}-static-v1" if control else "static-v1"
@@ -72,7 +81,9 @@ def settings(args, base):
     return {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": args.case, "diagnostic": diagnostic, "control": control, "envelope_side_m": str(envelope_cells(base["preset"], control)//10), "profile": args.profile or "full", "resolution": args.resolution or "1920x1080",
             "warmup": str(warmup), "frames": str(frames), "schedule": schedule_id, "deadline_s": str(deadline),
             "capture_opening": args.capture_opening, "archive": str(archive),
-            "schedule_kind": "accepted" if (warmup, frames) == (120, 3600) else "declared_development_prefix"}
+            "schedule_kind": "declared_control" if schedule_id in {"history-12-v1", "history-48-v1",
+                                                                    "support-1-span-v1", "support-2-span-v1"} else
+                             "accepted" if (warmup, frames) == (120, 3600) else "declared_development_prefix"}
 
 
 def schedule(config, owners=None):
@@ -218,8 +229,9 @@ def audit_observation(records, config, frames):
             require({k:state[k] for k in camera} == camera, "actual view differs from frozen camera schedule")
             if config.get("case") == "support":
                 from megascene_support import CUT_FRAMES, motion, value
-                i=int(f['frame']);cuts=sum(at<=i for at in CUT_FRAMES)
-                released=[at for at in CUT_FRAMES[1::2] if at<=i]
+                i=int(f['frame']);cut_frames=tuple(int(a['frame']) for a in frozen['actions'])
+                cuts=sum(at<=i for at in cut_frames)
+                released=[at for at in cut_frames[1::2] if at<=i]
                 moving=sum(value(motion(min(i-at,80),42+(8 if config.get('control')=='fill' else 0))[1])!=0 for at in released)
                 translated=sum(i>at for at in released)
                 require((state['anchored'],state['fragments'],state['moving'],state['translated'])==
@@ -318,6 +330,7 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
     complete = (not problems and exit_code == 0 and cause == "normal_exit" and
                 any(r["record_type"] == "complete" for r in records) and
                 len(prefix) == (1 if review else 1+int(config["warmup"])+int(config["frames"])))
+    completion_scope = frozen["schedule_id"] if frozen.get("variant") else config.get("schedule_kind", "accepted")
     missing = outcome("inconclusive", "not implemented in static development slice", "complete qualified attempt")
     result = {"schema": SCHEMA, "record_type": "summary", "attempt_id": attempt_id,
               "attempt_kind": "opening_capture" if review else "development_observation", "synthetic": any(r.get("synthetic", False) for r in records),
@@ -325,7 +338,7 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
               **{k: dict(missing) for k in ("state_correctness", "rendering_correctness", "visual_quality", "numeric_validity",
                   "population_qualification", "calibration", "responsiveness", "qualified_capacity", "interactive_pass")},
               "schedule_completion": outcome("pass" if complete else "inconclusive", "declared schedule completed" if complete else "incomplete or invalid evidence",
-                                             "opening capture only" if review else config["schedule_kind"], ["cpu.jsonl", "gpu.jsonl"]),
+                                             "opening capture only" if review else completion_scope, ["cpu.jsonl", "gpu.jsonl"]),
               "completed_prefix": {"startup": bool(prefix), "warmup": str(min(max(0,len(prefix)-1),int(config["warmup"]))),
                                    "measured": str(max(0,len(prefix)-1-int(config["warmup"])))},
               "termination": {"cause": cause, "exit_code": str(exit_code) if exit_code >= 0 else None,
@@ -353,7 +366,10 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
     if config.get("case") in ("localized", "support", "history"):
         accepted = [r for r in records if r["record_type"] == "edit" and r["accepted"]]
         result["accepted_edits"] = distribution([int(r["duration_ns"]) for r in accepted])
-        result["edit_response"] = outcome("inconclusive", f"{len(accepted)} accepted edit(s); correctness and instrumentation calibration still govern qualification", "accepted edits", ["cpu.jsonl", "reference.jsonl"])
+        edit_reason = (f"{len(accepted)} accepted edits; fewer than 100 required for edit percentiles"
+                       if len(accepted)<100 else
+                       f"{len(accepted)} accepted edits; correctness and instrumentation calibration still govern qualification")
+        result["edit_response"] = outcome("inconclusive",edit_reason, "accepted edits", ["cpu.jsonl", "reference.jsonl"])
         result["combined_frames"] = distribution([int(r["duration_ns"]) for r in prefix if r["population"] in ("ordinary", "edit", "motion")])
         result["edit_stages"] = [r for r in records if r["record_type"] == "stage" and r["frame"] in {a["frame"] for a in frozen["actions"]}]
     result["cold_startup"] = measurement("measured", "process launch to first usable frame-effect return", "startup", "ns",
@@ -370,7 +386,8 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
     if config.get("case") == "history":
         named={}
         windows={name:range(int(pair[0]),int(pair[1])+1) for name,pair in frozen['history_populations'].items()}
-        windows['moved_span_window']={12*(10*b+4)+step for b in range(12) for step in range(1,12)}
+        windows['moved_span_window']={12*int(a['action'])+step for a in frozen['actions']
+                                      if int(a['action'])%10==4 for step in range(1,12)}
         for name,ordinals in windows.items():
             selected=[r for r in prefix if r['frame']!='0' and int(r['frame'])-121 in ordinals]
             named[name]={kind:distribution([int(r['duration_ns']) for r in selected if kind=='all' or r['population']==kind])
@@ -394,7 +411,10 @@ def report(records, problems, config, exit_code, cause, launch_ns, attempt_id, r
     result["evidence_errors"] += ["GPU: "+e for e in result["gpu_execution"]["errors"]]
     if prefix and not result["gpu_execution"]["required_evidence_complete"]:
         result["schedule_completion"] = outcome("inconclusive", "required GPU evidence incomplete; CPU prefix retained",
-                                                config["schedule_kind"], ["cpu.jsonl", "gpu.jsonl"])
+                                                completion_scope, ["cpu.jsonl", "gpu.jsonl"])
+    if frozen.get("variant") and not frozen["variant"]["baseline_completion_equivalence"]:
+        result["baseline_schedule_completion"] = outcome("not_applicable", "shortened action schedule cannot complete its baseline",
+                                                         frozen["variant"]["baseline_schedule_id"])
     return result
 
 
@@ -505,7 +525,7 @@ def execute(config, output, manifest, campaign):
             (runtime/"src/megascene_edit_reference_entry.bend").write_text(edit_reference_program())
         if config["case"] == "support":
             from megascene_support_references import program as support_reference_program
-            (runtime/"src/megascene_support_reference_entry.bend").write_text(support_reference_program())
+            (runtime/"src/megascene_support_reference_entry.bend").write_text(support_reference_program(config))
         if config["case"] == "history":
             from megascene_history_references import program as history_reference_program
             (runtime/"src/megascene_history_reference_entry.bend").write_text(history_reference_program())
@@ -577,6 +597,7 @@ def execute(config, output, manifest, campaign):
         manifest["worker_environment"]["MEGASCENE_CAMERA_FILE"] = "../camera.bin"
     if config['case']=='support':
         manifest['worker_environment']['MEGASCENE_DETAIL_CAMERA_FILE']='../support-review.bin'
+        manifest['worker_environment']['MEGASCENE_DETAIL_CAMERA_COUNT']=str(len(frozen['supplementary_views']))
     if config["case"] == "picking":
         manifest["worker_environment"]["MEGASCENE_RAY_FILE"] = "../rays.bin"
     if config["case"] in ("localized", "support", "history"):

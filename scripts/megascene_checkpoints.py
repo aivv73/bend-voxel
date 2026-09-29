@@ -144,10 +144,10 @@ def checkpoint_catalog(frozen):
 
 def audit(records, frozen, expected, expected_work, complete, thorough=False):
     """Verify every replay frame, or the timed checkpoint catalog, with evidence."""
-    if frozen["schedule_id"] in ("history-v1", "fill-history-v1", "body-rich-history-v1"):
+    if frozen["schedule_id"] in ("history-v1", "history-12-v1", "history-48-v1", "fill-history-v1", "body-rich-history-v1"):
         from megascene_history import audit as audit_history
         return audit_history(records, frozen, expected, expected_work, complete, thorough)
-    if frozen["schedule_id"] in ("support-v1", "fill-support-v1"):
+    if frozen["schedule_id"] in ("support-v1", "support-1-span-v1", "support-2-span-v1", "fill-support-v1"):
         from megascene_support import audit as audit_support
         return audit_support(records, frozen, expected, expected_work, complete, thorough)
     if frozen["schedule_id"] in ("localized-v1", "material-detail-localized-v1"):
