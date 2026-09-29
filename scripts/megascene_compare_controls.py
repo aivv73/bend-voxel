@@ -28,7 +28,7 @@ def compare(baseline, control):
     base_manifest,base_validation,base = load(Path(baseline))
     variant_manifest,variant_validation,variant = load(Path(control))
     a,b = base_manifest["effective"],variant_manifest["effective"]
-    require(a["control"] is None and b["control"] in ("spread","material-detail","surface-detail"),
+    require(a.get("control") is None and b["control"] in ("spread","material-detail","surface-detail","fill","body-rich"),
             "expected baseline and terrain control")
     for key in ("case","preset","seed","threads","resolution","profile","fragment_budget","warmup","frames"):
         require(a[key] == b[key], "baseline/control mismatch: "+key)
@@ -40,6 +40,10 @@ def compare(baseline, control):
             a["resolution"] == "1920x1080" and a["profile"] == "full", "unsupported control comparison")
     if b["control"] == "material-detail":
         require(b["case"] in ("static","localized"), "unsupported material control case")
+    elif b["control"] == "fill":
+        require(b["case"] in ("support","history"), "unsupported fill control case")
+    elif b["control"] == "body-rich":
+        require(b["case"] == "history", "unsupported body-rich control case")
     else:
         require(b["case"] == "static", "unsupported control case")
     effects = variant["control_comparison"]
@@ -47,8 +51,9 @@ def compare(baseline, control):
             and effects["baseline_source"]["cells"] == base["cells"], "source/achieved inventory mismatch")
     metrics = ("cells","protected_cells","cuboids","surface_rectangles","exposed_area_cell_faces","vertices")
     delta = {key: str(integer(variant[key],signed=False)-integer(base[key],signed=False)) for key in metrics}
-    require(base["bodies"]["initial_owners"] == variant["bodies"]["initial_owners"] == "21",
-            "terrain control changed owner count")
+    require(base["bodies"]["initial_owners"] == "21" and
+            variant["bodies"]["initial_owners"] == ("25" if b["control"] == "body-rich" else "21"),
+            "control owner count mismatch")
     if b["control"] == "spread":
         require(delta["cells"] == "46080" and integer(delta["protected_cells"],signed=True) == 1920 and
                 variant["generation_envelope_cells"]["lo"] == ["-480","0","-480"] and
@@ -62,13 +67,29 @@ def compare(baseline, control):
                 base["exposed_area_by_material_cell_faces"] != variant["exposed_area_by_material_cell_faces"] and
                 integer(delta["cuboids"],signed=True) > 0 and
                 integer(delta["surface_rectangles"],signed=True) > 0, "material control invariants mismatch")
-    else:
+    elif b["control"] == "surface-detail":
         require(delta["cells"] == "-2048" and delta["protected_cells"] == "0" and
                 base["generation_envelope_cells"] == variant["generation_envelope_cells"] and
                 base["occupied_bounds_cells"] == variant["occupied_bounds_cells"] and
                 integer(delta["exposed_area_cell_faces"],signed=True) > 0 and
                 integer(delta["cuboids"],signed=True) > 0 and
                 integer(delta["surface_rectangles"],signed=True) > 0, "surface control invariants mismatch")
+    elif b["control"] == "fill":
+        require(b["case"] in ("support","history") and delta["cells"] == "3276800" and
+                delta["protected_cells"] == "0" and
+                base["generation_envelope_cells"] == variant["generation_envelope_cells"] and
+                base["occupied_bounds_cells"]["lo"] == variant["occupied_bounds_cells"]["lo"] and
+                base["occupied_bounds_cells"]["hi"][1] != variant["occupied_bounds_cells"]["hi"][1] and
+                variant["cells_by_material"]["2"] != base["cells_by_material"]["2"],
+                "fill control invariants mismatch")
+    else:
+        require(b["case"] == "history" and delta["cells"] == "-76032" and
+                delta["protected_cells"] == "0" and
+                base["generation_envelope_cells"] == variant["generation_envelope_cells"] and
+                base["occupied_bounds_cells"] == variant["occupied_bounds_cells"] and
+                integer(delta["exposed_area_cell_faces"],signed=True) < 0 and
+                integer(delta["surface_rectangles"],signed=True) < 0,
+                "body-rich control invariants mismatch")
     return {"schema": SCHEMA,"record_type":"terrain_control_comparison", "status":"pass",
             "scope":"validated achieved work comparison; unqualified development observations",
             "control":b["control"],"case":b["case"],
@@ -76,7 +97,9 @@ def compare(baseline, control):
                         "schedule_sha256":base_manifest["worker_environment"]["MEGASCENE_SCHEDULE_SHA256"]},
             "variant":{"attempt_id":variant_manifest["attempt_id"],"validation_id":variant_validation["attempt_id"],
                        "schedule_sha256":variant_manifest["worker_environment"]["MEGASCENE_SCHEDULE_SHA256"]},
-            "delta":delta,"materials":{"baseline":base["cells_by_material"],"variant":variant["cells_by_material"]},
+            "delta":delta,"owners":{"baseline":base["bodies"],"variant":variant["bodies"]},
+            "density":{"baseline":base["density"],"variant":variant["density"]},
+            "materials":{"baseline":base["cells_by_material"],"variant":variant["cells_by_material"]},
             "exposed_area_by_material_cell_faces":{"baseline":base["exposed_area_by_material_cell_faces"],
                 "variant":variant["exposed_area_by_material_cell_faces"]},
             "bounds":{"baseline":base["occupied_bounds_cells"],"variant":variant["occupied_bounds_cells"]},

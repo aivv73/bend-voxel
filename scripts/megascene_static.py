@@ -26,7 +26,8 @@ def settings(args, base):
     diagnostic = None if control else args.diagnostic
     if control:
         require((args.case, control) in (("static", "spread"), ("static", "material-detail"),
-                ("localized", "material-detail"), ("static", "surface-detail")), "unsupported control/case combination")
+                ("localized", "material-detail"), ("static", "surface-detail"),
+                ("support", "fill"), ("history", "fill"), ("history", "body-rich")), "unsupported control/case combination")
         require(base["preset"] == "small" and base["seed"] == "45" and base["threads"] == "6"
                 and args.resolution in (None, "1920x1080"), "terrain controls require small/seed-45/1080p/6 threads")
     if diagnostic is not None:
@@ -198,7 +199,9 @@ def audit_observation(records, config, frames):
             require(actual["present_mode"] in ("immediate", "mailbox"), "unsupported presentation mode")
             require(str(actual["ground_half_extent_m"]) == str(int(config.get("envelope_side_m", config["side_m"]))//2+8), "ground bounds mismatch")
         frozen = schedule(config)
-        owners = 4 if config.get("diagnostic") == "compact-reference" else 21 if config["preset"] == "small" else 81
+        owners = (4 if config.get("diagnostic") == "compact-reference" else
+                  (25 if config["preset"] == "small" else 97) if config.get("control") == "body-rich" else
+                  21 if config["preset"] == "small" else 81)
         source_cells = int(config.get("source_cells", "10503360" if owners == 21 else "42096576"))
         by_frame = {}
         for r in records:
@@ -217,12 +220,12 @@ def audit_observation(records, config, frames):
                 from megascene_support import CUT_FRAMES, motion, value
                 i=int(f['frame']);cuts=sum(at<=i for at in CUT_FRAMES)
                 released=[at for at in CUT_FRAMES[1::2] if at<=i]
-                moving=sum(value(motion(min(i-at,60))[1])!=0 for at in released)
+                moving=sum(value(motion(min(i-at,80),42+(8 if config.get('control')=='fill' else 0))[1])!=0 for at in released)
                 translated=sum(i>at for at in released)
                 require((state['anchored'],state['fragments'],state['moving'],state['translated'])==
                         tuple(map(str,(owners+(cuts+1)//2,len(released),moving,translated))), 'support inventory/moving count mismatch')
                 require((state['cells'],state['removed'],state['next_id'],state['budget'])==
-                        (str((10503360 if owners==21 else 42096576)-cuts*16),'16' if cuts else '0',str(owners+1+2*cuts),config['fragment_budget']), 'support material/identity inventory mismatch')
+                        (str(source_cells-cuts*16),'16' if cuts else '0',str(owners+1+2*cuts),config['fragment_budget']), 'support material/identity inventory mismatch')
                 require(work['body_count']==work['full_meshes']==str(owners+cuts),'support full meshes missing')
             elif config.get("case") == "history":
                 require(state['budget']==config['fragment_budget'] and int(state['cells'])>0 and
@@ -475,7 +478,8 @@ def execute(config, output, manifest, campaign):
         if config.get("validated"):
             keys += ("profile",)
         for key in keys:
-            require(config[key] == original["effective"][key], f"archived runtime configuration mismatch: {key}")
+            previous = original["effective"].get(key, original["effective"]["side_m"] if key == "envelope_side_m" else None)
+            require(config.get(key) == previous, f"archived runtime configuration mismatch: {key}")
         require(canonical(frozen) == canonical(read_json((source/"schedule.json").read_text())), "archived schedule mismatch")
         shutil.copytree(source/"runtime", runtime)
         manifest["build"] = original["build"]

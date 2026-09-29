@@ -67,3 +67,43 @@ performance or visual quality.
 The [issue #59 evidence index](validation/megascene-controls/README.md) records
 the completed control and baseline Vulkan attempts, comparison reports and
 capture previews.
+
+## Fill and initial body-count pressure
+
+Issue #60 adds three complete small/seed-45/1920 x 1080/six-thread variants:
+`--case support --diagnostic fill`, `--case history --diagnostic fill`, and
+`--case history --diagnostic body-rich`. Each resolves a distinct `*-v1`
+schedule, numeric admission, full validation replay and timed attempt.
+
+Use the command above with one of these case/diagnostic pairs and a fresh
+`--output` directory for every attempt:
+
+| Case | Command options | Frozen schedule |
+| --- | --- | --- |
+| Fill support | `--case support --diagnostic fill` | `fill-support-v1` |
+| Fill history | `--case history --diagnostic fill` | `fill-history-v1` |
+| Body-rich history | `--case history --diagnostic body-rich` | `body-rich-history-v1` |
+
+Fill inserts concrete at Y=[8,16) in every neighborhood, lifts original
+terrain with low Y>=8 and all structures by eight cells, and shifts support
+and history targets and views with them. The y=0 protected foundation stays
+fixed. The cavity remains sixteen cells deep, now at Y=[16,32), under the
+fixed generation envelope Y=[0,128). The small source starts with 13,780,160
+cells and 21 owners; the additional 3,276,800 cells are material 2.
+
+Body-rich removes building cells in local X=[72,80), leaving two connected,
+independently anchored building owners per neighborhood. The small source has
+10,427,328 cells and 25 initial owners. History action 6 targets the remaining
+back wall at `(40+3*r,48,134)` from eye `(40+3*r,48,120)`. The interior view
+looks from `(40,48,80)` toward `(40,48,132)`. These are declared variant
+coordinates; preflight verifies each cut against the actual evolving geometry.
+
+`numeric_bounds.control_effects` records source cells, materials, owners, boxes
+and occupied bounds against baseline. `validation/inventory.json` records
+achieved production cuboids, surfaces, area, density, materials, bodies and
+bounds. Use `megascene_compare_controls.py` with a matching complete support
+or history baseline to retain actual deltas and independent validation IDs.
+The [issue #60 evidence index](validation/megascene-fill-body/README.md)
+records the outcomes. As with the earlier controls, observations are not
+qualified benchmark or capacity passes without the remaining review and
+calibration gates.

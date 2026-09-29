@@ -288,5 +288,5 @@ def inventory(text, owners, config, numeric):
         out["control_comparison"] = {**numeric["control_effects"],
             "achieved": {key: out[key] for key in ("cells", "cells_by_material", "protected_cells",
                 "generation_envelope_cells", "occupied_bounds_cells", "cuboids", "surface_rectangles",
-                "exposed_area_cell_faces", "exposed_area_by_material_cell_faces", "vertices")}}
+                "exposed_area_cell_faces", "exposed_area_by_material_cell_faces", "vertices", "bodies", "density")}}
     return out
