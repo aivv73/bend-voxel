@@ -65,6 +65,15 @@ law palette_length:
 #   diagnostics with explicit limited equivalence evidence; they never qualify
 #   benchmark passes or endpoints. Qualifying runs retain all required checks.
 #   See docs/megascene-spec.md for the handoff and calibration protocol.
+# - Issue #65 calibration uses 12 exact static/history × preset × thread
+#   configurations at full 1080p. Each has six fresh controls in
+#   off/on/on/off/off/on order, with separate complete mode validations.
+#   Each applicable ordinary mean/p95/p99 and history accepted-edit p95 must
+#   have sufficient populations and valid off denominators. Above 5% off
+#   variation is inconclusive; otherwise every paired increase must be at
+#   most 5%. Do not pool attempts, subtract cost or rerun without allowance.
+#   These unsafe/native-dependent properties require runtime/reference tests;
+#   Bend proof checks do not establish calibration or transient off equality.
 # - Fixed-preset initial admission now checks disjointness, positive-face
 #   connectivity, anchors, arithmetic bounds and actual production inventory.
 #   See docs/megascene-admission.md. These are runtime/reference checks only;

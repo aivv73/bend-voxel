@@ -61,3 +61,47 @@ resource omission and mismatched endpoint hashes. The supervisor tests exercise
 retrieval of committed shared records after a worker crash. Runtime and native
 properties are supported by those fixtures and real Vulkan replays, not by
 formal proofs that depend on unsafe definitions.
+
+## Ordered calibration series
+
+Issue #65's series coordinator produces the exact 12-configuration, 72-control
+plan and runs one configuration at a time. Each configuration uses seed 45,
+the accepted 120/3,600 schedule, full body geometry at 1920 × 1080, and the
+fresh-process order `off/on/on/off/off/on`. It first performs complete on and
+off validation replays, then reuses those matching validated artifacts in the
+six controls. Every step is written to a durable `series.json` before the next
+launch. A failed control remains in the series and is never silently retried.
+
+```sh
+python3 scripts/megascene_calibration_series.py plan > build/calibration-plan.json
+python3 scripts/megascene_calibration_series.py run \
+  --archive "$HOME/megascene-calibration-campaign" \
+  --work "$PWD/build/calibration-static-small-6" \
+  --case static --preset small --threads 6
+python3 scripts/megascene_calibration_series.py assess \
+  --series "$HOME/megascene-calibration-campaign/calibration-series/static-small-6/series.json"
+```
+
+The shared `campaign.json` charges validation and controls to the same initial
+two-hour allowance. Resuming any incomplete series requires
+`--additional-allowance SECONDS`; that flag adds a declared allowance to the
+existing campaign. Partial runs and their archives remain available. A
+noisy or excessive-overhead series does not launch extra controls.
+
+The assessor checks archived manifests, complete mode validations, common
+reference records, each on/off pair's endpoint and scalar-outcome agreement,
+ordinary population size and measured duration, and history's accepted-edit
+count. It retains each ordinary mean/p95/p99 and applicable accepted-edit p95
+for each control. Off variation above 5% is `noisy`; otherwise any paired
+increase above 5% is `failed`. Missing evidence, insufficient populations or
+zero denominators are `insufficient`. Only an exact six-control series whose
+every applicable statistic passes can report `pass`. The assessment does not
+subtract overhead, promote off attempts to benchmark passes, or establish
+transient equality in an off control. Its scope is the exact tested case,
+preset, seed, thread count, resolution, geometry profile, schedule, diagnostic,
+control and fragment budget.
+The coordinator writes `assessment.json` with every per-control value and
+`calibration.json` in the existing report reader's scope/status format. The
+three complete on attempts are listed as possible acceptance observations;
+they still need every separate acceptance gate and are not promoted by the
+calibration assessment alone.
