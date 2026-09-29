@@ -1,0 +1,398 @@
+{
+  "attempts": [
+    {
+      "archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/09ea8769-5493-4b9e-bd88-3e35bc5ef23e/3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+      "attempt_id": "3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+      "captures": [
+        {
+          "path": "captures/opening.ppm",
+          "sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d"
+        }
+      ],
+      "inventory": {
+        "cells": "10503360",
+        "cells_by_material": {
+          "1": "413888",
+          "2": "9388032",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        },
+        "cuboids": "204",
+        "exposed_area_cell_faces": "1412588",
+        "generation_envelope_cells": {
+          "hi": [
+            "320",
+            "128",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "occupied_bounds_cells": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "protected_cells": "413888",
+        "surface_rectangles": "1164",
+        "vertices": "6984"
+      },
+      "manifest_sha256": "4ebcdf43436f6bb316b0267689c492656e4cdd38bde24c20dbbeee37846e0181",
+      "name": "baseline-static-timed",
+      "rendering_correctness": "pass",
+      "schedule": "static-v1",
+      "schedule_completion": "pass",
+      "schedule_sha256": "3309c6f340c53af412480f04932dc0753170fa06c613784587d1708a6f9290dc",
+      "state_correctness": "pass",
+      "validated_frames": "3721",
+      "validation_id": "79c4e737-3ed2-4355-80a3-f8df35795450",
+      "validation_status": "pass",
+      "visual_quality": "inconclusive"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/478f8bf4-dfcf-4220-a5ec-80c8626268db/2bb184d5-69c1-47ff-afb4-db285dcc61b0",
+      "attempt_id": "2bb184d5-69c1-47ff-afb4-db285dcc61b0",
+      "captures": [
+        {
+          "path": "validation/captures/frame-0000.ppm",
+          "sha256": "96c9dcf80c32ba7dec2a3393749b9cbc5df51235e8aebe7e81cfa0dc533db85e"
+        },
+        {
+          "path": "validation/captures/frame-0121.ppm",
+          "sha256": "6d70e7a6b777446c79b2a93c9ddde8a36069e3187cf964d44785ab60572f4382"
+        },
+        {
+          "path": "validation/captures/frame-3720.ppm",
+          "sha256": "6d70e7a6b777446c79b2a93c9ddde8a36069e3187cf964d44785ab60572f4382"
+        }
+      ],
+      "inventory": {
+        "cells": "10503360",
+        "cells_by_material": {
+          "1": "413888",
+          "2": "9388032",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        },
+        "cuboids": "204",
+        "exposed_area_cell_faces": "1412588",
+        "generation_envelope_cells": {
+          "hi": [
+            "320",
+            "128",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "occupied_bounds_cells": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "protected_cells": "413888",
+        "surface_rectangles": "1164",
+        "vertices": "6984"
+      },
+      "manifest_sha256": "2c71aa2b542551559216b46df191dbf209c923a6349f071c62cf4053cca2ca96",
+      "name": "baseline-localized-timed",
+      "rendering_correctness": "pass",
+      "schedule": "localized-v1",
+      "schedule_completion": "pass",
+      "schedule_sha256": "3d3b5eb5befad07196de614b118b068ee7072bb5bfee1eb2ba7f0a7922f3b2fc",
+      "state_correctness": "pass",
+      "validated_frames": "3721",
+      "validation_id": "6bedead6-647a-43ac-966e-42b00f103aa6",
+      "validation_status": "pass",
+      "visual_quality": "inconclusive"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/da0c47ea-aef1-4138-980d-5d2e03b6b561/8d29c2f9-4bb8-43cd-a29a-0a29f9221fd1",
+      "attempt_id": "8d29c2f9-4bb8-43cd-a29a-0a29f9221fd1",
+      "captures": [
+        {
+          "path": "captures/opening.ppm",
+          "sha256": "06a55b20ca29a0ee9d6c3b5fc0854cad56545d1aca63eab8bc3dec3b338b416f"
+        }
+      ],
+      "inventory": {
+        "cells": "10549440",
+        "cells_by_material": {
+          "1": "415808",
+          "2": "9432192",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        },
+        "cuboids": "210",
+        "exposed_area_cell_faces": "1523660",
+        "generation_envelope_cells": {
+          "hi": [
+            "480",
+            "128",
+            "480"
+          ],
+          "lo": [
+            "-480",
+            "0",
+            "-480"
+          ]
+        },
+        "occupied_bounds_cells": {
+          "hi": [
+            "480",
+            "89",
+            "480"
+          ],
+          "lo": [
+            "-480",
+            "0",
+            "-480"
+          ]
+        },
+        "protected_cells": "415808",
+        "surface_rectangles": "1232",
+        "vertices": "7392"
+      },
+      "manifest_sha256": "c47f3a487c87e87a16840858d72657ff52da9daa7e4a60c2cb9e5c0eb03056db",
+      "name": "spread-captured",
+      "rendering_correctness": "pass",
+      "schedule": "spread-static-v1",
+      "schedule_completion": "pass",
+      "schedule_sha256": "07283ef3f2887dd3881d683c6fd1582c4006bb58fa464a28536b5d4b772fe22d",
+      "state_correctness": "pass",
+      "validated_frames": "3721",
+      "validation_id": "b097414a-cd0a-4b78-994f-f5f02b9f2835",
+      "validation_status": "pass",
+      "visual_quality": "inconclusive"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/37c85261-8a1d-40b4-828d-88f1f6ba450e/1f2a5187-2def-4339-b54a-b3dccd386690",
+      "attempt_id": "1f2a5187-2def-4339-b54a-b3dccd386690",
+      "captures": [
+        {
+          "path": "captures/opening.ppm",
+          "sha256": "869cf0bda758f9629bca02cbe4a15d0e7465a2e09e524dab8af7be023cf3df6e"
+        }
+      ],
+      "inventory": {
+        "cells": "10503360",
+        "cells_by_material": {
+          "1": "413888",
+          "2": "4740608",
+          "3": "179104",
+          "4": "26208",
+          "5": "5143552"
+        },
+        "cuboids": "1032",
+        "exposed_area_cell_faces": "1412588",
+        "generation_envelope_cells": {
+          "hi": [
+            "320",
+            "128",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "occupied_bounds_cells": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "protected_cells": "413888",
+        "surface_rectangles": "2792",
+        "vertices": "16752"
+      },
+      "manifest_sha256": "2c524e4de1867bb58fa9633b697f572726a5cd64110411f036dfb921ac08644a",
+      "name": "material-static-timed",
+      "rendering_correctness": "pass",
+      "schedule": "material-detail-static-v1",
+      "schedule_completion": "pass",
+      "schedule_sha256": "08f730597ccc7882740b0692e8d71e8922ffa5139f0f4e2f314fff4529f0fde4",
+      "state_correctness": "pass",
+      "validated_frames": "3721",
+      "validation_id": "d27aa065-9f75-4d7f-b59b-6ece3ee507d9",
+      "validation_status": "pass",
+      "visual_quality": "inconclusive"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/0ae916f1-b701-4916-bf9c-eb63ea858824/06de8ddf-2083-406b-b01e-1342cdade4f5",
+      "attempt_id": "06de8ddf-2083-406b-b01e-1342cdade4f5",
+      "captures": [
+        {
+          "path": "validation/captures/frame-0000.ppm",
+          "sha256": "e1011c7267faaaaeb3d4bf8e408b592257f3e1f0a0f3621c66be01deac179b31"
+        },
+        {
+          "path": "validation/captures/frame-0121.ppm",
+          "sha256": "a3f6a9e56d1d99e67e30eac86e6bcf255535f86369442dcb4ade44bfe131dbf5"
+        },
+        {
+          "path": "validation/captures/frame-3720.ppm",
+          "sha256": "a3f6a9e56d1d99e67e30eac86e6bcf255535f86369442dcb4ade44bfe131dbf5"
+        }
+      ],
+      "inventory": {
+        "cells": "10503360",
+        "cells_by_material": {
+          "1": "413888",
+          "2": "4740608",
+          "3": "179104",
+          "4": "26208",
+          "5": "5143552"
+        },
+        "cuboids": "1032",
+        "exposed_area_cell_faces": "1412588",
+        "generation_envelope_cells": {
+          "hi": [
+            "320",
+            "128",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "occupied_bounds_cells": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "protected_cells": "413888",
+        "surface_rectangles": "2792",
+        "vertices": "16752"
+      },
+      "manifest_sha256": "9694de41d597d9eca87259b7248aebba726c8e97fee9ca872c8e880120b76860",
+      "name": "material-localized-timed",
+      "rendering_correctness": "pass",
+      "schedule": "material-detail-localized-v1",
+      "schedule_completion": "pass",
+      "schedule_sha256": "59735a09dce87703fe0b90a05a702d89b2e81a24bbcddcb52e6b9114a94e06c7",
+      "state_correctness": "pass",
+      "validated_frames": "3721",
+      "validation_id": "c0330ae7-0e7e-43d5-95ca-d6aa0367048c",
+      "validation_status": "pass",
+      "visual_quality": "inconclusive"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/5eea733a-1594-4b8e-97e8-68e7d4b3bb47/0c633d6a-1086-4842-aa2d-c4ba53ff6907",
+      "attempt_id": "0c633d6a-1086-4842-aa2d-c4ba53ff6907",
+      "captures": [
+        {
+          "path": "captures/opening.ppm",
+          "sha256": "3d7fc0d4777804561512de8525f6c552ead9be415d930cdeca9aabf949cb865e"
+        }
+      ],
+      "inventory": {
+        "cells": "10501312",
+        "cells_by_material": {
+          "1": "413888",
+          "2": "9385984",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        },
+        "cuboids": "524",
+        "exposed_area_cell_faces": "1416684",
+        "generation_envelope_cells": {
+          "hi": [
+            "320",
+            "128",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "occupied_bounds_cells": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "protected_cells": "413888",
+        "surface_rectangles": "2856",
+        "vertices": "17136"
+      },
+      "manifest_sha256": "d0cae8192651c063d7a01abd8c21df1e1b716549c655c1976ca7defcdb751641",
+      "name": "surface-static-timed",
+      "rendering_correctness": "pass",
+      "schedule": "surface-detail-static-v1",
+      "schedule_completion": "pass",
+      "schedule_sha256": "5f4b716a4a3a8682bd1a79b15ef1d24e8207c00bdcdf6f546f9cbf17d96d68f9",
+      "state_correctness": "pass",
+      "validated_frames": "3721",
+      "validation_id": "35d24e9b-e8c8-4f88-96dc-9edc1c112a66",
+      "validation_status": "pass",
+      "visual_quality": "inconclusive"
+    }
+  ],
+  "comparisons": [
+    "material-localized-timed-comparison.json",
+    "material-static-timed-comparison.json",
+    "spread-captured-comparison.json",
+    "surface-static-timed-comparison.json"
+  ],
+  "issue": "59",
+  "prescribed_configuration": {
+    "frames": "3600",
+    "preset": "small",
+    "profile": "full",
+    "resolution": "1920x1080",
+    "seed": "45",
+    "threads": "6",
+    "warmup": "120"
+  },
+  "schema": "megascene-controls-evidence/1",
+  "scope": "separate real Vulkan validation and timed attempts; comparison reports are achieved-work checks, not benchmark qualification"
+}

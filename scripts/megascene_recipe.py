@@ -47,21 +47,55 @@ class Owner:
     boxes: list
 
 
-def generate(preset, seed):
+CONTROLS = ("spread", "material-detail", "surface-detail")
+
+
+def envelope_cells(preset, control=None):
+    q = 2 if preset == "small" else 4
+    return 640 * (q-1) + 320 if control == "spread" else 320 * q
+
+
+def generate(preset, seed, control=None):
     if preset not in ("small", "large") or seed not in (45, 46):
         raise ValueError("only small/large and seeds 45/46 are supported")
+    if control not in (None, *CONTROLS):
+        raise ValueError("unsupported terrain control")
     q = 2 if preset == "small" else 4
+    spacing = 640 if control == "spread" else 320
+    half = envelope_cells(preset, control)//2
     terrain = Owner("terrain", None, [])
     owners = [terrain]
     for iz in range(q):
         for ix in range(q):
             n = checked(ix + checked(q * iz, "row offset"), "neighborhood")
             v = (3 * ix + 5 * iz + seed - 45) % 4
-            ox, oz = 320 * ix - 160 * q, 320 * iz - 160 * q
+            ox, oz = spacing * ix - half, spacing * iz - half
 
             def add(owner, x, y, z, material):
-                owner.boxes.append(Box((x[0] + ox, y[0], z[0] + oz),
-                                       (x[1] + ox, y[1], z[1] + oz), material))
+                def append(x0, x1, y0, y1, z0, z1, m):
+                    owner.boxes.append(Box((x0+ox,y0,z0+oz),(x1+ox,y1,z1+oz),m))
+                if control == "surface-detail" and owner is terrain and (x,y,z) == ((224,288),(8,24),(0,240)):
+                    append(224,288,8,22,0,240,material)
+                    cursor = 224
+                    for u in range(8):
+                        x0 = 224+6*u
+                        if cursor < x0:
+                            append(cursor,x0,22,24,0,240,material)
+                        zcursor = 0
+                        for w in range(8):
+                            z0 = 16+6*w
+                            if zcursor < z0:
+                                append(x0,x0+2,22,24,zcursor,z0,material)
+                            zcursor = z0+2
+                        append(x0,x0+2,22,24,zcursor,240,material)
+                        cursor = x0+2
+                    append(cursor,288,22,24,0,240,material)
+                elif control == "material-detail" and owner is terrain and material == 2:
+                    for x0 in range(x[0],x[1],4):
+                        x1 = min(x0+4,x[1])
+                        append(x0,x1,*y,*z,2 if (x0//4)%2 == 0 else 5)
+                else:
+                    append(*x,*y,*z,material)
 
             for x, y, z, m in [
                 ((0,320),(0,1),(0,320),1),
@@ -124,6 +158,19 @@ def generate(preset, seed):
                 ((288,302+v%2),(34,50),(184,199),4),
             ]:
                 add(assembly, x, y, z, m)
+    if control == "spread":
+        def connector(x0,x1,z0,z1):
+            terrain.boxes.append(Box((x0,0,z0),(x1,1,z1),1))
+            terrain.boxes.append(Box((x0,1,z0),(x1,24,z1),2))
+        for iz in range(q):
+            for ix in range(q-1):
+                x0 = spacing*ix-half+320
+                z0 = spacing*iz-half+158
+                connector(x0,x0+320,z0,z0+2)
+        for iz in range(q-1):
+            x0 = 158-half
+            z0 = spacing*iz-half+320
+            connector(x0,x0+2,z0,z0+320)
     return owners
 
 

@@ -265,7 +265,7 @@ def inventory(text, owners, config, numeric):
                        "production_record_sha256": digest(body)})
     total = checked(sum(by_material.values()), "actual world cells")
     require(str(total) == numeric["cells"], "production cell total mismatch")
-    half = 320 if config["preset"] == "small" else 640
+    half = int(config.get("envelope_side_m", config["side_m"]))*5
     out = {"schema": SCHEMA, "record_type": "inventory", "requested_controls": config,
            "generation_envelope_cells": {"lo": [str(-half), "0", str(-half)],
                                          "hi": [str(half), "128", str(half)]},
@@ -284,4 +284,9 @@ def inventory(text, owners, config, numeric):
            "owners": result, "validation": "validation.json"}
     for key in ("authored_boxes", "cuboids", "tree_nodes", "surface_rectangles", "exposed_area_cell_faces", "vertices"):
         out[key] = str(checked(sum(integer(body[key]) for body in result), key))
+    if "control_effects" in numeric:
+        out["control_comparison"] = {**numeric["control_effects"],
+            "achieved": {key: out[key] for key in ("cells", "cells_by_material", "protected_cells",
+                "generation_envelope_cells", "occupied_bounds_cells", "cuboids", "surface_rectangles",
+                "exposed_area_cell_faces", "exposed_area_by_material_cell_faces", "vertices")}}
     return out
