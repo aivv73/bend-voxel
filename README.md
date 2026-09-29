@@ -63,6 +63,8 @@ mesh, shadow and named beam-feature evidence.
 The [history runner](docs/megascene-history.md) replays 120 frozen irregular cuts,
 checks every evolving edit and retains the separate history and moving-span
 populations.
+The [history and span controls](docs/megascene-schedule-variants.md) run the
+12/48-cut prefixes and one/two-span releases as separately validated schedules.
 The [terrain pressure controls](docs/megascene-controls.md) replay spread,
 material-detail, surface-detail, fill-support, fill-history and body-rich-history
 variants with separate validation identities and actual inventory evidence.

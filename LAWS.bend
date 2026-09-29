@@ -233,6 +233,21 @@ law palette_material_order:
 #   previously audited body. Re-read motion and view each frame; changing
 #   geometry under the same revision must miss this validation cache.
 
+# Megascene history/span controls (issue #61; runtime/reference evidence):
+# - History-12 and history-48 require only their first 12/48 baseline cuts.
+#   Preserve the full baseline binary32 camera track and all 3,600 measured
+#   frames; omitted cuts are not required actions. Normal physics continues.
+# - Support-1-span and support-2-span require only the first 2/4 support cuts.
+#   Preserve the baseline overview and require exactly 1/2 distinct released
+#   spans moving on every measured frame 31..42.
+# - Keep variant schedule, state, work, motion/edit populations, checkpoints
+#   and visual expectations separate. Variant completion never qualifies its
+#   full baseline. Fewer than 100 edits cannot qualify edit percentiles.
+# - Changed history/state is not a witness of identical final geometry.
+#   Retention-specific attribution requires checked equal removed-cell sets
+#   and final canonical geometry; otherwise it remains unavailable. These
+#   unsafe/native-dependent rules are never formal proofs.
+
 # Proxy diagnostics for issue #58 (runtime/reference rules, not formal laws):
 # - Keep mixed-world and compact-reference routes separate from the primary
 #   traversal/picking routes. Pair full and proxy profiles on identical frozen

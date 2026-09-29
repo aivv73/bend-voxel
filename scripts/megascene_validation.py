@@ -91,7 +91,7 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
             run([str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"),
                  str(archive/"runtime/support-reference-worker"), "--gpu", "off", "--threads", config["threads"]],
                 archive/"runtime", destination/"support-reference.stdout.log", destination/"support-reference.stderr.log", 30)
-            value["support_references"] = check_support((destination/"support-reference.stdout.log").read_text())
+            value["support_references"] = check_support((destination/"support-reference.stdout.log").read_text(),config)
         if config["case"] == "history":
             from megascene_history_references import check as check_history
             run([str(archive/f"runtime/lib/{loader}"), "--library-path", str(archive/"runtime/lib"),
@@ -127,11 +127,12 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
         if config["case"] == "support":
             value["moving_window"] = result.get("moving_window")
             value["beam_features"] = result.get("beam_features")
-            value["invariant_coverage"] += ["two_support_paths_and_stumps", "three_distinct_spans_frames_31_42", "binary32_motion_and_floor", "translation_preserves_full_mesh"]
+            value["invariant_coverage"] += ["two_support_paths_and_stumps", frozen["moving_window"]["distinct_spans"]+"_distinct_spans_frames_31_42", "binary32_motion_and_floor", "translation_preserves_full_mesh"]
         if config["case"] == "history":
             value["moving_window"] = result.get("moving_window")
             value["moved_targets"] = result.get("moved_targets")
-            value["invariant_coverage"] += ["twelve_moving_spans_and_targets", "bridge_stub_revisits", "every_cut_state_and_geometry"]
+            value["invariant_coverage"] += [str(sum(int(a["action"])%10==4 for a in frozen["actions"]))+
+                                             "_moving_spans_and_targets", "bridge_stub_revisits", "every_cut_state_and_geometry"]
         if config["case"] == "picking":
             from megascene_picking import audit as audit_picking
             value["picking"] = audit_picking(records, frozen)

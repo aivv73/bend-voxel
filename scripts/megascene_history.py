@@ -142,10 +142,17 @@ def _cut(bodies, source, local, frame):
 
 def schedule(config):
     require((config['warmup'],config['frames']) == ('120','3600'), 'history requires the complete 120/3600 schedule')
-    require(config.get('schedule','history-v1')==
-            (config.get('control')+'-history-v1' if config.get('control') else 'history-v1'),
+    schedule_id=config.get('schedule','history-v1')
+    counts={'history-v1':120,'history-12-v1':12,'history-48-v1':48,
+            'fill-history-v1':120,'body-rich-history-v1':120}
+    require(schedule_id in counts and
+            (schedule_id.startswith('fill-') if config.get('control')=='fill' else
+             schedule_id.startswith('body-rich-') if config.get('control')=='body-rich' else
+             schedule_id in ('history-v1','history-12-v1','history-48-v1')),
             'unsupported history schedule')
-    key=tuple(config.get(name) for name in ('preset','seed','side_m','warmup','frames','fragment_budget','control'))
+    count=counts[schedule_id]
+    cut_frames=CUT_FRAMES[:count]
+    key=tuple(config.get(name) for name in ('preset','seed','side_m','warmup','frames','fragment_budget','control','schedule'))
     if key in _SCHEDULE_CACHE:
         return _SCHEDULE_CACHE[key]
     owners=generate(config['preset'],int(config['seed']),config.get('control'))
@@ -178,6 +185,8 @@ def schedule(config):
                 'history source removal total differs from accepted recipe')
     far_eye,far_look=pose('far',None,config['preset'],int(config['seed']),'traversal-v2',config.get('control'))
     far=camera(far_eye,far_look)
+    # Resolve the entire baseline route before shortening the action list.
+    # Later camera visits remain byte-identical to the full history.
     frames=[]
     last=views[-1]
     for i in range(3721):
@@ -192,26 +201,42 @@ def schedule(config):
             look=[f32(x+(y-x)*t) for x,y in zip(final_target,far_look)]
             view=camera(eye,look)
         else: view=far
-        frames.append({'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in CUT_FRAMES else 'ordinary',
+        frames.append({'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in cut_frames else 'ordinary',
                        'measured_ordinal':str(ordinal) if i>120 else None,'camera':view,'picking':False,
-                       'actions':[str(ordinal//12)] if i in CUT_FRAMES else []})
+                       'actions':[str(ordinal//12)] if i in cut_frames else []})
+    actions=actions[:count]
     points=[{'name':'initialization','frame':'0'},{'name':'review_opening','frame':'0'},{'name':'warmup_end','frame':'120'}]
-    points += [{'name':'action_'+str(k),'frame':str(frame)} for k,frame in enumerate(CUT_FRAMES)]
-    points += [{'name':'after_cut_'+str(count),'frame':str(frame)} for count,frame in NAMED]
+    points += [{'name':'action_'+str(k),'frame':str(frame)} for k,frame in enumerate(cut_frames)]
+    points += [{'name':'after_cut_'+str(n),'frame':str(frame)} for n,frame in NAMED if n<=count]
     points += [{'name':'history_overview','frame':'1681'},{'name':'completion','frame':'3720'}]
     review=[{'name':'opening','frame':'0','features':['district and structures']}]
     review += [{'name':'cut_'+str(k),'frame':str(frame),
                 'features':['remaining back wall','new exposed back-wall surfaces']
                     if config.get('control')=='body-rich' and k%10==6 else
-                    ['removed material','new exposed surfaces']} for k,frame in enumerate(CUT_FRAMES)]
-    review += [{'name':'history_overview','frame':'1681','features':['cumulative destruction','remaining anchored material']},
-               {'name':'completion','frame':'3720','features':['retained geometry','settled fragments']}]
-    frozen={'schema':SCHEMA,'record_type':'schedule','schedule_id':config.get('schedule','history-v1'),'fixed_step':'0x3c888889',
+                    ['removed material','new exposed surfaces']} for k,frame in enumerate(cut_frames)]
+    review += [{'name':'uncut_visit_'+str(k),'frame':str(frame),
+                'features':['no new cut at this camera visit','remaining material at later target']}
+               for k,frame in enumerate(CUT_FRAMES) if k>=count]
+    review += [{'name':'history_overview','frame':'1681','features':['cumulative destruction','remaining anchored material']
+                if count==120 else [f'destruction after {count} cuts','remaining uncut later targets']},
+               {'name':'completion','frame':'3720','features':['retained geometry','settled fragments']
+                if count==120 else [f'retained geometry after {count} cuts','settled fragments','remaining uncut later targets']}]
+    populations={'cuts_1_12':['0','143']}
+    if count>=48: populations['cuts_13_48']=['144','575']
+    if count==120: populations['cuts_49_120']=['576','1439']
+    if count<120: populations['post_prefix']=[str(count*12),'1439']
+    populations.update(overview=['1440','1559'],tail=['1560','3599'])
+    frozen={'schema':SCHEMA,'record_type':'schedule','schedule_id':schedule_id,'fixed_step':'0x3c888889',
             'warmup_frames':'120','measured_frames':'3600','opening':opening,'frames':frames,'actions':actions,
             'review_views':review,'required_checkpoints':points,'checkpoint_implementation':'megascene-checkpoint/1',
             'update_order':['physics','edit','view_picking_disabled','render'],
-            'history_populations':{'cuts_1_12':['0','143'],'cuts_13_48':['144','575'],
-                                   'cuts_49_120':['576','1439'],'overview':['1440','1559'],'tail':['1560','3599']}}
+            'history_populations':populations}
+    if count<120:
+        frozen['variant']={'baseline_schedule_id':'history-v1','required_actions':str(count),
+                           'omitted_actions':{'first':str(count),'last':'119','count':str(120-count)},
+                           'omitted_action_disposition':'not_required_for_variant',
+                           'camera_track':'full_history_v1_all_3600_measured_frames',
+                           'baseline_completion_equivalence':False}
     if config.get('control') == 'body-rich':
         eye,look=pose('interior',0,config['preset'],int(config['seed']),'traversal-v2','body-rich')
         ray=ray_to(eye,look)
@@ -228,7 +253,7 @@ def schedule(config):
 
 def audit_actions(records, frozen):
     result=_audit_actions(records,frozen)
-    require(result['actions']=='120' and int(result['removed_cells'])==
+    require(result['actions']==str(len(frozen['actions'])) and int(result['removed_cells'])==
             sum(int(a['expected_removed_cells']) for a in frozen['actions']),
             'incomplete irregular history')
     return result
@@ -254,7 +279,7 @@ class Reference:
         self.moved_targets=[]
 
     def at(self, frame):
-        phase=min(sum(cut<=frame for cut in CUT_FRAMES),len(self.phases)-1)
+        phase=min(sum(int(a['frame'])<=frame for a in self.frozen['actions']),len(self.phases)-1)
         base=self.phases[phase]
         body_values=[]
         for body in sorted(self.bodies[phase],key=lambda b:b.ident):
@@ -335,6 +360,7 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
         by_frame={r['frame']:r for r in checks}
         require(len(by_frame)==len(checks),'duplicate history checkpoint frame')
         previous_work=initial_work
+        cut_frames={int(a['frame']) for a in frozen['actions']}
         for action in frozen['actions']:
             cp=by_frame[action['frame']]
             before,parts=ref.cut(action,cp['payload'])
@@ -372,7 +398,7 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
                 require(diff is None,'history checkpoint mismatch at frame '+frame+': '+str(diff))
                 require(digest(row['payload'])==row['sha256'],'history checkpoint digest mismatch')
             require(row['sha256']==sha and row['body_sha256']==body_hashes,'history state/geometry mismatch at frame '+frame)
-            phase=sum(at<=i for at in CUT_FRAMES)
+            phase=sum(at<=i for at in cut_frames)
             require(row['work']==([initial_work]+phase_work)[phase], 'history representation changed between edits')
             for name in names:
                 require(name not in seen,'duplicate history checkpoint name');seen.add(name)
@@ -395,7 +421,9 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
                 samples.append({'frame':str(frame),'offset_m':body['offset_m'],'velocity_m_s':body['velocity_m_s']})
             moving_windows.append({'group':str(group),'body_id':release['body_id'],
                                    'release_frame':release['frame'],'samples':samples})
-        require(len(moving_windows)==12 and len(ref.moved_targets)==12,
+        releases=sum(int(a['action'])%10==4 for a in frozen['actions'])
+        moved=sum(int(a['action'])%10==5 for a in frozen['actions'])
+        require(len(moving_windows)==releases and len(ref.moved_targets)==moved,
                 'history missing moved-span targets/windows')
         previous_native=None;previous_state=None
         for i,(n,w,f) in enumerate(zip(native,renders,frames)):
@@ -405,13 +433,13 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
             for b in state['bodies']:
                 if not b['anchored']:
                     expected_motion[str(i),b['id']]={k:b[k] for k in ('id','revision','offset_m','velocity_m_s')}
-            work=([initial_work]+phase_work)[sum(at<=i for at in CUT_FRAMES)]
+            work=([initial_work]+phase_work)[sum(at<=i for at in cut_frames)]
             require(set(n['mesh_sha256'])==ids and int(n['vertices_checked'])==sum(int(b['vertices']) for b in work),
                     'history full-mesh inventory mismatch')
             require(len(n['drawn_ids'])==len(set(n['drawn_ids'])) and set(n['drawn_ids'])<=ids and
                     str(len(n['drawn_ids']))==w['main_body_draws'] and int(n['reference_visible'])<=len(n['drawn_ids']),
                     'history visible geometry mismatch')
-            changed=i==0 or i in CUT_FRAMES or any(b['offset_m']!=next(old['offset_m'] for old in previous_state['bodies'] if old['id']==b['id'])
+            changed=i==0 or i in cut_frames or any(b['offset_m']!=next(old['offset_m'] for old in previous_state['bodies'] if old['id']==b['id'])
                     for b in state['bodies'] if previous_state and any(old['id']==b['id'] for old in previous_state['bodies']))
             require(w['shadow_refresh'] is changed,'history shadow invalidation mismatch')
             if previous_native:
@@ -419,7 +447,7 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
                     require(n['mesh_slots'][ident]==previous_native['mesh_slots'][ident] and
                             n['mesh_sha256'][ident]==previous_native['mesh_sha256'][ident],
                             'history unchanged mesh slot/data changed')
-                if i not in CUT_FRAMES:
+                if i not in cut_frames:
                     require(n['proxy_cache_sha256']==previous_native['proxy_cache_sha256'] and w['proxy_rebuilt']=='0',
                             'history translation/camera invalidated proxy')
             previous_native=n;previous_state=state
@@ -431,4 +459,4 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
             'checked_frames':str(len(checked)),'native_frames':str(sum(r['record_type']=='native_audit' for r in records)),
             'actual_work':initial_work,'edited_work':phase_work,'moving_window':moving_windows,
             'moved_targets':ref.moved_targets if 'ref' in locals() else [],
-            'scope':'120 evolving cuts, intermediate ownership/material/surface/motion and native cache replay'}
+            'scope':str(len(frozen['actions']))+' evolving cuts, intermediate ownership/material/surface/motion and native cache replay'}

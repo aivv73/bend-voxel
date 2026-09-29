@@ -64,8 +64,13 @@ def ray_to(eye, point):
 
 def schedule(config):
     require((config['warmup'],config['frames']) == ('120','3600'), 'support requires the complete 120/3600 schedule')
-    require(config.get('schedule','support-v1') ==
-            ('fill-support-v1' if config.get('control')=='fill' else 'support-v1'), 'unsupported support schedule')
+    schedule_id=config.get('schedule','support-v1')
+    counts={'support-v1':3,'support-1-span-v1':1,'support-2-span-v1':2,'fill-support-v1':3}
+    require(schedule_id in counts and
+            (schedule_id=='fill-support-v1')==(config.get('control')=='fill'),
+            'unsupported support schedule')
+    spans=counts[schedule_id]
+    cut_frames=CUT_FRAMES[:2*spans]
     owners=generate(config['preset'],int(config['seed']),config.get('control'))
     origin=-int(config['side_m'])*5
     lift=8 if config.get('control')=='fill' else 0
@@ -73,7 +78,7 @@ def schedule(config):
     eye=[(160+origin)/10,18.+lift/10,(300+origin)/10]
     view=camera(eye,[(76+origin)/10,5.5+lift/10,(204+origin)/10])
     actions=[]
-    for i,frame in enumerate(CUT_FRAMES):
+    for i,frame in enumerate(cut_frames):
         j=i//2
         target=[origin+(25 if i%2==0 else 127),40+lift,origin+180+24*j]
         point=[bits(x/10) for x in target]
@@ -104,24 +109,38 @@ def schedule(config):
               'camera':camera([value(a['target_m'][0]),4.+lift/10,value(a['target_m'][2])+1.2],list(map(value,a['target_m']))),
               'features':['support cut and exposed surfaces','anchored stump'],'supplementary_to':'cut_'+a['action']}
              for a in actions]
-    frames=[{'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in CUT_FRAMES else 'motion' if i in WINDOW else 'ordinary',
+    frames=[{'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in cut_frames else 'motion' if i in WINDOW else 'ordinary',
         'measured_ordinal':str(i-121) if i>120 else None, 'camera':opening if i<=120 else view,
-        'picking':False,'actions':[str(CUT_FRAMES.index(i))] if i in CUT_FRAMES else []} for i in range(3721)]
+        'picking':False,'actions':[str(cut_frames.index(i))] if i in cut_frames else []} for i in range(3721)]
     review=[{'name':'opening','frame':'0','features':['building silhouettes','span silhouettes','major shadows']}]
     review += [{'name':'cut_'+a['action'],'frame':a['frame'],'features':['support cut and exposed surfaces','anchored stump','supported span' if int(a['action'])%2==0 else 'released span']} for a in actions]
-    review += [{'name':'motion_'+str(i-121),'frame':str(i),'features':['three distinct released spans','beam_0_top_center','beam_1_top_center','beam_2_top_center','moving body shadows']} for i in (152,163)]
-    review += [{'name':'completion','frame':'3720','features':['settled spans','protected anchored stumps']}]
+    review += [{'name':'uncut_visit_'+str(j),'frame':str(frame),
+               'features':['no support cut at this overview visit','later span remains supported']}
+              for j,frame in enumerate(CUT_FRAMES) if j>=2*spans]
+    review += [{'name':'motion_'+str(i-121),'frame':str(i),'features':['three distinct released spans' if spans==3 else
+               f'{spans} distinct released span'+('s' if spans!=1 else ''),
+               *['beam_'+str(j)+'_top_center' for j in range(spans)],'moving body shadows']} for i in (152,163)]
+    review += [{'name':'completion','frame':'3720','features':['settled spans','protected anchored stumps']
+                if spans==3 else [f'{spans} settled released span'+('s' if spans!=1 else ''),
+                                    'unsevered later spans','protected anchored stumps']}]
     points=[{'name':'initialization','frame':'0'},{'name':'review_opening','frame':'0'},{'name':'warmup_end','frame':'120'}]
     points += [{'name':'action_'+a['action'],'frame':a['frame']} for a in actions]
     points += [{'name':'motion_'+str(i-121),'frame':str(i)} for i in WINDOW]
     points += [{'name':'completion','frame':'3720'}]
-    return {'schema':SCHEMA,'record_type':'schedule','schedule_id':config.get('schedule','support-v1'),'fixed_step':'0x3c888889',
+    frozen={'schema':SCHEMA,'record_type':'schedule','schedule_id':schedule_id,'fixed_step':'0x3c888889',
         'warmup_frames':'120','measured_frames':'3600','opening':opening,'frames':frames,'actions':actions,
-        'beam_features':[{'span':str(j),'source_owner':str(j+3),'local_top_center_cells':list(map(str,(origin+76,76+int(config['seed'])-45+lift,origin+180+24*j)))} for j in range(3)],
+        'beam_features':[{'span':str(j),'source_owner':str(j+3),'local_top_center_cells':list(map(str,(origin+76,76+int(config['seed'])-45+lift,origin+180+24*j)))} for j in range(spans)],
         'released_bottom_cells':str(42+lift),
-        'moving_window':{'first':'152','last':'163','measured_first':'31','measured_last':'42','distinct_spans':'3'},
+        'moving_window':{'first':'152','last':'163','measured_first':'31','measured_last':'42','distinct_spans':str(spans)},
         'review_views':review,'supplementary_views':details,'required_checkpoints':points,'checkpoint_implementation':'megascene-checkpoint/1',
         'update_order':['physics','edit','view_picking_disabled','render']}
+    if spans<3:
+        frozen['variant']={'baseline_schedule_id':'support-v1','required_actions':str(2*spans),
+                           'omitted_actions':{'first':str(2*spans),'last':'5','count':str(6-2*spans)},
+                           'omitted_action_disposition':'not_required_for_variant',
+                           'overview':'support_v1_all_3600_measured_frames',
+                           'baseline_completion_equivalence':False}
+    return frozen
 
 
 def action_outcome(action):
@@ -140,7 +159,7 @@ class Reference:
         self.initial=initial; self.frozen=frozen; self.states=[initial]; self.released={}
 
     def state(self,frame):
-        phase=sum(i<=frame for i in CUT_FRAMES)
+        phase=sum(int(a['frame'])<=frame for a in self.frozen['actions'])
         require(phase<len(self.states), 'missing preceding support component checkpoint')
         state=self.states[phase]
         bodies=[]
@@ -211,7 +230,8 @@ def audit_window(records,frozen):
             require(any(box.material==2 and all(lo<=p<hi for p,lo,hi in zip((feature[0],feature[1]-1,feature[2]),box.lo,box.hi)) for box in boxes_of(b)), 'released identity is not the intended span')
             released[b['id']]={'span':a['span'],'release_frame':a['frame']}
         require(len(detached)==(int(a['action'])+1)//2,'support path detached prematurely or not released')
-    require(len(released)==3,'three distinct span identities required')
+    require(len(released)==int(frozen['moving_window']['distinct_spans']),
+            'declared number of distinct span identities required')
     observed=motion_records(records);window=[]
     for i in WINDOW:
         cp=checks[str(i)]['payload']
@@ -234,7 +254,7 @@ def audit_details(records,frozen,required):
     if not required:
         require(not captures and not rendered,'supplementary captures entered timed execution')
         return
-    require(len(captures)==6,'missing supplementary cut captures')
+    require(len(captures)==len(frozen['supplementary_views']),'missing supplementary cut captures')
     for planned,actual in zip(frozen['supplementary_views'],captures):
         require(actual['rendered_frame']==planned['frame'] and actual['action']==planned['action'] and
                 actual['camera']==planned['camera'], 'supplementary cut capture/view mismatch')
@@ -269,6 +289,7 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
         by_frame={r['frame']:r for r in checks}
         require(len(by_frame)==len(checks),'duplicate checkpoint frame')
         previous_work=initial_work
+        cut_frames={int(a['frame']) for a in frozen['actions']}
         for action in frozen['actions']:
             cp=by_frame[action['frame']]
             ref.cut(action,cp['payload'])
@@ -300,7 +321,7 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
                 require(diff is None,'support state mismatch: '+str(diff))
                 require(digest(r['payload'])==r['sha256'],'checkpoint digest mismatch')
             require(r['sha256']==sha and r['body_sha256']==bs,'support state/geometry mismatch at frame '+frame)
-            phase=sum(f<=i for f in CUT_FRAMES)
+            phase=sum(f<=i for f in cut_frames)
             require(r['work']==([initial_work]+phase_work)[phase],'representation changed during translation')
             catalog += [{'name':name,'frame':frame,'sha256':sha,'body_sha256':bs} for name in names]
         require(checked==({f['frame'] for f in frozen['frames']} if thorough else set(points.values())), 'incomplete support checkpoint replay')
@@ -316,18 +337,18 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
             state,_,_=expected_at(i);ids={b['id'] for b in state['bodies']}
             for b in state['bodies']:
                 if not b['anchored']: expected_motion[str(i),b['id']]={k:b[k] for k in ('id','revision','offset_m','velocity_m_s')}
-            phase=sum(at<=i for at in CUT_FRAMES);work=([initial_work]+phase_work)[phase]
+            phase=sum(at<=i for at in cut_frames);work=([initial_work]+phase_work)[phase]
             require(len(n['drawn_ids'])==len(set(n['drawn_ids'])) and set(n['drawn_ids'])<=ids and str(len(n['drawn_ids']))==w['main_body_draws'] and int(n['reference_visible'])<=len(n['drawn_ids']), 'native visible geometry missing')
             require(int(n['vertices_checked'])==sum(int(b['vertices']) for b in work),'incomplete native mesh checks')
             require(set(n['mesh_sha256'])==ids,'missing native full-mesh hashes')
-            require(w['mesh_rebuilt']==(str(len(ids)) if i==0 else '2' if i in CUT_FRAMES else '0'),'translation rebuilt local geometry')
-            changed=i==0 or i in CUT_FRAMES or any(b['offset_m']!=next(old['offset_m'] for old in previous_state['bodies'] if old['id']==b['id']) for b in state['bodies'])
+            require(w['mesh_rebuilt']==(str(len(ids)) if i==0 else '2' if i in cut_frames else '0'),'translation rebuilt local geometry')
+            changed=i==0 or i in cut_frames or any(b['offset_m']!=next(old['offset_m'] for old in previous_state['bodies'] if old['id']==b['id']) for b in state['bodies'])
             require(w['shadow_refresh'] is changed and w['shadow_body_draws']==(str(len(ids)) if changed else '0'), 'moving body shadow invalidation mismatch')
             require(value(w['shadow_fit_min_margin_texels'])>=0 and all(value(x)>0 for x in w['shadow_texel_m']), 'shadow fit missing occupied geometry')
             if previous:
                 for ident in ids & set(previous_native['mesh_slots']):
                     require(n['mesh_slots'][ident]==previous_native['mesh_slots'][ident] and n['mesh_sha256'][ident]==previous_native['mesh_sha256'][ident], 'unchanged full-mesh slot/data changed')
-                if i not in CUT_FRAMES:
+                if i not in cut_frames:
                     require(n['proxy_cache_sha256']==previous_native['proxy_cache_sha256'] and w['proxy_rebuilt']=='0', 'translation invalidated proxy cache')
             if i in (152,163):
                 for ident,release in ref.released.items():
