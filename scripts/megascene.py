@@ -16,6 +16,7 @@ import time
 import uuid
 
 from megascene_recipe import admit_sources, bend_program, generate
+from megascene_scale import side_count, preset_for, operational_bounds, NumericRejection, preflight
 from megascene_inventory import (SCHEMA, canonical, integer, inventory, measurement,
                                  outcome, require)
 
@@ -34,7 +35,7 @@ def parser():
     p.add_argument("--campaign", help="persistent campaign archive root; static defaults to --archive")
     p.add_argument("--additional-allowance", help="explicit additional seconds for an existing interrupted/exhausted campaign")
     p.add_argument("--preset", choices=("small", "large"))
-    p.add_argument("--side-m", help="fixed district side: 64 or 128")
+    p.add_argument("--side-m", help="square district side in metres, 32*q for supported integer q")
     p.add_argument("--seed", default="45")
     p.add_argument("--threads", default="6")
     p.add_argument("--fragment-budget", default="2048")
@@ -69,11 +70,16 @@ def configuration(args):
     require(threads in (1, 6, 12), "supported thread counts are 1, 6 and 12")
     require(budget <= 2**32-1, "fragment budget exceeds U32")
     side = integer(args.side_m) if args.side_m is not None else None
-    require(side in (None, 64, 128), "supported district sides are 64 and 128 metres")
-    preset = args.preset or ("large" if side == 128 else "small")
-    require(side is None or side == (64 if preset == "small" else 128), "contradictory preset and side")
-    config = {"case": args.case, "preset": preset, "side_m": str(64 if preset == "small" else 128),
-            "seed": str(seed), "threads": str(threads), "fragment_budget": str(budget)}
+    if side is not None:
+        require(side % 32 == 0, "district side must be 32*q metres")
+        q = side // 32
+        preset_for(q)
+    else:
+        q = side_count(args.preset or "small")
+    preset = preset_for(q)
+    require(args.preset is None or args.preset == preset, "contradictory preset and side")
+    config = {"case": args.case, "preset": preset, "side_m": str(32*q),
+            "neighborhoods_per_side": str(q), "seed": str(seed), "threads": str(threads), "fragment_budget": str(budget)}
     if args.case in ("static", "traversal", "picking", "localized", "support", "history"):
         from megascene_static import settings
         return settings(args, config)
@@ -144,7 +150,7 @@ def runtime_environment():
 def summary(status, reason):
     missing = outcome("inconclusive", "not executed by admission-only entry point", "Vulkan attempt")
     return {"schema": SCHEMA, "record_type": "summary", "attempt_kind": "admission",
-            "admission": outcome(status, reason, "fixed-preset initialization", ["manifest.json"]),
+            "admission": outcome(status, reason, "requested-scale initialization", ["manifest.json"]),
             "state_correctness": outcome("pass" if status == "pass" else "inconclusive", reason,
                                          "initialization only", ["validation.json"] if status == "pass" else []),
             "numeric_validity": outcome("pass" if status == "pass" else "inconclusive", reason, "initial construction only"),
@@ -157,17 +163,21 @@ def summary(status, reason):
                             "reason": reason},
             "limitations": ["Runtime/reference initialization evidence; no unsafe-dependent formal proof.",
                             "No replay, targets, rendering, GPU, resource monitoring or benchmark evidence.",
-                            "Fixed presets only; no universal numeric envelope or capacity claim."]}
+            "Only the declared operational scale range is supported; no physical capacity claim."]}
 
 
 def execute(config, output, manifest):
     manifest["extensions"]["phase"] = "source_admission"
-    owners = generate(config["preset"], int(config["seed"]))
-    numeric = admit_sources(owners, int(config["side_m"])*5, int(config["fragment_budget"]))
-    expected = "10503360" if config["preset"] == "small" else "42096576"
-    require(numeric["cells"] == expected, "fixed recipe cell total mismatch")
-    require(len(owners) == (21 if config["preset"] == "small" else 81), "fixed recipe owner count mismatch")
-    manifest["numeric_admission"] = outcome("pass", "checked fixed-preset source arithmetic and geometry bounds",
+    owners = preflight(generate,config["preset"], int(config["seed"]))
+    numeric = preflight(admit_sources,owners, int(config["side_m"])*5, int(config["fragment_budget"]))
+    q = side_count(config["preset"])
+    if config["preset"] in ("small", "large"):
+        expected = "10503360" if q == 2 else "42096576"
+        require(numeric["cells"] == expected, "fixed recipe cell total mismatch")
+    require(len(owners) == 1+5*q*q, "recipe owner count mismatch")
+    numeric["operational"] = preflight(operational_bounds,q,len(owners),int(numeric["cells"]),
+        sum(map(int,numeric["surface_rectangle_bounds"])),int(numeric["vertex_bound"]),3721,int(config["fragment_budget"]))
+    manifest["numeric_admission"] = outcome("pass", "checked source arithmetic and declared operational bounds",
                                             "initial construction only", ["inputs.json"])
     manifest["numeric_bounds"] = numeric
     manifest["extensions"]["phase"] = "build"
@@ -184,7 +194,7 @@ def execute(config, output, manifest):
     # loaded by this worker. The generated C includes Bend's runtime and effects.
     for name in ("math", "spatial", "mesh", "world", "showcase", "atelier_assets", "material", "megascene"):
         shutil.copyfile(ROOT / f"src/{name}.bend", runtime / f"src/{name}.bend")
-    for name in ("megascene.py", "megascene_recipe.py", "megascene_inventory.py"):
+    for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_inventory.py"):
         shutil.copyfile(ROOT / "scripts" / name, runtime / name)
     (runtime / "input.bend").write_text(bend_program(owners, int(config["fragment_budget"])))
     version = subprocess.run(["bend", "version"], capture_output=True, text=True, check=True).stdout.strip()
@@ -233,7 +243,7 @@ def execute(config, output, manifest):
     validation = {"schema": SCHEMA, "record_type": "validation", "scope": "initialization only",
                   "independent_reference": reference,
                   "initialization": outcome("pass", "actual trees, IDs, anchors, face coverage and vertices match",
-                                            "fixed-preset initialization", ["inputs.json", "stdout.log", "inventory.json"]),
+                                            "requested-scale initialization", ["inputs.json", "stdout.log", "inventory.json"]),
                   "source_checks": ["disjointness across owners", "positive-face connectivity", "protected anchors"],
                   "numeric_bounds": numeric,
                   "complete_replay": measurement("not_executed", "admission-only entry point", "replay", "frames"),
@@ -241,13 +251,13 @@ def execute(config, output, manifest):
                                                "Vulkan attempt"),
                   "production_evidence": artifact(output / "stdout.log", output)}
     snapshot(output / "validation.json", validation)
-    manifest["admission"] = outcome("pass", "fixed district constructed and checked", "initialization only",
+    manifest["admission"] = outcome("pass", "requested district constructed and checked", "initialization only",
                                     ["inventory.json", "validation.json"])
     manifest["extensions"]["phase"] = "complete"
     manifest["evidence"] = [artifact(output / name, output) for name in
                             ("inventory.json", "validation.json", "stdout.log", "stderr.log")]
     snapshot(output / "manifest.json", manifest)
-    report = summary("pass", "fixed district constructed and checked")
+    report = summary("pass", "requested district constructed and checked")
     report["attempt_id"] = manifest["attempt_id"]
     snapshot(output / "summary.json", report)
 
@@ -321,9 +331,12 @@ def main(argv=None):
                         target.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy2(file,target)
             elif created_output:
-                report = static_report([], [reason], manifest["effective"], 2, "prelaunch_failure", 0, manifest["attempt_id"])
-                report["numeric_validity"] = manifest["numeric_admission"]
-                report["termination"] = {"cause": "campaign_deadline" if campaign is not None and not campaign.remaining_ns() else "prelaunch_failure", "exit_code": None, "signal": None, "reason": reason}
+                rejected = isinstance(error,NumericRejection)
+                report = static_report([], [reason], manifest["effective"], 2, "rejected_request" if rejected else "prelaunch_failure", 0, manifest["attempt_id"])
+                report["numeric_validity"] = outcome("fail",reason,"requested operational representation") if rejected else manifest["numeric_admission"]
+                if rejected:
+                    manifest["numeric_admission"] = report["numeric_validity"]
+                report["termination"] = {"cause": "rejected_request" if rejected else "campaign_deadline" if campaign is not None and not campaign.remaining_ns() else "prelaunch_failure", "exit_code": None, "signal": None, "reason": reason}
                 if archived and archived.is_dir():
                     snapshot(archived/"manifest.json",manifest)
                     snapshot(archived/"summary.json",report)
@@ -334,13 +347,15 @@ def main(argv=None):
         report = summary("fail", reason)
         # A build, process, or validation failure is not a rejected setting and
         # must not masquerade as an observed capacity limit.
-        if manifest["effective"] is not None:
+        if manifest["effective"] is not None and not isinstance(error,NumericRejection):
             report["termination"]["cause"] = "admission_failure"
         report["attempt_id"] = manifest["attempt_id"]
         if manifest["extensions"]["phase"] == "inventory_validation":
             report["state_correctness"] = outcome("fail", reason, "initialization only", ["stdout.log"])
         # A compiler/loader failure cannot undo numeric checks already completed.
-        report["numeric_validity"] = manifest["numeric_admission"]
+        report["numeric_validity"] = outcome("fail",reason,"requested operational representation") if isinstance(error,NumericRejection) else manifest["numeric_admission"]
+        if isinstance(error,NumericRejection):
+            manifest["numeric_admission"] = report["numeric_validity"]
         manifest["admission"] = outcome("fail", reason, "initialization only")
         if created_output:
             snapshot(output / "manifest.json", manifest)

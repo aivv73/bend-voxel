@@ -1,4 +1,4 @@
-# Fixed Megascene admission
+# Megascene admission
 
 Issue #48 adds a separate admission command. It constructs the actual initial
 voxel bodies, cached surfaces and vertices through the existing Bend world
@@ -8,16 +8,21 @@ Atelier's default executable, controls and benchmark commands are unchanged.
 ```sh
 python3 scripts/megascene.py --preset small --seed 45 --output build/megascene/small-45
 python3 scripts/megascene.py --side-m 128 --seed 46 --threads 6 --output build/megascene/large-46
+python3 scripts/megascene.py --side-m 96 --seed 45 --output build/megascene/intermediate-45
 ```
 
 Use a new output directory for every invocation. The command requires Python
 3.10+, Bend 2.0.34, its native C compiler, and Linux/glibc. No display or Vulkan
 device is used. The explicit command is `--case admission`, which is also the
 default. Small/large mean the accepted 64/128 metre centered districts; seeds
-45/46 and thread counts 1/6/12 are supported. Defaults are small, seed 45, six
+45/46 and thread counts 1/6/12 are supported. Integer square scales q=2..5
+are admitted through `--side-m 32*q`; q=2 and q=4 retain the small/large preset
+names. This operational range does not assert a physical capacity limit.
+Defaults are small, seed 45, six
 threads and a detached-fragment budget of 2,048. `--fragment-budget` accepts a
-canonical unsigned decimal U32 value, including zero; it never counts initial
-anchored owners. `--side-m` can select a preset, or corroborate `--preset`.
+canonical unsigned decimal value, including zero, when the initial-owner plus
+budget count fits the operational U32 guard; it never counts initial anchored
+owners. `--side-m` selects a scale or corroborates a named preset.
 
 Malformed, duplicate, contradictory and unsupported options fail with exit code
 2. The requested argument vector and parsed options are retained, with effective
@@ -62,12 +67,14 @@ from that output, separately from authored boxes. Surface area is per owner;
 contacts between separate owners remain drawable, while internal material
 interfaces within an owner are hidden by the production mesher.
 
-The fixed totals are 21/81 initial anchored owners and
-10,503,360/42,096,576 cells. Density uses the declared [0,128) vertical envelope;
-tight occupied bounds are reported separately. No coordinate envelope beyond
-these fixed inputs is admitted. Carving, motion, resolved targets, picking,
-renderer sizes, clocks and evolving counters need their later capability's
-own admission and validation before execution.
+The fixed-preset totals are 21/81 initial anchored owners and
+10,503,360/42,096,576 cells. Other scales have `1+5*q*q` initial owners and
+source-cell totals measured for the requested seed. Density uses the declared
+[0,128) vertical envelope; tight occupied bounds are reported separately.
+The q=2..5 source range checks actual boxes, products, surfaces, IDs, native-size
+bounds and monotonic clock arithmetic before unsafe work. Replay cases freeze
+their complete camera, ray and target schedules. Carving, motion, picking and
+native rendering retain evolving guards and separate runtime/reference checks.
 
 ## Evidence and reproduction
 

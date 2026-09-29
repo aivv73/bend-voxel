@@ -1,14 +1,10 @@
-"""Fixed Megascene source generator; all arithmetic precedes Bend construction.
-
-Only the two accepted presets are admitted. Python integers are checked before
-conversion to the engine's F32 coordinates/U32 counters. This is not a general
-coordinate envelope, nor admission for editing, rendering, or a larger world.
-"""
+"""Mixed Megascene source generator; arithmetic precedes Bend construction."""
 
 from dataclasses import dataclass
 from itertools import combinations
 import math
 import struct
+from megascene_scale import side_count, preset_for
 
 U32_MAX = 2**32 - 1
 
@@ -51,16 +47,17 @@ CONTROLS = ("spread", "material-detail", "surface-detail", "fill", "body-rich")
 
 
 def envelope_cells(preset, control=None):
-    q = 2 if preset == "small" else 4
+    q = side_count(preset)
     return 640 * (q-1) + 320 if control == "spread" else 320 * q
 
 
 def generate(preset, seed, control=None):
-    if preset not in ("small", "large") or seed not in (45, 46):
-        raise ValueError("only small/large and seeds 45/46 are supported")
+    q = side_count(preset)
+    preset_for(q)
+    if seed not in (45, 46):
+        raise ValueError("only seeds 45/46 are supported")
     if control not in (None, *CONTROLS):
         raise ValueError("unsupported terrain control")
-    q = 2 if preset == "small" else 4
     spacing = 640 if control == "spread" else 320
     half = envelope_cells(preset, control)//2
     terrain = Owner("terrain", None, [])

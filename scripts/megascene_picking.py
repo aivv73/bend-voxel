@@ -12,6 +12,7 @@ import struct
 
 from megascene_inventory import require
 from megascene_recipe import Box, bits, f32, generate
+from megascene_scale import side_count
 from megascene_traversal import PHASES, schedule as traversal_schedule
 
 ROUTES = ("picking-v1", "picking-v2")
@@ -133,7 +134,7 @@ def schedule(config, owners=None):
     boxes = [(i,b,0.) for i,owner in enumerate(owners,1) for b in owner.boxes]
     cache = {}
     rays = {}
-    q=2 if config["preset"]=="small" else 4
+    q=side_count(config["preset"])
     for frame in frozen["frames"]:
         active = frame["route_phase"] in ENABLED and int(frame["phase_offset"]) < 120
         frame["picking"] = active
@@ -153,7 +154,7 @@ def schedule(config, owners=None):
                         "assembly":("6","3","1"),"sky":("0","0","0")}[pose]
             require(tuple(result[k] for k in ("owner","material","kind")) == expected, f"unreachable or incorrect declared {pose} target")
             if pose in ("wall","interior","cavity","assembly"):
-                q=2 if config["preset"]=="small" else 4
+                q=side_count(config["preset"])
                 axis,plane = {"wall":(0,(16-160*q)/10),"interior":(0,(20-160*q)/10),
                               "cavity":(1,.8),"assembly":(1,(58+(int(config['seed'])-45)%2)/10)}[pose]
                 require(abs(reference["point"][axis]-plane)<1e-6, f"wrong declared {pose} face")

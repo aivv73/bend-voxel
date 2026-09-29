@@ -10,6 +10,7 @@ import math
 
 from megascene_inventory import SCHEMA, require, digest, surface_reference
 from megascene_recipe import bits, f32, generate, Box
+from megascene_scale import side_count, history_stride, history_visit
 from megascene_localized import remove_cells, audit_actions as _audit_actions
 from megascene_picking import value, exact_pick
 from megascene_support import motion, ray_to, boxes_of, motion_records
@@ -65,16 +66,15 @@ class Body:
 
 
 def _origin(n, preset):
-    q = 2 if preset == 'small' else 4
+    q = side_count(preset)
     return (320*(n%q)-160*q, 320*(n//q)-160*q)
 
 
 def _target(k, config):
-    nhood = 4 if config['preset'] == 'small' else 16
+    q = side_count(config['preset'])
+    nhood = q*q
     b, a = divmod(k, 10)
-    n = (5*b+int(config['seed'])-45) % nhood
-    r = b//nhood
-    q = 2 if nhood == 4 else 4
+    n, r = history_visit(b,nhood,int(config['seed']))
     ix, iz = n%q, n//q
     v = (3*ix+5*iz+int(config['seed'])-45)%4
     ox, oz = _origin(n,config['preset'])
@@ -143,12 +143,13 @@ def _cut(bodies, source, local, frame):
 def schedule(config):
     require((config['warmup'],config['frames']) == ('120','3600'), 'history requires the complete 120/3600 schedule')
     schedule_id=config.get('schedule','history-v1')
-    counts={'history-v1':120,'history-12-v1':12,'history-48-v1':48,
+    counts={'history-v1':120,'history-v2':120,'history-12-v1':12,'history-48-v1':48,
             'fill-history-v1':120,'body-rich-history-v1':120}
     require(schedule_id in counts and
             (schedule_id.startswith('fill-') if config.get('control')=='fill' else
              schedule_id.startswith('body-rich-') if config.get('control')=='body-rich' else
-             schedule_id in ('history-v1','history-12-v1','history-48-v1')),
+             schedule_id in ('history-v1','history-v2','history-12-v1','history-48-v1')) and
+            (schedule_id=='history-v2' if config['preset'] not in ('small','large') else schedule_id!='history-v2'),
             'unsupported history schedule')
     count=counts[schedule_id]
     cut_frames=CUT_FRAMES[:count]
@@ -181,8 +182,9 @@ def schedule(config):
                         'reference_components':str(len(created))})
         views.append(view)
     if not config.get('control'):
-        require(removed_total==(2440 if config['preset']=='small' else 2472),
-                'history source removal total differs from accepted recipe')
+        if config['preset'] in ('small','large'):
+            require(removed_total==(2440 if config['preset']=='small' else 2472),
+                    'history source removal total differs from accepted recipe')
     far_eye,far_look=pose('far',None,config['preset'],int(config['seed']),'traversal-v2',config.get('control'))
     far=camera(far_eye,far_look)
     # Resolve the entire baseline route before shortening the action list.
@@ -231,6 +233,12 @@ def schedule(config):
             'review_views':review,'required_checkpoints':points,'checkpoint_implementation':'megascene-checkpoint/1',
             'update_order':['physics','edit','view_picking_disabled','render'],
             'history_populations':populations}
+    if schedule_id == 'history-v2':
+        frozen['history_neighborhood_mapping']={'version':'coprime-prior-visits-v1',
+            'stride':str(history_stride(side_count(config['preset'])**2)),
+            'group_visits':[{'group':str(b),'neighborhood':str(history_visit(b,side_count(config['preset'])**2,int(config['seed']))[0]),
+                             'prior_visits':str(history_visit(b,side_count(config['preset'])**2,int(config['seed']))[1])}
+                            for b in range(12)]}
     if count<120:
         frozen['variant']={'baseline_schedule_id':'history-v1','required_actions':str(count),
                            'omitted_actions':{'first':str(count),'last':'119','count':str(120-count)},
