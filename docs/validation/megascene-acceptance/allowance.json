@@ -1,0 +1,1382 @@
+{
+  "allowance_ns": "36000000000000",
+  "charging_policy": "Conservative gross charge of every retained earlier Megascene campaign root, including development and failed attempts; new work charged once through new_work",
+  "declared_extension_ns": "28800000000000",
+  "extension_scope": "single approved 8-hour extension, superseding the earlier 4-hour response",
+  "initial_allowance_ns": "7200000000000",
+  "issue": 68,
+  "new_work": [
+    {
+      "command": [
+        "make",
+        "test"
+      ],
+      "elapsed_ns": "480767142888",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/make-test.log",
+      "log_sha256": "aad010a620645100a9ffec71b7542faee52857bb8ab85f1a9c54e2c5da636de9",
+      "name": "make-test",
+      "started_utc": "2026-09-29T16:35:02.688446+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "make",
+        "proof-verdict"
+      ],
+      "elapsed_ns": "1066780975",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/proof-verdict.log",
+      "log_sha256": "0f40601f1ea7e7f9b514c528885c440585c15cb7ae9a6b5bbd454576280d08d1",
+      "name": "proof-verdict",
+      "started_utc": "2026-09-29T16:43:12.149581+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "make",
+        "benchmark-faces"
+      ],
+      "elapsed_ns": "21374674248",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/face-diagnostic.log",
+      "log_sha256": "470c05d1a05c1f732bc0763b51bb6dc07cc8e3626e67236e8a66683d2c880ffb",
+      "name": "face-diagnostic",
+      "started_utc": "2026-09-29T16:43:18.203780+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "make",
+        "build"
+      ],
+      "elapsed_ns": "30146252964",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/build-atelier.log",
+      "log_sha256": "8abc3e9cd1088eccfe9d09b107a4a9bd870b5b1eda781abbbf8edd48696c47bb",
+      "name": "build-atelier",
+      "started_utc": "2026-09-29T16:43:46.105698+00:00",
+      "status": "pass"
+    },
+    {
+      "artifacts_manifest": "/home/aivv/megascene-acceptance-68/atelier-runtime/manifest.json",
+      "command": [
+        "local copy and hash"
+      ],
+      "elapsed_ns": "16268482",
+      "exit_code": 0,
+      "log": null,
+      "name": "archive-face-and-atelier-runtime",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/benchmark_stress.py",
+        "--resolution",
+        "640x360",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/atelier-640",
+        "--binary",
+        "/home/aivv/megascene-acceptance-68/atelier-runtime/voxel-demo"
+      ],
+      "elapsed_ns": "2621117838",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/atelier-640.log",
+      "log_sha256": "445f8afa1af8dd725903ce7aab61310fa48e436192cefcb89e19b093a15122ed",
+      "name": "atelier-640",
+      "started_utc": "2026-09-29T16:45:18.010151+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/benchmark_stress.py",
+        "--resolution",
+        "1920x1080",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/atelier-1080",
+        "--binary",
+        "/home/aivv/megascene-acceptance-68/atelier-runtime/voxel-demo"
+      ],
+      "elapsed_ns": "2821928487",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/atelier-1080.log",
+      "log_sha256": "b272c806b92dab18264a19109f14e38b804594c0f22051ac7bd858ac76da18da",
+      "name": "atelier-1080",
+      "started_utc": "2026-09-29T16:45:26.150658+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "admission",
+        "--preset",
+        "small",
+        "--seed",
+        "45",
+        "--threads",
+        "6",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/admission/small-45"
+      ],
+      "elapsed_ns": "6080927765",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/admission-small-45.log",
+      "log_sha256": "b2d97e06a76fc6418efb3bcf4ec60a8bc9631ef84f906ca43aabe39eac3cf083",
+      "name": "admission-small-45",
+      "started_utc": "2026-09-29T16:45:45.339374+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "admission",
+        "--preset",
+        "small",
+        "--seed",
+        "46",
+        "--threads",
+        "6",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/admission/small-46"
+      ],
+      "elapsed_ns": "6635851908",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/admission-small-46.log",
+      "log_sha256": "d3e3aa84102eaf4a5290926ef0af0e8887578340be7f75f1a08139d543214fe3",
+      "name": "admission-small-46",
+      "started_utc": "2026-09-29T16:46:08.983959+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "admission",
+        "--preset",
+        "large",
+        "--seed",
+        "45",
+        "--threads",
+        "6",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/admission/large-45"
+      ],
+      "elapsed_ns": "13004444965",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/admission-large-45.log",
+      "log_sha256": "e3721b09f7da8a4ae3accd8c05b3c626afe8895589bece315d264cfc1c8097fd",
+      "name": "admission-large-45",
+      "started_utc": "2026-09-29T16:46:21.332080+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "admission",
+        "--preset",
+        "large",
+        "--seed",
+        "46",
+        "--threads",
+        "6",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/admission/large-46"
+      ],
+      "elapsed_ns": "12050542775",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/admission-large-46.log",
+      "log_sha256": "3de0b2871944c5b2b8d03b2d5463b0acd9fae1ca57cc061533a982f0e70d5567",
+      "name": "admission-large-46",
+      "started_utc": "2026-09-29T16:46:42.422585+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_atelier_review.py",
+        "--resolution",
+        "640x360",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/atelier-interactive-640",
+        "--binary",
+        "build/voxel-demo"
+      ],
+      "elapsed_ns": "4777120938",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/atelier-interactive-640.log",
+      "log_sha256": "1def98fec3022b52e5a4082d45b9e48a23e0da27d80a6311cc6468e9e6a1b0ef",
+      "name": "atelier-interactive-640",
+      "started_utc": "2026-09-29T16:48:37.777451+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_atelier_review.py",
+        "--resolution",
+        "640x360",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/atelier-interactive-640-v2",
+        "--binary",
+        "build/voxel-demo"
+      ],
+      "elapsed_ns": "4677005560",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/atelier-interactive-640-v2.log",
+      "log_sha256": "489d22f9a2e925305ff94fd5a6732969b66fd14e8694c69115b9ddff147a1495",
+      "name": "atelier-interactive-640-v2",
+      "started_utc": "2026-09-29T16:49:47.681477+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_atelier_review.py",
+        "--resolution",
+        "1920x1080",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/atelier-interactive-1080",
+        "--binary",
+        "build/voxel-demo"
+      ],
+      "elapsed_ns": "6833325936",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/atelier-interactive-1080.log",
+      "log_sha256": "4367a5d071d9cdb9887ead347e6f6117e09c123fed9bcba8946fb8723df61792",
+      "name": "atelier-interactive-1080",
+      "started_utc": "2026-09-29T16:50:04.407654+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_atelier_review.py",
+        "--resolution",
+        "640x360",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/atelier-interactive-640-v3",
+        "--binary",
+        "build/voxel-demo"
+      ],
+      "elapsed_ns": "8085505101",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/atelier-interactive-640-v3.log",
+      "log_sha256": "0e9885ebd07176d3e184452a02b8162d121c3a200e6c669cc1aa9dec886e3787",
+      "name": "atelier-interactive-640-v3",
+      "started_utc": "2026-09-29T16:51:32.119469+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_atelier_review.py",
+        "--resolution",
+        "1920x1080",
+        "--output",
+        "/home/aivv/megascene-acceptance-68/atelier-interactive-1080-v2",
+        "--binary",
+        "build/voxel-demo"
+      ],
+      "elapsed_ns": "12947871555",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/atelier-interactive-1080-v2.log",
+      "log_sha256": "8d89c2be4cb62281f08b99fc3efd698cafe179d2f49c5ec5f42c30fd6750ab0a",
+      "name": "atelier-interactive-1080-v2",
+      "started_utc": "2026-09-29T16:51:49.333196+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "visual inspection of retained captures at both resolutions"
+      ],
+      "duration_basis": "conservative rounded charge for manual inspection between interactive capture and signed review",
+      "elapsed_ns": "180000000000",
+      "exit_code": 0,
+      "name": "atelier-manual-visual-review",
+      "reviews": [
+        "/home/aivv/megascene-acceptance-68/atelier-interactive-640-v3/review.json",
+        "/home/aivv/megascene-acceptance-68/atelier-interactive-1080-v2/review.json"
+      ],
+      "status": "pass"
+    },
+    {
+      "command": [
+        "Campaign(root)",
+        "Campaign(root, transferred allowance)"
+      ],
+      "elapsed_ns": "1172276040",
+      "exit_code": 0,
+      "name": "setup-runner-campaign",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68/runner",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-static-small-1",
+        "--case",
+        "static",
+        "--preset",
+        "small",
+        "--threads",
+        "1"
+      ],
+      "elapsed_ns": "269778480883",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-static-small-1.log",
+      "log_sha256": "95d1f6afc4c2e68339c4bdcf5ab132d75698a44f1625870db45ac3fc0cc4f619",
+      "name": "calibration-static-small-1",
+      "started_utc": "2026-09-29T16:54:23.136258+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68/runner",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-static-small-12",
+        "--case",
+        "static",
+        "--preset",
+        "small",
+        "--threads",
+        "12"
+      ],
+      "elapsed_ns": "278554316891",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-static-small-12.log",
+      "log_sha256": "cd335ccfc85e543ea4eb79f43b8405ca8119c77104e6973e8636abf4e56dc7e8",
+      "name": "calibration-static-small-12",
+      "started_utc": "2026-09-29T17:00:11.450680+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68/runner",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-static-large-6",
+        "--case",
+        "static",
+        "--preset",
+        "large",
+        "--threads",
+        "6"
+      ],
+      "elapsed_ns": "434194249456",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-static-large-6.log",
+      "log_sha256": "e3e2c2703ddf357cd9663d8d647b01e002c949ecbdef9015341bbf53e57d78f1",
+      "name": "calibration-static-large-6",
+      "started_utc": "2026-09-29T17:05:41.921581+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68/runner",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-batch/calibration-static-large-1",
+        "--case",
+        "static",
+        "--preset",
+        "large",
+        "--threads",
+        "1"
+      ],
+      "elapsed_ns": "440212083822",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-static-large-1.log",
+      "log_sha256": "a9f3f4bf0b01dea4c556583cdeaa033c876d78eabd12d1d2a2cb1c56063a2be1",
+      "name": "calibration-static-large-1",
+      "started_utc": "2026-09-29T17:19:14.140970+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68/runner",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-batch/calibration-static-large-12",
+        "--case",
+        "static",
+        "--preset",
+        "large",
+        "--threads",
+        "12"
+      ],
+      "elapsed_ns": "194805702910",
+      "exit_code": 2,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-static-large-12.log",
+      "log_sha256": "54a0b79a77b2374f0692de4867f14a2ec801f41d88b9c2428c72b6b9ca808f24",
+      "name": "calibration-static-large-12",
+      "started_utc": "2026-09-29T17:26:34.427964+00:00",
+      "status": "failed"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-retry/calibration-static-large-12-retry1",
+        "--case",
+        "static",
+        "--preset",
+        "large",
+        "--threads",
+        "12"
+      ],
+      "elapsed_ns": "444473690900",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-static-large-12-retry1.log",
+      "log_sha256": "99b5c826ab5c0698dc32ccebfbaf87b250994d2f8e8e5ad6ec028adc890fbec0",
+      "name": "calibration-static-large-12-retry1",
+      "started_utc": "2026-09-29T17:38:54.602884+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-retry/calibration-history-small-1-retry1",
+        "--case",
+        "history",
+        "--preset",
+        "small",
+        "--threads",
+        "1"
+      ],
+      "elapsed_ns": "980765422171",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-history-small-1-retry1.log",
+      "log_sha256": "5146c22fadd66df15c637a68a1c178651ba8c64d2082cf3376c70d0ba76b27ba",
+      "name": "calibration-history-small-1-retry1",
+      "started_utc": "2026-09-29T17:46:19.195591+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-retry/calibration-history-small-6-retry1",
+        "--case",
+        "history",
+        "--preset",
+        "small",
+        "--threads",
+        "6"
+      ],
+      "elapsed_ns": "951734266160",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-history-small-6-retry1.log",
+      "log_sha256": "f1b98a41f9fdbd2307a996e69029e4402f2b6fbe7bee7784ef07ecaff68b6f22",
+      "name": "calibration-history-small-6-retry1",
+      "started_utc": "2026-09-29T18:02:40.055255+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-retry/calibration-history-small-12-retry1",
+        "--case",
+        "history",
+        "--preset",
+        "small",
+        "--threads",
+        "12"
+      ],
+      "elapsed_ns": "934046418946",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-history-small-12-retry1.log",
+      "log_sha256": "f1f2ebff54d6c721258ffe74436504e0b8bb386f531ee57a17531845c9622498",
+      "name": "calibration-history-small-12-retry1",
+      "started_utc": "2026-09-29T18:18:31.886513+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-retry/calibration-history-large-1-retry1",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--threads",
+        "1"
+      ],
+      "elapsed_ns": "85846160813",
+      "exit_code": 2,
+      "log": "/home/aivv/megascene-acceptance-68/checks/calibration-history-large-1-retry1.log",
+      "log_sha256": "9701e9c2c9a6f777e0d4cb5a5c5ba16894b581059078e0cfa692fb7dc500ac19",
+      "name": "calibration-history-large-1-retry1",
+      "started_utc": "2026-09-29T18:34:06.013801+00:00",
+      "status": "failed"
+    },
+    {
+      "bridge_to_next_runner_ns": "528280041241",
+      "campaign": "/home/aivv/megascene-acceptance-68/runner/campaign.json",
+      "elapsed_ns": "1075628426044",
+      "gross_ns": "2693173260006",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1617544833962"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry/campaign.json",
+      "elapsed_ns": "387955749710",
+      "gross_ns": "3784821708700",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "3396865958990"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry/campaign.json",
+      "elapsed_ns": "67159576114",
+      "gross_ns": "3851981284814",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "3396865958990"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry2",
+        "--work",
+        "build/calibration-68-retry2/calibration-history-large-1-retry2",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--threads",
+        "1"
+      ],
+      "elapsed_ns": "970649580585",
+      "exit_code": 2,
+      "log": "/home/aivv/megascene-acceptance-68-retry2/checks/calibration-history-large-1-retry2.log",
+      "log_sha256": "6d363518310f803e50558bc96ffdac99423b57842d943564b562c4f9b921b54f",
+      "name": "calibration-history-large-1-retry2",
+      "started_utc": "2026-09-29T18:42:59.358190+00:00",
+      "status": "failed"
+    },
+    {
+      "bridge_to_next_runner_ns": "443356048045",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry/campaign.json",
+      "elapsed_ns": "5827159407",
+      "gross_ns": "3857808444221",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "3396865958990"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry2/campaign.json",
+      "elapsed_ns": "57479122029",
+      "gross_ns": "1028128702614",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "970649580585"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry3",
+        "--work",
+        "build/calibration-68-retry3/calibration-history-large-1-retry3",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--threads",
+        "1"
+      ],
+      "elapsed_ns": "940779211281",
+      "exit_code": 2,
+      "log": "/home/aivv/megascene-acceptance-68-retry3/checks/calibration-history-large-1-retry3.log",
+      "log_sha256": "31839156109309923615cd663a6b3b1be9e9c81e94ff2926af80f65fffcb3232",
+      "name": "calibration-history-large-1-retry3",
+      "started_utc": "2026-09-29T19:00:23.466835+00:00",
+      "status": "failed"
+    },
+    {
+      "bridge_to_next_runner_ns": "67144819278",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry2/campaign.json",
+      "elapsed_ns": "14350629794",
+      "gross_ns": "1042479332408",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "970649580585"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry3/campaign.json",
+      "elapsed_ns": "296089664005",
+      "gross_ns": "1236868875286",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "940779211281"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry4",
+        "--work",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/calibration-68-retry4/calibration-history-large-1-retry4",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--threads",
+        "1"
+      ],
+      "elapsed_ns": "938451458586",
+      "exit_code": 2,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/calibration-history-large-1-retry4.log",
+      "log_sha256": "02c57d6ea5e63015d87875f42a410bbc974432934cfea976a8c32ae69ac4ba38",
+      "name": "calibration-history-large-1-retry4",
+      "started_utc": "2026-09-29T19:21:21.193984+00:00",
+      "status": "failed"
+    },
+    {
+      "bridge_to_next_runner_ns": "302765032904",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry3/campaign.json",
+      "elapsed_ns": "12968210011",
+      "gross_ns": "1249837085297",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "940779211281"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "145162246542",
+      "gross_ns": "1083613705128",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "938451458586"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--seed",
+        "45",
+        "--threads",
+        "1",
+        "--profile",
+        "full",
+        "--resolution",
+        "1920x1080",
+        "--calibration",
+        "on",
+        "--validated",
+        "/home/aivv/megascene-acceptance-68-retry4/a529356f-7e84-47f0-b324-1b72dfad5719/95a71c29-3df7-4cd1-824b-56624593bed4/501eca03-13ba-4dc6-b273-eb6aeb1ac33e",
+        "--calibration-peer-validation",
+        "/home/aivv/megascene-acceptance-68-retry4/a529356f-7e84-47f0-b324-1b72dfad5719/22628d8f-547d-40eb-aff6-30165b1950bd/c38346f7-01d8-43bc-8c9b-ce4aa56d1269",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry4",
+        "--output",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/diagnostic-monitor-68-large1"
+      ],
+      "elapsed_ns": "91246007992",
+      "exit_code": 2,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/diagnostic-monitor-large1.log",
+      "log_sha256": "d25ef6b01d0aca52756e085c0181e199d5031a011dec240d29403ab6cd6837d0",
+      "name": "diagnostic-monitor-large1",
+      "started_utc": "2026-09-29T19:42:14.229561+00:00",
+      "status": "failed"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "309392357315",
+      "gross_ns": "1484252070435",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1029697466578"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--seed",
+        "45",
+        "--threads",
+        "1",
+        "--profile",
+        "full",
+        "--resolution",
+        "1920x1080",
+        "--calibration",
+        "on",
+        "--validated",
+        "/home/aivv/megascene-acceptance-68-retry4/a529356f-7e84-47f0-b324-1b72dfad5719/95a71c29-3df7-4cd1-824b-56624593bed4/501eca03-13ba-4dc6-b273-eb6aeb1ac33e",
+        "--calibration-peer-validation",
+        "/home/aivv/megascene-acceptance-68-retry4/a529356f-7e84-47f0-b324-1b72dfad5719/22628d8f-547d-40eb-aff6-30165b1950bd/c38346f7-01d8-43bc-8c9b-ce4aa56d1269",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry4",
+        "--output",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/diagnostic-monitor-68-large1-deferred"
+      ],
+      "elapsed_ns": "230113361263",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/diagnostic-monitor-large1-deferred.log",
+      "log_sha256": "4e70484b2cd6c593aade2968085bdd81f1484588f20c5d54b7201b094d7b1dd3",
+      "name": "diagnostic-monitor-large1-deferred",
+      "started_utc": "2026-09-29T19:46:08.320537+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "24272814938",
+      "gross_ns": "1738638246636",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1259810827841"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "static",
+        "--preset",
+        "small",
+        "--seed",
+        "45",
+        "--threads",
+        "6",
+        "--resolution",
+        "640x360",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry4",
+        "--output",
+        "build/primary-68-static-small-6-640x360",
+        "--capture-opening"
+      ],
+      "elapsed_ns": "72849359619",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/primary-static-small-6-640x360.log",
+      "log_sha256": "71192c76ba8e4fbd4805ce39d01d07db4e865323613ab81d035a4edc9907cda0",
+      "name": "primary-static-small-6-640x360",
+      "started_utc": "2026-09-29T19:50:29.616473+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "34073848253",
+      "gross_ns": "1845561454508",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1332660187460"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "history",
+        "--preset",
+        "small",
+        "--seed",
+        "45",
+        "--threads",
+        "6",
+        "--resolution",
+        "640x360",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry4",
+        "--output",
+        "build/primary-68-history-small-6-640x360"
+      ],
+      "elapsed_ns": "274153984093",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/primary-history-small-6-640x360.log",
+      "log_sha256": "8d5beb9f0f12e250ad32eae01aaef0e456add5d7089bdd9accee0c0e6285315c",
+      "name": "primary-history-small-6-640x360",
+      "started_utc": "2026-09-29T19:51:58.426862+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "12740804433",
+      "gross_ns": "2132456243034",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1606814171553"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_review.py",
+        "--bundle",
+        "/home/aivv/megascene-acceptance-68-retry4/a529356f-7e84-47f0-b324-1b72dfad5719/4f815370-80c1-4a05-b357-062ba251008b/9a3b9649-57a8-4995-a644-0c445d5bea60",
+        "--assessments",
+        "docs/validation/megascene-acceptance/reviews/static-opening-360.json",
+        "--reviewer",
+        "Codex"
+      ],
+      "elapsed_ns": "3174846270",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/review-static-small-360.log",
+      "log_sha256": "9f56e761d79bfdb34304a012586cb04d16b435ef6130091a97702e559260a2f2",
+      "name": "review-static-small-360",
+      "started_utc": "2026-09-29T19:56:46.234868+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_contact_sheets.py",
+        "--bundle",
+        "/home/aivv/megascene-acceptance-68-retry4/a529356f-7e84-47f0-b324-1b72dfad5719/131123b4-90a2-4a8f-b0ad-ead2e23ab5dc/ebb79336-1e44-40fc-a1f5-1479f658ebd5",
+        "--output",
+        "/home/aivv/megascene-acceptance-68-retry4/review-sheets/history-small-360"
+      ],
+      "elapsed_ns": "1518532255",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/contact-history-small-360.log",
+      "log_sha256": "34af3b58bfc15a7e1365862d13eb5cabef68de0271e76f843ae9c1847838db25",
+      "name": "contact-history-small-360",
+      "started_utc": "2026-09-29T19:57:10.154616+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_review.py",
+        "--bundle",
+        "/home/aivv/megascene-acceptance-68-retry4/a529356f-7e84-47f0-b324-1b72dfad5719/131123b4-90a2-4a8f-b0ad-ead2e23ab5dc/ebb79336-1e44-40fc-a1f5-1479f658ebd5",
+        "--assessments",
+        "docs/validation/megascene-acceptance/reviews/history-small-360.json",
+        "--reviewer",
+        "Codex"
+      ],
+      "elapsed_ns": "7390459272",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/review-history-small-360.log",
+      "log_sha256": "9f56e761d79bfdb34304a012586cb04d16b435ef6130091a97702e559260a2f2",
+      "name": "review-history-small-360",
+      "started_utc": "2026-09-29T19:57:51.416989+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "85480862393",
+      "gross_ns": "2217937105427",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1606814171553"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_index.py",
+        "--archive-base",
+        "/home/aivv",
+        "--output",
+        "docs/validation/megascene-acceptance/index.json"
+      ],
+      "elapsed_ns": "14310725618",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/index-refresh-mid.log",
+      "log_sha256": "9273c78c28c8e49939c904decbace8bbc40a08d265292f9fc882fbfe1bc304b7",
+      "name": "index-refresh-mid",
+      "started_utc": "2026-09-29T19:58:10.915226+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_megascene_report.py",
+        "-v"
+      ],
+      "elapsed_ns": "1217390550",
+      "exit_code": 1,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/report-preflight-regression.log",
+      "log_sha256": "2363090bed066658ebc3e63e44c406e2233951d6a9d37826094219ee0a625ef9",
+      "name": "report-preflight-regression",
+      "started_utc": "2026-09-29T20:01:08.451067+00:00",
+      "status": "failed"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_megascene_report.py",
+        "-v"
+      ],
+      "elapsed_ns": "1418489782",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/report-preflight-regression-retry.log",
+      "log_sha256": "f23713e80009c026d7fddfc8a2f70bb12a413764a36d8cb2532010f6d8db5773",
+      "name": "report-preflight-regression-retry",
+      "started_utc": "2026-09-29T20:01:41.866808+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_reclassify.py",
+        "--bundle",
+        "/home/aivv/megascene-acceptance-68-retry4/a529356f-7e84-47f0-b324-1b72dfad5719/131123b4-90a2-4a8f-b0ad-ead2e23ab5dc/ebb79336-1e44-40fc-a1f5-1479f658ebd5",
+        "--pre-review-summary",
+        "build/primary-68-history-small-6-640x360/summary.json"
+      ],
+      "elapsed_ns": "7544527621",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/reclassify-history-small-360.log",
+      "log_sha256": "312a5e2e377279417b426f518108a8fcf66882a70b0aaea7246b0b8d45115456",
+      "name": "reclassify-history-small-360",
+      "started_utc": "2026-09-29T20:02:27.201568+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "276674589261",
+      "gross_ns": "2494611694688",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1606814171553"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "traversal",
+        "--preset",
+        "small",
+        "--seed",
+        "45",
+        "--threads",
+        "1",
+        "--resolution",
+        "1920x1080",
+        "--runtime-from",
+        "/home/aivv/megascene-issue53-v2/13f036f9-b271-432b-9e4a-d1126685e730/907efea6-31c1-4426-8b1f-9f580b58065e/bfb53a28-121f-4114-b573-3aaf0c244d62",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry4",
+        "--output",
+        "build/primary-68-traversal-small-1-1080"
+      ],
+      "elapsed_ns": "148079120079",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/primary-traversal-small-1-1080.log",
+      "log_sha256": "4d8c5e49ec07a60d44a50e682e1ecbf7ee849e0290172d642a4d43100fe091de",
+      "name": "primary-traversal-small-1-1080",
+      "started_utc": "2026-09-29T20:03:04.786259+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "28392037505",
+      "gross_ns": "2671082852272",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1754893291632"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene.py",
+        "--case",
+        "traversal",
+        "--preset",
+        "small",
+        "--seed",
+        "45",
+        "--threads",
+        "12",
+        "--resolution",
+        "1920x1080",
+        "--runtime-from",
+        "/home/aivv/megascene-issue53-v2/13f036f9-b271-432b-9e4a-d1126685e730/907efea6-31c1-4426-8b1f-9f580b58065e/bfb53a28-121f-4114-b573-3aaf0c244d62",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-retry4",
+        "--output",
+        "build/primary-68-traversal-small-12-1080"
+      ],
+      "elapsed_ns": "143872105893",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/primary-traversal-small-12-1080.log",
+      "log_sha256": "f0232255c5959fdf984ad7ac6ebdfffd4a9b4cd0488ca1eac402c34a2ca2090b",
+      "name": "primary-traversal-small-12-1080",
+      "started_utc": "2026-09-29T20:05:47.759512+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "9525688320",
+      "gross_ns": "2824480646485",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1898765397525"
+    },
+    {
+      "command": [
+        "bend",
+        "PROOF.bend"
+      ],
+      "elapsed_ns": "465475735",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/final-bend-proof.log",
+      "log_sha256": "931f1e664a679af1355a9ca547ac1daef9f7b14137bc7cc21b110b0cc504b5b1",
+      "name": "final-bend-proof",
+      "started_utc": "2026-09-29T20:08:28.711162+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "bend",
+        "PROOF.bend",
+        "--verdict"
+      ],
+      "elapsed_ns": "967466022",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/final-bend-proof-verdict.log",
+      "log_sha256": "61b73cda11b6b665b9f99f2defd3d3b57f985c865225e942a5bdaa594a503e47",
+      "name": "final-bend-proof-verdict",
+      "started_utc": "2026-09-29T20:08:33.588263+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_acceptance_index.py",
+        "--archive-base",
+        "/home/aivv",
+        "--output",
+        "docs/validation/megascene-acceptance/index.json"
+      ],
+      "elapsed_ns": "10649936926",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-retry4/checks/index-final.log",
+      "log_sha256": "a25bab2f9c54db47d2a22a440842b234316aa8ecd2bbbbfca8570d62f0d7061a",
+      "name": "index-final",
+      "started_utc": "2026-09-29T20:08:40.074225+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "elapsed_ns": "80311275837",
+      "gross_ns": "2904791922322",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1898765397525"
+    }
+  ],
+  "new_work_charge_ns": "12591826932730",
+  "prior_campaigns": [
+    {
+      "archive": "/home/aivv/megascene-calibration-64",
+      "campaign": "/home/aivv/megascene-calibration-64/campaign.json",
+      "campaign_id": "723a4efb-3a21-40c7-acd9-934937be7155",
+      "elapsed_ns": "929927286580",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-calibration-65",
+      "campaign": "/home/aivv/megascene-calibration-65/campaign.json",
+      "campaign_id": "f11a290e-df61-4b0c-93ab-55c9d05065bc",
+      "elapsed_ns": "247885746041",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-gpu-evidence",
+      "campaign": "/home/aivv/megascene-gpu-evidence/campaign.json",
+      "campaign_id": "a6c0e3ec-f206-4e82-9372-fc1e0c01c435",
+      "elapsed_ns": "603410925743",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue-66-archive",
+      "campaign": "/home/aivv/megascene-issue-66-archive/campaign.json",
+      "campaign_id": "13e0327e-0560-4672-89bb-2ddb1dd39ce2",
+      "elapsed_ns": "927257214036",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue-66-numeric-reject-archive",
+      "campaign": "/home/aivv/megascene-issue-66-numeric-reject-archive/campaign.json",
+      "campaign_id": "b640942e-060e-4c4a-b868-850725588820",
+      "elapsed_ns": "1219845267",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue50-evidence",
+      "campaign": "/home/aivv/megascene-issue50-evidence/campaign.json",
+      "campaign_id": "b5f0a4ca-63ac-47df-b428-8645c793750e",
+      "elapsed_ns": "1211966185303",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue51-evidence",
+      "campaign": "/home/aivv/megascene-issue51-evidence/campaign.json",
+      "campaign_id": "2b024983-0863-4005-beda-5b16088db1b5",
+      "elapsed_ns": "3588282792908",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue53",
+      "campaign": "/home/aivv/megascene-issue53/campaign.json",
+      "campaign_id": "b392a7aa-fed2-45ba-8fad-0ae0ef8f13e3",
+      "elapsed_ns": "1074998098296",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue53-v2",
+      "campaign": "/home/aivv/megascene-issue53-v2/campaign.json",
+      "campaign_id": "13f036f9-b271-432b-9e4a-d1126685e730",
+      "elapsed_ns": "484979473161",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue54",
+      "campaign": "/home/aivv/megascene-issue54/campaign.json",
+      "campaign_id": "a9588819-aeda-4415-8b95-8ce334d8e499",
+      "elapsed_ns": "1793477519492",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue55",
+      "campaign": "/home/aivv/megascene-issue55/campaign.json",
+      "campaign_id": "41412612-0c02-4cb4-ac06-dbd576b7afe6",
+      "elapsed_ns": "872745896805",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue57",
+      "campaign": "/home/aivv/megascene-issue57/campaign.json",
+      "campaign_id": "51ce44c5-43aa-4856-a014-15abad5c2b6f",
+      "elapsed_ns": "4435840591293",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue58-evidence",
+      "campaign": "/home/aivv/megascene-issue58-evidence/campaign.json",
+      "campaign_id": "88dcb8c5-fa48-4b31-b033-88b2d1ee6a61",
+      "elapsed_ns": "1695052897230",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue59-archive",
+      "campaign": "/home/aivv/megascene-issue59-archive/campaign.json",
+      "campaign_id": "71b8de88-db0c-440f-b056-875fff62bb72",
+      "elapsed_ns": "834306910960",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue60",
+      "campaign": "/home/aivv/megascene-issue60/campaign.json",
+      "campaign_id": "9d200292-aa6f-4fb9-83db-c618cc76f995",
+      "elapsed_ns": "1595898556316",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue61",
+      "campaign": "/home/aivv/megascene-issue61/campaign.json",
+      "campaign_id": "cce7c072-d838-404c-a901-cbba15db8ca0",
+      "elapsed_ns": "946701529186",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-evidence",
+      "campaign": "/home/aivv/megascene-issue63-evidence/campaign.json",
+      "campaign_id": "153f0e72-2b51-40b0-a74c-ebe87892bcd4",
+      "elapsed_ns": "38175967800",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-localized-reproduced",
+      "campaign": "/home/aivv/megascene-issue63-localized-reproduced/campaign.json",
+      "campaign_id": "b2b8b5f1-5c17-43e2-9621-ba8add58842b",
+      "elapsed_ns": "57417881207",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-localized-source",
+      "campaign": "/home/aivv/megascene-issue63-localized-source/campaign.json",
+      "campaign_id": "7133c18d-03ff-4013-8bf5-948c2032051e",
+      "elapsed_ns": "82922749365",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-reproduction",
+      "campaign": "/home/aivv/megascene-issue63-reproduction/campaign.json",
+      "campaign_id": "ad874eae-b09b-424d-b3a8-0b2af3921fd8",
+      "elapsed_ns": "17105537754",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-reproduction-2",
+      "campaign": "/home/aivv/megascene-issue63-reproduction-2/campaign.json",
+      "campaign_id": "86c78656-0d3c-4f8a-a19e-fe8043de6e50",
+      "elapsed_ns": "8846532685",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-reproduction-3",
+      "campaign": "/home/aivv/megascene-issue63-reproduction-3/campaign.json",
+      "campaign_id": "6b2bd0c8-2843-4264-9db9-8eff2754ea8a",
+      "elapsed_ns": "30858598043",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-reproduction-4",
+      "campaign": "/home/aivv/megascene-issue63-reproduction-4/campaign.json",
+      "campaign_id": "f2fc92dc-7746-4817-9b72-d5209c2c84b4",
+      "elapsed_ns": "1564155264",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-reproduction-5",
+      "campaign": "/home/aivv/megascene-issue63-reproduction-5/campaign.json",
+      "campaign_id": "b417a6c5-5432-4e16-8f57-db0b3cbc4215",
+      "elapsed_ns": "17507310418",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-static-full-reproduced",
+      "campaign": "/home/aivv/megascene-issue63-static-full-reproduced/campaign.json",
+      "campaign_id": "8fa05308-eadf-4ac9-9850-62aa8db90bcd",
+      "elapsed_ns": "69726580079",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-issue63-static-full-source",
+      "campaign": "/home/aivv/megascene-issue63-static-full-source/campaign.json",
+      "campaign_id": "0bfc8f84-03c1-4513-a979-657c5aeaa897",
+      "elapsed_ns": "74180244500",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    },
+    {
+      "archive": "/home/aivv/megascene-support-56",
+      "campaign": "/home/aivv/megascene-support-56/campaign.json",
+      "campaign_id": "ffac9c21-68b7-43dc-a844-4786c0591aaa",
+      "elapsed_ns": "1700823345726",
+      "scope": "all retained earlier Megascene work; conservative gross charge"
+    }
+  ],
+  "prior_gross_charge_ns": "23343080371458",
+  "recorded_utc": "2026-09-29T16:34:07.929025+00:00",
+  "remaining_ns": "65092695812",
+  "runner_campaign": {
+    "path": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+    "scope": "internal supervisor cap; shared allowance remains consolidated in this ledger"
+  },
+  "runner_campaign_history": [
+    {
+      "allowance_ns": "16725000000000",
+      "approved_extension_transfer_s": "9525",
+      "path": "/home/aivv/megascene-acceptance-68/runner/campaign.json",
+      "scope": "Supervisor cap for new runner invocations; run wall times are charged once through new_work entries"
+    },
+    {
+      "allowance_ns": "10200000000000",
+      "approved_extension_transfer_s": "3000",
+      "path": "/home/aivv/megascene-acceptance-68-retry/campaign.json",
+      "scope": "Fresh supervisor after retained monitoring failure; consolidated allowance remains shared and new_work remains charged once"
+    },
+    {
+      "path": "/home/aivv/megascene-acceptance-68-retry2/campaign.json",
+      "scope": "internal supervisor cap; shared allowance remains consolidated in this ledger"
+    },
+    {
+      "path": "/home/aivv/megascene-acceptance-68-retry3/campaign.json",
+      "scope": "internal supervisor cap; shared allowance remains consolidated in this ledger"
+    }
+  ],
+  "runner_campaign_remaining_ns": "4295208077678",
+  "runner_overhead_credited_ns": {
+    "/home/aivv/megascene-acceptance-68-retry/campaign.json": "460942485231",
+    "/home/aivv/megascene-acceptance-68-retry2/campaign.json": "71829751823",
+    "/home/aivv/megascene-acceptance-68-retry3/campaign.json": "309057874016",
+    "/home/aivv/megascene-acceptance-68-retry4/campaign.json": "1006026524797",
+    "/home/aivv/megascene-acceptance-68/runner/campaign.json": "1075628426044"
+  },
+  "schema": "megascene-acceptance-allowance/1"
+}

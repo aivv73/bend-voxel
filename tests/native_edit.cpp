@@ -13,6 +13,11 @@ int main() {
   float positive_decimal[]={-24.4f,7.303800106f,22.8f};
   assert(edit_point_valid(positive_decimal,-.196200043f,local));
   assert(fabsf(local[2]-228.f)<.0001f);
+  // Recorded large-history action 5: binary32 -56.4 m rounds to -564 cells,
+  // differing from the double expression by 0.0000152587890625 cells.
+  float large_history[]={-56.400001525878906f,7.203800201416016f,-46.f};
+  assert(edit_point_valid(large_history,-.196200043f,local));
+  assert(local[0]==-564.f && local[1]==74.f && local[2]==-460.f);
   float moved[]={-.05f,9.05f,.05f}; assert(edit_point_valid(moved,-1,local));
   assert(local[1]==100.5f);
   float falling[]={-29.5f,4.f,-11.6f},span_lo[]={-304.f,42.f,-144.f},span_hi[]={-184.f,76.f,-136.f};

@@ -74,6 +74,14 @@ law palette_length:
 #   most 5%. Do not pool attempts, subtract cost or rerun without allowance.
 #   These unsafe/native-dependent properties require runtime/reference tests;
 #   Bend proof checks do not establish calibration or transient off equality.
+# - Issue #68 implementation acceptance needs a separate complete validation,
+#   timed workload and named visual review for every positive matrix row.
+#   Insufficient calibration or responsiveness can leave performance unqualified
+#   while completed functional evidence remains valid. A missing or failed
+#   positive row keeps implementation acceptance incomplete. Retain failed runs
+#   and charge all eligible earlier and new work to the shared declared allowance.
+#   Unsafe carving and native Vulkan fidelity need runtime/reference evidence;
+#   these are not formal Bend proof claims.
 # - Fixed-preset initial admission now checks disjointness, positive-face
 #   connectivity, anchors, arithmetic bounds and actual production inventory.
 #   See docs/megascene-admission.md. These are runtime/reference checks only;

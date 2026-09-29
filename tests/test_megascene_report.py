@@ -80,6 +80,21 @@ def classify_fixture(data):
 
 
 class SyntheticOutcomes(unittest.TestCase):
+    def test_preflight_resource_extremum_and_reclassification(self):
+        data=fixture()
+        data["resources"]=[
+            {"record_type":"host_sample","phase":"preflight","device_free_bytes":"90"},
+            {"record_type":"host_sample","device_free_bytes":"100"}]
+        data["summary"]["supervision"]["resource_samples"]="2"
+        data["summary"]["supervision"]["observed_minima"]={"device_free_bytes":"100"}
+        first=classify_fixture(data)
+        self.assertEqual(first["schedule_completion"]["status"],"pass")
+        self.assertEqual(first["evidence_errors"],[])
+        data["summary"]=first
+        second=classify_fixture(data)
+        self.assertEqual(second["schedule_completion"]["status"],"pass")
+        self.assertEqual(second["evidence_errors"],[])
+
     def test_static_success_and_one_cut_inconclusive(self):
         result=classify_fixture(fixture())
         ordinary=result["populations"]["ordinary"]

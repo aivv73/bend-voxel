@@ -179,6 +179,7 @@ class Reference:
         self.records = []
         self.frame_count = 0
         self.frame_end = None
+        self.effect_end = None
 
     def drain(self, sync=True):
         while self.count < self.capacity:
@@ -220,6 +221,8 @@ class Reference:
             if kind == 'frame':
                 self.frame_count += 1
                 self.frame_end = record['end_ns']
+            if kind in ('frame', 'edit'):
+                self.effect_end = record['end_ns']
             self.count += 1
         if sync:
             self.stream.flush()
@@ -403,6 +406,8 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
                     os.fsync(f.fileno())
     durability = Durability(persist_files)
     durability_complete = False
+    slow_loops = []
+    last_iteration_end = None
     def final_resource(sample):
         nonlocal cause, reason, last_host, last_heap
         observed_resources.append(sample)
@@ -479,6 +484,10 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
             last_sync = 0
             while process is not None:
                 now = time.monotonic_ns()
+                iteration_begin = now
+                if last_iteration_end is not None and now-last_iteration_end > 200_000_000 and len(slow_loops) < 32:
+                    slow_loops.append({'stage':'between_iterations', 'begin_ns':str(last_iteration_end),
+                                       'duration_ns':str(now-last_iteration_end)})
                 if pipe_ready(monitor.stdout):
                     host_pending += os.read(monitor.stdout.fileno(), 65536)
                 lines = host_pending.split(b'\n'); host_pending = lines.pop()
@@ -500,12 +509,17 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
                         cause, reason = stop
                     if heap.get('status') == 'measured' and (not stop or stop[0] != 'monitoring_failure'):
                         last_heap = integer(heap['sample_begin_ns'])
-                tails['cpu'].drain(); tails['allocations'].drain()
+                after_resources = time.monotonic_ns()
+                # The shared recorder supplies live frame/edit intervals. CPU
+                # JSON audits are verified by the complete final drain; parsing
+                # their growing nested payloads here can starve resource checks.
+                tails['allocations'].drain()
+                after_tails = time.monotonic_ns()
                 reference.drain(sync=False)
                 durability.check()
-                completed = [r for r in reference.records if r['record_type'] in ('frame','edit')]
-                if completed:
-                    last_frame = integer(completed[-1]['end_ns'])
+                after_reference = time.monotonic_ns()
+                if reference.effect_end is not None:
+                    last_frame = integer(reference.effect_end)
                 for tail in tails.values():
                     if tail.error:
                         raise ValueError(tail.error)
@@ -532,6 +546,15 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
                         loaded_objects.update(line.split(None,5)[5] for line in maps.splitlines() if len(line.split(None,5)) == 6 and line.split(None,5)[5].startswith('/'))
                     except FileNotFoundError:
                         pass
+                after_sync = time.monotonic_ns()
+                if after_sync-iteration_begin > 200_000_000 and len(slow_loops) < 32:
+                    slow_loops.append({'stage':'iteration', 'begin_ns':str(iteration_begin),
+                                       'duration_ns':str(after_sync-iteration_begin),
+                                       'resources_ns':str(after_resources-iteration_begin),
+                                       'tails_ns':str(after_tails-after_resources),
+                                       'reference_ns':str(after_reference-after_tails),
+                                       'checks_and_sync_ns':str(after_sync-after_reference)})
+                last_iteration_end = after_sync
                 if cause != 'normal_exit' or process.poll() is not None:
                     kill_tree(process, known_worker_pids)
                     break
@@ -662,6 +685,7 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
                 'allocation_ledger':ledger_summary,
                 'synthetic':identity.get('synthetic',False),
                 'resource_cadence':resource_summary,
+                'slow_supervisor_loops':slow_loops,
                 'durability':{'mode':'single_background_flush', 'final_barrier':durability_complete},
                 'observed_maxima':{field: str(max(int(r[field]) for r in valid_resources if field in r)) for field in ('rss_bytes',) if any(field in r for r in valid_resources)},
                 'observed_minima':{field: str(min(int(r[field]) for r in valid_resources if field in r)) for field in ('available_ram_bytes','device_free_bytes') if any(field in r for r in valid_resources)},

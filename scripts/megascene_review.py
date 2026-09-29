@@ -91,7 +91,8 @@ def assess(bundle, input_path, reviewer):
     if manifest["effective"]["case"] == "static":
         return assess_static(root,manifest,input_path,reviewer)
     require(manifest["effective"]["case"] in ("traversal", "picking", "localized", "support", "history"), "replay bundle required")
-    require(manifest["attempt_kind"] in ("validation_only", "development_observation"), "complete bundle required")
+    require(manifest["attempt_kind"] in ("validation_only", "development_observation", "calibration_on"),
+            "complete bundle required")
     summary=read_json((root/"summary.json").read_text())
     require(summary["schedule_completion"]["status"] == "pass" and
             summary["state_correctness"]["status"] == "pass", "complete validated replay required")
@@ -100,7 +101,9 @@ def assess(bundle, input_path, reviewer):
     frozen=read_json((root/"schedule.json").read_text())
     require(review["schedule_sha256"]==hashlib.sha256((root/"schedule.json").read_bytes()).hexdigest(), "stale review schedule")
     require(frozen["schedule_id"] in ("traversal-v1", "traversal-v2", "picking-v1", "picking-v2", "localized-v1", "support-v1", "history-v1",
-                                       "history-12-v1", "history-48-v1", "support-1-span-v1", "support-2-span-v1") or
+                                       "fill-support-v1", "fill-history-v1", "body-rich-history-v1",
+                                       "material-detail-localized-v1", "history-12-v1", "history-48-v1",
+                                       "support-1-span-v1", "support-2-span-v1") or
             frozen["schedule_id"].startswith("proxy-"), "unsupported route")
     answers=read_json(Path(input_path).read_text())
     require(answers["schema"]=="megascene-feature-assessments/1" and isinstance(answers["views"],dict), "unsupported assessments")

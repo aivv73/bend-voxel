@@ -12,7 +12,7 @@ static int edit_point_valid(const float* point,float offset,float* local) {
     local[k]=relative*10.f;
     if(!isfinite(point[k])||!isfinite(local[k])||fabsf(local[k])>1024 ||
        fabsf(local[k]*2.f-roundf(local[k]*2.f))>0.0001f ||
-       fabs((double)local[k]-((double)point[k]-(k==1?offset:0.))*10.)>0.00001) return 0;
+       fabs((double)local[k]-((double)point[k]-(k==1?offset:0.))*10.)>0.0001) return 0;
   }
   return 1;
 }
