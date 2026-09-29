@@ -50,6 +50,9 @@ static u64 mega_reference_sequence;
 static u64 mega_edit_begin;
 static u32 mega_edit_action,mega_edit_removed,mega_edit_status;
 static int mega_edit_pending;
+// Standalone edit-recorder fixtures do not call mark(0); ordinary logging is
+// the default until an explicit calibration-off worker initializes the mode.
+static int mega_detailed=1, mega_final_audit;
 static char mega_action_outcomes[65536]="[]";
 static void mega_reference(const char* fields) {
   char record[MEGA_REFERENCE_SLOT-8];
@@ -60,7 +63,7 @@ static void mega_reference(const char* fields) {
   if(n<0 || n>=(int)sizeof record || !mega_reference_commit(mega_reference_memory,record,(size_t)n))
     err_fail("Megascene reference overflow");
 }
-static void mega_record(const char* fields) {
+static void mega_record_force(const char* fields) {
   if (!mega_stream) return;
   u64 now=mega_tick();
   if (fprintf(mega_stream,
@@ -71,7 +74,11 @@ static void mega_record(const char* fields) {
       (unsigned long long)now,(unsigned long long)mega_frame,fields)<0 || fflush(mega_stream))
     err_fail("Megascene evidence persistence failed");
 }
+static void mega_record(const char* fields) {
+  if (mega_detailed) mega_record_force(fields);
+}
 static void mega_stage(const char* name,u64 begin,u64 end) {
+  if (!mega_detailed) return;
   char record[512];
   snprintf(record,sizeof record,
     "\"record_type\":\"stage\",\"stage\":\"%s\",\"begin_ns\":\"%llu\",\"end_ns\":\"%llu\",\"duration_ns\":\"%llu\",\"status\":\"measured\",\"unit\":\"ns\",\"scope\":\"cpu_stage\"",
@@ -203,6 +210,9 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
       if (!((*p>='a'&&*p<='z')||(*p>='0'&&*p<='9')||*p=='-')) err_fail("invalid Megascene identity");
     mega_warmup=mega_number("MEGASCENE_WARMUP",120);
     mega_measured=mega_number("MEGASCENE_MEASURED",3600);
+    const char* calibration=getenv("MEGASCENE_CALIBRATION");
+    if(calibration && strcmp(calibration,"on") && strcmp(calibration,"off")) err_fail("invalid calibration mode");
+    mega_detailed=!calibration || strcmp(calibration,"off") || getenv("MEGASCENE_VALIDATE");
     mega_ground=(float)mega_number("MEGASCENE_GROUND",72);
     if (mega_stream) err_fail("Megascene recorder already open");
     mega_stream=fopen(mega_env("MEGASCENE_EVENTS"),"wx");
@@ -224,13 +234,13 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
     if(!start(error,sizeof error)) err_fail(error);
     // Supervisor checks process-attributed heap samples before allowing work.
     while(access(mega_env("MEGASCENE_GO"),F_OK)) usleep(1000);
-    mega_record("\"record_type\":\"worker_start\"");
+    mega_record_force("\"record_type\":\"worker_start\"");
   } else if (code==15) {
-    mega_record("\"record_type\":\"complete\"");
+    mega_record_force("\"record_type\":\"complete\"");
     if (fclose(mega_stream)) err_fail("cannot close Megascene evidence");
     mega_stream=NULL;
   } else if (code==17) {
-    mega_record("\"record_type\":\"window_closed\"");
+    mega_record_force("\"record_type\":\"window_closed\"");
   } else if(code>=19 && code<=26) {
     static const char* stages[]={"carve","connectivity","surfaces","commit"};
     if(code&1) mega_stage_begin[code]=now;

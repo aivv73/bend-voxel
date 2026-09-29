@@ -52,6 +52,7 @@ def loop(n: Nat, cuts: List<&2,Cut>, +index: U32, +width: U32, +height: U32, +en
   match n:
     case 0n:
       do IO<Unit>:
+        VK.vulkan.audit(state,V.Aim{R.Vec{0.0,0.0,0.0},0.0,0})
         L.close(win)
         VK.vulkan.mark(15)
     case 1n+rest:

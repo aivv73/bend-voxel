@@ -1,0 +1,295 @@
+{
+  "configuration_count": 12,
+  "configurations": [
+    {
+      "case": "static",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "static-v1",
+      "seed": "45",
+      "threads": "1",
+      "warmup": "120"
+    },
+    {
+      "case": "static",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "static-v1",
+      "seed": "45",
+      "threads": "6",
+      "warmup": "120"
+    },
+    {
+      "case": "static",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "static-v1",
+      "seed": "45",
+      "threads": "12",
+      "warmup": "120"
+    },
+    {
+      "case": "static",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "static-v1",
+      "seed": "45",
+      "threads": "1",
+      "warmup": "120"
+    },
+    {
+      "case": "static",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "static-v1",
+      "seed": "45",
+      "threads": "6",
+      "warmup": "120"
+    },
+    {
+      "case": "static",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "static-v1",
+      "seed": "45",
+      "threads": "12",
+      "warmup": "120"
+    },
+    {
+      "case": "history",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "history-v1",
+      "seed": "45",
+      "threads": "1",
+      "warmup": "120"
+    },
+    {
+      "case": "history",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "history-v1",
+      "seed": "45",
+      "threads": "6",
+      "warmup": "120"
+    },
+    {
+      "case": "history",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "history-v1",
+      "seed": "45",
+      "threads": "12",
+      "warmup": "120"
+    },
+    {
+      "case": "history",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "history-v1",
+      "seed": "45",
+      "threads": "1",
+      "warmup": "120"
+    },
+    {
+      "case": "history",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "history-v1",
+      "seed": "45",
+      "threads": "6",
+      "warmup": "120"
+    },
+    {
+      "case": "history",
+      "control": null,
+      "diagnostic": null,
+      "fragment_budget": "2048",
+      "frames": "3600",
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "profile": "full",
+      "resolution": "1920x1080",
+      "schedule": "history-v1",
+      "seed": "45",
+      "threads": "12",
+      "warmup": "120"
+    }
+  ],
+  "control_count": 72,
+  "control_order": [
+    "off",
+    "on",
+    "on",
+    "off",
+    "off",
+    "on"
+  ],
+  "pairs": [
+    [
+      0,
+      1
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      4,
+      5
+    ]
+  ],
+  "qualification_scope": "only the exact tested configuration and workload regime",
+  "record_type": "calibration_plan",
+  "schema": "megascene-evidence/1"
+}

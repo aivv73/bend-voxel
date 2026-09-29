@@ -65,6 +65,15 @@ law palette_length:
 #   diagnostics with explicit limited equivalence evidence; they never qualify
 #   benchmark passes or endpoints. Qualifying runs retain all required checks.
 #   See docs/megascene-spec.md for the handoff and calibration protocol.
+# - Issue #65 calibration uses 12 exact static/history × preset × thread
+#   configurations at full 1080p. Each has six fresh controls in
+#   off/on/on/off/off/on order, with separate complete mode validations.
+#   Each applicable ordinary mean/p95/p99 and history accepted-edit p95 must
+#   have sufficient populations and valid off denominators. Above 5% off
+#   variation is inconclusive; otherwise every paired increase must be at
+#   most 5%. Do not pool attempts, subtract cost or rerun without allowance.
+#   These unsafe/native-dependent properties require runtime/reference tests;
+#   Bend proof checks do not establish calibration or transient off equality.
 # - Fixed-preset initial admission now checks disjointness, positive-face
 #   connectivity, anchors, arithmetic bounds and actual production inventory.
 #   See docs/megascene-admission.md. These are runtime/reference checks only;
@@ -298,3 +307,17 @@ law palette_material_order:
 # - Each variant has separate schedule, admission, checkpoint and achieved
 #   material/owner/surface/density/bounds evidence. Native/unsafe behavior is
 #   covered by independent reference and complete Vulkan replay, not proof.
+
+# Archived static/localized reproduction (issue #63; runtime/reference scope):
+# - Retrieve the exact executable, native library, linked libraries, shaders,
+#   generated source, generator, configuration and frozen schedule from the
+#   recorded durable archive. Verify their SHA-256 bytes before execution.
+# - A fresh validation and timed replay use those restored inputs and their
+#   original thread/profile/frame settings. Compare initial inventory and
+#   canonical state, action and geometry checkpoints with the source attempt.
+# - A missing/tampered artifact, changed configuration, failed replay, damaged
+#   stream or mismatch cannot pass reproduction. Keep incomplete attempts and
+#   partial archive writes under distinct identities without overwriting bytes.
+# - Actual host graphics dependencies and elapsed time are recorded separately;
+#   reproduction does not prove cross-platform equality or performance gates.
+#   Native/unsafe behavior remains runtime/reference evidence, not formal proof.

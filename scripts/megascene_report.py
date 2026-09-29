@@ -385,7 +385,7 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
         missing.append("evidence_integrity")
     if not reference or any("reference" in e.lower() for e in errors):
         missing.append("reference_evidence")
-    if result["attempt_kind"] in ("calibration_off","validation_only","validation_replay","opening_capture","admission"):
+    if result["attempt_kind"] in ("calibration_off","validation_only","validation_replay","opening_capture","admission","reproduction"):
         missing.append("nonqualifying_attempt_kind")
     if cause in RESERVE_CAUSES or cause in ("required_edit_rejection","allocation_error","device_loss"):
         failures.append(cause)
@@ -431,6 +431,13 @@ def report_bundle(bundle, calibration=None):
     bundle = Path(bundle)
     manifest = checked_object(read_json((bundle/"manifest.json").read_text()),"manifest")
     summary = checked_object(read_json((bundle/"summary.json").read_text()),"summary")
+    if manifest["attempt_kind"] == "calibration_off":
+        from megascene_calibration import off_result
+        from megascene_static import read_stream as read_cpu
+        cpu, errors = read_cpu(bundle/"cpu.jsonl",manifest["attempt_id"])
+        validation = read_json((bundle/"validation.json").read_text()) if (bundle/"validation.json").is_file() else None
+        return {**summary, **off_result(manifest["effective"],bundle,manifest,validation,
+                          read_json((bundle/"supervision.json").read_text()),cpu,errors)}
     cpu, cpu_errors = read_stream(bundle/"cpu.jsonl",manifest)
     from megascene_gpu import read_stream as read_gpu
     gpu, gpu_errors = read_gpu(bundle/"gpu.jsonl",manifest)

@@ -23,6 +23,10 @@ def vulkan.release(window: Window) -> IO(Window):
 def vulkan.mark(code: U32) -> IO(Unit):
   import "./vulkan/record.c"
   import "./vulkan/bridge.js"
+# The calibration-off final checkpoint runs after the last frame boundary.
+def vulkan.audit(state: D.State, aim: V.Aim) -> IO(Unit):
+  import "./vulkan/bridge.c"
+  import "./vulkan/bridge.js"
 def vulkan.capture(window: Window) -> IO(Window):
   import "./vulkan/bridge.c"
   import "./vulkan/bridge.js"

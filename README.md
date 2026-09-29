@@ -6,7 +6,7 @@ A destructible voxel demo built with [Bend 2](https://github.com/bendlang/bend) 
 
 ## Run
 
-Requires [Bend 2.0.32](https://github.com/bendlang/bend/releases/tag/v2.0.32), Linux with X11 or XWayland, a Vulkan 1.3 driver with Xlib surface support, Vulkan, X11 and OpenSSL development headers, `glslc`, `g++`, and `make`.
+Requires [Bend 2.0.34](https://github.com/bendlang/bend/releases/tag/v2.0.34), Linux with X11 or XWayland, a Vulkan 1.3 driver with Xlib surface support, Vulkan, X11 and OpenSSL development headers, `glslc`, `g++`, and `make`.
 
 ```sh
 make run
@@ -71,6 +71,8 @@ variants with separate validation identities and actual inventory evidence.
 The [attempt reporter](docs/megascene-report.md) reads retained raw evidence and
 classifies correctness, fidelity, completion, availability, populations,
 calibration, responsiveness, capacity and termination independently.
+The [archive reproduction command](docs/megascene-reproduction.md) restores
+saved static and localized runtimes and frozen inputs for exact checkpoint comparison.
 
 `make test` checks `PROOF.bend` before running runtime/reference tests. The separate
 `make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),

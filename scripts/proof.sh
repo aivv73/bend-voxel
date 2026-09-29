@@ -10,6 +10,6 @@ if ! verdict="$(bend PROOF.bend "${flags[@]}" "$@")"; then
   exit 1
 fi
 printf '%s\n' "$verdict"
-# Bend 2.0.32 may exit zero while reporting unsafe dependencies. Require the
+# Bend may exit zero while reporting unsafe dependencies. Require the
 # positive verdict as well as successful execution.
 rg -q '^ALL PROOFS CHECK$' <<< "$verdict"

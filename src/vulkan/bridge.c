@@ -98,6 +98,7 @@ static u64 voxel_vk_tick(void) {
 // no recorder and retain their original execution path.
 static FILE* mega_stream;
 static u64 mega_frame,mega_previous_end;
+static int mega_detailed, mega_final_audit;
 static u32 mega_warmup,mega_measured;
 static float mega_ground;
 #ifdef CID_VULKAN_VULKAN_MARK
@@ -108,11 +109,13 @@ static char mega_action_outcomes[65536];
 #endif
 #ifdef CID_VULKAN_VULKAN_MARK
 static void mega_record(const char* fields);
+static void mega_record_force(const char* fields);
 static void mega_reference(const char* fields);
 static void mega_stage(const char* name,u64 begin,u64 end);
 static const char* mega_env(const char* name);
 #else
 static void mega_record(const char* fields) { (void)fields; }
+static void mega_record_force(const char* fields) { (void)fields; }
 static void mega_reference(const char* fields) { (void)fields; }
 static void mega_stage(const char* name,u64 begin,u64 end) { (void)name; (void)begin; (void)end; }
 #endif
@@ -302,6 +305,7 @@ static VoxelMegaBox mega_tree(Env e,Term tree,VoxelMegaBox** boxes,u32* count,u6
 }
 static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   int validation=getenv("MEGASCENE_VALIDATE")!=NULL;
+  if (!mega_detailed && mega_frame && !mega_final_audit) return;
   const char* diagnostic=getenv("MEGASCENE_PROXY_DIAGNOSTIC");
   u64 hold=diagnostic && strcmp(diagnostic,"mixed-world")==0?1200:120;
   u64 count=diagnostic && strcmp(diagnostic,"mixed-world")==0?3:9;
@@ -343,6 +347,7 @@ static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   Check check=(Check)dlsym(voxel_vk_library,"voxel_mega_checkpoint");
   if(!check) err_fail("checkpoint capability unavailable");
   VoxelVkFrame fresh_frame=*frame; fresh_frame.bodies=actual;
+  if (!mega_detailed) fresh_frame.record=mega_record_force;
   char error[1024]; if(!check(&fresh_frame,&state,error,sizeof error)) err_fail(error);
   for(u32 i=0;i<frame->body_count;i++) { free((void*)raw[i].boxes); free((void*)actual[i].faces); free((void*)actual[i].vertices); }
   free(raw); free(actual);
@@ -355,7 +360,7 @@ static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) { (v
 static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud) {
   if (term_aux(state)!=CID_DEMO_STATE || term_aux(aim)!=CID_RENDER_AIM)
     err_fail("bad Vulkan scene state");
-  // With Bend 2.0.32: State = World(7), Control(Camera(7) + 9), pending, last.
+  // With Bend 2.0.34: State = World(7), Control(Camera(7) + 9), pending, last.
   if (cid_arity(CID_DEMO_STATE)!=25 || cid_arity(CID_WORLD_WORLD)!=7 ||
       cid_arity(CID_INPUT_CONTROL)!=16 || cid_arity(CID_RENDER_AIM)!=5 ||
       cid_arity(CID_WORLD_BODY)!=8 || cid_arity(CID_SPATIAL_FACE)!=8 ||
@@ -394,7 +399,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
     out->anchored=(u32)e.mem[at+4];
     anchored+=out->anchored;
     moving+=voxel_vk_float(e.mem[at+3])!=0;
-    if(mega_stream && (getenv("MEGASCENE_SUPPORT") || getenv("MEGASCENE_HISTORY")) && !out->anchored) {
+    if(mega_detailed && mega_stream && (getenv("MEGASCENE_SUPPORT") || getenv("MEGASCENE_HISTORY")) && !out->anchored) {
       char motion[256];
       snprintf(motion,sizeof motion,"\"record_type\":\"body_motion\",\"id\":\"%u\",\"revision\":\"%u\",\"offset_m\":\"0x%08x\",\"velocity_m_s\":\"0x%08x\"",
         out->id,out->revision,(u32)e.mem[at+2],(u32)e.mem[at+3]);
@@ -428,7 +433,8 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
     const char* profile=getenv("MEGASCENE_PROFILE");
     frame.full_geometry=!(profile && strcmp(profile,"proxy")==0);
     frame.ground_half_extent=mega_ground; frame.record=mega_record;
-    frame.evidence_frame=mega_frame; frame.gpu_evidence=1;
+    frame.evidence_frame=mega_frame; frame.gpu_evidence=mega_detailed;
+    if (!mega_detailed) frame.record=NULL;
     if ((!getenv("MEGASCENE_SUPPORT") && !getenv("MEGASCENE_HISTORY") && (anchored!=frame.body_count || moving || translated)) || (frame.aim_kind && !getenv("MEGASCENE_RAY_FILE")) || frame.night)
       err_fail("static Megascene state invariant failed");
     if(!getenv("MEGASCENE_LOCALIZED") && !getenv("MEGASCENE_SUPPORT") && !getenv("MEGASCENE_HISTORY")) {
@@ -445,6 +451,7 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
       if (voxel_vk_bodies[i].id!=i+1 || voxel_vk_bodies[i].revision!=0)
         err_fail("static owner identity changed");
     }
+    if (mega_detailed) {
     char record[1024];
     snprintf(record,sizeof record,
       "\"record_type\":\"static_state\",\"anchored\":\"%u\",\"moving\":\"%u\",\"translated\":\"%u\",\"aim_kind\":\"%u\","
@@ -453,11 +460,29 @@ static VoxelVkFrame voxel_vk_scene(Env e, Term state, Term aim, const char* hud)
       anchored,moving,translated,frame.aim_kind,(u32)e.mem[st+7],(u32)e.mem[st+8],(u32)e.mem[st+9],
       (u32)e.mem[st+10],(u32)e.mem[st+11],(u32)e.mem[st+1],(u32)e.mem[st+2],(u32)e.mem[st+3],(u32)e.mem[st+5],(u32)e.mem[st+6]);
     mega_record(record);
+    }
   }
   frame.bodies=voxel_vk_bodies;
   if (mega_stream) voxel_mega_check(e,st,al,&frame);
   return frame;
 }
+
+#ifdef CID_VULKAN_VULKAN_AUDIT
+Term vulkan_audit_run(Env e, Term* f, IoWork* work) {
+  io_sync();
+  if (mega_stream && !mega_detailed) {
+    if (mega_frame!=(u64)mega_warmup+mega_measured+1) err_fail("final calibration audit frame mismatch");
+    mega_final_audit=1;
+    mega_frame--;
+    VoxelVkFrame frame=voxel_vk_scene(e,f[0],f[1],"MEGASCENE");
+    (void)frame;
+    mega_frame++;
+    mega_final_audit=0;
+  }
+  term_sink(e,f[0]); term_sink(e,f[1]);
+  return term_pak(CID_UNIT,0);
+}
+#endif
 
 static const u32 voxel_vk_keys[][2] = {
   {XK_Escape,27},{XK_Return,13},{XK_KP_Enter,13},{XK_Tab,9},
@@ -718,6 +743,9 @@ Term vulkan_release_run(Env e, Term* f, IoWork* work) {
 }
 
 static void __attribute__((constructor)) voxel_vk_effects(void) {
+  #ifdef CID_VULKAN_VULKAN_AUDIT
+  io_eff(CID_VULKAN_VULKAN_AUDIT, vulkan_audit_run, 0);
+  #endif
   #ifdef CID_VULKAN_VULKAN_CAPTURE
   io_eff(CID_VULKAN_VULKAN_CAPTURE, vulkan_capture_run, 0);
   #endif
