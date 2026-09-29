@@ -42,6 +42,7 @@ def parser():
     p.add_argument("--validation-only", action="store_true", help="build and validate a complete replay without a timed attempt")
     p.add_argument("--validated", help="reuse an identical successful archived validation")
     p.add_argument("--runtime-from", help="reuse archived runtime bytes, then validate this thread configuration separately")
+    p.add_argument("--calibration-peer-validation", help="retained complete validation of the opposite calibration mode")
     p.add_argument("--deadline", help="bounded replay deadline in seconds (default 300)")
     # Settings are admitted per capability; no silent fallback workload.
     for name in ("diagnostic", "resolution", "profile", "schedule", "frames", "warmup",
@@ -58,7 +59,8 @@ def configuration(args):
     if args.case in ("static", "traversal", "picking", "localized", "support", "history") and args.campaign:
         require(Path(args.campaign).expanduser().resolve() == Path(args.archive or "").expanduser().resolve(), "static campaign must use its archive root")
     if args.case == "admission":
-        require(not args.validation_only and args.validated is None and args.runtime_from is None, "validation options require --case static")
+        require(not args.validation_only and args.validated is None and args.runtime_from is None and
+                args.calibration_peer_validation is None, "validation options require --case static")
         require(not args.capture_opening and args.deadline is None, "capture/deadline require --case static")
         for name in ("diagnostic", "resolution", "profile", "schedule", "frames", "warmup", "archive", "calibration", "search"):
             require(getattr(args, name) is None, f"--{name} requires --case static or a later capability; request rejected")

@@ -123,7 +123,7 @@ def identity(manifest, root, config):
         artifacts[item["path"]] = actual
     require(artifacts and "schedule.json" in artifacts and "runtime/worker" in artifacts, "incomplete runtime artifacts")
     return {"artifacts": artifacts, "configuration": {k: v for k,v in config.items()
-            if k not in {"archive", "capture_opening", "validation_only", "validated", "runtime_from"}},
+            if k not in {"archive", "capture_opening", "validation_only", "validated", "runtime_from", "calibration_peer_validation"}},
             "worker_command": manifest["worker_command"], "worker_environment": manifest["worker_environment"],
             "runtime": manifest["runtime"], "constants": manifest["constants"]}
 

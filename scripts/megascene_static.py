@@ -17,8 +17,15 @@ from megascene_gpu import u64
 
 
 def settings(args, base):
-    for name in ("calibration", "search"):
+    for name in ("search",):
         require(getattr(args, name) is None, f"--{name} is not implemented")
+    require(args.calibration in (None, "on", "off"), "--calibration must be on or off")
+    if args.calibration:
+        require(args.case in ("static", "history") and args.diagnostic is None and
+                args.profile in (None, "full") and args.resolution in (None, "1920x1080") and
+                not args.capture_opening, "calibration requires primary static/history full geometry at 1920x1080")
+    else:
+        require(args.calibration_peer_validation is None, "peer validation requires a calibration mode")
     control = args.diagnostic if args.diagnostic in CONTROLS else None
     diagnostic = None if control else args.diagnostic
     if control:
@@ -66,6 +73,9 @@ def settings(args, base):
         require(not args.capture_opening, "replay captures come from the separate validation replay")
     if control:
         require((warmup, frames) == (120, 3600), "terrain controls require the complete 120/3600 schedule")
+    if args.calibration and (warmup, frames) == (120, 3600) and not args.validation_only:
+        require(args.calibration_peer_validation is not None,
+                "complete calibration controls require prior opposite-mode validation")
     require(1 <= deadline <= 300, "development deadline must be 1..300 seconds")
     require(args.archive, "Vulkan replays require an explicit durable --archive destination")
     archive = Path(args.archive).expanduser().resolve()
@@ -75,7 +85,7 @@ def settings(args, base):
             "archive and output must be separate directory trees")
     require(not (args.validated and args.runtime_from), "choose --validated or --runtime-from")
     require(not (args.validation_only and (args.validated or args.capture_opening)), "validation-only cannot reuse validation or request capture")
-    return {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": args.case, "diagnostic": diagnostic, "control": control, "envelope_side_m": str(envelope_cells(base["preset"], control)//10), "profile": args.profile or "full", "resolution": args.resolution or "1920x1080",
+    return {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": args.case, "diagnostic": diagnostic, "control": control, "calibration_mode": args.calibration, "calibration_peer_validation": args.calibration_peer_validation, "envelope_side_m": str(envelope_cells(base["preset"], control)//10), "profile": args.profile or "full", "resolution": args.resolution or "1920x1080",
             "warmup": str(warmup), "frames": str(frames), "schedule": schedule_id, "deadline_s": str(deadline),
             "capture_opening": args.capture_opening, "archive": str(archive),
             "schedule_kind": "declared_control" if schedule_id in {"history-12-v1", "history-48-v1",
@@ -432,7 +442,8 @@ def retained_copy(source, target):
 def execute(config, output, manifest, campaign):
     # Import common admission utilities only at execution to keep the CLI stable.
     from megascene import ROOT, artifact, provenance, run, snapshot
-    manifest.update(attempt_kind="development_observation", campaign_id=campaign.value["campaign_id"], series_id=str(uuid.uuid4()))
+    mode = config.get("calibration_mode")
+    manifest.update(attempt_kind="calibration_"+mode if mode else "development_observation", campaign_id=campaign.value["campaign_id"], series_id=str(uuid.uuid4()))
     manifest["qualification"] = "unqualified_development_observation"
     manifest["extensions"]["phase"] = "static_build"
     if config.get("diagnostic"):
@@ -505,15 +516,16 @@ def execute(config, output, manifest, campaign):
         manifest["build"] = original["build"]
         manifest["source"] = original["source"]
         loader = Path(original["worker_command"][0]).name
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
-            shutil.copy2(ROOT/"scripts"/name, runtime/name)
+        if not config.get("validated"):
+            for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+                shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
         manifest["artifacts"] += [artifact(output/name,output) for name in input_names]
     else:
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
@@ -590,6 +602,8 @@ def execute(config, output, manifest, campaign):
                                       "MEGASCENE_WARMUP": config["warmup"], "MEGASCENE_MEASURED": config["frames"],
                                       "MEGASCENE_GROUND": str(int(config["envelope_side_m"])//2+8),
                                       "MEGASCENE_SCHEDULE_SHA256": artifact(output/"schedule.json",output)["sha256"]}
+    if mode:
+        manifest["worker_environment"]["MEGASCENE_CALIBRATION"] = mode
     if config.get("diagnostic"):
         manifest["worker_environment"]["MEGASCENE_PROXY_DIAGNOSTIC"] = config["diagnostic"]
         manifest["worker_environment"]["MEGASCENE_PROFILE"] = config["profile"]
@@ -615,6 +629,12 @@ def execute(config, output, manifest, campaign):
     manifest["reproduction"]["status"] = "runtime_archived_before_execution"
     snapshot(archive/"manifest.json",manifest)
     snapshot(output/"manifest.json",manifest)
+    if config.get("calibration_peer_validation"):
+        from megascene_calibration import verify_peer_validation
+        peer = verify_peer_validation(config, manifest, archive)
+        manifest["calibration_peer_validation"] = peer
+        snapshot(archive/"manifest.json",manifest)
+        snapshot(output/"manifest.json",manifest)
     # Run directly from archived bytes. Raw committed records survive local cleanup.
     from megascene_validation import validate_or_reuse, compare_attempt
     validation = validate_or_reuse(config, archive, manifest, loader, campaign, source, owners, bounds)
@@ -658,7 +678,8 @@ def execute(config, output, manifest, campaign):
     applicable(validation,identity(manifest,archive,config))
     verify_host_artifacts(validation)
     report_value, records = launch(config,archive,manifest,loader,campaign=campaign)
-    compare_attempt(config,archive,manifest,validation,report_value,records)
+    if mode != "off":
+        compare_attempt(config,archive,manifest,validation,report_value,records)
     if traversal_review is not None:
         report_value["visual_quality"] = outcome("inconclusive", "named feature assessments remain pending" if not traversal_review["missing"] else "required traversal captures missing",
             "primary traversal full-profile fidelity", ["review.json"])
@@ -672,7 +693,8 @@ def execute(config, output, manifest, campaign):
         report_value["initialization"] = outcome("fail",str(exc),"initialization only",["stdout.log"])
     manifest["admission"] = report_value["initialization"]
     report_value["numeric_validity"] = manifest["numeric_admission"]
-    manifest["effective_render_settings"] = report_value["effective_render_settings"]
+    manifest["effective_render_settings"] = (report_value["effective_render_settings"] if mode != "off" else
+        {"status": "disabled", "reason": "off control suppresses detailed render logging; frozen settings and runtime artifacts retained"})
     supervised = report_value["supervision"]
     for name in ("resources", "allocations"):
         manifest["capabilities"][name] = measurement(
@@ -707,12 +729,14 @@ def execute(config, output, manifest, campaign):
             "separate opening capture retained" if capture_ok else "requested opening capture incomplete",
             "capture availability only; visual quality remains unqualified", ["review.json", "captures/summary.json"])
     snapshot(archive/"summary.json",report_value)
-    from megascene_report import report_bundle
-    report_value = report_bundle(archive)
+    if mode != "off":
+        from megascene_report import report_bundle
+        report_value = report_bundle(archive)
     snapshot(archive/"summary.json",report_value)
     manifest["qualification"] = report_value["qualification"]
     finish_archive(archive,output,manifest)
-    require(capture_ok and report_value["schedule_completion"]["status"] == "pass" and report_value["initialization"]["status"] == "pass" and report_value["state_correctness"]["status"] == "pass",
+    require(capture_ok and report_value["schedule_completion"]["status"] == "pass" and report_value["initialization"]["status"] == "pass" and
+            (report_value["endpoint_agreement"]["status"] == "pass" if mode == "off" else report_value["state_correctness"]["status"] == "pass"),
             config["case"]+" invocation did not complete correctly; retained summary describes the prefix")
 
 
@@ -759,6 +783,14 @@ def launch(config, archive, manifest, loader, review=False, campaign=None, valid
     termination = supervised["termination"]
     code = int(termination["exit_code"]) if termination["exit_code"] is not None else -int(termination["signal"]) if termination["signal"] else 2
     cause = termination["cause"]
+    if config.get("calibration_mode") == "off" and not validation and not review:
+        from megascene_calibration import off_result
+        value = off_result(config, archive, manifest, read_json((archive/"validation.json").read_text()),
+                           supervised, records, problems)
+        snapshot(destination/"summary.json", value)
+        if campaign is not None:
+            campaign.attempt(manifest["attempt_id"], destination/"summary.json", cause)
+        return value, records
     if cause == "worker_error" and "unpaced Vulkan present mode unavailable" in (destination/"stderr.log").read_text(errors="replace"):
         cause = "unsupported_presentation"
         termination["cause"] = cause

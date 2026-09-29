@@ -11,4 +11,5 @@ function vulkan_release() {
 }
 
 function vulkan_mark() { throw new Error("Megascene requires native Linux"); }
+function vulkan_audit() { throw new Error("Megascene requires native Linux"); }
 function vulkan_capture() { throw new Error("Megascene requires native Linux"); }

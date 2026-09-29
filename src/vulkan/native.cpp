@@ -1063,9 +1063,9 @@ public:
       vkGetPhysicalDeviceQueueFamilyProperties(physical,&count,families.data());
       gpu_queries.start(device,family,properties.limits.timestampPeriod,families.at(family).timestampValidBits,3721);
     }
-    if (frame.record && (extent.width!=frame.width || extent.height!=frame.height))
+    if ((frame.record || std::getenv("MEGASCENE_CALIBRATION")) && (extent.width!=frame.width || extent.height!=frame.height))
       throw std::runtime_error("Megascene actual swapchain resolution differs from frozen request");
-    if (frame.record && present_mode!=VK_PRESENT_MODE_IMMEDIATE_KHR && present_mode!=VK_PRESENT_MODE_MAILBOX_KHR)
+    if ((frame.record || std::getenv("MEGASCENE_CALIBRATION")) && present_mode!=VK_PRESENT_MODE_IMMEDIATE_KHR && present_mode!=VK_PRESENT_MODE_MAILBOX_KHR)
       throw std::runtime_error("Megascene requires immediate or mailbox presentation");
     if (frame.record && !settings_recorded) {
       VkPhysicalDeviceProperties p{}; vkGetPhysicalDeviceProperties(physical,&p);

@@ -637,7 +637,9 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
     cpu_frames = [r for r in tails['cpu'].records if r['record_type'] == 'frame']
     refs = [r for r in reference.records if r['record_type'] == 'frame']
     if process is not None:
-        if [(r['frame'],r['begin_ns'],r['end_ns']) for r in cpu_frames] != [(r['frame'],r['begin_ns'],r['end_ns']) for r in refs]:
+        if (config.get('calibration_mode') != 'off' or env.get('MEGASCENE_VALIDATE')) and [
+                (r['frame'],r['begin_ns'],r['end_ns']) for r in cpu_frames] != [
+                (r['frame'],r['begin_ns'],r['end_ns']) for r in refs]:
             errors.append('CPU/reference committed frame mismatch')
         if not allocations:
             errors.append('allocation ledger unavailable')

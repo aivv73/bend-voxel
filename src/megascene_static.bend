@@ -33,6 +33,7 @@ def loop(n: Nat, win: Window, state: D.State) -> IO(Unit):
   match n:
     case 0n:
       do IO<Unit>:
+        VK.vulkan.audit(state,V.Aim{R.Vec{0.0,0.0,0.0},0.0,0})
         close(win)
         VK.vulkan.mark(15)
     case 1n+rest:

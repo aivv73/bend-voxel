@@ -230,6 +230,9 @@ observed Megascene run.
 
 ## Accepted calibration protocol
 
+The implemented on/off control interface and diagnostic equality scope are
+described in [diagnostic calibration controls](megascene-calibration-controls.md).
+
 This handoff accepts an **explicit, narrow exception to #44 for diagnostic calibration
 controls only**. Keeping all checkpoints enabled
 in both variants cannot measure their cost, while omitting them cannot establish
