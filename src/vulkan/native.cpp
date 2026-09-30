@@ -546,8 +546,14 @@ Geometry& geometry(const VoxelVkFrame& frame,GeometryCache& cache,bool& scene_re
 // Verify actual cached mesh slots and submitted draw ranges, independent of slot
 // allocation order. Culling is checked against unculled full-mesh triangles.
 uint32_t float_bits(float value);
+uint64_t monotonic_ns();
+void stage(const VoxelVkFrame& frame,const char* name,uint64_t begin,uint64_t end);
 void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
   using checkpoint::require;
+  // Record contiguous audit phases, then emit their markers after the payload
+  // so marker IO is not charged to visibility, proxy checks or hashing.
+  std::array<uint64_t,6> boundaries{};
+  boundaries[0]=monotonic_ns();
   require(cache.meshes.size()==f.body_count,"native full-mesh ownership mismatch");
   require(cache.shadow_draws.size()==f.body_count,"native shadow draw mismatch");
   uint64_t vertices_checked=0,reference_visible=0;
@@ -561,9 +567,6 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
     require(mesh.revision==b.revision&&mesh.anchored==b.anchored&&mesh.count==b.vertex_count,"native mesh identity mismatch");
     require(uint64_t(mesh.first)+mesh.count<=cache.geometry.vertices.size(),"native mesh range overflow");
     mesh_slots[std::to_string(b.id)]=checkpoint::array({checkpoint::number(mesh.first),checkpoint::number(mesh.count)});
-    if(std::getenv("MEGASCENE_SUPPORT") || std::getenv("MEGASCENE_HISTORY"))
-      mesh_hashes[std::to_string(b.id)]=checkpoint::quote(checkpoint::hash(
-        std::string(reinterpret_cast<const char*>(b.vertices),size_t(b.vertex_count)*sizeof *b.vertices)));
     for(unsigned j=0;j<b.vertex_count;j++) {
       const auto& actual=cache.geometry.vertices[mesh.first+j]; const auto& expected=b.vertices[j];
       auto color=material_color(f,expected.material,!b.anchored);
@@ -571,6 +574,10 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
         std::memcmp(&actual.color,&color,sizeof color)==0,"stale native mesh vertex/material");
       vertices_checked++;
     }
+  }
+  boundaries[1]=monotonic_ns();
+  for(unsigned i=0;i<f.body_count;i++) {
+    const auto& b=f.bodies[i]; const auto& mesh=cache.meshes.at(b.id);
     auto matches=[&](const Draw& d){return d.first==mesh.first&&d.count==mesh.count&&checkpoint::real(d.offset)==checkpoint::real(b.offset);};
     auto drawn=std::count_if(cache.draws.begin(),cache.draws.end(),matches);
     require(drawn<=1&&std::count_if(cache.shadow_draws.begin(),cache.shadow_draws.end(),matches)==1,"duplicate/missing native draw");
@@ -584,6 +591,7 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
     if(drawn) drawn_ids.push_back(checkpoint::number(b.id));
   }
   require(drawn_ids.size()+cache.proxy_draws==cache.draws.size(),"unknown native draw ownership");
+  boundaries[2]=monotonic_ns();
   require(cache.proxies.size()==cache.groups.size(),"stale native proxy ownership");
   for(const auto& [key,proxy]:cache.proxies) {
     const auto& group=cache.groups.at(key);
@@ -591,15 +599,11 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
     Geometry expected;
     for(auto index:group.bodies) proxy_box(expected,f.bodies[index],f);
     require(expected.triangles==proxy.count,"native proxy vertex count");
-    std::vector<checkpoint::J> vertices;
     for(unsigned j=0;j<proxy.count;j++) {
       const auto& v=cache.geometry.vertices[proxy.first+j]; const auto& want=expected.vertices[j];
       require(std::memcmp(&v.position,&want.position,sizeof v.position)==0 &&
         std::memcmp(&v.color,&want.color,sizeof v.color)==0 && v.side==want.side,"stale native proxy contents");
-      vertices.push_back(checkpoint::array({checkpoint::real(v.position.x),checkpoint::real(v.position.y),checkpoint::real(v.position.z),
-        checkpoint::real(v.color.x),checkpoint::real(v.color.y),checkpoint::real(v.color.z),checkpoint::number(v.side)}));
     }
-    proxy_hashes[std::to_string(key)]=checkpoint::quote(checkpoint::hash(checkpoint::array(vertices)));
     std::vector<checkpoint::J> members;
     for(auto index:group.bodies) members.push_back(checkpoint::number(f.bodies[index].id));
     char metric[16]; std::snprintf(metric,sizeof metric,"0x%08x",float_bits(proxy_pixels(group,f,basis)));
@@ -609,15 +613,35 @@ void audit_native(const VoxelVkFrame& f,const GeometryCache& cache) {
       {"aim_suppressed",proxy_near_aim(group,f)?"true":"false"},
       {"visible_bodies",checkpoint::number(group.visible_bodies)}});
   }
+  boundaries[3]=monotonic_ns();
+  bool hash_meshes=std::getenv("MEGASCENE_SUPPORT") || std::getenv("MEGASCENE_HISTORY");
+  if(hash_meshes) for(unsigned i=0;i<f.body_count;i++) {
+    const auto& b=f.bodies[i];
+    mesh_hashes[std::to_string(b.id)]=checkpoint::quote(checkpoint::hash(
+      std::string(reinterpret_cast<const char*>(b.vertices),size_t(b.vertex_count)*sizeof *b.vertices)));
+  }
+  for(const auto& [key,proxy]:cache.proxies) {
+    std::vector<checkpoint::J> vertices;
+    for(unsigned j=0;j<proxy.count;j++) {
+      const auto& v=cache.geometry.vertices[proxy.first+j];
+      vertices.push_back(checkpoint::array({checkpoint::real(v.position.x),checkpoint::real(v.position.y),checkpoint::real(v.position.z),
+        checkpoint::real(v.color.x),checkpoint::real(v.color.y),checkpoint::real(v.color.z),checkpoint::number(v.side)}));
+    }
+    proxy_hashes[std::to_string(key)]=checkpoint::quote(checkpoint::hash(checkpoint::array(vertices)));
+  }
+  boundaries[4]=monotonic_ns();
   checkpoint::Object fields={{"drawn_ids",checkpoint::array(drawn_ids)},
     {"selected_ids",checkpoint::array(selected_ids)},{"proxied_ids",checkpoint::array(proxied_ids)},
     {"proxy_group_evidence",checkpoint::object(group_evidence)},
     {"mesh_slots",checkpoint::object(mesh_slots)},{"proxy_cache_sha256",checkpoint::object(proxy_hashes)},
     {"record_type",checkpoint::quote("native_audit")},{"reference_visible",checkpoint::number(reference_visible)},
     {"vertices_checked",checkpoint::number(vertices_checked)}};
-  if(std::getenv("MEGASCENE_SUPPORT") || std::getenv("MEGASCENE_HISTORY")) fields["mesh_sha256"]=checkpoint::object(mesh_hashes);
+  if(hash_meshes) fields["mesh_sha256"]=checkpoint::object(mesh_hashes);
   auto record=checkpoint::object(fields);
   f.record(record.substr(1,record.size()-2).c_str());
+  boundaries[5]=monotonic_ns();
+  const char* names[]={"audit_mesh_validation","audit_visibility","audit_proxy","audit_hashing","audit_output"};
+  for(size_t i=0;i<5;i++) stage(f,names[i],boundaries[i],boundaries[i+1]);
 }
 
 std::vector<uint32_t> spirv(const char* path) {
@@ -1091,6 +1115,7 @@ public:
       std::snprintf(record,sizeof record,
         "\"record_type\":\"render_settings\",\"width\":\"%u\",\"height\":\"%u\",\"present_mode\":\"%s\","
         "\"profile\":\"%s\",\"ground_half_extent_m\":\"%.9g\",\"shadow_size\":\"%u\",\"night\":\"%u\","
+        "\"geometry_timing_schema\":\"native-geometry-timing/1\","
         "\"device_name_hex\":\"%s\",\"vendor_id\":\"%u\",\"device_id\":\"%u\",\"driver_version\":\"%u\",\"api_version\":\"%u\"",
         extent.width,extent.height,present_mode==VK_PRESENT_MODE_IMMEDIATE_KHR?"immediate":"mailbox",
         frame.full_geometry?"full":"proxy",frame.ground_half_extent,SHADOW_SIZE,frame.night,name,p.vendorID,p.deviceID,p.driverVersion,p.apiVersion);
@@ -1106,11 +1131,15 @@ public:
       settings_recorded=true;
     }
     auto start=Clock::now();
+    uint64_t ns_mesh_begin=frame.record?monotonic_ns():0;
     bool scene_reused=false;
     Geometry& g=geometry(frame,geometry_cache,scene_reused);
+    uint64_t ns_after_mesh=frame.record?monotonic_ns():0;
     if(frame.record) audit_native(frame,geometry_cache);
     auto after_geometry=Clock::now();
     uint64_t ns_after_geometry=frame.record?monotonic_ns():0;
+    stage(frame,"geometry_mesh_update",ns_mesh_begin,ns_after_mesh);
+    stage(frame,"geometry_audit",ns_after_mesh,ns_after_geometry);
     stage(frame,"geometry",ns_start,ns_after_geometry);
     timings.geometry_us=microseconds(start,after_geometry);
     VkResult waited=vkWaitForFences(device,1,&fence,VK_TRUE,UINT64_MAX);

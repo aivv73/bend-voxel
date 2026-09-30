@@ -97,6 +97,21 @@ Generation/tree construction, initial surfaces/vertices, inventory transport,
 window setup, renderer setup, initial upload and first-frame work have separate
 markers. Native stages nest inside the renderer stage. Stage sums are not a
 frame total. Final bookkeeping and teardown are separate from measured frames.
+The aggregate `geometry` marker is retained for archived report compatibility.
+Within it, `geometry_mesh_update` measures the native geometry/cache, draw and
+overlay update, and `geometry_audit` measures the subsequent native audit.
+The audit has contiguous `audit_mesh_validation`, `audit_visibility`,
+`audit_proxy`, `audit_hashing` and `audit_output` phases. Hashing includes full
+mesh digests when enabled and canonical proxy vertex serialization and digests;
+proxy measures reference geometry checks and group evidence. Output measures
+final audit JSON construction and the recorder call. Phase marker IO and audit
+setup/cleanup remain in the enclosing audit interval; initial renderer settings
+and GPU query setup remain in the aggregate geometry interval. Parent and child
+durations must not be added together. New workers declare
+`geometry_timing_schema: native-geometry-timing/1` in `render_settings`.
+Detailed streams require every phase on
+every frame with checked nesting and phase boundaries; historical streams with
+only the aggregate marker remain readable.
 The reported initial inventory check compares actual Bend trees, faces and
 vertices with the existing independent integer reference after execution; it
 is scoped to initialization. Separate complete validation and timed canonical

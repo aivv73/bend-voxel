@@ -29,6 +29,11 @@ law palette_length:
 # - Foreign IO and existing @unsafe geometry algorithms are outside these
 #   formal claims. make test covers dense carving, connectivity, rollback,
 #   mesh winding, cache identity, and local/full surface equivalence at runtime.
+# - Native geometry timing separates mesh/cache updates from audit work.
+#   Audit mesh checks, visibility, proxy checks, hashing and output use actual
+#   contiguous monotonic intervals nested in the audit. Keep the aggregate
+#   geometry marker and legacy timing ABI; never add parent/child durations.
+#   These foreign timing contracts require runtime/reference checks.
 # - This file states the accepted contract. Change claims only when the user
 #   authorizes a contract change; implement proofs in PROOF.bend.
 
