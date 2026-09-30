@@ -2,6 +2,7 @@
 
 import sys
 import json
+import math
 import subprocess
 import tempfile
 import unittest
@@ -12,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from megascene_scale import (U32_MAX, U64_MAX, admit_schedule, history_stride, history_visit,
                              midpoint_refinement, next_growth, operational_bounds, preset_for)
+from megascene_bend import run
 from megascene_recipe import generate
 from megascene_picking import value
 from megascene_static import schedule
@@ -73,6 +75,42 @@ class ScalePolicy(unittest.TestCase):
                 self.assertEqual(len(set(visited[:min(12,count)])), min(12,count))
         self.assertEqual([history_visit(i,25,45)[0] for i in range(6)],
                          [0,6,12,18,24,5])
+
+    def test_scale_policy_preserves_arbitrary_integer_width(self):
+        self.assertEqual(next_growth(1 << 32), 6074001000)
+        self.assertEqual(next_growth(1 << 48), 398065729532861)
+        self.assertEqual(next_growth(10**100),
+            14142135623730950488016887242096980785696718753769480731766797379907324784621070388503875343276415727)
+        self.assertEqual(midpoint_refinement(10**100, 10**100 + 10), 10**100 + 5)
+        self.assertIsNone(midpoint_refinement(10**100, 10**100 + 1))
+        self.assertEqual(midpoint_refinement(2, 9), 6)
+        self.assertEqual(history_stride(math.factorial(30) // 24), 31)
+        self.assertEqual(history_visit(11, 10**100, 46), (78, 0))
+        neighborhood, prior = history_visit(1, 4, 45.0)
+        self.assertEqual((neighborhood, prior), (1.0, 0))
+        self.assertIs(type(neighborhood), float)
+
+    def test_scale_policy_keeps_invalid_input_rejections(self):
+        for q in (True, 1, -2, 2.0, "2"):
+            with self.subTest(q=q), self.assertRaisesRegex(ValueError, "growth requires"):
+                next_growth(q)
+        for low, high in ((1, 3), (2, 2), (3, 2), (2.0, 3), (2, True)):
+            with self.subTest(low=low, high=high), self.assertRaisesRegex(ValueError, "refinement requires"):
+                midpoint_refinement(low, high)
+        for count in (3, True, -4, 4.0, "4"):
+            with self.subTest(count=count), self.assertRaisesRegex(ValueError, "history needs"):
+                history_stride(count)
+        for group, seed in ((-1, 45), (12, 45), (True, 45), (0, 44), (0, "45")):
+            with self.subTest(group=group, seed=seed), self.assertRaisesRegex(ValueError, "unsupported history"):
+                history_visit(group, 4, seed)
+
+    def test_bend_policy_rejects_invalid_arguments_before_work(self):
+        for arguments in (("growth", 1), ("growth", "2x"), ("growth", ""),
+                          ("refinement", 3, 2), ("stride", 3),
+                          ("visit", 12, 4, 45), ("visit", 1 << 32, 4, 45),
+                          ("visit", 0, 4, 44)):
+            with self.subTest(arguments=arguments), self.assertRaises(ValueError):
+                run("megascene_policy", *arguments)
 
     def test_numeric_boundaries_reject_before_unsafe_work(self):
         kwargs = dict(q=3, owners=46, cells=23663488, surface_rectangles=5364,

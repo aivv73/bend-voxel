@@ -1,0 +1,290 @@
+{
+  "large/45/base": {
+    "boxes": 816,
+    "cells": 42096576,
+    "owners": 81,
+    "sha256": "7adf31f3d38a49f204b0bd8668bf62412b1d507bd4494cd736ddc182c7cb1c55"
+  },
+  "large/45/body-rich": {
+    "boxes": 816,
+    "cells": 41787328,
+    "owners": 97,
+    "sha256": "e67a67a46837f1b892efb16598e39c49ddfd0d2bf010b0715dc3ae823ca9151d"
+  },
+  "large/45/fill": {
+    "boxes": 832,
+    "cells": 55203776,
+    "owners": 81,
+    "sha256": "d76fc37a668479c963c60bde475e5067fce0e7639d322774350a2c350f6bfb4d"
+  },
+  "large/45/material-detail": {
+    "boxes": 4128,
+    "cells": 42096576,
+    "owners": 81,
+    "sha256": "4ae1d7c18a200778e3a0c3d56cade19fd309fa16b2791207b16f6863ea455209"
+  },
+  "large/45/spread": {
+    "boxes": 846,
+    "cells": 42326976,
+    "owners": 81,
+    "sha256": "fc9ad14dc99a772fbfaf0fb7810e222a16ce01399a60182ce5be50dcf81158f1"
+  },
+  "large/45/surface-detail": {
+    "boxes": 2096,
+    "cells": 42088384,
+    "owners": 81,
+    "sha256": "bb83ee8106fbb0b88c6c56e3b7c0ce8650fb5b60eab81e3a4649e91f3ed859a0"
+  },
+  "large/46/base": {
+    "boxes": 816,
+    "cells": 42096576,
+    "owners": 81,
+    "sha256": "04631b7024d63f35e118edacc5692335ab0987b259dd549627dd3b4b2844d7cc"
+  },
+  "large/46/body-rich": {
+    "boxes": 816,
+    "cells": 41787328,
+    "owners": 97,
+    "sha256": "a2df4df9e09af1bea576ff1450ec48b1c093a5b209ce3d561a09db366ba5783b"
+  },
+  "large/46/fill": {
+    "boxes": 832,
+    "cells": 55203776,
+    "owners": 81,
+    "sha256": "32a9df0a1972519bd4de8000c489899afaa5843a1b85d024920ada288032cae7"
+  },
+  "large/46/material-detail": {
+    "boxes": 4128,
+    "cells": 42096576,
+    "owners": 81,
+    "sha256": "5504ec76437ad8088227f1c672896e7fe7a8f716cf39322e50626d5418a33a64"
+  },
+  "large/46/spread": {
+    "boxes": 846,
+    "cells": 42326976,
+    "owners": 81,
+    "sha256": "0692fec465bf16a4022eb36bac119a3301e9bfc17c597494e642ed4f0f509ccf"
+  },
+  "large/46/surface-detail": {
+    "boxes": 2096,
+    "cells": 42088384,
+    "owners": 81,
+    "sha256": "a04bf2f41800e22a7c3ff20ab8d415fe0170e85a2318b00d3e87dc599113523a"
+  },
+  "scale-3/45/base": {
+    "boxes": 459,
+    "cells": 23663488,
+    "owners": 46,
+    "sha256": "5feae673534b880b593daa746d15659482145a6722cbb1fd4634d2e56e8f925c"
+  },
+  "scale-3/45/body-rich": {
+    "boxes": 459,
+    "cells": 23490496,
+    "owners": 55,
+    "sha256": "2158714c729a898b1d35206e44f0f46ce694f6b343e510e17df3be2c1c4d0755"
+  },
+  "scale-3/45/fill": {
+    "boxes": 468,
+    "cells": 31036288,
+    "owners": 46,
+    "sha256": "f4ddf57eed616f2a285c501d6877dbd6e1f175a99a4a63ac50c562fc302b960f"
+  },
+  "scale-3/45/material-detail": {
+    "boxes": 2322,
+    "cells": 23663488,
+    "owners": 46,
+    "sha256": "530b2127c67e8572c645dc956fbb75af7dffbb822e5324f2f53d622f6533cbdd"
+  },
+  "scale-3/45/spread": {
+    "boxes": 475,
+    "cells": 23786368,
+    "owners": 46,
+    "sha256": "412e61945e71e20d3e5c8a286cf628e3c348c187d7126fdad8266ea86da1ffc0"
+  },
+  "scale-3/45/surface-detail": {
+    "boxes": 1179,
+    "cells": 23658880,
+    "owners": 46,
+    "sha256": "341dc2f0172e715c440bb0e2780c2eea22ba12949d1b57218ad8713a762f1e07"
+  },
+  "scale-3/46/base": {
+    "boxes": 459,
+    "cells": 23674376,
+    "owners": 46,
+    "sha256": "99268088b808d3f2052a983efefa251d4f17d1662ce6c2651f2d15e37604c8ff"
+  },
+  "scale-3/46/body-rich": {
+    "boxes": 459,
+    "cells": 23500744,
+    "owners": 55,
+    "sha256": "a4d2d0eaca163ab731021935aa2e9201c375705b3816674033757259f4e86209"
+  },
+  "scale-3/46/fill": {
+    "boxes": 468,
+    "cells": 31047176,
+    "owners": 46,
+    "sha256": "fe89b4ff83ecee6758bee02e8048e3fb9dfa49c62fc4bf56986f0422b4286a93"
+  },
+  "scale-3/46/material-detail": {
+    "boxes": 2322,
+    "cells": 23674376,
+    "owners": 46,
+    "sha256": "8140c13a66bba1f433122a18ff90b9c06c389bd897bf860d6ce6152288005515"
+  },
+  "scale-3/46/spread": {
+    "boxes": 475,
+    "cells": 23797256,
+    "owners": 46,
+    "sha256": "563e85f77cb68df98dcaa56d404388e385fa909c7e5b4c5fcd214017c43c908a"
+  },
+  "scale-3/46/surface-detail": {
+    "boxes": 1179,
+    "cells": 23669768,
+    "owners": 46,
+    "sha256": "8532fe1d1f1218bd9af7a5724595d7957037e0918bda37dbd12df5f7c2137abf"
+  },
+  "scale-5/45/base": {
+    "boxes": 1275,
+    "cells": 65760064,
+    "owners": 126,
+    "sha256": "ce05855ab5d82f7e3197c2bd84c37cb7bf224f68eacbb0c55fd796cca1587047"
+  },
+  "scale-5/45/body-rich": {
+    "boxes": 1275,
+    "cells": 65277824,
+    "owners": 151,
+    "sha256": "518de4005ac0cd14c2919f79589b2733f3e723254ab9f2fe1ae71331f30529a2"
+  },
+  "scale-5/45/fill": {
+    "boxes": 1300,
+    "cells": 86240064,
+    "owners": 126,
+    "sha256": "a710f216cc543ab916b0e939c7b393359bfb94a98c0993a21d05ca8af250c162"
+  },
+  "scale-5/45/material-detail": {
+    "boxes": 6450,
+    "cells": 65760064,
+    "owners": 126,
+    "sha256": "18c36f8268db223fc302fcdd10d4b734e888f76a3e241beca5578466191a4ad2"
+  },
+  "scale-5/45/spread": {
+    "boxes": 1323,
+    "cells": 66128704,
+    "owners": 126,
+    "sha256": "41fc48a5dd31baf310a3a37c18817cd6983157b1ce470e4a3872c7254e237d5d"
+  },
+  "scale-5/45/surface-detail": {
+    "boxes": 3275,
+    "cells": 65747264,
+    "owners": 126,
+    "sha256": "560c39c393dca7c96e9a58d7c8ebb6b58344d7413b480fd359d702c0a94cfddd"
+  },
+  "scale-5/46/base": {
+    "boxes": 1275,
+    "cells": 65770952,
+    "owners": 126,
+    "sha256": "e206287f7d00fa195b47620d0dc033e7f9a2e8a1d76006006dfea2faa3f19bc9"
+  },
+  "scale-5/46/body-rich": {
+    "boxes": 1275,
+    "cells": 65288072,
+    "owners": 151,
+    "sha256": "8f514be514efb2accdf87c78f2e9e904403487f87a43e3fb94a1494e072382df"
+  },
+  "scale-5/46/fill": {
+    "boxes": 1300,
+    "cells": 86250952,
+    "owners": 126,
+    "sha256": "9081bef8da0961ce79441fb3a94206edd794ef0e03bde988e381af21f34e7778"
+  },
+  "scale-5/46/material-detail": {
+    "boxes": 6450,
+    "cells": 65770952,
+    "owners": 126,
+    "sha256": "be9980121ca2b50345042b817a31d39ea4fdd7cfe0994003333a5556de21270b"
+  },
+  "scale-5/46/spread": {
+    "boxes": 1323,
+    "cells": 66139592,
+    "owners": 126,
+    "sha256": "4736f747260c46ca0d2e6fa7aa113ba14a9310d2edf9b031d1ddc16eff2557bd"
+  },
+  "scale-5/46/surface-detail": {
+    "boxes": 3275,
+    "cells": 65758152,
+    "owners": 126,
+    "sha256": "58dfb6f168a7c4b1b283cd940d2021576d8e7887d71367bc3a667db9cea76ec2"
+  },
+  "small/45/base": {
+    "boxes": 204,
+    "cells": 10503360,
+    "owners": 21,
+    "sha256": "397b3d5106c0cac25543ada077e3d815e73ee3868aa1528039a918f8e454b1e8"
+  },
+  "small/45/body-rich": {
+    "boxes": 204,
+    "cells": 10427328,
+    "owners": 25,
+    "sha256": "306c3f6d55ae4a8d040f684a4ea7366c0e1ccba3635e69c401f812876132cf57"
+  },
+  "small/45/fill": {
+    "boxes": 208,
+    "cells": 13780160,
+    "owners": 21,
+    "sha256": "635019e3a48592216ad13ec5b3769fd576d72209bcdb96fa0c4b61e1f8bafea7"
+  },
+  "small/45/material-detail": {
+    "boxes": 1032,
+    "cells": 10503360,
+    "owners": 21,
+    "sha256": "74d26757ca966ed14510d4e2d1acdd6bfab76a85afa21b691c2d4c07c83bad24"
+  },
+  "small/45/spread": {
+    "boxes": 210,
+    "cells": 10549440,
+    "owners": 21,
+    "sha256": "c14399c7f565e4b7e570238d3c4ffc542969b577fa011a34a4d253eb86f29edd"
+  },
+  "small/45/surface-detail": {
+    "boxes": 524,
+    "cells": 10501312,
+    "owners": 21,
+    "sha256": "07237b84623ebf3ca914d2bd5bfec227e70da21cd47c02b998d2a8c0a74ee431"
+  },
+  "small/46/base": {
+    "boxes": 204,
+    "cells": 10503360,
+    "owners": 21,
+    "sha256": "0bd946dd9beefb8037b190d5d3b55fa948b470dfdd6997759593584d2c26a1ac"
+  },
+  "small/46/body-rich": {
+    "boxes": 204,
+    "cells": 10427328,
+    "owners": 25,
+    "sha256": "63fc1fa1ffc2729416ba34a82be56d1ff06adb121635fb3c57caf2e90af62d6a"
+  },
+  "small/46/fill": {
+    "boxes": 208,
+    "cells": 13780160,
+    "owners": 21,
+    "sha256": "208f805926a16e4f10e4b269074a76645b0fda7880f3be8cf5445f89a74885e9"
+  },
+  "small/46/material-detail": {
+    "boxes": 1032,
+    "cells": 10503360,
+    "owners": 21,
+    "sha256": "26050fd77067110b7cd70a144da1783ff3036e0361aa4fe84e43495b53064f7e"
+  },
+  "small/46/spread": {
+    "boxes": 210,
+    "cells": 10549440,
+    "owners": 21,
+    "sha256": "dfd7278f9e7b0cf567823ca6a3fcb857a2c2fba6da1d41620a3ae3a5286fd5ea"
+  },
+  "small/46/surface-detail": {
+    "boxes": 524,
+    "cells": 10501312,
+    "owners": 21,
+    "sha256": "8cccf8e238936b72beb3937dda445d061a1346b5453a6080cdd8467b3dfcac63"
+  }
+}

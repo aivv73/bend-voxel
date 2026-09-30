@@ -4,10 +4,12 @@ The range is an implementation support limit, not a measured machine ceiling.
 All search choices use integer squared area, avoiding floating-point ties.
 """
 
-from math import gcd, isqrt
+import json
 import math
 import struct
 import time
+
+from megascene_bend import run
 
 
 MAX_NEIGHBORHOODS_PER_SIDE = 5
@@ -48,40 +50,52 @@ def next_growth(q):
     """Next q minimizing distance to twice the current area; lower ties win."""
     if type(q) is not int or q < 2:
         raise ValueError("growth requires q>=2")
-    target = 2 * q * q
-    lower = max(q + 1, isqrt(target))
-    return min((lower, lower + 1), key=lambda candidate: (abs(candidate*candidate-target), candidate))
+    return _policy("growth", q)
 
 
 def midpoint_refinement(low, high):
     """Closest interior discrete area midpoint, or None at adjacent scales."""
     if type(low) is not int or type(high) is not int or low < 2 or high <= low:
         raise ValueError("refinement requires ordered square neighborhood scales")
-    if high == low + 1:
-        return None
-    target = low*low + high*high
-    root = isqrt(target // 2)
-    candidates = {max(low+1, min(high-1, root)), max(low+1, min(high-1, root+1))}
-    return min(candidates, key=lambda candidate: (abs(2*candidate*candidate-target), candidate))
+    return _policy("refinement", low, high)
 
 
 def history_stride(count):
     if type(count) is not int or count < 4:
         raise ValueError("history needs at least four neighborhoods")
-    stride = 5
-    while gcd(stride, count) != 1:
-        stride += 1
-    return stride
+    return _policy("stride", count)
 
 
 def history_visit(group, count, seed):
     """Return neighborhood and actual number of its earlier visits."""
     if type(group) is not int or not 0 <= group < 12 or seed not in (45, 46):
         raise ValueError("unsupported history group or seed")
-    stride = history_stride(count)
-    neighborhood = (stride*group + seed-45) % count
-    prior = sum((stride*b + seed-45) % count == neighborhood for b in range(group))
-    return neighborhood, prior
+    if type(count) is not int or count < 4:
+        raise ValueError("history needs at least four neighborhoods")
+    neighborhood, prior = _policy("visit", group, count, int(seed))
+    return neighborhood + (seed - seed), prior
+
+
+def _policy(operation, *arguments):
+    return json.loads(run("megascene_policy", operation, *map(_decimal, arguments)),
+                      parse_int=_integer)
+
+
+def _decimal(value):
+    # Each chunk fits below Python's minimum decimal conversion guard.
+    parts = []
+    while value:
+        value, part = divmod(value, 10**500)
+        parts.append(str(part).zfill(500) if value else str(part))
+    return "".join(reversed(parts)) or "0"
+
+
+def _integer(digits):
+    value = 0
+    for start in range(0, len(digits), 500):
+        part = digits[start:start+500]
+        value = value * 10**len(part) + int(part)
+    return value
 
 
 def operational_bounds(q, owners, cells, surface_rectangles, vertices, frame_count, budget,

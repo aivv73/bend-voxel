@@ -3,6 +3,8 @@ import ./src/color.bend as Color
 import ./src/math.bend as R
 import ./src/material.bend as Material
 import ./src/resolution.bend as Resolution
+import ./src/megascene_recipe.bend as Recipe
+import ./src/megascene_scale.bend as Scale
 
 # The Vulkan bridge reads ten material colors, then surfaces and overlays.
 law palette_length:
@@ -360,3 +362,42 @@ law palette_material_order:
 # cameras, rays, action times, caches, proxy hysteresis and full-mesh shadows.
 # These native/unsafe invariants require runtime/reference tests; they are not
 # formally proven by this file. Supplementary work is excluded from timing.
+
+# Bend district-source migration runtime contract:
+# - Preserve exact owner roles, neighborhoods and ordered integer cuboids for
+#   q=2..5, seeds 45/46 and every accepted terrain control. Freeze and check
+#   those actual source records before unsafe construction or timed replay.
+# - Growth/refinement retain exact squared-area choices and lower ties.
+#   History retains coprime visitation and actual earlier-visit counts.
+# - Keep independent Python occupancy, picking, edit and motion references.
+#   Unsafe geometry and foreign rendering remain runtime/reference evidence.
+# - Retain the Bend generator/policy and their adapter with archived inputs.
+
+law district_rejected:
+  for q: U32
+  for seed: U32
+  for control: Recipe.Control
+  {Recipe.district.valid(False{},q,seed,control) == None{} : Maybe<&2,Recipe.District>}
+law district_preserved:
+  for q: U32
+  for seed: U32
+  for control: Recipe.Control
+  {Recipe.district.valid(True{},q,seed,control) == Some{Recipe.District{q,seed,control}} : Maybe<&2,Recipe.District>}
+law scale_half_double:
+  for a: Scale.Integer
+  {Scale.Integer.half(Scale.Integer.double(a)) == a : Scale.Integer}
+law scale_sqrt_fuel:
+  for target: Scale.Integer
+  for lo: Scale.Integer
+  for hi: Scale.Integer
+  {Scale.sqrt.go(0n,target,lo,hi) == lo : Scale.Integer}
+law history_no_prior_visits:
+  for count: Scale.Integer
+  for stride: Scale.Integer
+  for offset: Scale.Integer
+  for neighborhood: Scale.Integer
+  for index: U32
+  {Scale.history_visit.prior(0n,count,stride,offset,neighborhood,index) == 0 : U32}
+law scale_midpoint_lower_tie:
+  {Scale.midpoint_refinement(Scale.Integer.from_u32(4n,2),Scale.Integer.from_u32(4n,9)) ==
+    Some{Scale.Integer.from_u32(4n,6)} : Maybe<&2,Scale.Integer>}

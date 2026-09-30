@@ -39,8 +39,9 @@ search remain later capabilities.
 
 ## Construction and numeric scope
 
-The Python generator implements the exact accepted [recipe](megascene-workload.md)
-in integer coordinates. All neighborhoods' terrain boxes belong to owner 1.
+The Bend generator implements the exact accepted [recipe](megascene-workload.md)
+in integer coordinates. Its Python adapter checks the complete ordered source
+stream before admission. All neighborhoods' terrain boxes belong to owner 1.
 Subsequent IDs follow row-major neighborhoods, each contributing a building,
 spans 0/1/2 and an irregular assembly. Seed variation changes the geometry.
 Each body retains the existing protected-foundation and material semantics.

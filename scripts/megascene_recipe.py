@@ -1,10 +1,10 @@
-"""Mixed Megascene source generator; arithmetic precedes Bend construction."""
-
 from dataclasses import dataclass
 from itertools import combinations
 import math
+import json
 import struct
 from megascene_scale import side_count, preset_for
+from megascene_bend import run
 
 U32_MAX = 2**32 - 1
 
@@ -51,144 +51,73 @@ def envelope_cells(preset, control=None):
     return 640 * (q-1) + 320 if control == "spread" else 320 * q
 
 
+def _source(q, seed, control):
+    return run("megascene_source", q, seed, control or "base")
+
+
+def source_owners(text, q, seed, control=None):
+    """Decode a complete source stream; callers receive fresh mutable owners."""
+    if not text.endswith("\n"):
+        raise ValueError("truncated Bend source stream")
+    def object_pairs(pairs):
+        result = dict(pairs)
+        if len(result) != len(pairs):
+            raise ValueError("duplicate Bend source field")
+        return result
+    records = [json.loads(line, object_pairs_hook=object_pairs) for line in text.splitlines()]
+    if len(records) < 3 or records[-1] != {"record_type": "complete"}:
+        raise ValueError("incomplete Bend source stream")
+    header = records[0]
+    expected_extent = 640*(q-1)+320 if control == "spread" else 320*q
+    roles = (("building_left", "building_right") if control == "body-rich" else ("building",)) + (
+        "span0", "span1", "span2", "irregular")
+    expected_owners = [("terrain", None)] + [(role, n) for n in range(q*q) for role in roles]
+    if (type(header) is not dict or
+            set(header) != {"record_type", "schema", "side", "seed", "control", "envelope_cells"} or
+            header["record_type"] != "source" or header["schema"] != "megascene-source/1" or
+            type(header["side"]) is not int or type(header["seed"]) is not int or
+            header["side"] != q or header["seed"] != seed or
+            header["control"] != (control or "base") or
+            type(header["envelope_cells"]) is not int or header["envelope_cells"] != expected_extent or
+            len(records) != len(expected_owners)+2):
+        raise ValueError("Bend source identity mismatch")
+    owners = []
+    def coordinate(value):
+        if (type(value) not in (int, float) or abs(value) > 2**23 or
+                not math.isfinite(value) or value != int(value)):
+            raise ValueError("inexact Bend source coordinate")
+        return int(value)
+    for record, expected_owner in zip(records[1:-1], expected_owners):
+        if (type(record) is not dict or set(record) != {"record_type", "role", "neighborhood", "boxes"} or
+                record["record_type"] != "owner" or type(record["role"]) is not str or
+                (record["role"], record["neighborhood"]) != expected_owner or
+                type(record["boxes"]) is not list or not record["boxes"]):
+            raise ValueError("invalid Bend source owner")
+        n = record["neighborhood"]
+        if (n is None and record["role"] != "terrain" or
+                n is not None and (type(n) is not int or not 0 <= n < q*q or record["role"] == "terrain")):
+            raise ValueError("invalid Bend source neighborhood")
+        boxes = []
+        for b in record["boxes"]:
+            if (type(b) is not dict or set(b) != {"lo", "hi", "material"} or type(b["lo"]) is not list or
+                    type(b["hi"]) is not list or len(b["lo"]) != 3 or len(b["hi"]) != 3 or
+                    type(b["material"]) is not int or not 1 <= b["material"] <= 5):
+                raise ValueError("invalid Bend source box")
+            boxes.append(Box(tuple(map(coordinate,b["lo"])),tuple(map(coordinate,b["hi"])),b["material"]))
+        owners.append(Owner(record["role"],n,boxes))
+    if owners[0].role != "terrain" or sum(o.role == "terrain" for o in owners) != 1:
+        raise ValueError("invalid Bend terrain ownership")
+    return owners
+
+
 def generate(preset, seed, control=None):
     q = side_count(preset)
     preset_for(q)
-    if seed not in (45, 46):
+    if type(seed) is not int or seed not in (45, 46):
         raise ValueError("only seeds 45/46 are supported")
     if control not in (None, *CONTROLS):
         raise ValueError("unsupported terrain control")
-    spacing = 640 if control == "spread" else 320
-    half = envelope_cells(preset, control)//2
-    terrain = Owner("terrain", None, [])
-    owners = [terrain]
-    for iz in range(q):
-        for ix in range(q):
-            n = checked(ix + checked(q * iz, "row offset"), "neighborhood")
-            v = (3 * ix + 5 * iz + seed - 45) % 4
-            ox, oz = spacing * ix - half, spacing * iz - half
-
-            def add(owner, x, y, z, material):
-                def append(x0, x1, y0, y1, z0, z1, m):
-                    owner.boxes.append(Box((x0+ox,y0,z0+oz),(x1+ox,y1,z1+oz),m))
-                if control == "fill":
-                    if owner is terrain:
-                        if y[0] >= 8:
-                            y = (y[0]+8,y[1]+8)
-                    else:
-                        y = (y[0]+8,y[1]+8)
-                if control == "surface-detail" and owner is terrain and (x,y,z) == ((224,288),(8,24),(0,240)):
-                    append(224,288,8,22,0,240,material)
-                    cursor = 224
-                    for u in range(8):
-                        x0 = 224+6*u
-                        if cursor < x0:
-                            append(cursor,x0,22,24,0,240,material)
-                        zcursor = 0
-                        for w in range(8):
-                            z0 = 16+6*w
-                            if zcursor < z0:
-                                append(x0,x0+2,22,24,zcursor,z0,material)
-                            zcursor = z0+2
-                        append(x0,x0+2,22,24,zcursor,240,material)
-                        cursor = x0+2
-                    append(cursor,288,22,24,0,240,material)
-                elif control == "material-detail" and owner is terrain and material == 2:
-                    for x0 in range(x[0],x[1],4):
-                        x1 = min(x0+4,x[1])
-                        append(x0,x1,*y,*z,2 if (x0//4)%2 == 0 else 5)
-                else:
-                    append(*x,*y,*z,material)
-
-            for x, y, z, m in [
-                ((0,320),(0,1),(0,320),1),
-                ((0,320),(1,8),(0,320),2),
-                ((0,224),(8,24),(0,320),2),
-                ((288,320),(8,24),(0,320),2),
-                ((224,288),(8,24),(0,240),2),
-                ((224,288),(8,24),(304,320),2),
-                ((224,288),(22,24),(271,273),2),
-                ((160,208),(24,32+2*v),(16,64),2),
-                ((160,184),(24,32+2*v),(64,96),2),
-                ((184,208),(24,28),(64,96),2),
-            ]:
-                add(terrain, x, y, z, m)
-            if control == "fill":
-                # The lower layers and y=0 foundation stay in place. The new
-                # concrete fills the whole patch between old and raised layers.
-                terrain.boxes.append(Box((ox,8,oz),(ox+320,16,oz+320),2))
-            building = Owner("building", n, [])
-            h = 80 + 2 * v
-            for x in ((16,24),(128,136)):
-                for z in ((16,24),(128,136)):
-                    add(building, x, (24,26), z, 1)
-            for x, y, z, m in [
-                ((16,136),(26,28),(16,136),5),
-                ((16,20),(28,h),(20,132),5),
-                ((16,136),(28,h),(132,136),5),
-                ((16,64),(28,h),(16,20),5),
-                ((88,136),(28,h),(16,20),5),
-                ((64,88),(60,h),(16,20),5),
-                ((132,136),(28,h),(20,56),5),
-                ((132,136),(28,h),(80,132),5),
-                ((132,136),(28,44),(56,80),5),
-                ((132,136),(64,h),(56,80),5),
-                ((76,80),(28,h),(48,72),2),
-                ((76,80),(28,h),(88,112),2),
-                ((76,80),(60,h),(72,88),2),
-                ((16,48),(h,h+3),(16,136),3),
-                ((72,136),(h,h+3),(16,136),3),
-                ((48,72),(h,h+3),(16,96),3),
-                ((48,72),(h,h+3),(120,136),3),
-            ]:
-                add(building, x, y, z, m)
-            if control == "body-rich":
-                left = Owner("building_left", n, [])
-                right = Owner("building_right", n, [])
-                for box in building.boxes:
-                    for piece, x0, x1 in ((left, box.lo[0], ox+72), (right, ox+80, box.hi[0])):
-                        lo, hi = max(box.lo[0], x0), min(box.hi[0], x1)
-                        if lo < hi:
-                            piece.boxes.append(Box((lo,*box.lo[1:]),(hi,*box.hi[1:]),box.material))
-                owners.extend((left,right))
-            else:
-                owners.append(building)
-            for j in range(3):
-                span = Owner(f"span{j}", n, [])
-                owners.append(span)
-                z, b = 176 + 24*j, 72 + v
-                for x, y, zr, m in [
-                    ((22,28),(24,26),(z+1,z+7),1),
-                    ((124,130),(24,26),(z+1,z+7),1),
-                    ((24,26),(26,b),(z+3,z+5),3),
-                    ((126,128),(26,b),(z+3,z+5),3),
-                    ((16,136),(b,b+4),(z,z+8),2),
-                ]:
-                    add(span, x, y, zr, m)
-            assembly = Owner("irregular", n, [])
-            owners.append(assembly)
-            for x, y, z, m in [
-                ((280,288),(24,26),(176,184),1),
-                ((280,288),(26,42),(176,184),4),
-                ((272,288),(42,50),(168,184),4),
-                ((280,296),(50,58+v%2),(176,192),3),
-                ((288,302+v%2),(34,50),(184,199),4),
-            ]:
-                add(assembly, x, y, z, m)
-    if control == "spread":
-        def connector(x0,x1,z0,z1):
-            terrain.boxes.append(Box((x0,0,z0),(x1,1,z1),1))
-            terrain.boxes.append(Box((x0,1,z0),(x1,24,z1),2))
-        for iz in range(q):
-            for ix in range(q-1):
-                x0 = spacing*ix-half+320
-                z0 = spacing*iz-half+158
-                connector(x0,x0+320,z0,z0+2)
-        for iz in range(q-1):
-            x0 = 158-half
-            z0 = spacing*iz-half+320
-            connector(x0,x0+2,z0,z0+320)
-    return owners
+    return source_owners(_source(q,seed,control),q,seed,control)
 
 
 def volume(box):

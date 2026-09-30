@@ -1,5 +1,6 @@
 import Base
 import ./LAWS.bend as Laws
+import ./src/megascene_scale.bend as Scale
 
 def Laws.palette_length():
   {==}
@@ -45,3 +46,13 @@ def Laws.resolution_default(): {==}
 def Laws.resolution_pixel_limit(): {==}
 def Laws.resolution_malformed(): {==}
 def Laws.palette_material_order(): {==}
+
+def Laws.district_rejected(q,seed,control): {==}
+def Laws.district_preserved(q,seed,control): {==}
+def Laws.scale_half_double(a):
+  match a:
+    case Scale.ScaleZero{}: {==}
+    case Scale.ScaleBit{b,t}: {==}
+def Laws.scale_sqrt_fuel(target,lo,hi): {==}
+def Laws.history_no_prior_visits(count,stride,offset,neighborhood,index): {==}
+def Laws.scale_midpoint_lower_tie(): {==}
