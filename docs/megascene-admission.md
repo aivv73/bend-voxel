@@ -46,7 +46,14 @@ Subsequent IDs follow row-major neighborhoods, each contributing a building,
 spans 0/1/2 and an irregular assembly. Seed variation changes the geometry.
 Each body retains the existing protected-foundation and material semantics.
 
-Before emitting a Bend input, admission checks the fixed envelope, positive
+The Python admission adapter sends the supplied ordered owners through a private
+integer request file to the cached Bend admission worker. The pure
+`src/megascene_admission.bend` validator checks exact signed integers before
+converting coordinates to binary32. Its worker sources and complete Bend dependency
+closure are retained with archived inputs. Independent Python inventory and
+connectivity references remain separate from this gate.
+
+Before emitting a Bend world input, the Bend validator checks the fixed envelope, positive
 dimensions, exact coordinate and spatial-split arithmetic, checked U32 box
 volumes/world sums, owner IDs, tree counts, disjointness across all owners,
 positive-area face connectivity and protected anchors. Source face endpoint

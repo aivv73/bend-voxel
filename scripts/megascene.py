@@ -192,7 +192,7 @@ def execute(config, output, manifest):
     (runtime / "src").mkdir()
     # Preserve the actual dependency closure. No native renderer is linked or
     # loaded by this worker. The generated C includes Bend's runtime and effects.
-    for name in ("math", "spatial", "mesh", "world", "showcase", "atelier_assets", "material", "megascene", "megascene_recipe", "megascene_source", "megascene_scale", "megascene_policy"):
+    for name in ("math", "spatial", "mesh", "world", "showcase", "atelier_assets", "material", "megascene", "megascene_recipe", "megascene_source", "megascene_scale", "megascene_policy", "megascene_admission", "megascene_admit"):
         shutil.copyfile(ROOT / f"src/{name}.bend", runtime / f"src/{name}.bend")
     for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_bend.py", "megascene_inventory.py"):
         shutil.copyfile(ROOT / "scripts" / name, runtime / name)

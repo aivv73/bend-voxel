@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p build
 bash scripts/proof.sh
-for suite in world input-aim probe resolution mesh face-audit color invariants; do
+for suite in world input-aim probe resolution mesh face-audit color invariants megascene-admission; do
   bend "tests/$suite.bend" -o "build/$suite-tests"
   "build/$suite-tests"
 done

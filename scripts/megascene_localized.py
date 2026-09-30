@@ -2,8 +2,8 @@
 from itertools import product
 import math
 
-from megascene_inventory import SCHEMA, digest, require, surface_reference
-from megascene_recipe import Box, bits, connected, f32, generate
+from megascene_inventory import SCHEMA, connected, digest, require, surface_reference
+from megascene_recipe import Box, bits, f32, generate
 from megascene_traversal import camera, pose
 from megascene_picking import center, checked_result, value
 

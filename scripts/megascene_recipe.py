@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-from itertools import combinations
 import math
 import json
 import struct
-from megascene_scale import side_count, preset_for
-from megascene_bend import run
+from megascene_scale import side_count, preset_for, _decimal
+from megascene_bend import run, run_input
 
 U32_MAX = 2**32 - 1
 
@@ -120,99 +119,70 @@ def generate(preset, seed, control=None):
     return source_owners(_source(q,seed,control),q,seed,control)
 
 
-def volume(box):
-    value = 1
-    for lo, hi in zip(box.lo, box.hi):
-        value = checked(value * checked(hi - lo, "box dimension"), "box volume")
-    return value
-
-
-def overlaps(a, b):
-    return all(max(l, x) < min(h, y) for l, h, x, y in zip(a.lo, a.hi, b.lo, b.hi))
-
-
-def connected(boxes):
-    if not boxes:
-        return False
-    reached, pending = {0}, [0]
-    while pending:
-        a = boxes[pending.pop()]
-        for j, b in enumerate(boxes):
-            if j in reached:
-                continue
-            if any((a.hi[k] == b.lo[k] or b.hi[k] == a.lo[k]) and
-                   all(max(a.lo[t], b.lo[t]) < min(a.hi[t], b.hi[t])
-                       for t in range(3) if t != k) for k in range(3)):
-                reached.add(j)
-                pending.append(j)
-    return len(reached) == len(boxes)
-
-
-def surface_bound(boxes):
-    """Bound clipping output before calling unsafe Bend surface construction.
-
-    All cut lines are source endpoints. A nonempty output rectangle contains
-    at least one unique elementary rectangle in this face's endpoint grid.
-    Counting that grid (including covered cells) bounds every clipping stage.
-    """
-    total = 0
-    for box in boxes:
-        for axis in range(3):
-            u, v = (axis+1) % 3, (axis+2) % 3
-            for side in (0, 1):
-                plane = (box.lo, box.hi)[side][axis]
-                edges = [{box.lo[t], box.hi[t]} for t in (u, v)]
-                for other in boxes:
-                    if (other.hi, other.lo)[side][axis] != plane:
-                        continue
-                    if all(max(box.lo[t], other.lo[t]) < min(box.hi[t], other.hi[t])
-                           for t in (u, v)):
-                        for e, t in zip(edges, (u, v)):
-                            e.update((max(box.lo[t], other.lo[t]), min(box.hi[t], other.hi[t])))
-                total = checked(total + checked((len(edges[0])-1) * (len(edges[1])-1),
-                                               "face grid"), "surface bound")
-    return total
+def signed_decimal(value):
+    return ("-" if value < 0 else "") + _decimal(abs(value))
 
 
 def admit_sources(owners, half_extent, budget):
-    checked(budget, "fragment budget")
-    checked(len(owners) + 1, "next ownership ID")
-    all_boxes = [b for o in owners for b in o.boxes]
-    total = 0
-    bounds = []
+    if type(budget) is not int:
+        raise ValueError("fragment budget: unsigned integer exceeds supported range")
+    if isinstance(half_extent, int):
+        numerator, denominator = int(half_extent), 1
+    else:
+        try:
+            numerator, denominator = half_extent.as_integer_ratio()
+        except OverflowError:
+            numerator, denominator = "inf" if half_extent > 0 else "-inf", 1
+        except (AttributeError, ValueError):
+            numerator, denominator = "invalid", 1
+    tokens = ["megascene-admission/1", signed_decimal(numerator) if type(numerator) is int else numerator,
+              signed_decimal(denominator), signed_decimal(budget), str(len(owners))]
     for owner in owners:
+        tokens.append(str(len(owner.boxes)))
         for box in owner.boxes:
-            if box.material not in range(1, 6):
-                raise ValueError("unsupported material")
-            for k, (lo, hi) in enumerate(zip(box.lo, box.hi)):
-                low, high = (0, 128) if k == 1 else (-half_extent, half_extent)
-                if type(lo) is not int or type(hi) is not int or not low <= lo < hi <= high:
-                    raise ValueError("box outside supported fixed generation envelope")
-                if f32(lo) != lo or f32(hi) != hi or f32(hi - lo) != hi - lo:
-                    raise ValueError("inexact coordinate conversion")
-                # S.build uses endpoint sums, twice-midpoints and dimension
-                # subtraction. These integer/half-integer values are exact here.
-                if f32(lo + hi) != lo + hi:
-                    raise ValueError("inexact spatial split")
-            total = checked(total + volume(box), "world cell sum")
-        if not connected(owner.boxes):
-            raise ValueError(f"{owner.role}: not positive-face connected")
-        if not any(b.material == 1 for b in owner.boxes):
-            raise ValueError(f"{owner.role}: missing protected anchor")
-        checked(2 * len(owner.boxes) - 1, "tree nodes")
-        bound = surface_bound(owner.boxes)
-        vertices = checked(bound * 6, "generated vertices")
-        # Conservative 64-byte slot covers both current native structs (20/28
-        # bytes) and index/transport sizes. No Vulkan allocation occurs here.
-        checked(vertices * 64, "potential geometry bytes")
-        bounds.append(bound)
-    for a, b in combinations(all_boxes, 2):
-        if overlaps(a, b):
-            raise ValueError("overlapping source ownership")
-    checked(sum(bounds), "world surface bound")
-    checked(sum(bounds) * 6 * 64, "world geometry byte bound")
-    return {"cells": str(total), "surface_rectangle_bounds": list(map(str, bounds)),
-            "vertex_bound": str(sum(bounds) * 6), "geometry_byte_bound": str(sum(bounds) * 6 * 64)}
+            material = box.material
+            if isinstance(material, complex) and material.imag == 0:
+                material = material.real
+            try:
+                integer = int(material)
+                material = signed_decimal(integer) if material == integer else "invalid"
+            except (TypeError, ValueError, OverflowError):
+                material = "invalid"
+            tokens.append(material)
+            coordinates = (*box.lo, *box.hi) if len(box.lo) == len(box.hi) == 3 else (None,) * 6
+            for value in coordinates:
+                tokens.append(signed_decimal(value) if type(value) is int else "invalid")
+    tokens.append("complete")
+    try:
+        text = run_input("megascene_admit", " ".join(tokens))
+    except ValueError as error:
+        message = str(error)
+        if message.startswith("owner-index:"):
+            _, index, reason = message.split(":", 2)
+            if index.isdecimal() and int(index) < len(owners):
+                message = f"{owners[int(index)].role}: {reason.strip()}"
+        raise ValueError(message) from error
+
+    def object_pairs(pairs):
+        result = dict(pairs)
+        if len(result) != len(pairs):
+            raise ValueError("duplicate Bend admission field")
+        return result
+
+    if not text.endswith("\n") or len(text.splitlines()) != 1:
+        raise ValueError("incomplete Bend admission report")
+    result = json.loads(text, object_pairs_hook=object_pairs)
+    if (type(result) is not dict or
+            set(result) != {"cells", "surface_rectangle_bounds", "vertex_bound", "geometry_byte_bound"} or
+            type(result["surface_rectangle_bounds"]) is not list or
+            len(result["surface_rectangle_bounds"]) != len(owners)):
+        raise ValueError("invalid Bend admission report")
+    for value in (result["cells"], result["vertex_bound"], result["geometry_byte_bound"],
+                  *result["surface_rectangle_bounds"]):
+        if (type(value) is not str or not value.isascii() or not value.isdecimal() or
+                len(value) > 10 or str(int(value)) != value or int(value) > U32_MAX):
+            raise ValueError("invalid Bend admission count")
+    return result
 
 
 def bend_program(owners, budget):

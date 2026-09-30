@@ -14,7 +14,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from megascene_bend import run
 import megascene_bend
-from megascene_recipe import generate, source_owners, volume
+from megascene_recipe import Box, Owner, admit_sources, generate, source_owners
+from megascene_inventory import volume
 from megascene_scale import history_stride
 
 
@@ -99,10 +100,29 @@ class BendSources(unittest.TestCase):
             megascene_bend.retain_sources(runtime)
             retained_files = sorted(p.relative_to(runtime).as_posix() for p in runtime.rglob("*"))
             with patch.object(megascene_bend,"ROOT",runtime), patch.object(megascene_bend,"SCRIPT_DIR",runtime):
-                self.assertEqual(len(generate("small",45)),21)
+                owners = generate("small",45)
+                self.assertEqual(len(owners),21)
                 self.assertEqual(history_stride(25),6)
+                self.assertEqual(admit_sources(owners,320,2048)["cells"],"10503360")
             self.assertEqual(frozen.read_text(),"retained old renderer source")
             self.assertEqual(sorted(p.relative_to(runtime).as_posix() for p in runtime.rglob("*")),retained_files)
+
+    def test_admission_source_changes_invalidate_the_worker(self):
+        owners = [Owner("a",None,[Box((0,0,0),(1,1,1),1)]),
+                  Owner("b",None,[Box((0,0,0),(1,1,1),1)])]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/"src").mkdir()
+            for name in megascene_bend.DEPENDENCIES["megascene_admit"]:
+                shutil.copyfile(ROOT/"src"/(name+".bend"),root/"src"/(name+".bend"))
+            with patch.object(megascene_bend,"ROOT",root):
+                with self.assertRaisesRegex(ValueError,"overlapping source ownership"):
+                    admit_sources(owners,320,0)
+                admission = root/"src/megascene_admission.bend"
+                admission.write_text(admission.read_text().replace(
+                    "overlapping source ownership","changed admission rejection"))
+                with self.assertRaisesRegex(ValueError,"changed admission rejection"):
+                    admit_sources(owners,320,0)
 
     def test_actual_worker_rejects_unsupported_inputs(self):
         for args in ((0,45,"base"),(6,45,"base"),(2,47,"base"),
