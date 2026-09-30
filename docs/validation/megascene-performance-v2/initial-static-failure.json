@@ -1,0 +1,13 @@
+{
+  "series": "/home/aivv/megascene-evidence/calibration-series-v2/static-small-6/series.json",
+  "series_sha256": "bffa83bfdb098cc9f9d36bc7d2df3c32a95807af9939e42f9611145b6161852f",
+  "assessment": "/home/aivv/megascene-evidence/calibration-series-v2/static-small-6/assessment.json",
+  "status": "stopped_before_controls",
+  "reason": "v2 runtime_from added five generator files; exact archived byte binding rejected the pair",
+  "validations": {
+    "on": "pass21721",
+    "off": "pass21721"
+  },
+  "replacement_series": "/home/aivv/megascene-evidence/calibration-series-v2/static-small-6/revision-2/series.json",
+  "fix": "v2 runtime reuse preserves copied bytes; legacy refresh unchanged"
+}

@@ -2,6 +2,7 @@
 """Run and assess the bounded, ordered Megascene calibration controls."""
 
 import argparse
+import hashlib
 from decimal import Decimal
 from fractions import Fraction
 import json
@@ -21,7 +22,13 @@ MIN_MEASURED_NS = 10_000_000_000
 MIN_EDITS = 100
 
 
-def matrix():
+def matrix(protocol="legacy"):
+    require(protocol in ("legacy","performance-v2"), "unsupported calibration protocol")
+    if protocol == "performance-v2":
+        return [{"case":case, "preset":"small", "seed":"45", "threads":"6", "resolution":"1920x1080",
+                 "profile":"full", "schedule":case+"-perf-v2", "diagnostic":None, "control":None,
+                 "fragment_budget":"2048", "warmup":"120", "frames":"21600", "order":list(ORDER)}
+                for case in ("static","history")]
     return [{"case": case, "preset": preset, "seed": "45", "threads": str(threads),
              "resolution": "1920x1080", "profile": "full", "schedule": case+"-v1",
              "diagnostic": None, "control": None, "fragment_budget": "2048",
@@ -30,8 +37,8 @@ def matrix():
             for threads in (1, 6, 12)]
 
 
-def plan():
-    configurations = matrix()
+def plan(protocol="legacy"):
+    configurations = matrix(protocol)
     return {"schema": SCHEMA, "record_type": "calibration_plan", "configurations": configurations,
             "configuration_count": len(configurations),
             "control_count": sum(len(c["order"]) for c in configurations),
@@ -40,7 +47,8 @@ def plan():
 
 
 def scope(config):
-    return {key: config[key] for key in SCOPE_KEYS}
+    from megascene_performance import scope_keys
+    return {key: config[key] for key in scope_keys(config)}
 
 
 def paths(series):
@@ -61,29 +69,54 @@ def _record(path, series, category, mode, output, returncode):
     else:
         series["controls"].append(item)
     snapshot(path, series)
+    from megascene_performance import enabled
+    if enabled(series['scope']) and archive is not None:
+        try:
+            runtime={a['path']:a['sha256'] for a in manifest['artifacts']}
+            if 'runtime_artifacts' in series:
+                require(series['runtime_artifacts']==runtime, 'performance series runtime/schedule bytes differ')
+            else:
+                series['runtime_artifacts']=runtime
+                series['schedule_sha256']=runtime['schedule.json']
+        except (ValueError,KeyError,TypeError) as exc:
+            item['binding_error']=str(exc)
+            snapshot(path,series)
+            raise
+        snapshot(path,series)
     require(returncode == 0 and archive is not None, "runner failed; retained partial series: "+str(output))
     return Path(archive)
 
 
-def run_series(archive, work, case, preset, threads, additional=0):
-    config = next(c for c in matrix() if (c["case"], c["preset"], c["threads"]) ==
-                  (case, preset, str(threads)))
+def run_series(archive, work, case, preset, threads, additional=0, protocol="legacy", series_path=None):
+    config = next((c for c in matrix(protocol) if (c["case"], c["preset"], c["threads"]) ==
+                  (case, preset, str(threads))),None)
+    require(config is not None, "configuration outside calibration protocol")
     require(archive.is_absolute() and work.is_absolute(), "archive and work paths must be absolute")
     require(archive != work and archive not in work.parents and work not in archive.parents,
             "archive and work must be separate")
-    series_path = archive/"calibration-series"/(case+"-"+preset+"-"+str(threads))/"series.json"
+    series_root = (archive/("calibration-series-v2" if protocol=="performance-v2" else "calibration-series")/(case+"-"+preset+"-"+str(threads))).resolve()
+    if series_path is None:
+        series_path = series_root/"series.json"
+    else:
+        require(series_path.is_absolute(), "explicit series must stay inside this performance configuration namespace")
+        series_path = series_path.resolve()
+        require(protocol == "performance-v2" and
+                series_path.name == "series.json" and series_root in series_path.parents,
+                "explicit series must stay inside this performance configuration namespace")
     series_path.parent.mkdir(parents=True, exist_ok=True)
     resuming = series_path.exists()
     if resuming:
         series = read_json(series_path.read_text())
         require(series["scope"] == scope(config) and series["order"] == list(ORDER),
                 "existing series scope/order mismatch")
-        require(all(run["returncode"] == 0 for run in series["runs"]),
+        require(all(run["returncode"] == 0 and not run.get('binding_error') and
+                    not run.get('measurement_exclusion') for run in series["runs"]+series["controls"]),
                 "series contains a failed run; retain it without automatic rerun")
     else:
         series = {"schema": SCHEMA, "record_type": "calibration_series", "scope": scope(config),
                   "order": list(ORDER), "validations": {}, "controls": [], "runs": [],
                   "archive_root": str(archive), "work_root": str(work), "status": "incomplete"}
+        if protocol=="performance-v2": series['protocol']=protocol
         snapshot(series_path, series)
     require(series["archive_root"] == str(archive) and series["work_root"] == str(work),
             "resume paths differ from original series")
@@ -109,6 +142,7 @@ def run_series(archive, work, case, preset, threads, additional=0):
                    "--preset", preset, "--seed", "45", "--threads", str(threads),
                    "--profile", "full", "--resolution", "1920x1080", "--calibration", mode,
                    "--validation-only", "--archive", str(archive), "--output", str(output)]
+        if protocol=="performance-v2": command += ['--schedule',config['schedule']]
         if mode == "off":
             command += ["--runtime-from", series["validations"]["on"]["archive"]]
         if allowance_pending:
@@ -128,6 +162,7 @@ def run_series(archive, work, case, preset, threads, additional=0):
                    "--validated", series["validations"][mode]["archive"],
                    "--calibration-peer-validation", series["validations"]["off" if mode == "on" else "on"]["archive"],
                    "--archive", str(archive), "--output", str(output)]
+        if protocol=="performance-v2": command += ['--schedule',config['schedule']]
         if allowance_pending:
             command += ["--additional-allowance", str(allowance_pending)]
         result = subprocess.run(command, check=False)
@@ -150,7 +185,10 @@ def _values(root, expected_scope, mode):
             scope(manifest["effective"]) == expected_scope, "control scope/mode mismatch")
     require(summary["attempt_id"] == manifest["attempt_id"] and
             summary["schedule_completion"]["status"] == "pass", "control incomplete")
-    require(validation["status"] == "pass" and integer(validation["checked_frames"]) == 3721,
+    from megascene_performance import enabled
+    performance=enabled(expected_scope)
+    expected_frames=1+integer(expected_scope['warmup'])+integer(expected_scope['frames']) if performance else 3721
+    require(validation["status"] == "pass" and integer(validation["checked_frames"]) == expected_frames,
             "control lacks complete mode validation")
     require(summary["termination"]["cause"] == "normal_exit" and
             not summary.get("evidence_errors"), "control evidence/termination invalid")
@@ -166,7 +204,8 @@ def _values(root, expected_scope, mode):
     accepted = [integer(r["duration_ns"]) for r in edits if r["accepted"]]
     measured = [r for r in frames if r["population"] not in ("startup", "warmup")]
     duration = integer(measured[-1]["end_ns"])-integer(measured[0]["begin_ns"]) if measured else 0
-    sufficient = len(ordinary) >= MIN_ORDINARY and duration >= MIN_MEASURED_NS and (
+    ordinary_duration=sum(ordinary)
+    sufficient = len(ordinary) >= MIN_ORDINARY and (ordinary_duration if performance else duration) >= MIN_MEASURED_NS and (
         expected_scope["case"] != "history" or len(accepted) >= MIN_EDITS)
     require(summary["populations"]["ordinary"]["count"] == str(len(ordinary)) and
             summary["populations"]["ordinary"]["samples_ns"] == list(map(str,ordinary)),
@@ -195,10 +234,12 @@ def _values(root, expected_scope, mode):
         require(value is not None and reported[name] is not None and
                 abs(Decimal(str(reported[name]))-Decimal(value)) <= Decimal("0.001"),
                 "reported statistic differs from common recorder: "+name)
-    return {"attempt_id": manifest["attempt_id"], "archive": str(root), "mode": mode,
+    value = {"attempt_id": manifest["attempt_id"], "archive": str(root), "mode": mode,
             "ordinary_count": len(ordinary), "accepted_edit_count": len(accepted),
             "measured_duration_ns": duration, "sufficient": sufficient,
             "statistics": {k: float(v) for k,v in stats.items()}, "exact_statistics": exact}
+    if performance: value['ordinary_duration_ns']=ordinary_duration
+    return value
 
 
 def classify_statistic(name, controls):
@@ -231,7 +272,8 @@ def classify_statistic(name, controls):
 def assess(series_path):
     series = read_json(series_path.read_text())
     require(series["schema"] == SCHEMA and series["order"] == list(ORDER), "unsupported series")
-    require(series["scope"] in [scope(c) for c in matrix()], "series outside accepted calibration matrix")
+    protocol=series.get('protocol','legacy')
+    require(series["scope"] in [scope(c) for c in matrix(protocol)], "series outside accepted calibration matrix")
     controls = series["controls"]
     require(len(controls) <= 6 and all(item["mode"] == ORDER[i] for i,item in enumerate(controls)),
             "control order mismatch")
@@ -258,12 +300,19 @@ def assess(series_path):
                                            "validation/comparison.json"})
             validation = read_json((root/"validation.json").read_text())
             applicable(validation,identity(manifest,root,manifest["effective"]))
-            require(validation["status"] == "pass" and integer(validation["checked_frames"]) == 3721,
+            expected_frames=1+integer(series['scope']['warmup'])+integer(series['scope']['frames']) if protocol=='performance-v2' else 3721
+            require(validation["status"] == "pass" and integer(validation["checked_frames"]) == expected_frames,
                     "incomplete mode validation")
         for index, item in enumerate(controls):
-            require(item["returncode"] == 0 and item["archive"], "failed control")
+            require(item["returncode"] == 0 and item["archive"] and not item.get('measurement_exclusion'),
+                    "failed or excluded control")
             value = _values(Path(item["archive"]), series["scope"], ORDER[index])
             report["controls"].append(value)
+            if protocol=='performance-v2':
+                manifest=read_json((Path(item['archive'])/'manifest.json').read_text())
+                binding={'artifacts':{a['path']:a['sha256'] for a in manifest['artifacts']}}
+                require(report.get('binding',binding)==binding, 'performance calibration runtime/schedule differ')
+                report['binding']=binding
             if ORDER[index] == "on":
                 report["on_acceptance_candidates"].append({"attempt_id": value["attempt_id"],
                     "archive": value["archive"],
@@ -302,9 +351,13 @@ def write_assessment(series_path):
     result = assess(series_path)
     assessment_path = series_path.with_name("assessment.json")
     snapshot(assessment_path,result)
-    snapshot(series_path.with_name("calibration.json"),{"schema":SCHEMA,
+    calibration={"schema":SCHEMA,
         "record_type":"calibration", "status":result["status"], "scope":result["scope"],
-        "reference":str(assessment_path)})
+        "reference":str(assessment_path)}
+    if 'binding' in result:
+        calibration['binding']=result['binding']
+        calibration['reference_sha256']=hashlib.sha256(assessment_path.read_bytes()).hexdigest()
+    snapshot(series_path.with_name("calibration.json"),calibration)
     return result
 
 
@@ -318,9 +371,10 @@ def main(argv=None):
     p.add_argument("--threads", type=int, choices=(1,6,12))
     p.add_argument("--series")
     p.add_argument("--additional-allowance", type=int, default=0)
+    p.add_argument("--protocol",choices=("legacy","performance-v2"),default="legacy")
     args = p.parse_args(argv)
     if args.command == "plan":
-        result = plan()
+        result = plan(args.protocol)
     elif args.command == "assess":
         require(args.series, "--series required")
         result = write_assessment(Path(args.series).expanduser().resolve())
@@ -329,7 +383,8 @@ def main(argv=None):
                 "run requires --archive, --work, --case, --preset and --threads")
         require(0 <= args.additional_allowance <= 86400, "additional allowance out of range")
         result = run_series(Path(args.archive).expanduser().resolve(), Path(args.work).expanduser().resolve(),
-                            args.case,args.preset,args.threads,args.additional_allowance)
+                            args.case,args.preset,args.threads,args.additional_allowance,args.protocol,
+                            Path(args.series).expanduser().resolve() if args.series else None)
     print(json.dumps(result,sort_keys=True,indent=2))
     return 0
 

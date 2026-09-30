@@ -3,6 +3,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
 // Shared append-only recorder ABI v1. Linux, lock-free aligned 64-bit atomics.
 // Slots are never reused: a killed producer cannot erase a committed record.
 #ifndef MEGASCENE_REFERENCE_H
@@ -28,6 +29,19 @@ static inline int mega_reference_commit(void* memory, const char* payload, size_
   __atomic_store_n(&slot->committed,n+1,__ATOMIC_RELEASE);
   __atomic_store_n(&h->written,n+1,__ATOMIC_RELEASE);
   return 1;
+}
+static int mega_policy_read(FILE* input,uint32_t* policy,uint32_t count,int history) {
+  if(count!=21721) return 0;
+  for(uint32_t at=0;at<count;at++) {
+    unsigned char row[8];
+    if(fread(row,1,8,input)!=8) return 0;
+    uint32_t phase=(uint32_t)row[0]|(uint32_t)row[1]<<8|(uint32_t)row[2]<<16|(uint32_t)row[3]<<24;
+    uint32_t flags=(uint32_t)row[4]|(uint32_t)row[5]<<8|(uint32_t)row[6]<<16|(uint32_t)row[7]<<24;
+    if(phase>4 || flags>7 || (at==0?phase!=0:at<=120?phase!=1:phase<2) ||
+       (!history && at>120 && phase!=2) || ((flags&4)!=0)!=(history && at==21661)) return 0;
+    policy[at*2]=phase; policy[at*2+1]=flags;
+  }
+  return fgetc(input)==EOF;
 }
 #endif
 
@@ -96,6 +110,33 @@ static u32 mega_number(const char* name,u32 maximum) {
   unsigned long n=strtoul(value,&end,10);
   if (*end || n>maximum || *value<'0' || *value>'9') err_fail("invalid Megascene numeric setting");
   return (u32)n;
+}
+static u32* mega_policy;
+static const char* mega_policy_phase(u64 frame) {
+  static const char* phases[]={"startup","warmup","ordinary","edit","motion"};
+  if(!mega_policy) return NULL;
+  if(frame>=(u64)1+mega_warmup+mega_measured) err_fail("performance frame outside policy");
+  return phases[mega_policy[frame*2]];
+}
+static u32 mega_policy_flags(u64 frame) {
+  if(!mega_policy) return 0;
+  if(frame>=(u64)1+mega_warmup+mega_measured) err_fail("performance frame outside policy");
+  return mega_policy[frame*2+1];
+}
+static void mega_policy_load(void) {
+  const char* path=getenv("MEGASCENE_FRAME_POLICY");
+  if(!path) return;
+  if(mega_warmup!=120 || mega_measured!=21600 || mega_number("MEGASCENE_QUERY_PAIRS",21721)!=21721)
+    err_fail("performance policy/count mismatch");
+  if(getenv("MEGASCENE_HISTORY") && mega_number("MEGASCENE_HISTORY_OVERVIEW",21720)!=21661)
+    err_fail("performance overview mismatch");
+  FILE* input=fopen(path,"rb");
+  if(!input) err_fail("performance policy unavailable");
+  const u32 count=21721;
+  mega_policy=io_mem(malloc((size_t)count*2*sizeof(u32)));
+  if(!mega_policy) err_fail("performance policy allocation failed");
+  if(!mega_policy_read(input,mega_policy,count,getenv("MEGASCENE_HISTORY")!=NULL) || fclose(input))
+    err_fail("invalid performance policy/count");
 }
 
 #ifdef CID_VULKAN_VULKAN_ROUTE
@@ -209,7 +250,8 @@ Term vulkan_mark_run(Env e, Term* f, IoWork* work) {
     for (u32 i=0;i<3;i++) for (const char* p=ids[i];*p;p++)
       if (!((*p>='a'&&*p<='z')||(*p>='0'&&*p<='9')||*p=='-')) err_fail("invalid Megascene identity");
     mega_warmup=mega_number("MEGASCENE_WARMUP",120);
-    mega_measured=mega_number("MEGASCENE_MEASURED",3600);
+    mega_measured=mega_number("MEGASCENE_MEASURED",getenv("MEGASCENE_FRAME_POLICY")?21600:3600);
+    mega_policy_load();
     const char* calibration=getenv("MEGASCENE_CALIBRATION");
     if(calibration && strcmp(calibration,"on") && strcmp(calibration,"off")) err_fail("invalid calibration mode");
     mega_detailed=!calibration || strcmp(calibration,"off") || getenv("MEGASCENE_VALIDATE");

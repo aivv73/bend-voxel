@@ -1077,7 +1077,7 @@ public:
       uint32_t count=0; vkGetPhysicalDeviceQueueFamilyProperties(physical,&count,nullptr);
       std::vector<VkQueueFamilyProperties> families(count);
       vkGetPhysicalDeviceQueueFamilyProperties(physical,&count,families.data());
-      gpu_queries.start(device,family,properties.limits.timestampPeriod,families.at(family).timestampValidBits,3721);
+      gpu_queries.start(device,family,properties.limits.timestampPeriod,families.at(family).timestampValidBits,gpu_timing::query_pairs());
     }
     if ((frame.record || std::getenv("MEGASCENE_CALIBRATION")) && (extent.width!=frame.width || extent.height!=frame.height))
       throw std::runtime_error("Megascene actual swapchain resolution differs from frozen request");

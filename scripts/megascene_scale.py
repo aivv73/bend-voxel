@@ -148,6 +148,10 @@ def admit_schedule(config, frozen):
         return result
 
     frames = frozen["frames"]
+    from megascene_performance import enabled, admit, validate
+    if enabled(config):
+        admit(config)
+        validate(frozen)
     expected = 1+int(config["warmup"])+int(config["frames"])
     if len(frames) != expected or expected > U32_MAX-1:
         raise ValueError("unsupported frozen frame count")

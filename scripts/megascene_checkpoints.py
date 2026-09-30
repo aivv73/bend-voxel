@@ -122,6 +122,19 @@ def identity(manifest, root, config):
                 f"stale runtime artifact: {item['path']}")
         artifacts[item["path"]] = actual
     require(artifacts and "schedule.json" in artifacts and "runtime/worker" in artifacts, "incomplete runtime artifacts")
+    from megascene_performance import enabled, admit, policy_bytes
+    if enabled(config):
+        admit(config)
+        frozen=read_json((root/'schedule.json').read_text())
+        expected_policy=policy_bytes(frozen)
+        require('frame-policy.bin' in artifacts and (root/'frame-policy.bin').read_bytes()==expected_policy,
+                'performance policy does not match frozen schedule')
+        env=manifest['worker_environment']
+        require(env.get('MEGASCENE_QUERY_PAIRS')==str(len(frozen['frames'])) and
+                env.get('MEGASCENE_FRAME_POLICY')=='../frame-policy.bin', 'performance runtime counts mismatch')
+        if config['case']=='history':
+            require(env.get('MEGASCENE_HISTORY_OVERVIEW')==frozen['performance_protocol']['overview_frame'],
+                    'performance runtime overview mismatch')
     return {"artifacts": artifacts, "configuration": {k: v for k,v in config.items()
             if k not in {"archive", "capture_opening", "validation_only", "validated", "runtime_from", "calibration_peer_validation"}},
             "worker_command": manifest["worker_command"], "worker_environment": manifest["worker_environment"],
@@ -144,7 +157,7 @@ def checkpoint_catalog(frozen):
 
 def audit(records, frozen, expected, expected_work, complete, thorough=False):
     """Verify every replay frame, or the timed checkpoint catalog, with evidence."""
-    if frozen["schedule_id"] in ("history-v1", "history-12-v1", "history-48-v1", "fill-history-v1", "body-rich-history-v1"):
+    if frozen["schedule_id"] in ("history-perf-v2", "history-v1", "history-12-v1", "history-48-v1", "fill-history-v1", "body-rich-history-v1"):
         from megascene_history import audit as audit_history
         return audit_history(records, frozen, expected, expected_work, complete, thorough)
     if frozen["schedule_id"] in ("support-v1", "support-1-span-v1", "support-2-span-v1", "fill-support-v1"):

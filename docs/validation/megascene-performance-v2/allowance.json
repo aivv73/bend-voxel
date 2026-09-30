@@ -1,0 +1,96 @@
+{
+  "schema": "megascene-performance-allowance/2",
+  "archive_root": "/home/aivv/megascene-evidence",
+  "historical_acceptance": "docs/validation/megascene-acceptance/acceptance.json",
+  "historical_shared_allowance": "docs/validation/megascene-acceptance/allowance.json",
+  "authorization": {
+    "time_utc": "2026-09-30T10:32:10.835421+00:00",
+    "source": "User reply in this conversation",
+    "text": "Разрешаю дополнительные 3600 секунд",
+    "additional_seconds": 3600
+  },
+  "transfers": [
+    {
+      "seconds": 2400,
+      "status": "applied",
+      "command_log": "build/performance-v2/checks/static-series.log",
+      "time_utc": "2026-09-30T10:45:35.216820+00:00",
+      "campaign_addition": {
+        "elapsed_before_ns": "7200000000000",
+        "explicit": true,
+        "seconds": "2400",
+        "utc_ns": "1790765136029635080"
+      },
+      "campaign_id": "4bbf98e4-5971-4f78-bc9f-84c015d45389"
+    },
+    {
+      "seconds": 1200,
+      "status": "applied",
+      "command_log": "build/performance-v2/checks/static-revision-2.log",
+      "time_utc": "2026-09-30T10:57:49.777632+00:00",
+      "reason": "Bounded correction after archive identity failure before controls",
+      "campaign_addition": {
+        "elapsed_before_ns": "7934690259288",
+        "explicit": true,
+        "seconds": "1200",
+        "utc_ns": "1790765870719918395"
+      },
+      "campaign_id": "4bbf98e4-5971-4f78-bc9f-84c015d45389"
+    },
+    {
+      "seconds": 1200,
+      "status": "applied",
+      "time_utc": "2026-09-30T11:42:24.396385+00:00",
+      "command_log": "build/performance-v2/checks/allowance-admission.log",
+      "reason": "User-authorized completion of history; public admission at an exclusive campaign boundary while only the owned coordinator was paused",
+      "campaign_addition": {
+        "elapsed_before_ns": "10557703146698",
+        "explicit": true,
+        "seconds": "1200",
+        "utc_ns": "1790768493732873207"
+      },
+      "campaign_id": "4bbf98e4-5971-4f78-bc9f-84c015d45389"
+    },
+    {
+      "seconds": 1200,
+      "status": "applied",
+      "time_utc": "2026-09-30T12:17:23.276306+00:00",
+      "command_log": "build/performance-v2/checks/history-revision-3.log",
+      "reason": "Explicitly authorized history continuation after retaining the excluded background-load control",
+      "campaign_addition": {
+        "elapsed_before_ns": "12000000000000",
+        "explicit": true,
+        "seconds": "1200",
+        "utc_ns": "1790770642276744793"
+      },
+      "campaign_id": "4bbf98e4-5971-4f78-bc9f-84c015d45389"
+    }
+  ],
+  "remaining_authorized_transfer_seconds": 0,
+  "scope": "two fixed v2 configurations, separate validations, twelve controls and bounded correction/continuation; existing campaign wall-time accounting",
+  "additional_authorizations": [
+    {
+      "time_utc": "2026-09-30T11:39:45.900657+00:00",
+      "source": "User reply in this conversation",
+      "text": "Разрешаю ещё 1200 секунд",
+      "additional_seconds": 1200
+    },
+    {
+      "time_utc": "2026-09-30T12:04:16.774792+00:00",
+      "source": "User reply in this conversation",
+      "text": "Разрешаю ещё 1200 секунд",
+      "additional_seconds": 1200,
+      "reason": "Complete the remaining history controls after observed checkpoint-reader cost"
+    }
+  ],
+  "total_authorized_additional_seconds": 6000,
+  "final_observation": {
+    "time_utc": "2026-09-30T12:53:19.636525+00:00",
+    "campaign_state_at_last_close": "ready",
+    "allowance_ns": "13200000000000",
+    "elapsed_ns_at_last_close": "12895769289938",
+    "bounded_elapsed_including_idle_ns": "13200000000000",
+    "remaining_including_idle_ns": "0",
+    "scope": "All selected native workers completed with normal exits; final comparison is a read-only recomputation, with no new campaign invocation."
+  }
+}

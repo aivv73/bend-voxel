@@ -257,7 +257,7 @@ void emit(const VoxelVkFrame& f,const VoxelMegaState& s) {
   if(s.action_frame) names.push_back(quote("action_"+std::to_string(s.action_id)));
   if(std::getenv("MEGASCENE_HISTORY") && s.action_frame && (s.action_id==11 || s.action_id==47 || s.action_id==119))
     names.push_back(quote("after_cut_"+std::to_string(s.action_id+1)));
-  if(std::getenv("MEGASCENE_HISTORY") && s.frame==uint64_t(s.warmup)+1561)
+  if(std::getenv("MEGASCENE_HISTORY") && s.frame==gpu_timing::environment_number("MEGASCENE_HISTORY_OVERVIEW",s.warmup+1561,s.warmup+s.measured))
     names.push_back(quote("history_overview"));
   if(std::getenv("MEGASCENE_SUPPORT") && s.frame>=uint64_t(s.warmup)+32 && s.frame<=uint64_t(s.warmup)+43)
     names.push_back(quote("motion_"+std::to_string(s.frame-s.warmup-1)));

@@ -25,6 +25,14 @@ POLICY = {'cadence_ns': 100_000_000, 'freshness_ns': NS, 'rss_bytes': 20*1024**3
           'startup_ns': 120*NS, 'watchdog_ns': 30*NS, 'case_ns': 300*NS}
 
 
+def worker_case_policy(config, env):
+    from megascene_performance import enabled
+    history_validation = enabled(config) and config.get('case') == 'history' and env.get('MEGASCENE_VALIDATE') == '1'
+    cap = 480*NS if history_validation else POLICY['case_ns']
+    seconds = int(config.get('validation_deadline_s', '480')) if history_validation else int(config['deadline_s'])
+    return {**POLICY, 'case_ns':cap}, min(seconds*NS, cap)
+
+
 def snapshot(path, value):
     from megascene import snapshot as write
     write(path, value)
@@ -161,7 +169,7 @@ class Reference:
     SLOT = 1024
 
     def __init__(self, directory, identity, capacity):
-        require(1 <= capacity <= 16384, 'unsupported shared recorder capacity')
+        require(1 <= capacity <= 32768, 'unsupported shared recorder capacity')
         self.path = directory/'reference.shared'
         self.file = self.path.open('x+b')
         os.posix_fallocate(self.file.fileno(), 0, 32+capacity*self.SLOT)
@@ -376,19 +384,25 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
     """
     require((probe is None and monitor_command is None) or identity.get('synthetic') is True, 'controlled monitor inputs require a synthetic manifest')
     capacity = 1+int(config['warmup'])+int(config['frames'])+3*120
+    from megascene_performance import enabled, validate
+    if enabled(config):
+        frozen=read_json((cwd.parent/'schedule.json').read_text())
+        validate(frozen)
+        capacity=len(frozen['frames'])+3*len(frozen['actions'])
     reference = Reference(destination, identity, capacity)
     resources = Stream(destination/'resources.jsonl', identity)
     env = {**env, 'MEGASCENE_REFERENCE': str(reference.path), 'MEGASCENE_GO': str(destination/'worker.go'),
            'MEGASCENE_HEAPS': str(destination/'heaps.jsonl'), 'MEGASCENE_ALLOCATIONS': str(destination/'allocations.jsonl')}
+    worker_policy, case_duration = worker_case_policy(config, env)
     invocation = {'schema': SCHEMA, 'record_type': 'invocation', 'attempt_id': identity['attempt_id'],
                   'command': command, 'cwd': str(cwd), 'environment': {k:v for k,v in env.items() if k.startswith(('MEGASCENE_', 'VOXEL_', 'VK_'))},
-                  'synthetic':identity.get('synthetic',False), 'clock_id': 'linux.CLOCK_MONOTONIC', 'policy': {k:str(v) for k,v in POLICY.items()},
+                  'synthetic':identity.get('synthetic',False), 'clock_id': 'linux.CLOCK_MONOTONIC', 'policy': {k:str(v) for k,v in worker_policy.items()},
                   'reference_capacity': str(capacity), 'reference_slot_bytes': str(Reference.SLOT)}
     snapshot(destination/'invocation.json', invocation)
     cause, reason, errors = 'normal_exit', 'process completed', []
     process, monitor = None, None
     start, last_frame = time.monotonic_ns(), None
-    case_deadline = start+min(int(config['deadline_s'])*NS, POLICY['case_ns'])
+    case_deadline = start+case_duration
     campaign_deadline = start+remaining_ns
     last_host, last_heap = None, None
     device = None
@@ -473,7 +487,7 @@ def supervise(command, cwd, env, destination, identity, config, remaining_ns,
                     cause, reason = ('campaign_deadline' if time.monotonic_ns() >= campaign_deadline else 'monitoring_failure'), str(exc)
             if cause == 'normal_exit':
                 start = time.monotonic_ns()
-                case_deadline = start+min(int(config['deadline_s'])*NS, POLICY['case_ns'])
+                case_deadline = start+case_duration
                 if start >= campaign_deadline:
                     cause, reason = 'campaign_deadline', 'allowance exhausted during preflight'
                 else:

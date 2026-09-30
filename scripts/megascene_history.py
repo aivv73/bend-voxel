@@ -6,6 +6,7 @@ the same reference transitions against every observed edit.
 """
 from dataclasses import dataclass
 from copy import copy
+from bisect import bisect_right
 import math
 
 from megascene_inventory import SCHEMA, require, digest, surface_reference
@@ -141,26 +142,29 @@ def _cut(bodies, source, local, frame):
 
 
 def schedule(config):
-    require((config['warmup'],config['frames']) == ('120','3600'), 'history requires the complete 120/3600 schedule')
+    from megascene_performance import enabled, CUT_FRAMES as PERF_CUTS, OVERVIEW, finish, motion_at
+    performance=enabled(config)
+    require((config['warmup'],config['frames']) == ('120','21600' if performance else '3600'), 'history requires its complete frozen schedule')
     schedule_id=config.get('schedule','history-v1')
-    counts={'history-v1':120,'history-v2':120,'history-12-v1':12,'history-48-v1':48,
+    counts={'history-perf-v2':120,'history-v1':120,'history-v2':120,'history-12-v1':12,'history-48-v1':48,
             'fill-history-v1':120,'body-rich-history-v1':120}
     require(schedule_id in counts and
             (schedule_id.startswith('fill-') if config.get('control')=='fill' else
              schedule_id.startswith('body-rich-') if config.get('control')=='body-rich' else
-             schedule_id in ('history-v1','history-v2','history-12-v1','history-48-v1')) and
+             schedule_id in ('history-perf-v2','history-v1','history-v2','history-12-v1','history-48-v1')) and
             (schedule_id=='history-v2' if config['preset'] not in ('small','large') else schedule_id!='history-v2'),
             'unsupported history schedule')
     count=counts[schedule_id]
-    cut_frames=CUT_FRAMES[:count]
+    all_cuts=PERF_CUTS if performance else CUT_FRAMES
+    cut_frames=all_cuts[:count]
     key=tuple(config.get(name) for name in ('preset','seed','side_m','warmup','frames','fragment_budget','control','schedule'))
     if key in _SCHEDULE_CACHE:
         return _SCHEDULE_CACHE[key]
     owners=generate(config['preset'],int(config['seed']),config.get('control'))
     bodies=[Body(i,o.boxes,True) for i,o in enumerate(owners,1)]
     opening=camera(*pose('opening',0,config['preset'],int(config['seed']),'traversal-v2',config.get('control')))
-    actions=[];views=[];removed_total=0;details=[]
-    for k,frame in enumerate(CUT_FRAMES):
+    actions=[];views=[];removed_total=0;details=[];motion_states=[]
+    for k,frame in enumerate(all_cuts):
         n,r,a,v,local,target=_target(k,config)
         view,eye=_view(a,n,r,v,local,target,config)
         source,location=_source(bodies,target,frame)
@@ -172,6 +176,7 @@ def schedule(config):
                 'history pre-edit owner unreachable at action '+str(k))
         removed,created=_cut(bodies,source,location,frame)
         removed_total+=len(removed)
+        if performance: motion_states.append([copy(b) for b in bodies])
         require(len(bodies)<=int(config['fragment_budget'])+len(owners),'history fragment budget admission')
         actions.append({'action':str(k),'frame':str(frame),'measured_ordinal':str(frame-121),
                         'target_m':target,'radius_m':bits(.2),'required':True,
@@ -194,9 +199,19 @@ def schedule(config):
     # Later camera visits remain byte-identical to the full history.
     frames=[]
     last=views[-1]
-    for i in range(3721):
+    overview=OVERVIEW if performance else 1681
+    total=1+int(config['warmup'])+int(config['frames'])
+    for i in range(total):
         ordinal=i-121
+        phase=bisect_right(cut_frames,i)
         if i<=120: view=opening
+        elif performance and i<=cut_frames[-1]: view=views[max(0,phase-1)]
+        elif performance and i<=overview:
+            t=(i-cut_frames[-1])/120
+            eye=[f32(value(x)+(y-value(x))*t) for x,y in zip(last['eye_m'],far_eye)]
+            look=[f32(x+(y-x)*t) for x,y in zip(map(value,actions[-1]['target_m']),far_look)]
+            view=camera(eye,look)
+        elif performance: view=far
         elif ordinal<=1439: view=views[min(ordinal//12,119)]
         elif ordinal<=1559:
             t=(ordinal-1439)/120
@@ -206,14 +221,21 @@ def schedule(config):
             look=[f32(x+(y-x)*t) for x,y in zip(final_target,far_look)]
             view=camera(eye,look)
         else: view=far
-        frames.append({'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in cut_frames else 'ordinary',
+        moving=False
+        if performance and phase:
+            for body in motion_states[phase-1]:
+                if body.release is not None:
+                    offset,speed=motion_at(i-body.release,body.bottom,value(body.start_offset),value(body.start_speed))
+                    before=motion_at(max(0,i-body.release-1),body.bottom,value(body.start_offset),value(body.start_speed))[0]
+                    moving=moving or value(speed)!=0 or offset!=before
+        frames.append({'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in cut_frames else 'motion' if moving else 'ordinary',
                        'measured_ordinal':str(ordinal) if i>120 else None,'camera':view,'picking':False,
-                       'actions':[str(ordinal//12)] if i in cut_frames else []})
+                       'actions':[str(cut_frames.index(i))] if i in cut_frames else []})
     actions=actions[:count]
     points=[{'name':'initialization','frame':'0'},{'name':'review_opening','frame':'0'},{'name':'warmup_end','frame':'120'}]
     points += [{'name':'action_'+str(k),'frame':str(frame)} for k,frame in enumerate(cut_frames)]
-    points += [{'name':'after_cut_'+str(n),'frame':str(frame)} for n,frame in NAMED if n<=count]
-    points += [{'name':'history_overview','frame':'1681'},{'name':'completion','frame':'3720'}]
+    points += [{'name':'after_cut_'+str(n),'frame':str(cut_frames[n-1] if performance else frame)} for n,frame in NAMED if n<=count]
+    points += [{'name':'history_overview','frame':str(overview)},{'name':'completion','frame':str(total-1)}]
     review=[{'name':'opening','frame':'0','features':['district and structures']}]
     review += [{'name':'cut_'+str(k),'frame':str(frame),
                 'features':['remaining back wall','new exposed back-wall surfaces']
@@ -222,17 +244,21 @@ def schedule(config):
     review += [{'name':'uncut_visit_'+str(k),'frame':str(frame),
                 'features':['no new cut at this camera visit','remaining material at later target']}
                for k,frame in enumerate(CUT_FRAMES) if k>=count]
-    review += [{'name':'history_overview','frame':'1681','features':['cumulative destruction','remaining anchored material']
+    review += [{'name':'history_overview','frame':str(overview),'features':['cumulative destruction','remaining anchored material']
                 if count==120 else [f'destruction after {count} cuts','remaining uncut later targets']},
-               {'name':'completion','frame':'3720','features':['retained geometry','settled fragments']
+               {'name':'completion','frame':str(total-1),'features':['retained geometry','settled fragments']
                 if count==120 else [f'retained geometry after {count} cuts','settled fragments','remaining uncut later targets']}]
     populations={'cuts_1_12':['0','143']}
     if count>=48: populations['cuts_13_48']=['144','575']
     if count==120: populations['cuts_49_120']=['576','1439']
     if count<120: populations['post_prefix']=[str(count*12),'1439']
     populations.update(overview=['1440','1559'],tail=['1560','3599'])
+    if performance:
+        populations={'group_'+str(g):[str(g*1800),str((g+1)*1800-1)] for g in range(12)}
+        populations['overview']=[str(cut_frames[-1]-120),str(overview-121)]
+        populations['settled_suffix']=[str(overview-120),str(total-122)]
     frozen={'schema':SCHEMA,'record_type':'schedule','schedule_id':schedule_id,'fixed_step':'0x3c888889',
-            'warmup_frames':'120','measured_frames':'3600','opening':opening,'frames':frames,'actions':actions,
+            'warmup_frames':'120','measured_frames':config['frames'],'opening':opening,'frames':frames,'actions':actions,
             'review_views':review,'required_checkpoints':points,'checkpoint_implementation':'megascene-checkpoint/1',
             'update_order':['physics','edit','view_picking_disabled','render'],
             'history_populations':populations}
@@ -260,6 +286,7 @@ def schedule(config):
         frozen['diagnostic_views']=[{'name':'interior_remaining_wall','camera':camera(eye,look),
                                      'eye_m':list(map(bits,eye)),'look_m':list(map(bits,look)),
                                      'expected_owner':'2','expected_material':'5','reference_hit':hit}]
+    if performance: frozen=finish(frozen)
     _SCHEDULE_CACHE[key]=frozen
     return frozen
 
@@ -290,6 +317,8 @@ class Reference:
         self.bodies=[[Body(int(b['id']),boxes_of(b),b['anchored']) for b in initial['bodies']]]
         self.releases={}
         self.moved_targets=[]
+        from megascene_performance import enabled, motion_at
+        self.motion=motion_at if enabled(frozen) else motion
 
     def at(self, frame):
         phase=min(sum(int(a['frame'])<=frame for a in self.frozen['actions']),len(self.phases)-1)
@@ -298,7 +327,7 @@ class Reference:
         for body in sorted(self.bodies[phase],key=lambda b:b.ident):
             item=next(b for b in base['bodies'] if b['id']==str(body.ident))
             if body.release is not None:
-                offset,speed=motion(frame-body.release,body.bottom,value(body.start_offset),value(body.start_speed))
+                offset,speed=self.motion(frame-body.release,body.bottom,value(body.start_offset),value(body.start_speed))
                 item={**item,'offset_m':offset,'velocity_m_s':speed}
             body_values.append(item)
         return {**base,'bodies':body_values,'view':{**base['view'],**self.frozen['frames'][frame]['camera']}}
@@ -390,13 +419,23 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
                         'history work/material inventory mismatch at action '+action['action'])
             phase_work.append(work);previous_work=work
         points={p['name']:p['frame'] for p in frozen['required_checkpoints']}
+        from megascene_performance import enabled, validate
+        performance=enabled(frozen)
+        if performance: validate(frozen)
         seen=set();cache={}
         def expected_at(i):
             # Bodies have settled by here; the camera keeps interpolating
             # until absolute frame 1681, so the whole payload stabilizes then.
-            key=min(i,1681)
+            if performance:
+                state=ref.at(i)
+                phase=bisect_right([int(a['frame']) for a in frozen['actions']],i)
+                view=frozen['frames'][i]['camera']
+                key=(phase,tuple(view['eye_m']),view['yaw'],view['pitch'],
+                     tuple((b['id'],b['offset_m'],b['velocity_m_s']) for b in state['bodies']))
+            else:
+                key=min(i,1681)
             if key not in cache:
-                state=ref.at(key)
+                if not performance: state=ref.at(key)
                 cache[key]=(state,digest(state),{b['id']:digest(b) for b in state['bodies']})
             return cache[key]
         for row in checks:
@@ -422,7 +461,7 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
         native=[r for r in records if r['record_type']=='native_audit']
         renders=[r for r in records if r['record_type']=='render_work']
         frames=[r for r in records if r['record_type']=='frame']
-        require(len(native)==len(renders)==len(frames)==3721,'incomplete history native replay')
+        require(len(native)==len(renders)==len(frames)==len(frozen['frames']),'incomplete history native replay')
         observed=motion_records(records);expected_motion={}
         for group,release in sorted(ref.releases.items()):
             samples=[]
@@ -442,6 +481,13 @@ def audit(records,frozen,initial,initial_work,complete,thorough=False):
         for i,(n,w,f) in enumerate(zip(native,renders,frames)):
             require(n['frame']==w['frame']==f['frame']==str(i),'history native/frame order mismatch')
             state,_,_=expected_at(i)
+            if performance:
+                before={b['id']:b for b in previous_state['bodies']} if previous_state else {}
+                moving=any(value(b['velocity_m_s'])!=0 or
+                           b['id'] in before and b['offset_m']!=before[b['id']]['offset_m'] for b in state['bodies'])
+                expected_phase='startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in cut_frames else 'motion' if moving else 'ordinary'
+                require(f['population']==frozen['frames'][i]['phase']==expected_phase,
+                        'history population differs from evolving physics')
             ids={b['id'] for b in state['bodies']}
             for b in state['bodies']:
                 if not b['anchored']:

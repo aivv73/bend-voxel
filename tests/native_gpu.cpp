@@ -30,6 +30,10 @@ extern "C" VkResult __wrap_vkGetQueryPoolResults(VkDevice,VkQueryPool,uint32_t f
 int main(int argc,char** argv) {
   if(argc!=3) return 2;
   mode=argv[2];
+  if(mode=="capacity_env") {
+    try { std::printf("%u\n",gpu_timing::query_pairs()); return 0; }
+    catch(const std::exception& e) { std::fprintf(stderr,"%s\n",e.what()); return 2; }
+  }
   setenv("MEGASCENE_GPU",argv[1],1);
   setenv("MEGASCENE_CAMPAIGN","fixture",1); setenv("MEGASCENE_SERIES","fixture",1); setenv("MEGASCENE_ATTEMPT","fixture",1);
   gpu_timing::Queries queries;
