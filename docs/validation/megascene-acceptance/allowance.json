@@ -1,8 +1,8 @@
 {
-  "allowance_ns": "54000000000000",
+  "allowance_ns": "54600000000000",
   "charging_policy": "Conservative gross charge of every retained earlier Megascene campaign root, including development and failed attempts; new work charged once through new_work",
-  "completion_status": "awaiting_explicit_extension_for_retained_final_review_overrun",
-  "declared_extension_ns": "46800000000000",
+  "completion_status": "complete_with_approved_extension; all_prior_charges_retained",
+  "declared_extension_ns": "47400000000000",
   "declared_extensions": [
     {
       "scope": "earlier approved extension; superseded the 14400-second suggestion",
@@ -18,9 +18,16 @@
       "explicit_user_approval": true,
       "scope": "Shared issue #68 campaign; retain all prior charges and attempts",
       "seconds": "3600"
+    },
+    {
+      "approved_utc": "2026-09-30T04:39:08.701237+00:00",
+      "explicit_user_approval": true,
+      "scope": "Cover retained final review overrun and finalize issue #68 acceptance; all prior charges and failures retained",
+      "seconds": "600"
     }
   ],
-  "extension_scope": "Approved additions of 28800, 14400 and 3600 seconds; 54000 seconds total including initial allowance",
+  "extension_scope": "Approved additions of 28800, 14400, 3600 and 600 seconds; 54600 seconds total including initial allowance",
+  "historical_over_allowance_ns": "123539339601",
   "initial_allowance_ns": "7200000000000",
   "issue": 68,
   "new_work": [
@@ -2792,10 +2799,20 @@
       "scope": "Final index, selected archive hashes, reviewed decision, documentation and conservative ten-second bookkeeping reserve; overrun explicitly retained",
       "start_utc_ns": "1790742455797030246",
       "status": "charged_over_allowance"
+    },
+    {
+      "elapsed_ns": "185854115959",
+      "end_utc_ns": "1790743274556791996",
+      "log": "/home/aivv/megascene-68-final-allowance-proofs.log",
+      "log_sha256": "6787cc90b41caaea71ef63132d2aff840f226e9ff466941075177bc9f8ae7710",
+      "name": "approved-final-allowance-reconciliation",
+      "scope": "Final allowance/evidence consistency, both proof modes, documentation and local commit; conservative 60-second initial review and 10-second commit reserves; approval pause excluded",
+      "start_utc_ns": "1790743088702676037",
+      "status": "pass"
     }
   ],
-  "new_work_charge_ns": "30780458968143",
-  "over_allowance_ns": "123539339601",
+  "new_work_charge_ns": "30966313084102",
+  "over_allowance_ns": "0",
   "prior_campaigns": [
     {
       "archive": "/home/aivv/megascene-calibration-64",
@@ -2988,8 +3005,8 @@
     }
   ],
   "prior_gross_charge_ns": "23343080371458",
-  "recorded_utc": "2026-09-30T04:33:00.054618+00:00",
-  "remaining_ns": "0",
+  "recorded_utc": "2026-09-30T04:41:04.556869+00:00",
+  "remaining_ns": "290606544440",
   "runner_campaign": {
     "path": "/home/aivv/megascene-acceptance-68-final/campaign.json",
     "scope": "Internal supervisor cap transferred from remaining shared 54,000-second allowance after retained output-copy failure; no new shared grant"

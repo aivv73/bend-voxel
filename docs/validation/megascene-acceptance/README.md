@@ -1,8 +1,8 @@
 # Issue #68 implementation acceptance record
 
-Issue [#68](https://github.com/aivv73/bend-voxel/issues/68) has a completed runtime and fidelity matrix; overall acceptance remains
-incomplete pending an explicit allowance extension. The separate [reviewed decision](acceptance.json)
-records passing results for all 45 required configurations and binds each to specific eligible
+Issue [#68](https://github.com/aivv73/bend-voxel/issues/68) has a completed local
+implementation acceptance record. The separate [reviewed decision](acceptance.json)
+passes all 45 required configurations and binds each to specific eligible
 attempts and verified archive hashes. GitHub publication and issue closure have
 not been performed. **Qualified performance remains unestablished.**
 
@@ -88,8 +88,8 @@ Noneligible archives with pending reviews are excluded from positive selections.
 
 ## Allowance and archive policy
 
-The shared allowance is **54,000 seconds**: initial 7,200 plus approved extensions
-of 28,800, 14,400 and 3,600 seconds. The [ledger](allowance.json) retains all prior
+The shared allowance is **54,600 seconds**: initial 7,200 plus approved extensions
+of 28,800, 14,400, 3,600 and 600 seconds. The [ledger](allowance.json) retains all prior
 charges and attempts, including work from earlier tickets, development, failed
 checks, image review and supervisor overhead. Wrapped work is charged once;
 a fresh internal supervisor cap does not reset the shared allowance. Closed
@@ -105,10 +105,10 @@ indexed alongside successes.
 
 ### Final allowance reconciliation
 
-Final archive review and documentation exceeded the declared allowance. All
-charges are retained in `allowance.json`, with `remaining_ns` zero and the
-overrun recorded explicitly. The runtime/fidelity matrix and proof/runtime
-checks pass, but the overall implementation acceptance decision is pending
-allowance reconciliation. No further acceptance run is authorized by the
-exhausted allowance. The previous local completion decision in commit
-`8b39052` predates this final charge and is superseded by this correction.
+Final archive review and documentation exceeded the previous 54,000-second
+allowance by 123.539 seconds. That charge and the pending decision in commit
+`4f3ffe1` remain retained. The user explicitly approved another 600 seconds
+to cover the overrun and finalize this record. The declared total is now
+54,600 seconds; all prior charges and attempts remain included, and the final
+ledger balance is positive after charging the finalization work. Overall
+implementation acceptance is complete. Performance remains unqualified.

@@ -3,7 +3,7 @@
   "issue": 68,
   "reviewer": "Codex",
   "reviewed_at_utc": "2026-09-30T04:30:19.423423+00:00",
-  "implementation_acceptance": "pending_allowance_reconciliation",
+  "implementation_acceptance": "pass",
   "qualified_performance": "unqualified",
   "future_limit_discovery": "outside_issue_68",
   "scope": "Minimum accepted matrix and observed implementation behavior on the archived host; no universal proof of unsafe/native behavior or performance readiness",
@@ -1161,13 +1161,19 @@
   ],
   "existing_behavior": "Retained face and generation admission plus all five Light Atelier cases at both resolutions, interactive controls/lighting/reset review; see indexed supporting artifacts and allowance log entries",
   "failure_reference_search_reproduction": "Retained independent reference, numeric/rollback, injected failure, search/recovery and archived reproduction checks; current full suite passes. See indexed corroboration and supporting artifacts.",
-  "declared_shared_allowance_seconds": 54000,
+  "declared_shared_allowance_seconds": 54600,
   "allowance_ledger": "allowance.json",
   "retention": "Earlier failed, incomplete and insufficient attempts remain indexed. Noneligible pending reviews cannot establish acceptance. No timing populations or calibration controls are pooled into a performance pass.",
   "runtime_and_fidelity": "pass",
-  "allowance_status": "overrun_retained; explicit additional declaration required",
+  "allowance_status": "within_declared_allowance_after_explicit_600_second_extension; historical_overrun_retained",
   "final_audit_log": {
     "path": "/home/aivv/megascene-68-final-review.log",
     "sha256": "1f5dd44f8716a75ef6e71d88f9804d43d43c152f9cbd627623bbad4606472fc5"
+  },
+  "remaining_shared_allowance_ns_at_completion": "290606544440",
+  "allowance_reconciled_at_utc": "2026-09-30T04:41:04.556869+00:00",
+  "allowance_finalization_checks": {
+    "path": "/home/aivv/megascene-68-final-allowance-proofs.log",
+    "sha256": "6787cc90b41caaea71ef63132d2aff840f226e9ff466941075177bc9f8ae7710"
   }
 }
