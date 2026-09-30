@@ -80,3 +80,7 @@ pinned in `lean-toolchain`; install it with `elan toolchain install leanprover/l
 The [Bend audit](docs/bend-audit.md) records proof scope, parallelization measurements,
 and remaining native computation. Properties depending on `@unsafe` are covered
 by runtime tests, not claimed as formally proven.
+
+Megascene district generation, terrain controls, and integer scale/history policy
+now run in Bend. The [migration notes](docs/bend-migration.md) describe the
+Python transport, frozen-input archives, and exact behavior checks.
