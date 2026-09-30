@@ -16,7 +16,7 @@ static uint32_t environment_number(const char* name,uint32_t fallback,uint32_t m
   return n;
 }
 static uint32_t query_pairs() {
-  bool performance=std::getenv("MEGASCENE_FRAME_POLICY")!=nullptr;
+  bool performance=std::getenv("MEGASCENE_QUERY_PAIRS")!=nullptr;
   uint32_t count=environment_number("MEGASCENE_QUERY_PAIRS",performance?0:3721,performance?21721:3721);
   if(!count || (performance && count!=21721)) throw std::runtime_error("GPU query capacity differs from protocol");
   return count;

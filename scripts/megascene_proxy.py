@@ -9,11 +9,11 @@ import struct
 
 from megascene_inventory import SCHEMA, require
 from megascene_recipe import Box, Owner, bits, f32, generate
-from megascene_traversal import camera, pose
 from megascene_picking import center, checked_result, ZERO
+from megascene_schedule import plan
+from megascene_scale import side_count
 
 DIAGNOSTICS = ("mixed-world", "compact-reference")
-HOLD_P = (105, 75, 90, 105, 90, 75, 75, 75, 105)
 
 
 def owners(config):
@@ -62,96 +62,46 @@ def schedule(config, source):
     require((int(config["warmup"]),int(config["frames"])) == (120,3600), "proxy diagnostics require 120/3600 frames")
     g = group(source)
     lo, hi = [[int(x) for x in g[k]] for k in ("lo_cells","hi_cells")]
-    center_m = tuple((a+b)/20 for a,b in zip(lo,hi))
-    radius = math.sqrt(sum(((b-a)/20)**2 for a,b in zip(lo,hi)))
     height = int(config["resolution"].split("x")[1])
     if diagnostic == "mixed-world":
         require(config["preset"] == "small" and height == 1080, "mixed-world route requires small/1080p")
-        far = camera((center_m[0],center_m[1],center_m[2]+1000), center_m)
-        near = camera((center_m[0],center_m[1],center_m[2]+100), center_m)
-        views = [far,near,far]
-        opening = camera(*pose("opening",0,"small",int(config["seed"]),"traversal-v2"))
-        hold_length = 1200
-        labels = ("far_entry","near_exit","far_reentry")
     else:
         require(config["preset"] == "small", "compact reference requires small preset")
         require(all(hi[k]-lo[k] <= limit for k,limit in enumerate((71,35,71))), "compact fixture bounds changed")
-        def at(p, target=center_m):
-            distance = radius + 800*(height/360)*radius/p
-            return camera((center_m[0],center_m[1],center_m[2]+distance),target)
-        views = [at(p) for p in HOLD_P]
-        opening = views[0]
-        hold_length = 120
-        labels = tuple(f"hold_{i}" for i in range(9))
-    # Opening and all warm-up frames use the first pose. Picking is disabled
-    # during warm-up, so both profiles enter measured work from the same state.
-    frames = []
+    frozen = plan("proxy", side_count(config["preset"]), int(config["seed"]), diagnostic,
+                  config["case"], height, *lo, *hi)
     boxes = [(i,b,0.) for i,owner in enumerate(source,1) for b in owner.boxes]
-    rays, outcomes = {}, {}
-    for index in range(3721):
-        measured = index-121
-        hold = 0 if measured < 0 else min(measured//hold_length,len(views)-1)
-        view = opening if measured < 0 else views[hold]
-        picking = config["case"] == "picking" and measured >= 0 and (diagnostic != "mixed-world" or hold != 1)
-        target = None
-        if picking:
-            if diagnostic == "compact-reference" and hold == 6:
-                distance = radius + 800*(height/360)*radius/75
-                hit_view = camera((center_m[0],center_m[1],center_m[2]+distance),(6,4.2,7.1))
-                ray = center(hit_view)
-                forward = center(view)
-                require(ray["origin_m"] == view["eye_m"] and
+    outcomes = {}
+    for frame in frozen["frames"]:
+        if not frame["picking"]:
+            frame["expected_pick"] = {"owner":"0","material":"0","kind":"0","distance_m":ZERO,"position_m":[ZERO]*3}
+            continue
+        ray = frame["ray"]
+        ray_key = tuple(ray["origin_m"]+ray["direction"])
+        if ray_key not in outcomes:
+            outcomes[ray_key] = checked_result(boxes,ray)
+            expected, reference = outcomes[ray_key]
+            if frame["target"] == "right_lobe":
+                forward = center(frame["camera"])
+                require(ray["origin_m"] == frame["camera"]["eye_m"] and
                         sum(number(a)*number(b) for a,b in zip(ray["direction"],forward["direction"])) > .99,
                         "reachable pointer ray lies outside declared compact view")
-                target = "right_lobe"
-            else:
-                ray = rays.setdefault(hold, center(view))
-                target = "declared_miss"
-            ray_key = tuple(ray["origin_m"]+ray["direction"])
-            if ray_key not in outcomes:
-                outcomes[ray_key] = checked_result(boxes,ray)
-            expected, reference = outcomes[ray_key]
-            if target == "right_lobe":
                 require((expected["owner"],expected["material"],expected["kind"]) == ("4","4","1") and
                         reference["distance"] < 256, "reachable right-lobe target changed")
             else:
                 require(expected["kind"] == "0", "declared top-center miss changed")
-        else:
-            ray = None
-            expected = {"owner":"0","material":"0","kind":"0","distance_m":ZERO,"position_m":[ZERO]*3}
-        frames.append({"frame":str(index), "phase":"startup" if index==0 else "warmup" if index<=120 else "ordinary",
-                       "measured_ordinal":str(measured) if measured>=0 else None,
-                       "route_phase":labels[hold] if measured>=0 else None,
-                       "phase_offset":str(measured%hold_length) if measured>=0 else None,
-                       "camera":view,"picking":picking,"ray":ray,"expected_pick":expected,
-                       "target":target,"actions":[]})
-    reviews = [{"name":"opening","frame":"0","features":["full source geometry","major shadows"]}]
-    checkpoints = [{"name":"initialization","frame":"0"},{"name":"review_opening","frame":"0"},
-                   {"name":"warmup_end","frame":"120"}]
-    for i,label in enumerate(labels):
-        frame = str(121+i*hold_length+hold_length//2)
-        reviews.append({"name":"review_"+label,"frame":frame,"pose":label,
-                        "features":["group silhouette","major shadows"]})
-        checkpoints.append({"name":"review_"+label,"frame":frame})
-    reviews.append({"name":"completion","frame":"3720","features":["unchanged geometry","major shadows"]})
-    checkpoints.append({"name":"completion","frame":"3720"})
-    enabled_count=sum(f["picking"] for f in frames)
-    hit_count=sum(f["picking"] and f["expected_pick"]["kind"] != "0" for f in frames)
+        frame["expected_pick"] = outcomes[ray_key][0]
     from megascene_supplementary import proxy_views
-    return {"schema":SCHEMA,"record_type":"schedule","fixed_step":"0x3c888889",
-            "schedule_id":f"proxy-{diagnostic}-{config['case']}-v1", "diagnostic":diagnostic,
-            "warmup_frames":"120","measured_frames":"3600","opening":opening,
-            "frames":frames,"actions":[],"review_views":reviews,"required_checkpoints":checkpoints,
-            "supplementary_views":proxy_views(source, reviews),
-            "group_reference":g,"hold_length":str(hold_length),"hold_labels":list(labels),
-            "picking_admission":{"status":"pass","enabled_samples":str(enabled_count),
-                "required_hits":str(hit_count),"required_misses":str(enabled_count-hit_count),
-                "reach_m":"256","reach_comparison":"strictly_less",
-                "reference":"rational face intersections against source geometry",
-                "runtime_guard":"actual tree bounds and F32 operations before unsafe picking"},
-            "checkpoint_implementation":"megascene-checkpoint/1",
-            "update_order":["physics","edit_disabled","view_picking" if config["case"]=="picking" else "view_picking_disabled","render"]}
-
+    frozen["group_reference"] = g
+    frozen["supplementary_views"] = proxy_views(source, frozen["review_views"])
+    enabled_count = sum(f["picking"] for f in frozen["frames"])
+    hit_count = sum(f["picking"] and f["expected_pick"]["kind"] != "0" for f in frozen["frames"])
+    frozen["picking_admission"] = {"status":"pass","enabled_samples":str(enabled_count),
+        "required_hits":str(hit_count),"required_misses":str(enabled_count-hit_count),
+        "reach_m":"256","reach_comparison":"strictly_less",
+        "reference":"rational face intersections against source geometry",
+        "runtime_guard":"actual tree bounds and F32 operations before unsafe picking"}
+    return frozen
 
 def number(word):
     return struct.unpack(">f",bytes.fromhex(word[2:]))[0]

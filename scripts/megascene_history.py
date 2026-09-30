@@ -10,8 +10,8 @@ from bisect import bisect_right
 import math
 
 from megascene_inventory import SCHEMA, require, digest, surface_reference
-from megascene_recipe import bits, f32, generate, Box
-from megascene_scale import side_count, history_stride, history_visit
+from megascene_recipe import bits, f32, generate
+from megascene_scale import side_count
 from megascene_localized import remove_cells, audit_actions as _audit_actions
 from megascene_picking import value, exact_pick
 from megascene_support import motion, ray_to, boxes_of, motion_records
@@ -66,53 +66,6 @@ class Body:
                                              value(self.start_offset),value(self.start_speed))
 
 
-def _origin(n, preset):
-    q = side_count(preset)
-    return (320*(n%q)-160*q, 320*(n//q)-160*q)
-
-
-def _target(k, config):
-    q = side_count(config['preset'])
-    nhood = q*q
-    b, a = divmod(k, 10)
-    n, r = history_visit(b,nhood,int(config['seed']))
-    ix, iz = n%q, n//q
-    v = (3*ix+5*iz+int(config['seed'])-45)%4
-    ox, oz = _origin(n,config['preset'])
-    z = 176+24*r
-    beam = 72+v
-    top = 58+v%2
-    local = ((160+12*r,24,160+8*r),(18,48,48+12*r),(25,40,z+4),
-             (163+12*r,24,160+8*r),(127,40,z+4),None,
-             ((40+3*r,48,134) if config.get('control') == 'body-rich' else (78,48,54+3*r)),
-             (284+3*r,top,180+3*r),
-             ((236,230,226)[r],23,272),((276,282,286)[r],23,272))[a]
-    lift = 8 if config.get('control') == 'fill' else 0
-    if a == 5:
-        offset = value(motion(12,42+lift)[0])
-        target = [bits(f32((76+ox)*f32(.1))),
-                  bits(f32(f32((beam+2+lift)*f32(.1))+offset)),
-                  bits(f32((z+4+oz)*f32(.1)))]
-    else:
-        target = [bits(x/10) for x in (local[0]+ox,local[1]+lift,local[2]+oz)]
-    return n,r,a,v,local,target
-
-
-def _view(a, n, r, v, local, target, config):
-    ox, oz = _origin(n,config['preset'])
-    point = list(map(value,target))
-    lift = .8 if config.get('control') == 'fill' else 0
-    if a in (0,3): eye = [point[0],point[1]+2,point[2]+1]
-    elif a == 1: eye = [(8+ox)/10,4.8+lift,point[2]]
-    elif a in (2,4): eye = [point[0],4.+lift,(176+24*r+16+oz)/10]
-    elif a == 5: eye = [point[0],point[1]+2,point[2]+1.2]
-    elif a == 6: eye = [((40+3*r if config.get('control')=='body-rich' else 100)+ox)/10,4.8+lift,
-                         (120+oz)/10 if config.get('control')=='body-rich' else point[2]]
-    elif a == 7: eye = [point[0],(58+v%2+32)/10+lift,point[2]-2]
-    else: eye = [point[0],4.4+lift,(256+oz)/10]
-    return camera(eye,point), eye
-
-
 def _source(bodies, target, frame):
     hits=[]
     for body in bodies:
@@ -142,152 +95,75 @@ def _cut(bodies, source, local, frame):
 
 
 def schedule(config):
-    from megascene_performance import enabled, CUT_FRAMES as PERF_CUTS, OVERVIEW, finish, motion_at
-    performance=enabled(config)
-    require((config['warmup'],config['frames']) == ('120','21600' if performance else '3600'), 'history requires its complete frozen schedule')
-    schedule_id=config.get('schedule','history-v1')
-    counts={'history-perf-v2':120,'history-v1':120,'history-v2':120,'history-12-v1':12,'history-48-v1':48,
-            'fill-history-v1':120,'body-rich-history-v1':120}
-    require(schedule_id in counts and
-            (schedule_id.startswith('fill-') if config.get('control')=='fill' else
-             schedule_id.startswith('body-rich-') if config.get('control')=='body-rich' else
+    from megascene_performance import enabled, finish, settling_age
+    from megascene_schedule import plan, exact_vector
+    performance = enabled(config)
+    require((config['warmup'], config['frames']) == ('120', '21600' if performance else '3600'),
+            'history requires its complete frozen schedule')
+    schedule_id = config.get('schedule', 'history-v1')
+    routes = {'history-perf-v2', 'history-v1', 'history-v2', 'history-12-v1',
+              'history-48-v1', 'fill-history-v1', 'body-rich-history-v1'}
+    require(schedule_id in routes and
+            (schedule_id.startswith('fill-') if config.get('control') == 'fill' else
+             schedule_id.startswith('body-rich-') if config.get('control') == 'body-rich' else
              schedule_id in ('history-perf-v2','history-v1','history-v2','history-12-v1','history-48-v1')) and
-            (schedule_id=='history-v2' if config['preset'] not in ('small','large') else schedule_id!='history-v2'),
+            (schedule_id == 'history-v2' if config['preset'] not in ('small','large') else schedule_id != 'history-v2'),
             'unsupported history schedule')
-    count=counts[schedule_id]
-    all_cuts=PERF_CUTS if performance else CUT_FRAMES
-    cut_frames=all_cuts[:count]
-    key=tuple(config.get(name) for name in ('preset','seed','side_m','warmup','frames','fragment_budget','control','schedule'))
+    key = tuple(config.get(name) for name in ('preset','seed','side_m','warmup','frames','fragment_budget','control','schedule'))
     if key in _SCHEDULE_CACHE:
         return _SCHEDULE_CACHE[key]
-    owners=generate(config['preset'],int(config['seed']),config.get('control'))
-    bodies=[Body(i,o.boxes,True) for i,o in enumerate(owners,1)]
-    opening=camera(*pose('opening',0,config['preset'],int(config['seed']),'traversal-v2',config.get('control')))
-    actions=[];views=[];removed_total=0;details=[];motion_states=[]
-    for k,frame in enumerate(all_cuts):
-        n,r,a,v,local,target=_target(k,config)
-        view,eye=_view(a,n,r,v,local,target,config)
-        source,location=_source(bodies,target,frame)
-        # Check the declared pre-edit view against actual evolving occupancy.
-        ray=ray_to(eye,list(map(value,target)))
-        hit=exact_pick([(b.ident,box,value(b.offset)) for b in bodies for box in b.boxes],
-                       eye,list(map(value,ray['direction'])))
-        require(hit['owner']==str(source.ident) and hit['distance']<256,
-                'history pre-edit owner unreachable at action '+str(k))
-        removed,created=_cut(bodies,source,location,frame)
-        removed_total+=len(removed)
-        if performance: motion_states.append([copy(b) for b in bodies])
-        require(len(bodies)<=int(config['fragment_budget'])+len(owners),'history fragment budget admission')
-        actions.append({'action':str(k),'frame':str(frame),'measured_ordinal':str(frame-121),
-                        'target_m':target,'radius_m':bits(.2),'required':True,
-                        'expected_removed_cells':str(len(removed)),
-                        'expected_owner_role':owners[source.ident-1].role if source.ident<=len(owners) else None,
-                        'reference_removed_cells':[[*map(str,p),str(m)] for p,m in sorted(removed.items())],
-                        'pre_edit_ray':ray,'pre_edit_hit':{key:str(val) for key,val in hit.items() if key!='point'},
-                        'reference_components':str(len(created))})
-        from megascene_supplementary import HISTORY_CUTS, history_view
-        if config['preset'] == 'small' and count == 120 and k in HISTORY_CUTS:
-            details.append(history_view(actions[-1], source, created, removed))
-        views.append(view)
-    if not config.get('control'):
-        if config['preset'] in ('small','large'):
-            require(removed_total==(2440 if config['preset']=='small' else 2472),
-                    'history source removal total differs from accepted recipe')
-    far_eye,far_look=pose('far',None,config['preset'],int(config['seed']),'traversal-v2',config.get('control'))
-    far=camera(far_eye,far_look)
-    # Resolve the entire baseline route before shortening the action list.
-    # Later camera visits remain byte-identical to the full history.
-    frames=[]
-    last=views[-1]
-    overview=OVERVIEW if performance else 1681
-    total=1+int(config['warmup'])+int(config['frames'])
-    for i in range(total):
-        ordinal=i-121
-        phase=bisect_right(cut_frames,i)
-        if i<=120: view=opening
-        elif performance and i<=cut_frames[-1]: view=views[max(0,phase-1)]
-        elif performance and i<=overview:
-            t=(i-cut_frames[-1])/120
-            eye=[f32(value(x)+(y-value(x))*t) for x,y in zip(last['eye_m'],far_eye)]
-            look=[f32(x+(y-x)*t) for x,y in zip(map(value,actions[-1]['target_m']),far_look)]
-            view=camera(eye,look)
-        elif performance: view=far
-        elif ordinal<=1439: view=views[min(ordinal//12,119)]
-        elif ordinal<=1559:
-            t=(ordinal-1439)/120
-            eye=[f32(value(x)+(y-value(x))*t) for x,y in zip(last['eye_m'],far_eye)]
-            # Interpolate the previous view's declared target, not its yaw/pitch.
-            final_target=list(map(value,actions[-1]['target_m']))
-            look=[f32(x+(y-x)*t) for x,y in zip(final_target,far_look)]
-            view=camera(eye,look)
-        else: view=far
-        moving=False
-        if performance and phase:
-            for body in motion_states[phase-1]:
-                if body.release is not None:
-                    offset,speed=motion_at(i-body.release,body.bottom,value(body.start_offset),value(body.start_speed))
-                    before=motion_at(max(0,i-body.release-1),body.bottom,value(body.start_offset),value(body.start_speed))[0]
-                    moving=moving or value(speed)!=0 or offset!=before
-        frames.append({'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in cut_frames else 'motion' if moving else 'ordinary',
-                       'measured_ordinal':str(ordinal) if i>120 else None,'camera':view,'picking':False,
-                       'actions':[str(cut_frames.index(i))] if i in cut_frames else []})
-    actions=actions[:count]
-    points=[{'name':'initialization','frame':'0'},{'name':'review_opening','frame':'0'},{'name':'warmup_end','frame':'120'}]
-    points += [{'name':'action_'+str(k),'frame':str(frame)} for k,frame in enumerate(cut_frames)]
-    points += [{'name':'after_cut_'+str(n),'frame':str(cut_frames[n-1] if performance else frame)} for n,frame in NAMED if n<=count]
-    points += [{'name':'history_overview','frame':str(overview)},{'name':'completion','frame':str(total-1)}]
-    review=[{'name':'opening','frame':'0','features':['district and structures']}]
-    review += [{'name':'cut_'+str(k),'frame':str(frame),
-                'features':['remaining back wall','new exposed back-wall surfaces']
-                    if config.get('control')=='body-rich' and k%10==6 else
-                    ['removed material','new exposed surfaces']} for k,frame in enumerate(cut_frames)]
-    review += [{'name':'uncut_visit_'+str(k),'frame':str(frame),
-                'features':['no new cut at this camera visit','remaining material at later target']}
-               for k,frame in enumerate(CUT_FRAMES) if k>=count]
-    review += [{'name':'history_overview','frame':str(overview),'features':['cumulative destruction','remaining anchored material']
-                if count==120 else [f'destruction after {count} cuts','remaining uncut later targets']},
-               {'name':'completion','frame':str(total-1),'features':['retained geometry','settled fragments']
-                if count==120 else [f'retained geometry after {count} cuts','settled fragments','remaining uncut later targets']}]
-    populations={'cuts_1_12':['0','143']}
-    if count>=48: populations['cuts_13_48']=['144','575']
-    if count==120: populations['cuts_49_120']=['576','1439']
-    if count<120: populations['post_prefix']=[str(count*12),'1439']
-    populations.update(overview=['1440','1559'],tail=['1560','3599'])
-    if performance:
-        populations={'group_'+str(g):[str(g*1800),str((g+1)*1800-1)] for g in range(12)}
-        populations['overview']=[str(cut_frames[-1]-120),str(overview-121)]
-        populations['settled_suffix']=[str(overview-120),str(total-122)]
-    frozen={'schema':SCHEMA,'record_type':'schedule','schedule_id':schedule_id,'fixed_step':'0x3c888889',
-            'warmup_frames':'120','measured_frames':config['frames'],'opening':opening,'frames':frames,'actions':actions,
-            'review_views':review,'required_checkpoints':points,'checkpoint_implementation':'megascene-checkpoint/1',
-            'update_order':['physics','edit','view_picking_disabled','render'],
-            'history_populations':populations}
+    frozen = plan('history', side_count(config['preset']), int(config['seed']),
+                  config.get('control') or 'base', schedule_id)
+    count = len(frozen['actions'])
+    face_actions = set(map(int, frozen.pop('_history_faces')))
+    diagnostic_interior = frozen.pop('_diagnostic_interior')
+    owners = generate(config['preset'], int(config['seed']), config.get('control'))
+    bodies = [Body(i, o.boxes, True) for i,o in enumerate(owners, 1)]
+    removed_total = 0
+    details = []
+    motion_limits = []
+    for planned in frozen['actions'] + frozen.pop('_reference_actions', []):
+        k, frame = int(planned['action']), int(planned['frame'])
+        target = planned['target_m']
+        eye = exact_vector(planned.pop('_eye'))
+        source, location = _source(bodies, target, frame)
+        ray = planned['pre_edit_ray']
+        hit = exact_pick([(b.ident, box, value(b.offset)) for b in bodies for box in b.boxes],
+                         eye, list(map(value, ray['direction'])))
+        require(hit['owner'] == str(source.ident) and hit['distance'] < 256,
+                'history pre-edit owner unreachable at action ' + str(k))
+        removed, created = _cut(bodies, source, location, frame)
+        removed_total += len(removed)
+        if performance:
+            motion_limits.append(max((b.release + settling_age(b.bottom, value(b.start_offset), value(b.start_speed))
+                                      for b in bodies if b.release is not None), default=0))
+        require(len(bodies) <= int(config['fragment_budget']) + len(owners), 'history fragment budget admission')
+        planned.update(expected_removed_cells=str(len(removed)),
+                       expected_owner_role=owners[source.ident-1].role if source.ident <= len(owners) else None,
+                       reference_removed_cells=[[*map(str,p), str(m)] for p,m in sorted(removed.items())],
+                       pre_edit_hit={key:str(val) for key,val in hit.items() if key != 'point'},
+                       reference_components=str(len(created)))
+        from megascene_supplementary import history_view
+        if k in face_actions:
+            details.append(history_view(planned, source, created, removed))
+    if not config.get('control') and config['preset'] in ('small','large'):
+        require(removed_total == (2440 if config['preset'] == 'small' else 2472),
+                'history source removal total differs from accepted recipe')
     if details:
         frozen['supplementary_views'] = details
-    if schedule_id == 'history-v2':
-        frozen['history_neighborhood_mapping']={'version':'coprime-prior-visits-v1',
-            'stride':str(history_stride(side_count(config['preset'])**2)),
-            'group_visits':[{'group':str(b),'neighborhood':str(history_visit(b,side_count(config['preset'])**2,int(config['seed']))[0]),
-                             'prior_visits':str(history_visit(b,side_count(config['preset'])**2,int(config['seed']))[1])}
-                            for b in range(12)]}
-    if count<120:
-        frozen['variant']={'baseline_schedule_id':'history-v1','required_actions':str(count),
-                           'omitted_actions':{'first':str(count),'last':'119','count':str(120-count)},
-                           'omitted_action_disposition':'not_required_for_variant',
-                           'camera_track':'full_history_v1_all_3600_measured_frames',
-                           'baseline_completion_equivalence':False}
-    if config.get('control') == 'body-rich':
-        eye,look=pose('interior',0,config['preset'],int(config['seed']),'traversal-v2','body-rich')
-        ray=ray_to(eye,look)
-        hit=exact_pick([(i,box,0.) for i,owner in enumerate(owners,1) for box in owner.boxes],
-                       eye,list(map(value,ray['direction'])))
-        require((hit['owner'],hit['material'],hit['kind'])==('2','5','1') and hit['distance']<256,
+    if diagnostic_interior:
+        eye, look = pose('interior', 0, config['preset'], int(config['seed']), 'traversal-v2', 'body-rich')
+        ray = ray_to(eye, look)
+        hit = exact_pick([(i,box,0.) for i,owner in enumerate(owners,1) for box in owner.boxes],
+                         eye, list(map(value, ray['direction'])))
+        require((hit['owner'],hit['material'],hit['kind']) == ('2','5','1') and hit['distance'] < 256,
                 'body-rich interior view misses the remaining removable back wall')
-        frozen['diagnostic_views']=[{'name':'interior_remaining_wall','camera':camera(eye,look),
-                                     'eye_m':list(map(bits,eye)),'look_m':list(map(bits,look)),
-                                     'expected_owner':'2','expected_material':'5','reference_hit':hit}]
-    if performance: frozen=finish(frozen)
-    _SCHEDULE_CACHE[key]=frozen
+        frozen['diagnostic_views'] = [{'name':'interior_remaining_wall', 'camera':camera(eye,look),
+            'eye_m':list(map(bits,eye)), 'look_m':list(map(bits,look)),
+            'expected_owner':'2', 'expected_material':'5', 'reference_hit':hit}]
+    if performance:
+        frozen = finish(frozen, motion_limits)
+    _SCHEDULE_CACHE[key] = frozen
     return frozen
 
 

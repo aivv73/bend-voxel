@@ -12,7 +12,8 @@ from megascene_references import dense, reference
 from megascene_localized import remove_cells, audit_actions
 from megascene_checkpoints import occupancy, strings, surface, mismatch
 from megascene_picking import value, exact_pick
-from megascene_traversal import camera, pose
+from megascene_scale import side_count
+from megascene_schedule import numeric, plan
 
 CUT_FRAMES = tuple(121 + 6*i for i in range(6))
 WINDOW = tuple(range(152, 164))
@@ -57,89 +58,44 @@ def motion(steps, bottom=42, offset=0., speed=0.):
 
 
 def ray_to(eye, point):
-    delta=[b-a for a,b in zip(eye,point)]
-    length=math.sqrt(sum(x*x for x in delta))
-    return {'origin_m':list(map(bits,eye)), 'direction':[bits(x/length) for x in delta]}
+    return numeric('ray',*(float(x).hex() for x in (*eye,*point)))
 
 
 def schedule(config):
     require((config['warmup'],config['frames']) == ('120','3600'), 'support requires the complete 120/3600 schedule')
     schedule_id=config.get('schedule','support-v1')
-    counts={'support-v1':3,'support-1-span-v1':1,'support-2-span-v1':2,'fill-support-v1':3}
-    require(schedule_id in counts and
+    routes={'support-v1','support-1-span-v1','support-2-span-v1','fill-support-v1'}
+    require(schedule_id in routes and
             (schedule_id=='fill-support-v1')==(config.get('control')=='fill'),
             'unsupported support schedule')
-    spans=counts[schedule_id]
-    cut_frames=CUT_FRAMES[:2*spans]
-    owners=generate(config['preset'],int(config['seed']),config.get('control'))
+    q=side_count(config['preset'])
     origin=-int(config['side_m'])*5
-    lift=8 if config.get('control')=='fill' else 0
-    opening=camera(*pose('opening',0,config['preset'],int(config['seed']),'traversal-v2',config.get('control')))
-    eye=[(160+origin)/10,18.+lift/10,(300+origin)/10]
-    view=camera(eye,[(76+origin)/10,5.5+lift/10,(204+origin)/10])
-    actions=[]
-    for i,frame in enumerate(cut_frames):
-        j=i//2
-        target=[origin+(25 if i%2==0 else 127),40+lift,origin+180+24*j]
-        point=[bits(x/10) for x in target]
-        require([f32(value(x)*10) for x in point]==target, 'inexact support target round trip')
-        visible_point=[(origin+76)/10,(76+int(config['seed'])-45+lift)/10,(origin+180+24*j)/10]
-        ray=ray_to(eye,visible_point)
-        # Direct cuts have a separate ray from the declared overview to the
-        # intended owner; they do not change the overview or mouse aim.
+    require(origin==-160*q, 'support envelope differs from admitted district')
+    frozen=plan('support',q,config['seed'],origin,config.get('control') or 'base',schedule_id)
+    frozen.pop('_eye')
+    owners=generate(config['preset'],int(config['seed']),config.get('control'))
+    for i,action in enumerate(frozen['actions']):
+        action.pop('_eye')
+        target=[f32(value(x)*10) for x in action['target_m']]
+        require(all(x==round(x) for x in target), 'inexact support target round trip')
+        ray=action['pre_edit_ray']
         hit=exact_pick([(k,b,0.) for k,o in enumerate(owners,1) for b in o.boxes],
                        list(map(value,ray['origin_m'])),list(map(value,ray['direction'])))
-        require(hit['owner']==str(j+3) and hit['kind']=='1' and hit['distance']<256,
+        require(hit['owner']==action['source_owner'] and hit['kind']=='1' and hit['distance']<256,
                 'support pre-edit target unreachable: '+str(i))
-        boxes=owners[j+2].boxes
+        boxes=owners[int(action['source_owner'])-1].boxes
         if i%2:
-            prior=[origin+25,40+lift,origin+180+24*j]
+            prior=[f32(value(x)*10) for x in frozen['actions'][i-1]['target_m']]
             parts,_=components(boxes,prior)
             boxes=next(bs for bs in parts if sum(math.prod(b-a for a,b in zip(x.lo,x.hi)) for x in bs)>120)
         parts,removed=components(boxes,target)
         require(len(removed)==16 and set(removed.values())=={3}, 'support material removal mismatch')
-        counts=sorted(sum(math.prod(b-a for a,b in zip(x.lo,x.hi)) for x in bs) for bs in parts)
-        require(len(parts)==2 and counts[0]==120 and sum(not geometry(bs)['anchored'] for bs in parts)==i%2,
+        volumes=sorted(sum(math.prod(b-a for a,b in zip(x.lo,x.hi)) for x in bs) for bs in parts)
+        require(len(parts)==2 and volumes[0]==120 and sum(not geometry(bs)['anchored'] for bs in parts)==i%2,
                 'support connectivity reference mismatch')
-        actions.append({'action':str(i),'frame':str(frame),'measured_ordinal':str(frame-121),'span':str(j),
-            'target_m':point,'radius_m':bits(.2),'required':True,'expected_removed_cells':'16','expected_material':'3',
-            'source_owner':str(j+3),'visibility_point_m':list(map(bits,visible_point)),'pre_edit_ray':ray,'pre_edit_hit':{k:str(v) for k,v in hit.items() if k!='point'},
-            'reference_removed_cells':[[*map(str,p),str(m)] for p,m in sorted(removed.items())]})
-    details=[{'name':'detail_'+a['action'],'frame':a['frame'],'action':a['action'],
-              'camera':camera([value(a['target_m'][0]),4.+lift/10,value(a['target_m'][2])+1.2],list(map(value,a['target_m']))),
-              'features':['support cut and exposed surfaces','anchored stump'],'supplementary_to':'cut_'+a['action']}
-             for a in actions]
-    frames=[{'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i in cut_frames else 'motion' if i in WINDOW else 'ordinary',
-        'measured_ordinal':str(i-121) if i>120 else None, 'camera':opening if i<=120 else view,
-        'picking':False,'actions':[str(cut_frames.index(i))] if i in cut_frames else []} for i in range(3721)]
-    review=[{'name':'opening','frame':'0','features':['building silhouettes','span silhouettes','major shadows']}]
-    review += [{'name':'cut_'+a['action'],'frame':a['frame'],'features':['support cut and exposed surfaces','anchored stump','supported span' if int(a['action'])%2==0 else 'released span']} for a in actions]
-    review += [{'name':'uncut_visit_'+str(j),'frame':str(frame),
-               'features':['no support cut at this overview visit','later span remains supported']}
-              for j,frame in enumerate(CUT_FRAMES) if j>=2*spans]
-    review += [{'name':'motion_'+str(i-121),'frame':str(i),'features':['three distinct released spans' if spans==3 else
-               f'{spans} distinct released span'+('s' if spans!=1 else ''),
-               *['beam_'+str(j)+'_top_center' for j in range(spans)],'moving body shadows']} for i in (152,163)]
-    review += [{'name':'completion','frame':'3720','features':['settled spans','protected anchored stumps']
-                if spans==3 else [f'{spans} settled released span'+('s' if spans!=1 else ''),
-                                    'unsevered later spans','protected anchored stumps']}]
-    points=[{'name':'initialization','frame':'0'},{'name':'review_opening','frame':'0'},{'name':'warmup_end','frame':'120'}]
-    points += [{'name':'action_'+a['action'],'frame':a['frame']} for a in actions]
-    points += [{'name':'motion_'+str(i-121),'frame':str(i)} for i in WINDOW]
-    points += [{'name':'completion','frame':'3720'}]
-    frozen={'schema':SCHEMA,'record_type':'schedule','schedule_id':schedule_id,'fixed_step':'0x3c888889',
-        'warmup_frames':'120','measured_frames':'3600','opening':opening,'frames':frames,'actions':actions,
-        'beam_features':[{'span':str(j),'source_owner':str(j+3),'local_top_center_cells':list(map(str,(origin+76,76+int(config['seed'])-45+lift,origin+180+24*j)))} for j in range(spans)],
-        'released_bottom_cells':str(42+lift),
-        'moving_window':{'first':'152','last':'163','measured_first':'31','measured_last':'42','distinct_spans':str(spans)},
-        'review_views':review,'supplementary_views':details,'required_checkpoints':points,'checkpoint_implementation':'megascene-checkpoint/1',
-        'update_order':['physics','edit','view_picking_disabled','render']}
-    if spans<3:
-        frozen['variant']={'baseline_schedule_id':'support-v1','required_actions':str(2*spans),
-                           'omitted_actions':{'first':str(2*spans),'last':'5','count':str(6-2*spans)},
-                           'omitted_action_disposition':'not_required_for_variant',
-                           'overview':'support_v1_all_3600_measured_frames',
-                           'baseline_completion_equivalence':False}
+        action['expected_removed_cells']=str(len(removed))
+        action['pre_edit_hit']={k:str(v) for k,v in hit.items() if k!='point'}
+        action['reference_removed_cells']=[[*map(str,p),str(m)] for p,m in sorted(removed.items())]
     return frozen
 
 

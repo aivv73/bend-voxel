@@ -13,6 +13,8 @@
 #include <set>
 #include <sstream>
 #include <limits>
+#include <fstream>
+#include <cstdlib>
 namespace checkpoint {
 using J = std::string;
 using Object = std::map<std::string,J>;
@@ -31,6 +33,67 @@ J array(const std::vector<J>& values) {
 }
 J object(const Object& values) {
   J s="{"; for(const auto& [k,v]:values) { if(s.size()>1) s+=","; s+=quote(k)+":"+v; } return s+"}";
+}
+struct Points { uint32_t frames; std::map<uint32_t,std::vector<J>> names; };
+uint32_t point_number(const std::string& text) {
+  require(!text.empty() && text.size()<=10 && (text.size()==1 || text.front()!='0'),"invalid checkpoint plan number");
+  uint64_t n=0;
+  for(char c:text) {
+    require(c>='0' && c<='9',"invalid checkpoint plan number");
+    n=n*10+uint32_t(c-'0');
+    require(n<=UINT32_MAX,"checkpoint plan number overflow");
+  }
+  return uint32_t(n);
+}
+Points read_points(const char* environment,const char* protocol) {
+  const char* path=std::getenv(environment);
+  require(path && *path,"frozen checkpoint plan environment unavailable");
+  std::ifstream input(path,std::ios::binary|std::ios::ate);
+  require(bool(input),"frozen checkpoint plan unavailable");
+  auto size=input.tellg();
+  require(size>0 && size<=96+4096*140,"checkpoint plan size outside native bound");
+  std::string bytes(size_t(size),'\0'); input.seekg(0);
+  require(bool(input.read(bytes.data(),size)),"incomplete checkpoint plan input");
+  require(bytes.back()=='\n',"truncated checkpoint plan line");
+  std::istringstream lines(bytes); std::string line;
+  require(bool(std::getline(lines,line)),"checkpoint plan header unavailable");
+  auto first=line.find('\t'),second=first==std::string::npos?first:line.find('\t',first+1);
+  require(first!=std::string::npos && second!=std::string::npos && line.find('\t',second+1)==std::string::npos &&
+          line.substr(0,first)==protocol,"invalid checkpoint plan header");
+  Points points{point_number(line.substr(first+1,second-first-1)),{}};
+  uint32_t count=point_number(line.substr(second+1));
+  require(points.frames>=1 && points.frames<=21721 && count>=1 && count<=4096,"checkpoint plan count outside native bound");
+  std::set<std::string> seen; uint32_t previous=0;
+  for(uint32_t i=0;i<count;i++) {
+    require(bool(std::getline(lines,line)),"checkpoint plan name count mismatch");
+    auto tab=line.find('\t');
+    require(tab!=std::string::npos && line.find('\t',tab+1)==std::string::npos,"invalid checkpoint plan row");
+    uint32_t frame=point_number(line.substr(0,tab)); std::string name=line.substr(tab+1);
+    require(frame<points.frames && frame>=previous,"checkpoint plan frame outside frozen order");
+    require(!name.empty() && name.size()<=128 &&
+      name.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_")==std::string::npos,
+      "invalid checkpoint plan name");
+    require(seen.insert(name).second,"duplicate checkpoint plan name");
+    points.names[frame].push_back(quote(name)); previous=frame;
+  }
+  require(!std::getline(lines,line),"checkpoint plan name count mismatch");
+  return points;
+}
+const Points& point_plan(bool review) {
+  if(review) {
+    static const Points points=read_points("MEGASCENE_REVIEW_FILE","megascene-reviews/1");
+    return points;
+  }
+  static const Points points=read_points("MEGASCENE_CHECKPOINT_FILE","megascene-checkpoints/1");
+  return points;
+}
+const std::vector<J>& point_names(uint64_t frame,uint32_t warmup,uint32_t measured,bool review=false) {
+  const auto& points=point_plan(review);
+  require(uint64_t(warmup)+measured+1==points.frames,"checkpoint plan frozen frame count mismatch");
+  require(frame<points.frames,"checkpoint frame outside frozen schedule");
+  auto found=points.names.find(uint32_t(frame));
+  static const std::vector<J> empty;
+  return found==points.names.end()?empty:found->second;
 }
 std::string hash(const std::string& s) {
   unsigned char out[SHA256_DIGEST_LENGTH]; SHA256((const unsigned char*)s.data(),s.size(),out);
@@ -251,34 +314,7 @@ void emit(const VoxelVkFrame& f,const VoxelMegaState& s) {
     {"cells",number(s.world[0])},{"fixed_step",quote("0x3c888889")},{"fragments",number(s.world[1])},
     {"next_id",number(s.world[4])},{"removed",number(s.world[2])},{"schedule_sha256",quote(s.schedule_sha256)},
     {"schema",quote("megascene-checkpoint/1")},{"status",number(s.world[3])},{"view",view}});
-  std::vector<J> names;
-  if(s.frame==0) { names.push_back(quote("initialization")); names.push_back(quote("review_opening")); }
-  if(s.frame==s.warmup) names.push_back(quote("warmup_end"));
-  if(s.action_frame) names.push_back(quote("action_"+std::to_string(s.action_id)));
-  if(std::getenv("MEGASCENE_HISTORY") && s.action_frame && (s.action_id==11 || s.action_id==47 || s.action_id==119))
-    names.push_back(quote("after_cut_"+std::to_string(s.action_id+1)));
-  if(std::getenv("MEGASCENE_HISTORY") && s.frame==gpu_timing::environment_number("MEGASCENE_HISTORY_OVERVIEW",s.warmup+1561,s.warmup+s.measured))
-    names.push_back(quote("history_overview"));
-  if(std::getenv("MEGASCENE_SUPPORT") && s.frame>=uint64_t(s.warmup)+32 && s.frame<=uint64_t(s.warmup)+43)
-    names.push_back(quote("motion_"+std::to_string(s.frame-s.warmup-1)));
-  const char* diagnostic=std::getenv("MEGASCENE_PROXY_DIAGNOSTIC");
-  if(diagnostic && s.frame>s.warmup && s.frame<=uint64_t(s.warmup)+s.measured) {
-    uint64_t ordinal=s.frame-s.warmup-1;
-    uint64_t hold=std::strcmp(diagnostic,"mixed-world")==0?1200:120;
-    uint64_t count=std::strcmp(diagnostic,"mixed-world")==0?3:9;
-    if(ordinal/hold<count && ordinal%hold==hold/2)
-      names.push_back(quote("review_"+(std::strcmp(diagnostic,"mixed-world")==0?
-        std::vector<std::string>{"far_entry","near_exit","far_reentry"}[ordinal/hold]:
-        "hold_"+std::to_string(ordinal/hold))));
-  }
-  if(!diagnostic && !std::getenv("MEGASCENE_LOCALIZED") && !std::getenv("MEGASCENE_SUPPORT") && !std::getenv("MEGASCENE_HISTORY") && std::getenv("MEGASCENE_CAMERA_FILE") && s.frame>s.warmup &&
-     s.frame<=uint64_t(s.warmup)+s.measured &&
-     (s.frame-s.warmup-1)%300==60) {
-    unsigned phase=unsigned((s.frame-s.warmup-1)/300);
-    char name[32]; std::snprintf(name,sizeof name,"review_route_%02u",phase);
-    names.push_back(quote(name));
-  }
-  if(s.frame==uint64_t(s.warmup)+s.measured) names.push_back(quote("completion"));
+  const auto& names=point_names(s.frame,s.warmup,s.measured);
   Object record={{"body_sha256",object(hashes)},{"names",array(names)},{"record_type",quote(names.empty()?"static_audit":"checkpoint")},
     {"sha256",quote(hash(payload))},{"work",array(work)}};
   if(!names.empty()) record["payload"]=payload;
@@ -288,4 +324,11 @@ void emit(const VoxelVkFrame& f,const VoxelMegaState& s) {
 extern "C" int voxel_mega_checkpoint(const VoxelVkFrame* frame,const VoxelMegaState* state,char* error,size_t cap) {
   try { checkpoint::emit(*frame,*state); return 1; }
   catch(const std::exception& e) { std::snprintf(error,cap,"%s",e.what()); return 0; }
+}
+extern "C" int voxel_mega_schedule_selected(uint32_t review,uint64_t frame,uint32_t warmup,uint32_t measured,char* error,size_t cap) {
+  try {
+    checkpoint::require(review<=1,"invalid schedule point kind");
+    return checkpoint::point_names(frame,warmup,measured,review!=0).empty()?0:1;
+  }
+  catch(const std::exception& e) { std::snprintf(error,cap,"%s",e.what()); return -1; }
 }

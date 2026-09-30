@@ -7,6 +7,16 @@ import ./src/resolution.bend as Resolution
 import ./src/megascene_recipe.bend as Recipe
 import ./src/megascene_scale.bend as Scale
 
+# Schedule policy lives in Bend. Python independently checks source geometry
+# and evolving edit/motion references, then annotates the frozen plan.
+# Preserve complete schedule bytes, binary64 operation order, binary32 rounding
+# barriers, signed zero, and checkpoint/review ordering across every route.
+# Native consumers read frozen frame, checkpoint and review tables. They cannot
+# infer phases or capture frames from route names. Foreign libm arithmetic and
+# unsafe world/geometry invariants require runtime/reference tests. They are not
+# established by the proof kernel. scripts/megascene_schedule_parity.py compares
+# complete schedules against the pre-migration hashes.
+
 # The Vulkan bridge reads ten material colors, then surfaces and overlays.
 law palette_length:
   {List.length(&2, R.Vec, Color.palette()) == 19n : Nat}

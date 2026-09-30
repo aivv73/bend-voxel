@@ -13,7 +13,13 @@ DEPENDENCIES = {
     "megascene_source": ("megascene_source", "megascene_recipe", "math"),
     "megascene_policy": ("megascene_policy", "megascene_scale"),
     "megascene_admit": ("megascene_admit", "megascene_admission", "megascene_scale", "megascene_recipe", "math"),
+    "megascene_schedule": ("megascene_schedule", "schedule_route", "schedule_history", "schedule_cut", "schedule_policy", "schedule_proxy", "schedule_float", "schedule_json", "megascene_scale"),
 }
+
+
+def dependency_files(names):
+    return tuple(name + extension for name in names for extension in
+                 ((".bend", ".c", ".js") if name == "schedule_float" else (".bend",)))
 
 
 @lru_cache(maxsize=1)
@@ -33,8 +39,8 @@ def source_directory():
 def retain_sources(runtime):
     generator = runtime / "generator"
     generator.mkdir(exist_ok=True)
-    for name in sorted({name for names in DEPENDENCIES.values() for name in names}):
-        shutil.copyfile(source_directory() / (name + ".bend"),generator / (name + ".bend"))
+    for name in sorted({name for names in DEPENDENCIES.values() for name in dependency_files(names)}):
+        shutil.copyfile(source_directory() / name, generator / name)
 
 
 @lru_cache(maxsize=2048)
@@ -49,7 +55,7 @@ def invoke(worker, arguments):
 def worker(module):
     names = DEPENDENCIES[module]
     version = compiler_version()
-    sources = {name: (source_directory() / (name + ".bend")).read_bytes() for name in names}
+    sources = {name: (source_directory() / name).read_bytes() for name in dependency_files(names)}
     fingerprint = hashlib.sha256(version.encode())
     for name, content in sources.items():
         fingerprint.update(name.encode() + b"\0" + content + b"\0")
@@ -64,7 +70,7 @@ def worker(module):
             with tempfile.TemporaryDirectory(dir=cache) as directory:
                 stage = Path(directory)
                 for name, content in sources.items():
-                    (stage / (name + ".bend")).write_bytes(content)
+                    (stage / name).write_bytes(content)
                 result = subprocess.run(["bend", str(stage / (module + ".bend")),
                                          "-o", str(stage / "worker")],
                                         capture_output=True, text=True, timeout=120)
