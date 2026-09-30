@@ -81,6 +81,8 @@ def main():
     entry = {"name": args.name, "command": command, "started_utc": started_utc,
              "elapsed_ns": str(elapsed), "status": status, "exit_code": code,
              "log": str(log), "log_sha256": hashlib.sha256(log.read_bytes()).hexdigest()}
+    if ledger.get("runner_campaign"):
+        entry["runner_campaign"] = ledger["runner_campaign"]["path"]
     ledger["new_work"].append(entry)
     ledger["new_work_charge_ns"] = str(int(ledger["new_work_charge_ns"]) + elapsed)
     ledger["remaining_ns"] = str(max(0, int(ledger["allowance_ns"]) -

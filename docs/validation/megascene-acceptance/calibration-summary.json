@@ -1,0 +1,912 @@
+{
+  "completed_configurations": 12,
+  "completed_controls": 72,
+  "performance_qualification": "unqualified",
+  "qualification_scope": "Only actual applicable configuration and workload regime; no pooling or cost subtraction",
+  "required_configurations": 12,
+  "required_controls": 72,
+  "rows": [
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68/runner/calibration-series/static-small-1/assessment.json",
+      "assessment_sha256": "b25123122f0a4b432dc4088ce10ebe95eb68fabf97bae338d61bcbce515e828d",
+      "case": "static",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/9f5ad8b0-ff48-4b34-99c4-8f03e97ce8e6/c0f3e725-1848-4e4c-9874-f6addcb4dad3",
+          "measured_duration_ns": "2041277890",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/2d78c72c-b0e3-42d4-b323-93f86e1bae5c/8a9fc906-aa7f-4522-bce0-f8639cb31fd1",
+          "measured_duration_ns": "6174087644",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/b9500440-1525-427f-851e-0b76174a1661/58fa3045-194b-44e2-8cfa-1af67a7a1a99",
+          "measured_duration_ns": "5809019418",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/06fd3795-58c6-44cd-9b8e-275bc1f8faae/5a63c8ac-a244-4a0c-9491-060134c776c2",
+          "measured_duration_ns": "2059401570",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/2198bb96-ca03-4d28-8088-6c141ce8d49c/f2898956-5533-4208-be41-4bcde71f045c",
+          "measured_duration_ns": "2113820109",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/e434f54f-1183-4963-a5b1-e2aecf71b111/13af384b-54fe-42e5-bf4e-8bdc1f81fa88",
+          "measured_duration_ns": "5691170672",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68/runner/calibration-series/static-small-1/series.json",
+      "series_sha256": "1b9f82f413194bf112fd24711c02fdca2ede9fdc00c6709e1a696448b4e8fb5d",
+      "status": "insufficient",
+      "threads": "1",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-calibration-65/calibration-series/static-small-6/assessment.json",
+      "assessment_sha256": "33522bd47dcd2974223471d6006d2197ebbc5dcc243b468cb524f0baafc4bb67",
+      "case": "static",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-calibration-65/f11a290e-df61-4b0c-93ab-55c9d05065bc/73046781-5462-4247-94b6-98f3631cf0d8/76ed156c-1254-4d2a-86a5-46fbc7b30848",
+          "measured_duration_ns": "2016017236",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-calibration-65/f11a290e-df61-4b0c-93ab-55c9d05065bc/7b6fa8bc-48dd-49f5-9756-1185c6d18094/b01abfd5-b718-4cfd-8412-910c45ed9302",
+          "measured_duration_ns": "5520646402",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-calibration-65/f11a290e-df61-4b0c-93ab-55c9d05065bc/67656d4e-8c8e-421c-8971-e1c1c8a492bb/919ea45e-3874-41df-894b-9cf3b3fa87d4",
+          "measured_duration_ns": "5526166757",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-calibration-65/f11a290e-df61-4b0c-93ab-55c9d05065bc/c4b379bb-ccbc-44ad-b7f9-47559530989f/889ef138-644a-4441-a73a-9e24dfec8047",
+          "measured_duration_ns": "2072351294",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-calibration-65/f11a290e-df61-4b0c-93ab-55c9d05065bc/761a604c-4c60-4080-8afe-1da6971b013d/6ca5cb24-6d60-4cd0-b2fe-ab18b89135a4",
+          "measured_duration_ns": "2072361933",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-calibration-65/f11a290e-df61-4b0c-93ab-55c9d05065bc/4213c97a-36e3-4192-99f0-0ca62219d590/71ae9eb5-3cb8-489c-aefa-a047f9a2b3f3",
+          "measured_duration_ns": "5498360247",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-calibration-65/calibration-series/static-small-6/series.json",
+      "series_sha256": "00a8c50977c3f4a7947348ddbbc6cd23555146b619979f3d2febbe908eac4b7f",
+      "status": "insufficient",
+      "threads": "6",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68/runner/calibration-series/static-small-12/assessment.json",
+      "assessment_sha256": "970bc6f067d9881f05f9986fad2b337e35c84bd32892c94e573f2aa76b349f18",
+      "case": "static",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/bb017af3-6f2c-4787-97ee-0a9ae166bb8e/b4673d83-48c0-4d4d-acb4-b49404ef6fff",
+          "measured_duration_ns": "2095389935",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/81b1a4c2-a2ca-4902-a7ec-5ec89c358f68/be1b49d3-2338-43e0-9b97-f1ca6f5df26c",
+          "measured_duration_ns": "6279144809",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/bbb95721-08cc-4a2e-9c83-afb4c8bd3d54/66fcbe44-1eda-4f94-9384-528ede46f8cd",
+          "measured_duration_ns": "5879721069",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/b7ca5e43-a560-4efd-8666-2b3aca7935ab/c5934a07-409c-4e24-9ee1-2bad45ec2db1",
+          "measured_duration_ns": "2101779421",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/847e284f-63ee-4026-bb7e-6d582128e339/c3cb89b5-1aed-429e-993a-83e984785f1c",
+          "measured_duration_ns": "2136867654",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/daaf3db9-1602-4d89-9904-7f480fb3a937/568b57e9-4245-4ca8-91ef-fd1805ffec4c",
+          "measured_duration_ns": "5845352575",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": false
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68/runner/calibration-series/static-small-12/series.json",
+      "series_sha256": "3783959bfa1d78ad2e16e4060753ba058b69a03db1f6129fca33159f4c91d4ec",
+      "status": "insufficient",
+      "threads": "12",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68/runner/calibration-series/static-large-1/assessment.json",
+      "assessment_sha256": "9fb1a11ed77ed3d4c256f5f7b53ae11fbe668761e434efa61332fefda993be1b",
+      "case": "static",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/e28990cc-8783-4d4d-b2b6-19864f27f25d/e62bf723-9f37-497c-858b-4d2f73ede2d1",
+          "measured_duration_ns": "1981861633",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/002ee4eb-7f21-4fe2-9490-bc9a716e5123/55f6de8c-d8e8-4835-9556-9c05f1e5b4d8",
+          "measured_duration_ns": "13897496968",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/ff3836c7-5705-4ded-943c-daf4af0aa5fd/c1a241f0-69d9-4ece-a124-7ebddcacec88",
+          "measured_duration_ns": "13622888269",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/20f48bb7-84d1-4654-9c8f-9e139fff5f92/83df032e-979d-4713-b0cc-ec18eb4af4d2",
+          "measured_duration_ns": "2016117247",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/5c8307f6-f13c-4138-8e97-92579ba0756e/91f5d722-d621-4a14-bcfb-4ebedd9b99dd",
+          "measured_duration_ns": "2134287061",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/1472c898-3651-416e-9745-ceea82cb4ad1/4405fa47-65f6-456d-9062-7410d2f748fc",
+          "measured_duration_ns": "13199918865",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68/runner/calibration-series/static-large-1/series.json",
+      "series_sha256": "ae494271a30f955413cf9233a4b8c940c4b9957db02292347150726d40efadd7",
+      "status": "insufficient",
+      "threads": "1",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68/runner/calibration-series/static-large-6/assessment.json",
+      "assessment_sha256": "a95425229d3e5b6ce86bb1b431ea99c3cce5e0b885474c3dd72831588600d318",
+      "case": "static",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/de7bac78-ccb9-4470-8478-9f729a7c8bc5/47874997-6c79-431c-87cc-a75a88e22a38",
+          "measured_duration_ns": "2038431329",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/432fc326-d3d0-4cd7-af10-c8e1cf96e583/d34bab0f-9191-4fc1-89e4-2133c4bb1897",
+          "measured_duration_ns": "13668752691",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/329621f9-ff5d-4e8a-80c8-4357671fd8e3/b8f6a9ec-5dbe-47d9-94d3-f22bec7b1231",
+          "measured_duration_ns": "13937901796",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/f4d7b668-a974-455e-be93-47b3bf1b5f98/d44c7b45-71be-4737-8871-27144ecca5ee",
+          "measured_duration_ns": "2304093272",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/341ad26c-9829-418c-9b19-50aa385ef89a/475c3232-da70-417a-ab71-06d58274d021",
+          "measured_duration_ns": "2037189050",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/9371a1b7-3b35-4d4a-8197-ab9cf27ff653/cfa890b3-bd53-4358-b28c-6c5e01164d43",
+          "measured_duration_ns": "13804463026",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68/runner/calibration-series/static-large-6/series.json",
+      "series_sha256": "33e3e8f54df85bd89afd40f0c6bd7af0dcae64651283e47aec39cbf0daef9c9e",
+      "status": "insufficient",
+      "threads": "6",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68-retry/calibration-series/static-large-12/assessment.json",
+      "assessment_sha256": "7c7853b452fe7b7d82675ef2e85338950788603b86ecb553a6be3adfc905282e",
+      "case": "static",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/dd0db7ef-d4af-497a-ac60-dfc0f4566490/3eb1538f-199b-47de-8f2c-fbe621a5110d",
+          "measured_duration_ns": "2085690281",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/1ca4c1db-cec8-4b17-98a8-8e0f4794d2c9/485bd95f-1d33-4432-a788-357ab55a03e9",
+          "measured_duration_ns": "13727967647",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/cf210533-0981-4841-ac72-9b0d0af607d0/7d8e0ae9-9108-4398-87cd-fe342f258637",
+          "measured_duration_ns": "14388308111",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/78ab617d-983c-4cb3-a2fc-0b8ee2fb7143/2d3c5263-257b-4738-a50d-ebf33047d3b3",
+          "measured_duration_ns": "2121765222",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/b0ddd3ac-d4d6-459d-90e4-e26ca32b0b51/8579308f-51cb-4325-a7dc-735ccfc5b0c6",
+          "measured_duration_ns": "2185293106",
+          "mode": "off",
+          "ordinary_count": 3600,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 0,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/79e1850b-4f69-4abf-bb9f-935294bcfe10/01cc0d3e-9206-4bc0-8069-2503e3f21162",
+          "measured_duration_ns": "14144350834",
+          "mode": "on",
+          "ordinary_count": 3600,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68-retry/calibration-series/static-large-12/series.json",
+      "series_sha256": "36d9b076c8492ea0c75675d4fd36784db35893389b53bfb83fbab7d6343552c1",
+      "status": "insufficient",
+      "threads": "12",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68-retry/calibration-series/history-small-1/assessment.json",
+      "assessment_sha256": "67958a8862f308e816d5d174c99514561c4a19433129fdf43912161d080365f4",
+      "case": "history",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/75d66329-2bc8-4569-9b51-c01abfd19719/a1decbf4-ec9b-42d4-8877-cc3f80789369",
+          "measured_duration_ns": "2590905659",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/a2cfac9e-bdc4-4e65-96a1-cd97b2354b09/7bf6de04-d717-41d3-bdd0-85125c28bca1",
+          "measured_duration_ns": "20444265148",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/c6cbc18f-7c8a-4c71-b0a1-113323e558d8/b203de6f-f0ba-461e-bc00-17ed0264c10b",
+          "measured_duration_ns": "20937252481",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/052e8a81-8905-497e-82c9-040e55ca41a5/5d08e3cf-5867-40b7-bd8d-47323925d493",
+          "measured_duration_ns": "2647415529",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/38db58f0-5f21-4017-a439-ba074ce5c2e2/f102da63-7c18-4a13-9fce-1d79540d7723",
+          "measured_duration_ns": "2601941770",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/d7e3d235-713c-4d6c-b207-fb6ad3f5f195/1e6d842d-f642-42a5-b264-649ae9b05d82",
+          "measured_duration_ns": "23609601613",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68-retry/calibration-series/history-small-1/series.json",
+      "series_sha256": "54f676874c347577244439ade1933bfc5680cd070477cc99c80011af96f83b17",
+      "status": "insufficient",
+      "threads": "1",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68-retry/calibration-series/history-small-6/assessment.json",
+      "assessment_sha256": "923153ba16bdf98a4b09895788821630118ebe7001847d07f68c58878a311c71",
+      "case": "history",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/ce90f933-dd80-4ac6-b176-11575eae02f4/f0232a26-6f5d-41d0-bafd-9d7d48e1d54d",
+          "measured_duration_ns": "2581395333",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/c1556d2a-fafe-45a2-a2fc-187a5c2f6932/d085e876-5b70-492d-85be-6bedc99d4941",
+          "measured_duration_ns": "20030225286",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/56567df3-4d92-404a-a581-d283d04fa199/5238ffa1-08a2-44ec-90c4-7a3c1afc88f2",
+          "measured_duration_ns": "19731818464",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/d6e87058-73d1-4801-b4f3-2575994c28e7/4abbea36-b20a-44ec-b4d0-4fa395d8b32d",
+          "measured_duration_ns": "2510593820",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/06329975-fe60-4b5a-b2c9-e9032d11f45c/2ca0841a-38e0-4f51-baae-8972dc55af87",
+          "measured_duration_ns": "2720208264",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/03eba740-1c2b-48af-ae10-4e2ef84e76a9/32fdb720-c368-4d13-8c05-0bc19c5e045f",
+          "measured_duration_ns": "20575074450",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68-retry/calibration-series/history-small-6/series.json",
+      "series_sha256": "4e8ab504c59a40622c73effedf363879256f1b78245b38eadb4fb579299db8f9",
+      "status": "insufficient",
+      "threads": "6",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68-retry/calibration-series/history-small-12/assessment.json",
+      "assessment_sha256": "a8cfa7011d5533837eb1face92d609177271826616251699f19a9ab81bbc8c12",
+      "case": "history",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/8e15c070-f7b1-4818-850a-24b71063b1cb/23f61e41-f6a1-4763-8020-8ee1ffac43ca",
+          "measured_duration_ns": "2556947202",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/fd883b50-5e15-4f45-a71f-3a57946a59a2/a7e8f618-18db-4b66-b8d0-9f86fd9840c4",
+          "measured_duration_ns": "19644688545",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/cc603fdd-5686-4c3d-acf6-2f0354ec010b/03fc91d1-813d-488d-a49a-6dffea597424",
+          "measured_duration_ns": "20697170491",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/4fa5255f-2f5c-4e9d-9567-282a2c69805a/15d66fed-bcc3-4b1b-8814-75f38d460718",
+          "measured_duration_ns": "2524285917",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/27722fba-cb11-4b52-b7b7-964dc72a51d4/d3936493-0111-4013-8c12-7e62eee96cf0",
+          "measured_duration_ns": "2570462108",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-retry/d2e4ee2e-3498-4b2e-a590-6aab9eae5365/6298a1c9-00ab-48e0-bd17-3de06c0aca5e/33d6ab95-0ceb-4120-9ea7-0ec1235284a4",
+          "measured_duration_ns": "20499938367",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "small",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68-retry/calibration-series/history-small-12/series.json",
+      "series_sha256": "ca38ea13786be0dd2c6f35539dcd4a1eca53c7d85d1efaaf29a3edcdb521a93f",
+      "status": "insufficient",
+      "threads": "12",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68-extension2/calibration-series/history-large-1/assessment.json",
+      "assessment_sha256": "191766dddc08c824acdfe9a6eddbf67456f2700274f19cf9c98d85f29ddc82ee",
+      "case": "history",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/76ea4c22-e3e9-4a6b-9ef4-d4532f04f5df/914cbccf-f820-4229-942b-b7cdc35ac56b",
+          "measured_duration_ns": "2705228271",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/3fa5f79d-2ed6-48df-8e4d-2ce6f50393a4/63e14907-d957-44b5-890d-adf8a9381ffc",
+          "measured_duration_ns": "31920426407",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/fd44173f-eadc-4ac2-a0f7-daa533442941/4dcecc6f-bd01-4794-9e43-c6cc168b6b72",
+          "measured_duration_ns": "31316164469",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/c4ba14ee-fe45-4480-8773-cb7efd4abfa6/4568c188-b2c0-4a5e-a40a-26f621ab67d4",
+          "measured_duration_ns": "2783890852",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/a555a755-1187-4f5a-8016-a99f88664639/9a33bb10-7288-4542-8d8b-80389f3748e5",
+          "measured_duration_ns": "2704771223",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/9311df89-bfa1-4c73-aa24-dea2952b5fc8/a3adda6a-5310-4998-9360-471acbf5ed25",
+          "measured_duration_ns": "31483965965",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68-extension2/calibration-series/history-large-1/series.json",
+      "series_sha256": "f883999ed039f2b00721fe37a2b461a11256f1283d6d977e7c83f20b7f4688f5",
+      "status": "insufficient",
+      "threads": "1",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68-extension2/calibration-series/history-large-6/assessment.json",
+      "assessment_sha256": "b2852f8343a20ab42ccd05f8af14f99b4e7e1890414288d78b61d054f17051c5",
+      "case": "history",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/09849b40-dbd8-4b27-94cc-e6eb26a7bd82/52d91486-620b-4a1f-849f-b7d40dc922e6",
+          "measured_duration_ns": "2614834118",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/0c30fa09-4396-4e14-bda3-11464909d9a4/97d1a9e9-8bc4-4de0-84fa-dce12ebcb2b5",
+          "measured_duration_ns": "31784892421",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/b0689c1e-217b-4f72-8332-6de633216505/2420dde7-2f77-44ba-a2b9-e809170ed608",
+          "measured_duration_ns": "31852770931",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/6a92ac62-e367-4aef-93aa-a4bc46a70d47/1345bf87-4ea1-4714-af60-14b57755dd09",
+          "measured_duration_ns": "2595025690",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/fae032e2-3bf8-4284-88b1-9d0dda8f8e77/e6333571-79f7-4648-be36-4c5df46f7c30",
+          "measured_duration_ns": "2731485553",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/1a83c0c6-e525-472c-a080-e398648b9c1a/af1a3d1e-99be-4f5d-a416-20548150addf",
+          "measured_duration_ns": "31937309094",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68-extension2/calibration-series/history-large-6/series.json",
+      "series_sha256": "e6a4961f63a7364fef4351f68ee77b2dcff66672bb297f1ae5d489e192685a74",
+      "status": "insufficient",
+      "threads": "6",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    },
+    {
+      "assessment": "/home/aivv/megascene-acceptance-68-extension2/calibration-series/history-large-12/assessment.json",
+      "assessment_sha256": "09f1dcca7ee060e887cfbf3973e4cbff8e99653017fb709a6b2bd0d4abe57da5",
+      "case": "history",
+      "completed_controls": 6,
+      "control_observations": [
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/746f0219-ffec-47c5-a2d1-80998250adf1/4ea7c2f0-e88b-48a9-8df9-5fe5c72bb305",
+          "measured_duration_ns": "2586845737",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/be9ded3a-5dbe-4c49-b781-92a031efd41a/02b3196c-7eaa-4964-bffb-f93f6ef4ae1f",
+          "measured_duration_ns": "31349151411",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/ff77063c-1e2a-440b-945d-8f257c069799/d1d10043-50f6-4994-a995-5b1ec0b1ebe5",
+          "measured_duration_ns": "31651254198",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/2ba172fe-02cb-48d7-9951-63fe5042016f/ea850ae3-4ec1-4438-a298-5a0dd8338017",
+          "measured_duration_ns": "2632848448",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/13405df0-d78a-4195-aeec-a3896fb3efc3/1ec8519f-1a7a-4096-83d8-4a74a6323bc4",
+          "measured_duration_ns": "2619612386",
+          "mode": "off",
+          "ordinary_count": 3480,
+          "sufficient": false
+        },
+        {
+          "accepted_edit_count": 120,
+          "archive": "/home/aivv/megascene-acceptance-68-extension2/0248da85-1c6a-4707-acc6-9a809e0b5652/d3f071c6-2fda-412a-b97e-e5c1276c07c6/e3ce7046-d755-439c-a686-5e2191f3f559",
+          "measured_duration_ns": "31319625219",
+          "mode": "on",
+          "ordinary_count": 3480,
+          "sufficient": true
+        }
+      ],
+      "order": [
+        "off",
+        "on",
+        "on",
+        "off",
+        "off",
+        "on"
+      ],
+      "preset": "large",
+      "reason": "required population or denominator missing",
+      "required_controls": 6,
+      "series": "/home/aivv/megascene-acceptance-68-extension2/calibration-series/history-large-12/series.json",
+      "series_sha256": "220af6df1ccee67a24ee47454744f27e225eef3b4f0a127d6f15edd992ddedd3",
+      "status": "insufficient",
+      "threads": "12",
+      "validated_modes": [
+        "off",
+        "on"
+      ]
+    }
+  ],
+  "schema": "megascene-acceptance-calibration-summary/1",
+  "scope": "One complete prescribed series per configuration; every retained attempt remains in the acceptance index"
+}

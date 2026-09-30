@@ -37,7 +37,13 @@ CORROBORATION = (
     ("localized_thread_equality", "docs/validation/megascene-localized/thread-comparison.json"),
     ("support_thread_equality", "docs/validation/megascene-support/thread-comparison.json"),
     ("history_small_thread_equality", "docs/validation/megascene-acceptance/history-small-threads.json"),
+    ("history_large_thread_equality", "docs/validation/megascene-acceptance/history-large-threads.json"),
+    ("complete_calibration_matrix", "docs/validation/megascene-acceptance/calibration-summary.json"),
+    ("audited_visual_corrections", "docs/validation/megascene-acceptance/visual-review-corrections.md"),
     ("identical_capture_visual_reuse", "docs/validation/megascene-acceptance/visual-reuse.json"),
+    ("additional_identical_capture_visual_reuse", "docs/validation/megascene-acceptance/visual-reuse-extension.json"),
+    ("proposed_history_view_decision", "docs/validation/megascene-acceptance/history-review-proposal.md"),
+    ("proposed_proxy_view_decision", "docs/validation/megascene-acceptance/proxy-review-proposal.md"),
     ("large_history_guard_regression", "docs/validation/megascene-acceptance/large-history-guard.md"),
     ("resource_recovery", "docs/validation/megascene-gpu/recovery.json"),
     ("report_fixtures", "docs/validation/megascene-report/results.json"),
@@ -253,8 +259,8 @@ def supporting_artifacts(base):
     """Index the #68 proof, diagnostic, admission and Atelier archive."""
     files = []
     roots = [(base / "megascene-acceptance-68", None)]
-    roots += [(root, {"failed"}) for root in sorted(
-        base.glob("megascene-acceptance-68-retry*"))]
+    roots += [(root, {"failed", "checks", "review-sheets"}) for root in sorted(
+        base.glob("megascene-acceptance-68-*"))]
     for root, allowed in roots:
         if not root.is_dir():
             continue

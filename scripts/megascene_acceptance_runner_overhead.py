@@ -35,14 +35,15 @@ def main():
                      if boot == campaign["boot_id"] else
                      time.time_ns() - int(campaign["lease_utc_ns"]))
             gross = min(int(campaign["allowance_ns"]), gross + max(0, since))
-        elif index + 1 < len(roots):
+        elif index + 1 < len(roots) and campaign["state"] == "active":
             next_campaign = json.loads(Path(roots[index + 1]["path"]).read_text())
             next_start_ns = int(datetime.fromisoformat(
                 next_campaign["utc_start"]).timestamp() * 1_000_000_000)
             bridge = max(0, next_start_ns - int(campaign["lease_utc_ns"]))
             gross += bridge
         wrapped = sum(int(run["elapsed_ns"]) for run in ledger["new_work"]
-                      if path.removesuffix("/campaign.json") in run.get("command", []))
+                      if run.get("runner_campaign") == path or
+                      path.removesuffix("/campaign.json") in run.get("command", []))
         overhead = max(0, gross - wrapped)
         previous = int(credited.get(path, "0"))
         if overhead > previous:

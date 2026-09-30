@@ -1,0 +1,198 @@
+{
+  "schema": "megascene-feature-assessments/1",
+  "views": {
+    "completion": {
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged return geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "opening": {
+      "building silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "span silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_00": {
+      "building silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "span silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_01": {
+      "exterior plaster wall": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_02": {
+      "clear interior doorway": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "interior wall": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_03": {
+      "cavity bridge": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "cavity depth": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "open air": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_04": {
+      "irregular lobes": {
+        "geometry": "correct",
+        "note": "Original-resolution inspection shows the raised blue center and lower orange lateral lobes with a stepped composite silhouette.",
+        "readability": "readable"
+      },
+      "material distinctions": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_05": {
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major structures": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "whole district extent": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_06": {
+      "building silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "span silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged return geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_07": {
+      "cavity bridge": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "cavity depth": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "open air": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged return geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_08": {
+      "open sky": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged return geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_09": {
+      "building silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "span silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged return geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_10": {
+      "building silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "span silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged return geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "review_route_11": {
+      "building silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "span silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged return geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    }
+  }
+}

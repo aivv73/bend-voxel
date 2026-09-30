@@ -1,8 +1,19 @@
 {
-  "allowance_ns": "36000000000000",
+  "allowance_ns": "50400000000000",
   "charging_policy": "Conservative gross charge of every retained earlier Megascene campaign root, including development and failed attempts; new work charged once through new_work",
-  "declared_extension_ns": "28800000000000",
-  "extension_scope": "single approved 8-hour extension, superseding the earlier 4-hour response",
+  "declared_extension_ns": "43200000000000",
+  "declared_extensions": [
+    {
+      "scope": "earlier approved extension; superseded the 14400-second suggestion",
+      "seconds": "28800"
+    },
+    {
+      "approved_utc": "2026-09-29T23:29:16.671624+00:00",
+      "scope": "new additional four-hour extension approved after commit 58ac050",
+      "seconds": "14400"
+    }
+  ],
+  "extension_scope": "two approved additions: 28800 seconds, then 14400 seconds; 50400 seconds total including initial allowance",
   "initial_allowance_ns": "7200000000000",
   "issue": 68,
   "new_work": [
@@ -1147,9 +1158,483 @@
       "name": "supervisor-gross-overhead",
       "status": "charged",
       "wrapped_ns": "1898765397525"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension2",
+        "--work",
+        "build/calibration-68-extension2/history-large-1",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--threads",
+        "1"
+      ],
+      "elapsed_ns": "1681821412090",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension2/checks/calibration-history-large-1-extension2.log",
+      "log_sha256": "bd13dd48bbb236e867e1aa1e0b4f41401e9d34862eccd62dd0e56d4aa6f5a55e",
+      "name": "calibration-history-large-1-extension2",
+      "started_utc": "2026-09-29T23:29:41.626725+00:00",
+      "status": "pass"
+    },
+    {
+      "charge_policy": "Original wrapper was interrupted. All orphan child work is charged through the supervisor gross-overhead reconciliation; zero here prevents double charging.",
+      "child_exit_code": null,
+      "command": [
+        "python3",
+        "scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension2",
+        "--work",
+        "build/calibration-68-extension2/history-large-6",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--threads",
+        "6"
+      ],
+      "completed_runs": 8,
+      "elapsed_ns": "0",
+      "exit_code": 143,
+      "log": "/home/aivv/megascene-acceptance-68-extension2/checks/calibration-history-large-6-extension2.log",
+      "log_sha256": "1e53529d7ab26e2f9760e7b4bd2549a62397a60b17b75a74d01cf742646acfea",
+      "name": "calibration-history-large-6-extension2-recovered",
+      "recovered_utc": "2026-09-30T00:27:24.851646+00:00",
+      "recovery_audit": "/home/aivv/megascene-acceptance-68-extension2/checks/calibration-history-large-6-recovery.json",
+      "series_status": "insufficient",
+      "status": "interrupted_wrapper_recovered_series"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-extension2/campaign.json",
+      "elapsed_ns": "1736633127316",
+      "gross_ns": "3418454539406",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1681821412090"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "scripts/megascene_calibration_series.py",
+        "run",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension2",
+        "--work",
+        "build/calibration-68-extension2/history-large-12",
+        "--case",
+        "history",
+        "--preset",
+        "large",
+        "--threads",
+        "12"
+      ],
+      "elapsed_ns": "1697497715203",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension2/checks/calibration-history-large-12-extension2.log",
+      "log_sha256": "aafbd48ed835b9c2de2c373cf2f9564d6e1cf880d6086480ec2c54020da3748e",
+      "name": "calibration-history-large-12-extension2",
+      "started_utc": "2026-09-30T00:29:57.834945+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-extension2/campaign.json",
+      "elapsed_ns": "187036621481",
+      "gross_ns": "5302988876090",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "3379319127293"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene.py",
+        "--case",
+        "traversal",
+        "--preset",
+        "large",
+        "--seed",
+        "45",
+        "--threads",
+        "6",
+        "--resolution",
+        "1920x1080",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension3",
+        "--output",
+        "build/acceptance-68-extension3/primary/traversal-large-6-1920x1080-2eb33006"
+      ],
+      "elapsed_ns": "304599385129",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/primary-traversal-large-6-1920x1080-2eb33006.log",
+      "log_sha256": "ddb9d7613f5b8400d48a05eb0fceb0d1f104fe92102a246876cc69a7b957e4d7",
+      "name": "primary-traversal-large-6-1920x1080-2eb33006",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T00:58:42.947550+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene.py",
+        "--case",
+        "picking",
+        "--preset",
+        "large",
+        "--seed",
+        "45",
+        "--threads",
+        "6",
+        "--resolution",
+        "1920x1080",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension3",
+        "--output",
+        "build/acceptance-68-extension3/primary/picking-large-6-1920x1080-9ad83cb7"
+      ],
+      "elapsed_ns": "324748126392",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/primary-picking-large-6-1920x1080-9ad83cb7.log",
+      "log_sha256": "4961223a3fe9242782d70145ae3d75e3f36c5462d37202a26e5b8e3f54673639",
+      "name": "primary-picking-large-6-1920x1080-9ad83cb7",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:04:18.658528+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene.py",
+        "--case",
+        "localized",
+        "--preset",
+        "large",
+        "--seed",
+        "45",
+        "--threads",
+        "6",
+        "--resolution",
+        "1920x1080",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension3",
+        "--output",
+        "build/acceptance-68-extension3/primary/localized-large-6-1920x1080-86b1ad05"
+      ],
+      "elapsed_ns": "161997920495",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/primary-localized-large-6-1920x1080-86b1ad05.log",
+      "log_sha256": "07a452fbdcec81ec5e14a15a6cb2183759437e30eb01273ef11481dc5634bbd5",
+      "name": "primary-localized-large-6-1920x1080-86b1ad05",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:10:13.632350+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/scripts/megascene.py",
+        "--case",
+        "support",
+        "--preset",
+        "large",
+        "--seed",
+        "45",
+        "--threads",
+        "6",
+        "--resolution",
+        "1920x1080",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension3",
+        "--output",
+        "build/acceptance-68-extension3/primary/support-large-6-1920x1080-22de7ee1"
+      ],
+      "elapsed_ns": "226121169158",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/primary-support-large-6-1920x1080-22de7ee1.log",
+      "log_sha256": "f781e60d3624becdf5d517a30592bd782b716e382f664932f278ab12c40a0e77",
+      "name": "primary-support-large-6-1920x1080-22de7ee1",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:13:26.065783+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "elapsed_ns": "111539546904",
+      "gross_ns": "1129006148078",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1017466601174"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "scripts/megascene.py",
+        "--case",
+        "static",
+        "--preset",
+        "small",
+        "--threads",
+        "1",
+        "--runtime-from",
+        "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/09ea8769-5493-4b9e-bd88-3e35bc5ef23e/3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+        "--capture-opening",
+        "--seed",
+        "45",
+        "--resolution",
+        "1920x1080",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension3",
+        "--output",
+        "build/acceptance-68-extension3/static-small-1-opening"
+      ],
+      "elapsed_ns": "60602610636",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/static-small-1-opening.log",
+      "log_sha256": "5e674fd77618402a35378ab2154743f80b244063a0085ccaded085d9dacda009",
+      "name": "static-small-1-opening",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:17:49.694764+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "elapsed_ns": "37345662398",
+      "gross_ns": "1226954421112",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1078069211810"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "scripts/megascene.py",
+        "--case",
+        "static",
+        "--preset",
+        "small",
+        "--threads",
+        "12",
+        "--runtime-from",
+        "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/09ea8769-5493-4b9e-bd88-3e35bc5ef23e/3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+        "--capture-opening",
+        "--seed",
+        "45",
+        "--resolution",
+        "1920x1080",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension3",
+        "--output",
+        "build/acceptance-68-extension3/static-small-12-opening"
+      ],
+      "elapsed_ns": "57336059519",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/static-small-12-opening.log",
+      "log_sha256": "27d0d789093c79ebb20ca3fbe86ae442ce92c0f22efbf8939f07412692ced763",
+      "name": "static-small-12-opening",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:18:50.438172+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "elapsed_ns": "110854116",
+      "gross_ns": "1284401334747",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1135405271329"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "scripts/megascene.py",
+        "--case",
+        "static",
+        "--preset",
+        "large",
+        "--threads",
+        "6",
+        "--runtime-from",
+        "/home/aivv/megascene-acceptance-68/runner/70bb4a37-1f5b-4c89-9700-d0b4fd3b71ca/329621f9-ff5d-4e8a-80c8-4357671fd8e3/b8f6a9ec-5dbe-47d9-94d3-f22bec7b1231",
+        "--capture-opening",
+        "--seed",
+        "45",
+        "--resolution",
+        "1920x1080",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension3",
+        "--output",
+        "build/acceptance-68-extension3/static-large-6-opening"
+      ],
+      "elapsed_ns": "129002935671",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/static-large-6-opening.log",
+      "log_sha256": "ef2daa36e505fb5eeede5d9311d601e2878f562b9e703f17b739f32d8db80b17",
+      "name": "static-large-6-opening",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:19:47.981706+00:00",
+      "status": "pass"
+    },
+    {
+      "bridge_to_next_runner_ns": "0",
+      "campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "elapsed_ns": "233202250",
+      "gross_ns": "1413637472668",
+      "name": "supervisor-gross-overhead",
+      "status": "charged",
+      "wrapped_ns": "1264408207000"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "scripts/megascene.py",
+        "--case",
+        "history",
+        "--preset",
+        "small",
+        "--threads",
+        "6",
+        "--schedule",
+        "history-48-v1",
+        "--seed",
+        "45",
+        "--resolution",
+        "1920x1080",
+        "--archive",
+        "/home/aivv/megascene-acceptance-68-extension3",
+        "--output",
+        "build/acceptance-68-extension3/history-48-fresh"
+      ],
+      "elapsed_ns": "225336534014",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/history-48-fresh.log",
+      "log_sha256": "978b689379a1c6d1d1deef513c4dabcba41c1dbf8fc7a6398401a7756666fea9",
+      "name": "history-48-fresh",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:21:57.197210+00:00",
+      "status": "pass"
+    },
+    {
+      "charging_scope": "Active review time after runtime continuation finished; its earlier wait overlaps already charged runs and is excluded",
+      "command": [
+        "python3",
+        "/home/aivv/megascene-acceptance-68-extension2/checks/apply-reviewed-captures-after-runtime.py"
+      ],
+      "elapsed_ns": "347733405000",
+      "finished_utc": "2026-09-30T01:31:30.347454+00:00",
+      "log": "/home/aivv/megascene-acceptance-68-extension2/checks/apply-reviewed-captures-after-runtime.log",
+      "log_sha256": "e66f1f3bda3a85366aeadd28657d1c0babaaca14696cab16c896a1b052966158",
+      "name": "post-runtime-review-batch",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:25:42.614049+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "make",
+        "test"
+      ],
+      "elapsed_ns": "466830301175",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/full-suite-current.log",
+      "log_sha256": "fbb801d9c7dc39f82e93915aaa5d0007d3e7bb12c37b914e3114d82ca50b82fd",
+      "name": "full-suite-current",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:34:52.576793+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "bend",
+        "PROOF.bend"
+      ],
+      "elapsed_ns": "465589901",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/proof-current.log",
+      "log_sha256": "931f1e664a679af1355a9ca547ac1daef9f7b14137bc7cc21b110b0cc504b5b1",
+      "name": "proof-current",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:43:12.114789+00:00",
+      "status": "pass"
+    },
+    {
+      "command": [
+        "bend",
+        "PROOF.bend",
+        "--verdict"
+      ],
+      "elapsed_ns": "967211122",
+      "exit_code": 0,
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/proof-verdict-current.log",
+      "log_sha256": "61b73cda11b6b665b9f99f2defd3d3b57f985c865225e942a5bdaa594a503e47",
+      "name": "proof-verdict-current",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:43:27.372036+00:00",
+      "status": "pass"
+    },
+    {
+      "acceptance_index": "docs/validation/megascene-acceptance/index.json",
+      "acceptance_index_sha256": "17ed5aee772e137503dcbb9b4cbb5356693e6e02b461646b54042cdd0279edd7",
+      "charging_scope": "Conservative active review/documentation/index wall window after the preceding review batch; overlapping wrapped tests and proofs charged separately and excluded here",
+      "command": [
+        "manual named-capture inspection, audited corrections, exact thread comparison, documentation and index generation"
+      ],
+      "elapsed_ns": "608660091000",
+      "excluded_wrapped_work": [
+        {
+          "excluded_ns": "466830301000",
+          "name": "full-suite-current"
+        },
+        {
+          "excluded_ns": "465590000",
+          "name": "proof-current"
+        },
+        {
+          "excluded_ns": "967211000",
+          "name": "proof-verdict-current"
+        }
+      ],
+      "finished_utc": "2026-09-30T01:49:27.270647+00:00",
+      "log": "/home/aivv/megascene-acceptance-68-extension3/checks/large-primary-reviews.json",
+      "log_sha256": "25da533c2ad71e1fe7821f7b485e7885e049c3e11c848e6166a94ef064eb9dbf",
+      "name": "final-visual-review-and-index",
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:31:30.347454+00:00",
+      "status": "pass"
+    },
+    {
+      "audit_scope": "Exact accepted schedule, linked passing validation and complete archive entries; preliminary and otherwise ineligible historical attempts remain archived with their original statuses",
+      "command": [
+        "Audit retained files and linked positive summaries; verify no complete timed acceptance bundle awaits a named-capture assessment"
+      ],
+      "elapsed_ns": "108633331000",
+      "fidelity_rows_with_passing_review": 35,
+      "finished_utc": "2026-09-30T01:51:15.903978+00:00",
+      "log": "docs/validation/megascene-acceptance/index.json",
+      "log_sha256": "17ed5aee772e137503dcbb9b4cbb5356693e6e02b461646b54042cdd0279edd7",
+      "missing_indexed_files": 0,
+      "name": "final-archive-audit",
+      "observed_runtime_rows": 45,
+      "pending_complete_timed_named_reviews": 0,
+      "required_runtime_rows": 45,
+      "runner_campaign": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+      "started_utc": "2026-09-30T01:49:27.270647+00:00",
+      "status": "pass",
+      "unresolved_fidelity_rows": 10
     }
   ],
-  "new_work_charge_ns": "12591826932730",
+  "new_work_charge_ns": "21067079744700",
   "prior_campaigns": [
     {
       "archive": "/home/aivv/megascene-calibration-64",
@@ -1343,10 +1828,10 @@
   ],
   "prior_gross_charge_ns": "23343080371458",
   "recorded_utc": "2026-09-29T16:34:07.929025+00:00",
-  "remaining_ns": "65092695812",
+  "remaining_ns": "5560818266133",
   "runner_campaign": {
-    "path": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
-    "scope": "internal supervisor cap; shared allowance remains consolidated in this ledger"
+    "path": "/home/aivv/megascene-acceptance-68-extension3/campaign.json",
+    "scope": "fresh internal supervisor cap for remaining primary coverage; approved shared allowance remains unchanged"
   },
   "runner_campaign_history": [
     {
@@ -1368,10 +1853,20 @@
     {
       "path": "/home/aivv/megascene-acceptance-68-retry3/campaign.json",
       "scope": "internal supervisor cap; shared allowance remains consolidated in this ledger"
+    },
+    {
+      "path": "/home/aivv/megascene-acceptance-68-retry4/campaign.json",
+      "scope": "internal supervisor cap; shared allowance remains consolidated in this ledger"
+    },
+    {
+      "path": "/home/aivv/megascene-acceptance-68-extension2/campaign.json",
+      "scope": "internal supervisor cap; shared allowance remains consolidated in this ledger"
     }
   ],
-  "runner_campaign_remaining_ns": "4295208077678",
+  "runner_campaign_remaining_ns": "5560818266133",
   "runner_overhead_credited_ns": {
+    "/home/aivv/megascene-acceptance-68-extension2/campaign.json": "1923669748797",
+    "/home/aivv/megascene-acceptance-68-extension3/campaign.json": "149229265668",
     "/home/aivv/megascene-acceptance-68-retry/campaign.json": "460942485231",
     "/home/aivv/megascene-acceptance-68-retry2/campaign.json": "71829751823",
     "/home/aivv/megascene-acceptance-68-retry3/campaign.json": "309057874016",
