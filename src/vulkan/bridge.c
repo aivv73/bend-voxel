@@ -121,6 +121,7 @@ static void mega_stage(const char* name,u64 begin,u64 end) { (void)name; (void)b
 #endif
 #ifdef CID_VULKAN_VULKAN_CAPTURE
 static VoxelVkFrame mega_capture_frame;
+static char mega_capture_hud[4096];
 static void voxel_support_detail(BendWin* win);
 static void mega_capture_image(BendWin* win,const char* path) {
   // History has 120 edit captures. Three refresh intervals suffice on the
@@ -175,7 +176,7 @@ Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
     snprintf(record,sizeof record,"\"record_type\":\"capture\",\"rendered_frame\":\"%llu\"",(unsigned long long)(mega_frame-1));
     mega_record(record);
   } else mega_record("\"record_type\":\"opening_capture\"");
-  if(directory && getenv("MEGASCENE_SUPPORT")) voxel_support_detail(win);
+  if(directory && (getenv("MEGASCENE_SUPPORT") || getenv("MEGASCENE_SUPPLEMENTARY_FILE"))) voxel_support_detail(win);
   return f[0];
 }
 
@@ -621,9 +622,11 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   if (mega_stream) mega_stage("renderer",mega_render_begin,voxel_vk_tick());
   u64 mega_events_begin=mega_stream?voxel_vk_tick():0;
 #ifdef CID_VULKAN_VULKAN_CAPTURE
-  if(mega_stream && getenv("MEGASCENE_SUPPORT") && getenv("MEGASCENE_VALIDATE")) {
+  if(mega_stream && (getenv("MEGASCENE_SUPPORT") || getenv("MEGASCENE_SUPPLEMENTARY_FILE")) && getenv("MEGASCENE_VALIDATE")) {
     mega_capture_frame=frame;
-    mega_capture_frame.hud="MEGASCENE / SUPPORT CUTS / DEVELOPMENT OBSERVATION";
+    if(strlen(hud)>=sizeof mega_capture_hud) err_fail("supplementary HUD exceeds retained bound");
+    memcpy(mega_capture_hud,hud,strlen(hud)+1);
+    mega_capture_frame.hud=mega_capture_hud;
   }
 #endif
   free(hud);
@@ -688,24 +691,33 @@ static void mega_detail_record(const char* fields) {
 }
 static void voxel_support_detail(BendWin* win) {
   u64 frame=mega_frame-1;
-  if(!getenv("MEGASCENE_VALIDATE") || frame<=mega_warmup || frame>mega_warmup+31 || (frame-mega_warmup-1)%6) return;
-  unsigned action=(unsigned)((frame-mega_warmup-1)/6);
-  const char* count_text=mega_env("MEGASCENE_DETAIL_CAMERA_COUNT");
+  if(!getenv("MEGASCENE_VALIDATE")) return;
+  const char* extra=getenv("MEGASCENE_SUPPLEMENTARY_FILE");
+  if(!extra && (frame<=mega_warmup || frame>mega_warmup+31 || (frame-mega_warmup-1)%6)) return;
+  unsigned action=extra?UINT32_MAX:(unsigned)((frame-mega_warmup-1)/6);
+  const char* count_text=mega_env(extra?"MEGASCENE_SUPPLEMENTARY_COUNT":"MEGASCENE_DETAIL_CAMERA_COUNT");
   char* end=NULL;
   unsigned long count=strtoul(count_text,&end,10);
-  if(!end || *end || (count!=2 && count!=4 && count!=6)) err_fail("invalid supplementary camera count");
-  if(action>=count) return;
-  FILE* file=fopen(mega_env("MEGASCENE_DETAIL_CAMERA_FILE"),"rb");
-  u32 views[30];
-  if(!file || fread(views,4,5*count,file)!=5*count || fgetc(file)!=EOF || fclose(file)) err_fail("supplementary camera input unavailable");
-  u32* words=views+5*action;
+  if(!end || *end || (extra?(!count || count>128):(count!=2 && count!=4 && count!=6))) err_fail("invalid supplementary camera count");
+  if(!extra && action>=count) return;
+  FILE* file=fopen(extra?extra:mega_env("MEGASCENE_DETAIL_CAMERA_FILE"),"rb");
+  u32 views[7*128]; size_t stride=extra?7:5;
+  if(!file || fread(views,4,stride*count,file)!=stride*count || fgetc(file)!=EOF || fclose(file)) err_fail("supplementary camera input unavailable");
+  u32* words=extra?NULL:views+5*action;
+  if(extra) {
+    for(unsigned i=0;i<count;i++) if(views[7*i]==frame) {
+      if(words) err_fail("duplicate supplementary frame");
+      action=views[7*i+1]; words=views+7*i+2;
+    }
+    if(!words) return;
+  }
   VoxelVkFrame detail=mega_capture_frame;
   for(unsigned i=0;i<5;i++) {
     float value; memcpy(&value,words+i,4);
     if(!isfinite(value)) err_fail("nonfinite supplementary camera");
     if(i<3) detail.eye[i]=value; else if(i==3) detail.yaw=value; else detail.pitch=value;
   }
-  detail.hud="MEGASCENE / SUPPORT CUT / VALIDATION DETAIL";
+  detail.hud=extra?"MEGASCENE / SUPPLEMENTARY / VALIDATION ONLY":"MEGASCENE / SUPPORT CUT / VALIDATION DETAIL";
   detail.record=mega_detail_record;
   VoxelVkRender render=(VoxelVkRender)dlsym(voxel_vk_library,"voxel_vk_render_detail");
   if(!render) err_fail("supplementary render unavailable");
@@ -716,8 +728,11 @@ static void voxel_support_detail(BendWin* win) {
   if(snprintf(path,sizeof path,"%s/detail-%04llu.ppm",mega_env("MEGASCENE_CAPTURE_DIR"),(unsigned long long)frame)>=(int)sizeof path) err_fail("detail path too long");
   mega_capture_image(win,path);
   char record[512];
-  snprintf(record,sizeof record,"\"record_type\":\"detail_capture\",\"rendered_frame\":\"%llu\",\"action\":\"%u\",\"camera\":{\"eye_m\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"],\"yaw\":\"0x%08x\",\"pitch\":\"0x%08x\"}",
-    (unsigned long long)frame,action,words[0],words[1],words[2],words[3],words[4]);
+  char action_json[32];
+  if(action==UINT32_MAX) snprintf(action_json,sizeof action_json,"null");
+  else snprintf(action_json,sizeof action_json,"\"%u\"",action);
+  snprintf(record,sizeof record,"\"record_type\":\"detail_capture\",\"rendered_frame\":\"%llu\",\"action\":%s,\"camera\":{\"eye_m\":[\"0x%08x\",\"0x%08x\",\"0x%08x\"],\"yaw\":\"0x%08x\",\"pitch\":\"0x%08x\"}",
+    (unsigned long long)frame,action_json,words[0],words[1],words[2],words[3],words[4]);
   mega_record(record);
   // Restore the frozen overview before returning the unchanged Bend state.
   mega_detail_phase="restore"; detail=mega_capture_frame; detail.record=mega_detail_record;

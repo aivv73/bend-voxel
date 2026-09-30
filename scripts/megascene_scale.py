@@ -159,6 +159,23 @@ def admit_schedule(config, frozen):
         pick = frame.get("expected_pick")
         if pick and pick["kind"] != "0" and not 0 <= binary32(pick["distance_m"]) < 256:
             raise ValueError("required picking result outside strict reach")
+    seen_details = set()
+    for detail in frozen.get("supplementary_views", []):
+        frame = int(detail["frame"])
+        if not 0 <= frame < expected or frame in seen_details:
+            raise ValueError("invalid supplementary frame")
+        seen_details.add(frame)
+        view = detail["camera"]
+        eye = [binary32(x) for x in view["eye_m"]]
+        yaw, pitch = binary32(view["yaw"]), binary32(view["pitch"])
+        if max(map(abs, eye)) > 2048 or abs(yaw) > math.pi+1e-6 or abs(pitch) > math.pi/2+1e-6:
+            raise ValueError("supplementary camera outside supported envelope")
+        max_eye = max(max_eye, *map(abs, eye))
+        if detail.get("action") is not None and detail["action"] not in frames[frame]["actions"]:
+            raise ValueError("supplementary action missing from its frame")
+        original = next((v for v in frozen["review_views"] if v["name"] == detail["supplementary_to"]), None)
+        if original is None or original["frame"] != detail["frame"] or not set(detail["features"]) <= set(original["features"]):
+            raise ValueError("supplementary view does not bind an original feature")
     required = set()
     for action in frozen["actions"]:
         if not action.get("required", False):

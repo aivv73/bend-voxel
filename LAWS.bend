@@ -355,3 +355,8 @@ law palette_material_order:
 # - Actual host graphics dependencies and elapsed time are recorded separately;
 #   reproduction does not prove cross-platform equality or performance gates.
 #   Native/unsafe behavior remains runtime/reference evidence, not formal proof.
+
+# Approved supplementary validation views must preserve world/frame, primary
+# cameras, rays, action times, caches, proxy hysteresis and full-mesh shadows.
+# These native/unsafe invariants require runtime/reference tests; they are not
+# formally proven by this file. Supplementary work is excluded from timing.

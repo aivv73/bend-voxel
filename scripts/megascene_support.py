@@ -265,15 +265,21 @@ def audit_details(records,frozen,required):
             ns=[r for r in rs if r['record_type']=='native_audit'];ws=[r for r in rs if r['record_type']=='render_work']
             require(len(ns)==len(ws)==1,'missing supplementary native/cache evidence')
             n,w=ns[0],ws[0]
-            for key in ('mesh_slots','mesh_sha256','proxy_cache_sha256','vertices_checked'):
+            for key in ('mesh_slots','proxy_cache_sha256','vertices_checked') + (('mesh_sha256',) if 'mesh_sha256' in primary else ()):
                 require(n[key]==primary[key], 'supplementary rendering changed '+key)
             require(w['mesh_rebuilt']==w['proxy_rebuilt']=='0' and w['shadow_refresh'] is False and w['shadow_body_draws']=='0',
                     'supplementary view rebuilt geometry/shadows')
             for key in ('body_count','full_meshes','shadow_extent_m','shadow_texel_m','shadow_fit_min_margin_texels'):
                 require(w[key]==work[key], 'supplementary view changed '+key)
-            require(int(n['reference_visible'])<=len(n['drawn_ids']) and str(len(n['drawn_ids']))==w['main_body_draws'],'supplementary visibility mismatch')
+            require(int(n['reference_visible'])<=len(n['drawn_ids'])+len(n.get('proxied_ids',[])) and str(len(n['drawn_ids']))==w['main_body_draws'],'supplementary visibility mismatch')
             if phase=='restore':
                 require(n['drawn_ids']==primary['drawn_ids'], 'frozen overview not restored')
+                for key in ('selected_ids','proxied_ids','proxy_group_evidence'):
+                    if key in primary:
+                        require(n.get(key)==primary[key], 'supplementary restoration changed '+key)
+                for key in ('proxy_draws','proxied_bodies','main_body_draws','visible_bodies'):
+                    if key in work:
+                        require(w.get(key)==work[key], 'supplementary restoration changed '+key)
     require({r['rendered_frame'] for r in rendered}=={v['frame'] for v in frozen['supplementary_views']} and
             all(r['phase'] in ('closeup','restore') for r in rendered),'unexpected supplementary render')
 

@@ -134,7 +134,15 @@ def assess(bundle, input_path, reviewer):
     for view in review['views']:
         for feature in view['features']:
             if 'covered_by' not in feature: continue
-            require(manifest['effective']['case']=='support', 'unexpected supplementary feature coverage')
+            config=manifest['effective']
+            planned=next((v for v in frozen.get('supplementary_views',[]) if v['name']==feature['covered_by']),None)
+            allowed=config['case']=='support' or (planned is not None and (
+                config['case']=='history' and planned.get('purpose')=='history_face' and
+                    feature['name'] in ('removed material','new exposed surfaces') or
+                config['case'] in ('traversal','picking') and
+                    config.get('diagnostic') in ('mixed-world','compact-reference') and
+                    planned.get('purpose')=='proxy_shadow' and feature['name']=='major shadows'))
+            require(allowed, 'unexpected supplementary feature coverage')
             detail=next((v for v in review['views'] if v['name']==feature['covered_by']),None)
             require(detail is not None and detail.get('supplementary_to')==view['name'] and detail['frame']==view['frame'],
                     'supplementary feature does not cover the same action state')

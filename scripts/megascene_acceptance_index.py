@@ -42,8 +42,12 @@ CORROBORATION = (
     ("audited_visual_corrections", "docs/validation/megascene-acceptance/visual-review-corrections.md"),
     ("identical_capture_visual_reuse", "docs/validation/megascene-acceptance/visual-reuse.json"),
     ("additional_identical_capture_visual_reuse", "docs/validation/megascene-acceptance/visual-reuse-extension.json"),
-    ("proposed_history_view_decision", "docs/validation/megascene-acceptance/history-review-proposal.md"),
-    ("proposed_proxy_view_decision", "docs/validation/megascene-acceptance/proxy-review-proposal.md"),
+    ("approved_history_view_decision", "docs/validation/megascene-acceptance/history-review-proposal.md"),
+    ("approved_proxy_view_decision", "docs/validation/megascene-acceptance/proxy-review-proposal.md"),
+    ("supplementary_view_preservation", "docs/validation/megascene-acceptance/supplementary-preservation.json"),
+    ("supplementary_history_thread_equality", "docs/validation/megascene-acceptance/history-small-supplementary-threads.json"),
+    ("supplementary_view_review", "docs/validation/megascene-acceptance/supplementary-views.md"),
+    ("supplementary_repeat_reviews", "docs/validation/megascene-acceptance/supplementary-repeat-reviews.json"),
     ("large_history_guard_regression", "docs/validation/megascene-acceptance/large-history-guard.md"),
     ("resource_recovery", "docs/validation/megascene-gpu/recovery.json"),
     ("report_fixtures", "docs/validation/megascene-report/results.json"),
@@ -259,7 +263,7 @@ def supporting_artifacts(base):
     """Index the #68 proof, diagnostic, admission and Atelier archive."""
     files = []
     roots = [(base / "megascene-acceptance-68", None)]
-    roots += [(root, {"failed", "checks", "review-sheets"}) for root in sorted(
+    roots += [(root, {"failed", "checks", "review-sheets", "diagnostics"}) for root in sorted(
         base.glob("megascene-acceptance-68-*"))]
     for root, allowed in roots:
         if not root.is_dir():
@@ -302,7 +306,8 @@ def main():
              "corroboration": corroboration(),
              "known_campaign_elapsed_ns": str(sum(int(row["elapsed_ns"] or 0)
                                                  for row in campaign_rows)),
-             "implementation_acceptance": "incomplete",
+             "implementation_acceptance": "unassessed",
+             "acceptance_assessment": "acceptance.json (separate reviewed decision, when present)",
              "qualified_performance": "unqualified",
              "future_limit_discovery": "outside_issue_68"}
     args.output.parent.mkdir(parents=True, exist_ok=True)

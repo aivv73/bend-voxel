@@ -1,0 +1,1343 @@
+{
+  "schema": "megascene-feature-assessments/1",
+  "views": {
+    "completion": {
+      "retained geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "settled fragments": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_0": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_1": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_10": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_100": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_101": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_102": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_103": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_104": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_105": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_106": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_107": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_108": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      }
+    },
+    "cut_109": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      }
+    },
+    "cut_11": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_110": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_111": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_112": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_113": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_114": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_115": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_116": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_117": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_118": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      }
+    },
+    "cut_119": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      }
+    },
+    "cut_12": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_13": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_14": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_15": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_16": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_17": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_18": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_19": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_2": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_20": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_21": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_22": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_23": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_24": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_25": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_26": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_27": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_28": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_29": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_3": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_30": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_31": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_32": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_33": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_34": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_35": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_36": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_37": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_38": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_39": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_4": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_40": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_41": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_42": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_43": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_44": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_45": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_46": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_47": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_48": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_49": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_5": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_50": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_51": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_52": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_53": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_54": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_55": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_56": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_57": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_58": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_59": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_6": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_60": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_61": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_62": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_63": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_64": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_65": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_66": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_67": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_68": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_69": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_7": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_70": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_71": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_72": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_73": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_74": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_75": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_76": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_77": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_78": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_79": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_8": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_80": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_81": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_82": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_83": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_84": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_85": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_86": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_87": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_88": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      }
+    },
+    "cut_89": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      }
+    },
+    "cut_9": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_90": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_91": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_92": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_93": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_94": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_95": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_96": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_97": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_98": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      }
+    },
+    "cut_99": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The post-cut primary view shows ground without a discernible remaining cut surface; reference correctness does not establish readability.",
+        "readability": "insufficient"
+      }
+    },
+    "face_108": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      }
+    },
+    "face_109": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      }
+    },
+    "face_118": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      }
+    },
+    "face_119": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      }
+    },
+    "face_88": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      }
+    },
+    "face_89": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      }
+    },
+    "face_98": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      }
+    },
+    "face_99": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The frozen reference locates the former bridge connection at the centre of this view. The continuous exposed wall, empty gap, wall and floor boundaries, and absence of a protruding bridge stub are discernible.",
+        "readability": "readable"
+      }
+    },
+    "history_overview": {
+      "cumulative destruction": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining anchored material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "opening": {
+      "district and structures": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    }
+  }
+}

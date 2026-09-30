@@ -1,6 +1,7 @@
 # Proposed supplementary proxy validation views
 
-Status: proposed; the accepted proxy schedule and fidelity gates remain unchanged.
+Status: accepted by the user on 2026-09-30; fresh validation and visual review
+completed. See [the execution record](supplementary-views.md).
 
 Original-resolution review of the mixed-world diagnostic shows that the
 horizontal far camera does not expose enough ground to assess every required
@@ -10,11 +11,11 @@ selection audit cannot replace this visual gate.
 
 ## Concrete proposed decision
 
-Apply the already accepted support close-up approach to the four required
-mixed-world proxy diagnostic configurations (traversal and picking, full and
-proxy profiles). Original-resolution inspection finds the compact-reference
-silhouettes and shadows discernible, so those four configurations do not
-currently need added views:
+Apply the accepted supplementary-view approach to all eight proxy configurations:
+mixed-world and compact-reference, traversal and picking, full and proxy.
+The user's approval expands the original four-configuration proposal. Retain
+the compact-reference original passing assessments as well as mixed-world
+insufficient assessments.
 
 - Preserve every primary camera, picking ray, hold, checkpoint and timed frame.
 - Freeze a supplementary camera for each named review frame before replay.
@@ -32,6 +33,5 @@ currently need added views:
   populations. Run fresh applicable validation and retain original failed
   reviews, pairing audits and all attempts.
 
-This requires an explicit decision because the accepted supplementary-view
-exception in `docs/megascene-spec.md` currently covers support cuts only.
-The proposal does not establish a visual pass or qualified performance.
+The user approved this extension of the former support-only exception.
+The decision does not itself establish a visual pass or qualified performance.

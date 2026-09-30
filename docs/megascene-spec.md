@@ -343,3 +343,25 @@ readable close-up can cover the same action's occluded cut feature, while any
 incorrect geometry still fails rendering correctness. These extra renders do not
 enter CPU/GPU performance populations. The primary schedule remains support-v1;
 its complete archived schedule identity includes the supplementary view inputs.
+
+## Issue #68 supplementary validation views
+
+On 2026-09-30 the user approved frozen supplementary shadow views for all eight
+proxy configurations (both worlds, traversal/picking, full/proxy), and frozen
+exposed-face views for cuts 88, 89, 98, 99, 108, 109, 118 and 119 in the six
+affected small-history configurations. The accepted proposals are
+[proxy review](validation/megascene-acceptance/proxy-review-proposal.md) and
+[history review](validation/megascene-acceptance/history-review-proposal.md).
+
+Freeze each camera before execution and bind it to the original named feature,
+frame, action where applicable, and actual state/geometry checkpoint. Render the
+same world/frame during validation only. Preserve every primary camera, picking
+ray, action time, physics step and timed workload. Retain original captures and
+corrected assessments; supplementary coverage applies only to major proxy
+shadows or the named history cuts' removed material and exposed surfaces.
+Incorrect geometry still fails.
+
+Restore and audit the original view, world geometry, cache, proxy hysteresis and
+full-mesh shadow state. Exclude supplementary rendering/restoration from timed
+CPU/GPU populations. Require fresh applicable validation; approval alone cannot
+turn an original unreadable capture into a visual pass.

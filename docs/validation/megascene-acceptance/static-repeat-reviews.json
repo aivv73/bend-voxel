@@ -1,0 +1,90 @@
+{
+  "schema": "megascene-static-repeat-reviews/1",
+  "policy": "Same configuration, frozen schedule and opening capture SHA-256 as inspected feature source; validation/runtime source recorded separately; target assessed separately",
+  "rows": [
+    {
+      "name": "static-small-1-repeat-2",
+      "archive": "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/e301e94a-9eff-4592-a7fc-1a8f22c2e408/42928cad-4b33-414e-b44b-e74d5cbe6fdc",
+      "attempt_id": "42928cad-4b33-414e-b44b-e74d5cbe6fdc",
+      "source_archive": "/home/aivv/megascene-acceptance-68-extension3/1b8e09c1-b8f1-4ba0-a805-73d7b593aa57/92090e38-bb65-4f6d-bd37-eb41f4aadf2f/e4a598a5-6e5d-407b-827e-627dc0e1bc07",
+      "source_attempt": "e4a598a5-6e5d-407b-827e-627dc0e1bc07",
+      "opening_capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d",
+      "frozen_schedule_identical": true,
+      "status": "pass",
+      "runtime_source_archive": "/home/aivv/megascene-acceptance-68-extension3/1b8e09c1-b8f1-4ba0-a805-73d7b593aa57/92090e38-bb65-4f6d-bd37-eb41f4aadf2f/e4a598a5-6e5d-407b-827e-627dc0e1bc07",
+      "validation_reused": true
+    },
+    {
+      "name": "static-small-1-repeat-3",
+      "archive": "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/3ee31af6-a272-4d38-a1a0-cdc0cc8db90c/f9cb7ebd-0e82-4388-a385-26bd0d02088e",
+      "attempt_id": "f9cb7ebd-0e82-4388-a385-26bd0d02088e",
+      "source_archive": "/home/aivv/megascene-acceptance-68-extension3/1b8e09c1-b8f1-4ba0-a805-73d7b593aa57/92090e38-bb65-4f6d-bd37-eb41f4aadf2f/e4a598a5-6e5d-407b-827e-627dc0e1bc07",
+      "source_attempt": "e4a598a5-6e5d-407b-827e-627dc0e1bc07",
+      "opening_capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d",
+      "frozen_schedule_identical": true,
+      "status": "pass",
+      "runtime_source_archive": "/home/aivv/megascene-acceptance-68-extension3/1b8e09c1-b8f1-4ba0-a805-73d7b593aa57/92090e38-bb65-4f6d-bd37-eb41f4aadf2f/e4a598a5-6e5d-407b-827e-627dc0e1bc07",
+      "validation_reused": true
+    },
+    {
+      "name": "static-small-6-repeat-1-fresh",
+      "archive": "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/05916fd2-94f6-4b2f-9294-84ed50748216/09e4bbe5-f9b8-4261-8b63-a78589927ea4",
+      "attempt_id": "09e4bbe5-f9b8-4261-8b63-a78589927ea4",
+      "source_archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/09ea8769-5493-4b9e-bd88-3e35bc5ef23e/3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+      "source_attempt": "3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+      "opening_capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d",
+      "frozen_schedule_identical": true,
+      "status": "pass",
+      "runtime_source_archive": "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/e301e94a-9eff-4592-a7fc-1a8f22c2e408/42928cad-4b33-414e-b44b-e74d5cbe6fdc",
+      "validation_reused": false
+    },
+    {
+      "name": "static-small-6-repeat-2-final-archive",
+      "archive": "/home/aivv/megascene-acceptance-68-final/e8cb4a56-b7e8-4fa0-9987-e66c2e7bc694/3f597cf6-261d-48a3-8007-1e9d6b69df77/c21ecb01-2e87-43c4-bff9-a508a91891cb",
+      "attempt_id": "c21ecb01-2e87-43c4-bff9-a508a91891cb",
+      "source_archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/09ea8769-5493-4b9e-bd88-3e35bc5ef23e/3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+      "source_attempt": "3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+      "runtime_source_archive": "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/05916fd2-94f6-4b2f-9294-84ed50748216/09e4bbe5-f9b8-4261-8b63-a78589927ea4",
+      "validation_reused": true,
+      "opening_capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d",
+      "frozen_schedule_identical": true,
+      "status": "pass"
+    },
+    {
+      "name": "static-small-6-repeat-3-final-archive",
+      "archive": "/home/aivv/megascene-acceptance-68-final/e8cb4a56-b7e8-4fa0-9987-e66c2e7bc694/e0fc6505-6907-42d5-95c0-bd2b1f7e3968/3ed83cf1-f64f-478a-877d-fddd8f499385",
+      "attempt_id": "3ed83cf1-f64f-478a-877d-fddd8f499385",
+      "source_archive": "/home/aivv/megascene-issue59-archive/71b8de88-db0c-440f-b056-875fff62bb72/09ea8769-5493-4b9e-bd88-3e35bc5ef23e/3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+      "source_attempt": "3ec8f737-5904-43e2-a5a8-bf0ecb40ca1d",
+      "runtime_source_archive": "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/05916fd2-94f6-4b2f-9294-84ed50748216/09e4bbe5-f9b8-4261-8b63-a78589927ea4",
+      "validation_reused": true,
+      "opening_capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d",
+      "frozen_schedule_identical": true,
+      "status": "pass"
+    },
+    {
+      "name": "static-small-12-repeat-2",
+      "archive": "/home/aivv/megascene-acceptance-68-final/e8cb4a56-b7e8-4fa0-9987-e66c2e7bc694/829d2e5f-30bd-4f0f-9916-d191de44e32d/ab1cc64e-3efe-46f7-875d-013bf537bc78",
+      "attempt_id": "ab1cc64e-3efe-46f7-875d-013bf537bc78",
+      "source_archive": "/home/aivv/megascene-acceptance-68-extension3/1b8e09c1-b8f1-4ba0-a805-73d7b593aa57/43978a57-7b8b-4061-85e5-96c1d2e5721c/3dba0034-2c08-4b25-845d-bf4cf67e83d8",
+      "source_attempt": "3dba0034-2c08-4b25-845d-bf4cf67e83d8",
+      "runtime_source_archive": "/home/aivv/megascene-acceptance-68-extension3/1b8e09c1-b8f1-4ba0-a805-73d7b593aa57/43978a57-7b8b-4061-85e5-96c1d2e5721c/3dba0034-2c08-4b25-845d-bf4cf67e83d8",
+      "validation_reused": true,
+      "opening_capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d",
+      "frozen_schedule_identical": true,
+      "status": "pass"
+    },
+    {
+      "name": "static-small-12-repeat-3",
+      "archive": "/home/aivv/megascene-acceptance-68-final/e8cb4a56-b7e8-4fa0-9987-e66c2e7bc694/d9a9ad32-4da4-4e9d-94c4-d9439202ffdb/1f6fcbc8-a806-4a12-8d1e-4017febdf719",
+      "attempt_id": "1f6fcbc8-a806-4a12-8d1e-4017febdf719",
+      "source_archive": "/home/aivv/megascene-acceptance-68-extension3/1b8e09c1-b8f1-4ba0-a805-73d7b593aa57/43978a57-7b8b-4061-85e5-96c1d2e5721c/3dba0034-2c08-4b25-845d-bf4cf67e83d8",
+      "source_attempt": "3dba0034-2c08-4b25-845d-bf4cf67e83d8",
+      "runtime_source_archive": "/home/aivv/megascene-acceptance-68-extension3/1b8e09c1-b8f1-4ba0-a805-73d7b593aa57/43978a57-7b8b-4061-85e5-96c1d2e5721c/3dba0034-2c08-4b25-845d-bf4cf67e83d8",
+      "validation_reused": true,
+      "opening_capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d",
+      "frozen_schedule_identical": true,
+      "status": "pass"
+    }
+  ]
+}

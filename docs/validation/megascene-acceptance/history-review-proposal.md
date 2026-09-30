@@ -1,6 +1,7 @@
 # Proposed supplementary history validation views
 
-Status: proposed; no added view has been accepted or executed.
+Status: accepted by the user on 2026-09-30; fresh validation and visual review
+completed. See [the execution record](supplementary-views.md).
 
 Review of all 123 named small-history images, both diagnostic history controls,
 and both history-prefix controls found a definite readability failure in late
@@ -39,6 +40,6 @@ error at cut 41: its bound capture clearly shows the opening and exposed faces.
 The original and fresh captures have identical hashes. Both prior insufficient
 assessments remain archived; no capture synchronization defect was observed.
 
-An explicit decision is required because `docs/megascene-spec.md` currently
-limits this exception to support cuts. This proposal changes the validation
-view coverage, not the timed schedule or the required fidelity standard.
+The user approved this extension of the former support-only exception.
+The decision changes validation coverage while preserving the timed schedule
+and required fidelity standard.
