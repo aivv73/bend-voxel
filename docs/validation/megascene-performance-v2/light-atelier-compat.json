@@ -1,0 +1,17 @@
+{
+  "archive": "/home/aivv/megascene-evidence/performance-v2/light-atelier-compat",
+  "review": {
+    "reviewer": "GPT-6 root original640x360 visual inspection",
+    "time_utc": "2026-09-30T12:12:57.256730+00:00",
+    "capture": "before.png",
+    "capture_sha256": "0108be17e2419feb23247113ccffa5d05aa843f9f8ec811301bf5e0e469113d1",
+    "scope": "Light Atelier opening compatibility after native bridge/query changes; no gameplay matrix or throughput claim",
+    "geometry": "Suzanne left, open golden Oculus center, twisted column right, courtyard and canopy are present.",
+    "readability": "Distinct sculpture shadows and canopy stripes are visible. HUD reads VOXELS803970, BODIES0/2048, REMOVED0, READY / CUT APPLIED.",
+    "visual_review": "pass for opening scope",
+    "native_mesh_reference": "Enabled VOXEL_VERIFY_BEND_MESH=1 in the actual helper launch; helper exit0 and no mismatch",
+    "cleanup": "Owned process727068 exit0; actions.jsonl cleanup process_stopped=true; helper report remains visual_review pending."
+  },
+  "mechanical_pass": true,
+  "exit_code": 0
+}

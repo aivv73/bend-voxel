@@ -68,7 +68,7 @@ Startup stops at 120 seconds without a usable frame. After startup, the
 completion watchdog stops after 30 seconds without a completed frame/edit.
 Logs and heartbeats do not reset it. The case stops at 300 seconds or the lower
 explicit `--deadline`, and the campaign deadline may stop it sooner. The earliest
-applicable deadline wins. The separate 30-second interactive startup gate
+applicable deadline wins. [Performance v2](megascene-performance-v2.md) separately declares a 480-second cap for complete history validation at 120/21600; its timed workers keep the 300-second cap. An explicit smaller deadline and every other stopping condition remain effective. The separate 30-second interactive startup gate
 remains a qualification concern, not the startup stop deadline.
 
 ## Allocation and reference evidence

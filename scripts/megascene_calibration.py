@@ -160,6 +160,13 @@ def off_result(config, archive, manifest, validation, supervised, cpu, problems)
                                    "measured": str(sum(r["population"] in ("ordinary", "edit", "motion") for r in frames))},
               "raw_evidence": {"reference": "reference.jsonl", "endpoints": "cpu.jsonl", "resources": "resources.jsonl",
                                "allocations": "allocations.jsonl"}}
+    from megascene_performance import enabled
+    if enabled(config):
+        result['populations'].update({name:distribution(integer(r['duration_ns']) for r in frames if r['population']==name)
+                                     for name in ('edit','motion','warmup')})
+        measured=[r for r in frames if r['population'] not in ('startup','warmup')]
+        result['populations']['combined']=distribution(integer(r['duration_ns']) for r in measured)
+        result['measured_interval_ns']=str(integer(measured[-1]['end_ns'])-integer(measured[0]['begin_ns'])) if measured else '0'
     return result
 
 

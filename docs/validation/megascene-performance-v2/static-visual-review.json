@@ -1,0 +1,32 @@
+{
+  "scope": "opening building/span silhouettes and major shadows only",
+  "inspected": "build/performance-v2/static-r2-opening.png",
+  "original_capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d",
+  "assessments": [
+    {
+      "archive": "/home/aivv/megascene-evidence/4bbf98e4-5971-4f78-bc9f-84c015d45389/50bc394c-1246-4ea0-a449-7002e3446654/f8b32882-22f7-4105-899b-9a2518bad0c1",
+      "status": "pass",
+      "capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d"
+    },
+    {
+      "archive": "/home/aivv/megascene-evidence/4bbf98e4-5971-4f78-bc9f-84c015d45389/df7efba7-9663-42cd-84e5-066c4c2dcd78/0666f62f-c96b-47d2-bbfb-dc8fdd7c5f17",
+      "status": "pass",
+      "capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d"
+    },
+    {
+      "archive": "/home/aivv/megascene-evidence/4bbf98e4-5971-4f78-bc9f-84c015d45389/e0eac19e-1f13-4827-b465-205a7c5873ed/243dbedb-3ad2-4ddc-a9e0-de2793b96346",
+      "status": "pass",
+      "capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d"
+    },
+    {
+      "archive": "/home/aivv/megascene-evidence/4bbf98e4-5971-4f78-bc9f-84c015d45389/ef5251f8-33c8-42d9-9c20-39be254b0c80/ccea5205-b141-48a2-90f3-7f5b241f10a1",
+      "status": "pass",
+      "capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d"
+    },
+    {
+      "archive": "/home/aivv/megascene-evidence/4bbf98e4-5971-4f78-bc9f-84c015d45389/02e8c10e-7033-43ff-bb45-84f430ad0651/722bb53f-6d1e-40ab-af4b-298f5d834386",
+      "status": "pass",
+      "capture_sha256": "7d947cb3c0de73b92fb22af15fd1dfbf4a38c063d9fe09d2cb93bd9a6aa4434d"
+    }
+  ]
+}

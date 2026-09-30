@@ -1,0 +1,16 @@
+{
+  "time_utc": "2026-09-30T12:11:05.113358+00:00",
+  "reason": "Light Atelier verification build overlapped this control worker from2026-09-30T12:01:16.394UTC to12:03:06.142UTC; native completion passed, timing excluded due to uncontrolled background load.",
+  "source_series": "/home/aivv/megascene-evidence/calibration-series-v2/history-small-6/revision-2/series.json",
+  "retained_control": {
+    "kind": "control",
+    "mode": "on",
+    "output": "/home/aivv/.t3/worktrees/bend-voxel/t3code-bfd3d7ae/build/performance-v2/history-r2/control-3-on",
+    "archive": "/home/aivv/megascene-evidence/4bbf98e4-5971-4f78-bc9f-84c015d45389/346588c2-507f-447d-a516-8869db00b853/5fe43064-f1ae-4ed9-ac28-0843e4920273",
+    "returncode": 0,
+    "measurement_exclusion": "Light Atelier verification build overlapped this control worker from2026-09-30T12:01:16.394UTC to12:03:06.142UTC; native completion passed, timing excluded due to uncontrolled background load."
+  },
+  "replacement_plan": "Retain two complete mode validations and clean off/on prefix; new revision3 executes four remaining controls with the same archived runtime, without background verification.",
+  "public_resume_prohibited": "measurement_exclusion blocks this series resume and calibration acceptance",
+  "ownership": "Only exact owned coordinator PID712280 stopped after owned child725177 was zombie with exit0; native worker ended normally and final durability barrier passed."
+}

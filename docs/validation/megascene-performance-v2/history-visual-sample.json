@@ -1,0 +1,77 @@
+{
+  "reviewer": "GPT-6 root visual inspection",
+  "scope": "Eight representative on-validation captures viewed as a labelled sheet; cut_5 and completion also viewed at original1920x1080. This is a sample inspection, not full named-feature acceptance.",
+  "findings": [
+    "The sampled views contain district structures, changed beam/post cut surfaces and a final district overview.",
+    "The close view at cut_5 shows an exposed cavity in the beam. The completion view shows the district and retained anchored structures.",
+    "The remaining named views and supplementary features were not all inspected. Official visual_quality remains inconclusive."
+  ],
+  "archive": "/home/aivv/megascene-evidence/4bbf98e4-5971-4f78-bc9f-84c015d45389/0b504679-61ef-4b0a-a72d-bac3e2b47267/509c9ca4-e5fe-4b0e-a835-04a9d1265a71",
+  "captures": [
+    {
+      "view": "opening",
+      "frame": "0",
+      "original": "build/performance-v2/history-r2/validation-on/validation/captures/frame-0000.ppm",
+      "sha256": "caece5e23c1ed84f409235861f89dabd20f4c0d386ac73f0119dd6ce764cb41f",
+      "lossless_png": "build/performance-v2/history-opening.png",
+      "retained_png": "/home/aivv/megascene-evidence/performance-v2/review-samples/history-opening.png"
+    },
+    {
+      "view": "cut_0",
+      "frame": "121",
+      "original": "build/performance-v2/history-r2/validation-on/validation/captures/frame-0121.ppm",
+      "sha256": "3b3180aa6dba130c6e072a7f2a2e7704eeafe8c05dfd2e49060fba2421961989",
+      "lossless_png": "build/performance-v2/history-cut_0.png",
+      "retained_png": "/home/aivv/megascene-evidence/performance-v2/review-samples/history-cut_0.png"
+    },
+    {
+      "view": "cut_3",
+      "frame": "661",
+      "original": "build/performance-v2/history-r2/validation-on/validation/captures/frame-0661.ppm",
+      "sha256": "a602b259065a71376052e9b5f501c231393bd14f2e40503a25411170e1b589dc",
+      "lossless_png": "build/performance-v2/history-cut_3.png",
+      "retained_png": "/home/aivv/megascene-evidence/performance-v2/review-samples/history-cut_3.png"
+    },
+    {
+      "view": "cut_4",
+      "frame": "841",
+      "original": "build/performance-v2/history-r2/validation-on/validation/captures/frame-0841.ppm",
+      "sha256": "1ab68208119619b59558cd97b2a210f78cd544e1a345f69a7a33d057a76f33c7",
+      "lossless_png": "build/performance-v2/history-cut_4.png",
+      "retained_png": "/home/aivv/megascene-evidence/performance-v2/review-samples/history-cut_4.png"
+    },
+    {
+      "view": "cut_5",
+      "frame": "853",
+      "original": "build/performance-v2/history-r2/validation-on/validation/captures/frame-0853.ppm",
+      "sha256": "dff6ad06922164a3f3944094bf29b7b75c2872687991567104e02881c8f03fc9",
+      "lossless_png": "build/performance-v2/history-cut_5.png",
+      "retained_png": "/home/aivv/megascene-evidence/performance-v2/review-samples/history-cut_5.png"
+    },
+    {
+      "view": "cut_114",
+      "frame": "20641",
+      "original": "build/performance-v2/history-r2/validation-on/validation/captures/frame-20641.ppm",
+      "sha256": "b6a4a636a4db8956cc0d352dbe1db1ae4a8f017929f1b4de90b4a5e3ad917084",
+      "lossless_png": "build/performance-v2/history-cut_114.png",
+      "retained_png": "/home/aivv/megascene-evidence/performance-v2/review-samples/history-cut_114.png"
+    },
+    {
+      "view": "history_overview",
+      "frame": "21661",
+      "original": "build/performance-v2/history-r2/validation-on/validation/captures/frame-21661.ppm",
+      "sha256": "2991a63d1c1ab46703c5525bcf334cf9f4c8c71c0236d26df7c941ddf19ac25e",
+      "lossless_png": "build/performance-v2/history-history_overview.png",
+      "retained_png": "/home/aivv/megascene-evidence/performance-v2/review-samples/history-history_overview.png"
+    },
+    {
+      "view": "completion",
+      "frame": "21720",
+      "original": "build/performance-v2/history-r2/validation-on/validation/captures/frame-21720.ppm",
+      "sha256": "2991a63d1c1ab46703c5525bcf334cf9f4c8c71c0236d26df7c941ddf19ac25e",
+      "lossless_png": "build/performance-v2/history-completion.png",
+      "retained_png": "/home/aivv/megascene-evidence/performance-v2/review-samples/history-completion.png"
+    }
+  ],
+  "official_review_updated": false
+}

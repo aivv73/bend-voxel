@@ -87,9 +87,11 @@ def calibration_result(value, config, attempt_kind):
             "invalid calibration status")
     state = value["status"]
     scope, reference = value.get("scope"), value.get("reference")
-    require(isinstance(scope, dict) and all(k in scope for k in SCOPE_KEYS), "calibration scope incomplete")
+    from megascene_performance import scope_keys
+    keys=scope_keys(config)
+    require(isinstance(scope, dict) and all(k in scope for k in keys), "calibration scope incomplete")
     require(reference is None or isinstance(reference, str) and reference, "invalid calibration reference")
-    applicable = all(scope[k] == config.get(k) for k in SCOPE_KEYS)
+    applicable = all(scope[k] == config.get(k) for k in keys)
     if state == "pass":
         require(reference and applicable, "passing calibration lacks matching scope/reference")
     reason = {"pass":"applicable calibration passed", "not_executed":"calibration not executed",
@@ -118,12 +120,20 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
     require(manifest["record_type"] == "manifest" and summary["record_type"] == "summary" and
             manifest["attempt_id"] == summary["attempt_id"], "manifest/summary identity mismatch")
     config = manifest["effective"]
+    from megascene_performance import enabled, validate
+    performance=enabled(config)
     require(isinstance(config, dict), "missing effective configuration")
     result = dict(summary)
     result["synthetic"] = bool(manifest.get("synthetic") or summary.get("synthetic"))
     result["attempt_kind"] = manifest["attempt_kind"]
     errors = list(cpu_errors)+list(resource_errors)+list(allocation_errors)+list(reference_errors)
     initial_error_count = len(errors)
+    if performance:
+        try:
+            require(schedule is not None, "performance frozen schedule unavailable")
+            validate(schedule)
+        except (ValueError, KeyError, TypeError) as exc:
+            errors.append(str(exc))
     frames = [r for r in cpu if r["record_type"] == "frame"]
     edits = [r for r in cpu if r["record_type"] == "edit"]
     actions = [r for r in cpu if r["record_type"] == "action"]
@@ -134,6 +144,8 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
             require(i <= warmup+measured, "extra CPU frames")
             require(integer(frame["frame"]) == i, "CPU frame gap or duplicate")
             expected = "startup" if i == 0 else "warmup" if i <= warmup else None
+            if performance and schedule and i<len(schedule['frames']):
+                expected=schedule['frames'][i]['phase']
             if expected is not None:
                 require(frame["population"] == expected, "CPU frame population mismatch")
             require(frame["population"] in {"startup", "warmup", "ordinary", "edit", "motion"},
@@ -176,7 +188,8 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
     cpu_integrity_ok = len(errors) == initial_error_count
     accepted = [integer(r["duration_ns"]) for r in valid_edits if r.get("accepted") is True]
     measured_frames = frames[warmup+1:]
-    ordinary_values = [integer(r["duration_ns"]) for r in measured_frames if r["population"] in ("ordinary", "motion")]
+    ordinary_values = [integer(r["duration_ns"]) for r in measured_frames if
+                       r["population"] in (("ordinary",) if performance else ("ordinary", "motion"))]
     values = {name:[integer(r["duration_ns"]) for r in frames if r["population"] == name]
               for name in ("startup", "warmup", "edit", "motion")}
     values["ordinary"] = ordinary_values
@@ -191,7 +204,7 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
         population = frame_population.get(r.get("frame"),"teardown")
         stage = r["stage"]
         stages.setdefault(stage,{}).setdefault(population,[]).append(integer(r["duration_ns"]))
-        if population == "motion":
+        if population == "motion" and not performance:
             stages[stage].setdefault("ordinary",[]).append(integer(r["duration_ns"]))
     result["stage_populations"] = {stage:{name:distribution(samples) for name,samples in groups.items()}
                                    for stage,groups in stages.items()}
@@ -201,7 +214,8 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
             lo,hi = map(integer,pair)
             selected = [r for r in measured_frames if lo <= integer(r["frame"])-warmup-1 <= hi]
             named[name] = {kind:distribution(integer(r["duration_ns"]) for r in selected if
-                kind == "combined" or r["population"] == kind) for kind in ("combined","ordinary","edit")}
+                kind == "combined" or r["population"] == kind) for kind in
+                (("combined","ordinary","edit","motion") if performance else ("combined","ordinary","edit"))}
         result["history_populations"] = named
     duration = integer(measured_frames[-1]["end_ns"])-integer(measured_frames[0]["begin_ns"]) if measured_frames else 0
     result["measured_interval_ns"] = str(duration)
@@ -346,9 +360,12 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
                                             config["schedule"],["manifest.json"])
     cal = calibration_result(calibration,config,result["attempt_kind"])
     result["calibration"] = cal
-    enough_ordinary = len(ordinary_values) >= 1000 and duration >= 10_000_000_000
+    ordinary_duration=sum(ordinary_values)
+    enough_ordinary = len(ordinary_values) >= 1000 and (ordinary_duration if performance else duration) >= 10_000_000_000
     result["population_qualification"] = _gate("pass" if enough_ordinary else "inconclusive",
+        "1000 ordinary frames and 10 ordinary seconds" if enough_ordinary and performance else
         "1000 ordinary frames and 10 measured seconds" if enough_ordinary else
+        "requires 1000 ordinary frames and 10 ordinary seconds in this attempt" if performance else
         "requires 1000 ordinary frames and 10 measured seconds in this attempt", "ordinary frames",["cpu.jsonl"])
     result["edit_response"] = (_gate("not_applicable","no edits in declared schedule","accepted edits") if not action_required else
         _gate("pass" if len(accepted)>=100 else "inconclusive",
@@ -454,7 +471,8 @@ def report_bundle(bundle, calibration=None):
     allocations, allocation_errors = read_stream(bundle/"allocations.jsonl",manifest)
     reference, reference_errors = read_stream(bundle/"reference.jsonl",manifest)
     from megascene_gpu import summarize
-    gpu_result = summarize(gpu,gpu_errors,[r for r in cpu if r["record_type"] == "frame"],manifest["effective"])
+    frozen=read_json((bundle/'schedule.json').read_text()) if (bundle/'schedule.json').exists() else None
+    gpu_result = summarize(gpu,gpu_errors,[r for r in cpu if r["record_type"] == "frame"],manifest["effective"],frozen)
     summary = dict(summary)
     summary["gpu_execution"] = gpu_result
     def optional(name):
@@ -462,6 +480,20 @@ def report_bundle(bundle, calibration=None):
         return checked_object(read_json(path.read_text()),name) if path.is_file() else None
     if calibration is None:
         calibration = optional("calibration.json")
+    from megascene_performance import enabled
+    if enabled(manifest['effective']) and calibration is not None:
+        from megascene_checkpoints import identity
+        from hashlib import sha256
+        actual=identity(manifest,bundle,manifest['effective'])['artifacts']
+        if calibration['status']=='pass':
+            require(calibration.get('binding',{}).get('artifacts')==actual,
+                    'performance calibration runtime/schedule binding mismatch')
+            reference_path=Path(calibration['reference'])
+            require(sha256(reference_path.read_bytes()).hexdigest()==calibration.get('reference_sha256'),
+                    'performance calibration assessment bytes mismatch')
+            assessment=read_json(reference_path.read_text())
+            require(assessment['status']==calibration['status'] and assessment['scope']==calibration['scope'] and
+                    assessment.get('binding')==calibration['binding'], 'performance calibration assessment mismatch')
     return classify(summary,manifest,cpu,cpu_errors,gpu_result["errors"],resources,resource_errors,
                     allocations,allocation_errors,reference,reference_errors,
                     optional("validation.json"),optional("review.json"),calibration,optional("comparison.json"),

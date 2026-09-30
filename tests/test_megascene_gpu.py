@@ -1,5 +1,6 @@
 """Native driver fixtures plus synthetic report fixtures, never benchmark passes."""
 import copy
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -127,6 +128,18 @@ class NativeGpu(unittest.TestCase):
         result = summarize(records,[],[{"frame":"0"},{"frame":"1"}],CONFIG)
         self.assertFalse(result["errors"],result)
         return result,records
+
+    def test_native_capacity_environment_is_bounded_and_legacy_is_preserved(self):
+        environment={k:v for k,v in os.environ.items() if not k.startswith('MEGASCENE_')}
+        result=subprocess.run([str(self.binary),'unused','capacity_env'],env=environment,capture_output=True,text=True)
+        self.assertEqual((result.returncode,result.stdout),(0,'3721\n'))
+        environment['MEGASCENE_FRAME_POLICY']='fixture'
+        for capacity,code in (('21721',0),('21722',2),('3721',2),('0',2),('-1',2),('1e4',2),('',2),('999999999999999999999999',2)):
+            result=subprocess.run([str(self.binary),'unused','capacity_env'],env={**environment,'MEGASCENE_QUERY_PAIRS':capacity},
+                                  capture_output=True,text=True)
+            self.assertEqual(result.returncode,code,capacity)
+        result=subprocess.run([str(self.binary),'unused','capacity_env'],env=environment,capture_output=True)
+        self.assertEqual(result.returncode,2)
 
     def test_driver_states_and_exact_values(self):
         for mode,status in (("supported","measured"),("zero","measured"),("wrapped","measured"),("fractional","measured"),

@@ -1,0 +1,15 @@
+{
+  "series": "/home/aivv/megascene-evidence/calibration-series-v2/history-small-6/series.json",
+  "series_sha256": "f4d8163105fc62742ded1c7ebdca1bf918e85969538b2f8b99630eaeedcc0a81",
+  "archive": "/home/aivv/megascene-evidence/4bbf98e4-5971-4f78-bc9f-84c015d45389/ffe482a8-11cd-4315-8a6b-bca8d33e6048/4f1644c4-eadd-4ede-ab19-e3552433d53c",
+  "termination": {
+    "cause": "case_deadline",
+    "exit_code": null,
+    "reason": "deadline_ns=116557236736027; observed_ns=116557238669605",
+    "signal": "9"
+  },
+  "completed_frame_prefix": "18905",
+  "completed_actions": "106",
+  "replacement_series": "/home/aivv/megascene-evidence/calibration-series-v2/history-small-6/revision-2/series.json",
+  "fix": "New history v2 full validation cap480seconds;timed cap300seconds;all21721frames and native gates remain required"
+}

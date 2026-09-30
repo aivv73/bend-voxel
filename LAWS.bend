@@ -401,3 +401,13 @@ law history_no_prior_visits:
 law scale_midpoint_lower_tie:
   {Scale.midpoint_refinement(Scale.Integer.from_u32(4n,2),Scale.Integer.from_u32(4n,9)) ==
     Some{Scale.Integer.from_u32(4n,6)} : Maybe<&2,Scale.Integer>}
+
+# Performance v2 is a runtime contract, never a formal proof of native code.
+# - Keep historical schedules and acceptance #68 unchanged.
+# - Freeze 120 warmup and 21600 measured frames for static/history small45/6/full/1080p.
+# - Bound GPU queries to 21721 pairs and shared reference records to 32768 slots.
+# - Admit every action and compare disjoint populations with evolving motion.
+# - Require ten summed ordinary seconds in each calibration control.
+# - Keep scripted edit-to-frame-return latency distinct from display latency.
+# - Bound full history validation to 480 seconds and timed workers to 300.
+# - Preserve every failed prefix and enforce the earlier campaign deadline.

@@ -113,11 +113,15 @@ static void mega_record_force(const char* fields);
 static void mega_reference(const char* fields);
 static void mega_stage(const char* name,u64 begin,u64 end);
 static const char* mega_env(const char* name);
+static const char* mega_policy_phase(u64 frame);
+static u32 mega_policy_flags(u64 frame);
 #else
 static void mega_record(const char* fields) { (void)fields; }
 static void mega_record_force(const char* fields) { (void)fields; }
 static void mega_reference(const char* fields) { (void)fields; }
 static void mega_stage(const char* name,u64 begin,u64 end) { (void)name; (void)begin; (void)end; }
+static const char* mega_policy_phase(u64 frame) { (void)frame; return NULL; }
+static u32 mega_policy_flags(u64 frame) { (void)frame; return 0; }
 #endif
 #ifdef CID_VULKAN_VULKAN_CAPTURE
 static VoxelVkFrame mega_capture_frame;
@@ -165,6 +169,7 @@ Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
          rendered==mega_warmup+32 || rendered==mega_warmup+43) :
        getenv("MEGASCENE_LOCALIZED") ? rendered==(u64)mega_warmup+1 :
        (rendered>mega_warmup && (rendered-mega_warmup-1)%300==60));
+    if(mega_policy_phase(rendered)) review=(mega_policy_flags(rendered)&1)!=0;
     if (!review) return f[0];
     if (snprintf(path,sizeof path,"%s/frame-%04llu.ppm",directory,(unsigned long long)rendered)>=(int)sizeof path)
       err_fail("capture path too long");
@@ -316,6 +321,7 @@ static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
     getenv("MEGASCENE_SUPPORT") ? mega_frame>=mega_warmup+32 && mega_frame<=mega_warmup+43 :
     !getenv("MEGASCENE_PROXY_DIAGNOSTIC") && !getenv("MEGASCENE_LOCALIZED") && getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
     (mega_frame-mega_warmup-1)%300==60;
+  if(mega_policy_phase(mega_frame)) review=(mega_policy_flags(mega_frame)&2)!=0;
   if(!validation&&!review&&!mega_edit_pending&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
   u64 begin=voxel_vk_tick();
   VoxelMegaBody* raw=io_mem(calloc(frame->body_count,sizeof *raw));
@@ -648,6 +654,18 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
       (unsigned long long)((ended - rendered) / 1000));
   }
   Term result=io_tup(e, f[0], io_tup(e, f[1], events));
+#ifdef CID_VULKAN_VULKAN_CAPTURE
+  if(mega_stream && getenv("MEGASCENE_VALIDATE") && getenv("MEGASCENE_FRAME_POLICY") &&
+     !getenv("MEGASCENE_CAMERA_FILE") && (mega_policy_flags(mega_frame)&1)) {
+    char path[4096],capture[160];
+    const char* directory=mega_env("MEGASCENE_CAPTURE_DIR");
+    if(snprintf(path,sizeof path,"%s/frame-%04llu.ppm",directory,(unsigned long long)mega_frame)>=(int)sizeof path)
+      err_fail("capture path too long");
+    mega_capture_image(win,path);
+    snprintf(capture,sizeof capture,"\"record_type\":\"capture\",\"rendered_frame\":\"%llu\"",(unsigned long long)mega_frame);
+    mega_record(capture);
+  }
+#endif
   if (mega_stream) {
     mega_stage("events",mega_events_begin,voxel_vk_tick());
     // Last marker before handing control back to Bend. Recording this boundary
@@ -656,8 +674,11 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
     char record[512];
     const char* population=!mega_frame?"startup":mega_frame<=mega_warmup?"warmup":"ordinary";
     if(getenv("MEGASCENE_SUPPORT") && mega_frame>=mega_warmup+32 && mega_frame<=mega_warmup+43) population="motion";
+    const char* planned=mega_policy_phase(mega_frame);
+    if(planned) population=planned;
 #ifdef CID_VULKAN_VULKAN_MARK
     if(mega_edit_pending) {
+      if(planned && strcmp(planned,"edit")) err_fail("performance edit population mismatch");
       population="edit";
       if(end<mega_edit_begin) err_fail("edit clock reversed");
       snprintf(record,sizeof record,
@@ -665,6 +686,8 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
         mega_edit_action,mega_edit_status==1&&mega_edit_removed?"true":"false",mega_edit_removed,
         (unsigned long long)mega_edit_begin,(unsigned long long)end,(unsigned long long)(end-mega_edit_begin));
       mega_reference(record); mega_record(record); mega_edit_pending=0;
+    } else if(planned && !strcmp(planned,"edit")) {
+      err_fail("performance required edit missing");
     }
 #endif
     char ordinal[32]="null";

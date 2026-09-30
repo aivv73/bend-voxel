@@ -48,9 +48,18 @@ def read_stream(path, manifest):
     return records, errors
 
 
-def summarize(records, errors, cpu_frames, config):
+def summarize(records, errors, cpu_frames, config, frozen=None):
     """Keep absent submissions and unresolved tails visible; never infer zero."""
     errors = list(errors)
+    from megascene_performance import enabled, validate
+    performance=enabled(config)
+    if performance:
+        try:
+            require(frozen is not None, "performance GPU frozen schedule unavailable")
+            validate(frozen)
+        except (ValueError, KeyError, TypeError) as exc:
+            errors.append(str(exc))
+            frozen=None
     capability, submissions, intervals = None, {}, {}
     complete = False
     for r in records:
@@ -64,7 +73,11 @@ def summarize(records, errors, cpu_frames, config):
                 require(r["status"] in {"measured", "unsupported", "disabled", "collection_failure"} and r["reason"], "invalid GPU capability status")
                 require((r["begin_stage"], r["end_stage"]) == ("TOP_OF_PIPE", "BOTTOM_OF_PIPE"), "GPU marker boundaries mismatch")
                 u64(r["queue_family"])
-                require(0 < u64(r["query_capacity"]) <= 3721, "invalid GPU query capacity")
+                capacity=u64(r["query_capacity"])
+                require(0 < capacity <= (21721 if performance else 3721), "invalid GPU query capacity")
+                if performance:
+                    require(capacity == 1+int(config['warmup'])+int(config['frames']) == 21721,
+                            "GPU capacity differs from performance schedule")
                 if r["status"] == "measured":
                     require(0 < bits <= 64 and math.isfinite(period) and period > 0, "invalid supported GPU capability")
                 if r["status"] == "unsupported":
@@ -151,9 +164,11 @@ def summarize(records, errors, cpu_frames, config):
     state = next(iter(statuses)) if len(statuses) == 1 and not errors else "incomplete" if expected or errors else "not_executed"
     from megascene_static import distribution
     populations = {}
-    for name in (("startup", "warmup", "ordinary", "edit", "motion") if config.get("case")=="support" else ("startup", "warmup", "ordinary", "edit")):
+    for name in (("startup", "warmup", "ordinary", "edit", "motion") if performance or config.get("case")=="support" else ("startup", "warmup", "ordinary", "edit")):
         def population(r):
             frame = int(r["frame"])
+            if performance:
+                return frozen['frames'][frame]['phase'] if frozen and frame<len(frozen['frames']) else None
             if config.get("case") == "support":
                 ordinal=frame-int(config['warmup'])-1
                 if ordinal in (0,6,12,18,24,30): return "edit"
@@ -164,7 +179,7 @@ def summarize(records, errors, cpu_frames, config):
                 return "edit"
             return "startup" if frame == 0 else "warmup" if frame <= int(config["warmup"]) else "ordinary"
         populations[name] = distribution([r["value"] for r in resolved if r["status"] == "measured" and
-                                          (population(r) == name or name == "ordinary" and population(r) == "motion")])
+                                          (population(r) == name or not performance and name == "ordinary" and population(r) == "motion")])
     return {"status": state, "scope": SCOPE, "unit": "ns", "capability": capability,
             "required_evidence_complete": usable, "counts": counts, "intervals": resolved, "populations": populations,
             "errors": errors, "evidence": ["gpu.jsonl"],

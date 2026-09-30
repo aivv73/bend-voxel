@@ -2,6 +2,25 @@
 #pragma once
 
 namespace gpu_timing {
+static uint32_t environment_number(const char* name,uint32_t fallback,uint32_t maximum) {
+  const char* s=std::getenv(name);
+  if(!s) return fallback;
+  uint32_t n=0;
+  if(!*s) throw std::runtime_error("empty performance numeric setting");
+  for(;*s;s++) {
+    if(*s<'0'||*s>'9'||n>(maximum-uint32_t(*s-'0'))/10)
+      throw std::runtime_error("invalid performance numeric setting");
+    n=n*10+uint32_t(*s-'0');
+    if(n>maximum) throw std::runtime_error("performance numeric setting exceeds bound");
+  }
+  return n;
+}
+static uint32_t query_pairs() {
+  bool performance=std::getenv("MEGASCENE_FRAME_POLICY")!=nullptr;
+  uint32_t count=environment_number("MEGASCENE_QUERY_PAIRS",performance?0:3721,performance?21721:3721);
+  if(!count || (performance && count!=21721)) throw std::runtime_error("GPU query capacity differs from protocol");
+  return count;
+}
 constexpr const char* scope="submitted_frame_top_to_bottom";
 struct Resolution {
   const char *status="collection_failure", *reason="invalid timestamp metadata", *range="invalid";
@@ -71,7 +90,7 @@ public:
     status=enabled?(bits?"measured":"unsupported"):"disabled";
     reason=enabled?(bits?"queue supports timestamp queries":"queue reports zero timestamp valid bits"):"timestamp collection deliberately disabled";
     if(enabled&&bits) {
-      if(bits>64||!std::isfinite(p)||p<=0||!count||count>3721) {
+      if(bits>64||!std::isfinite(p)||p<=0||!count||count>21721) {
         status="collection_failure"; reason="invalid timestamp capability or query capacity";
       } else {
         VkQueryPoolCreateInfo info{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};

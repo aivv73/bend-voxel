@@ -1,0 +1,96 @@
+{
+  "historical_acceptance": "docs/validation/megascene-acceptance/acceptance.json",
+  "historical_acceptance_sha256": "821935c803e5a06cd74744960da64fd03a1290fc13178f48d121a8b1897a4d04",
+  "implementation_acceptance": "pass",
+  "qualified_performance": "unqualified",
+  "schema": "megascene-performance-baseline/2",
+  "scope": "historical archived runtimes; different timing regimes cannot imply speedup",
+  "selected_scopes": {
+    "history": {
+      "assessment": "/home/aivv/megascene-acceptance-68-retry/calibration-series/history-small-6/assessment.json",
+      "assessment_sha256": "923153ba16bdf98a4b09895788821630118ebe7001847d07f68c58878a311c71",
+      "control_values": [
+        {
+          "accepted_edit_count": 120,
+          "measured_duration_ns": 2581395333,
+          "mode": "off",
+          "ordinary_count": 3480
+        },
+        {
+          "accepted_edit_count": 120,
+          "measured_duration_ns": 20030225286,
+          "mode": "on",
+          "ordinary_count": 3480
+        },
+        {
+          "accepted_edit_count": 120,
+          "measured_duration_ns": 19731818464,
+          "mode": "on",
+          "ordinary_count": 3480
+        },
+        {
+          "accepted_edit_count": 120,
+          "measured_duration_ns": 2510593820,
+          "mode": "off",
+          "ordinary_count": 3480
+        },
+        {
+          "accepted_edit_count": 120,
+          "measured_duration_ns": 2720208264,
+          "mode": "off",
+          "ordinary_count": 3480
+        },
+        {
+          "accepted_edit_count": 120,
+          "measured_duration_ns": 20575074450,
+          "mode": "on",
+          "ordinary_count": 3480
+        }
+      ],
+      "status": "insufficient"
+    },
+    "static": {
+      "assessment": "/home/aivv/megascene-calibration-65/calibration-series/static-small-6/assessment.json",
+      "assessment_sha256": "33522bd47dcd2974223471d6006d2197ebbc5dcc243b468cb524f0baafc4bb67",
+      "control_values": [
+        {
+          "accepted_edit_count": 0,
+          "measured_duration_ns": 2016017236,
+          "mode": "off",
+          "ordinary_count": 3600
+        },
+        {
+          "accepted_edit_count": 0,
+          "measured_duration_ns": 5520646402,
+          "mode": "on",
+          "ordinary_count": 3600
+        },
+        {
+          "accepted_edit_count": 0,
+          "measured_duration_ns": 5526166757,
+          "mode": "on",
+          "ordinary_count": 3600
+        },
+        {
+          "accepted_edit_count": 0,
+          "measured_duration_ns": 2072351294,
+          "mode": "off",
+          "ordinary_count": 3600
+        },
+        {
+          "accepted_edit_count": 0,
+          "measured_duration_ns": 2072361933,
+          "mode": "off",
+          "ordinary_count": 3600
+        },
+        {
+          "accepted_edit_count": 0,
+          "measured_duration_ns": 5498360247,
+          "mode": "on",
+          "ordinary_count": 3600
+        }
+      ],
+      "status": "insufficient"
+    }
+  }
+}
