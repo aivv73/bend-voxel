@@ -1,4 +1,13 @@
-# Parallelism
+# Project instructions
+
+## Bend
+
+Follow these rules:
+
+- If code can be written in Bend, do not use another programming language.
+- Write only formal claims in `LAWS.bend`.
+
+## Parallelism
 
 Parallelism laws for bend-voxel:
 
