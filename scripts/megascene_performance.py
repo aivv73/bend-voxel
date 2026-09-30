@@ -30,19 +30,19 @@ def admit(config):
             "performance v2 requires small/seed45/6/full/1080p/120/21600/budget2048")
 
 
-def finish(frozen):
-    history=frozen["schedule_id"]=="history-perf-v2"
-    checkpoints = {int(p["frame"]) for p in frozen["required_checkpoints"]}
-    reviews = {int(p["frame"]) for p in frozen["review_views"]}
-    for f in frozen["frames"]:
-        at = int(f["frame"])
-        f["policy_flags"] = str((REVIEW if at in reviews else 0) | (CHECKPOINT if at in checkpoints else 0) |
-                                (OVERVIEW_FLAG if frozen["schedule_id"] == "history-perf-v2" and at == OVERVIEW else 0))
-    frozen["performance_protocol"] = {"version": PROTOCOL, "query_pairs": str(FRAME_COUNT),
-        "ordinary_duration_min_ns": "10000000000", "ordinary_count_min": "1000",
-        "history_group_frames": "1800" if history else None, "history_action_offsets": list(map(str,OFFSETS)) if history else None,
-        "history_actions_per_measured_frame": {"numerator":"1", "denominator":"180"} if history else None,
-        "history_final_suffix_frames":"179" if history else None, "overview_frame":str(OVERVIEW) if history else None}
+def finish(frozen, motion_limits=()):
+    from megascene_schedule import numeric
+    def frames(records):
+        return ','.join(record['frame'] for record in records)
+    frozen['performance_protocol'] = numeric('protocol', frozen['schedule_id'])
+    overview = frozen['performance_protocol']['overview_frame']
+    policy = numeric('policy', frozen['warmup_frames'], frozen['measured_frames'], 'true',
+                     frames(frozen['actions']), ','.join(map(str, motion_limits)),
+                     frames(frozen['review_views']), frames(frozen['required_checkpoints']),
+                     overview if overview is not None else '4294967295')
+    require(len(policy) == len(frozen['frames']), 'incomplete Bend frame policy')
+    for frame, planned in zip(frozen['frames'], policy):
+        frame.update(planned)
     validate(frozen)
     return frozen
 

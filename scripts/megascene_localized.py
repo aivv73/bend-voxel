@@ -3,9 +3,10 @@ from itertools import product
 import math
 
 from megascene_inventory import SCHEMA, connected, digest, require, surface_reference
-from megascene_recipe import Box, bits, f32, generate
-from megascene_traversal import camera, pose
-from megascene_picking import center, checked_result, value
+from megascene_recipe import Box, f32, generate
+from megascene_picking import checked_result, value
+from megascene_scale import side_count
+from megascene_schedule import plan
 
 
 def remove_cells(boxes, target):
@@ -44,40 +45,23 @@ def remove_cells(boxes, target):
 def schedule(config):
     require((config['warmup'],config['frames']) == ('120','3600'), 'localized requires the complete 120/3600 schedule')
     require(config.get('schedule','localized-v1') in ('localized-v1','material-detail-localized-v1'), 'unsupported localized schedule')
-    origin=-int(config['side_m'])*5
-    target=[160+origin,24,160+origin]
-    point=[bits(x/10) for x in target]
-    # The actual multiply in W.prepare.body must preserve the admitted target.
-    require([f32(value(x)*10) for x in point] == target, 'inexact localized target round trip')
-    opening=camera(*pose('opening',0,config['preset'],int(config['seed']),'traversal-v2'))
-    # The band boundary is exactly at X=160. Aim one cell into the even band
-    # while keeping the accepted brush target fixed at X=160.
-    view_x = 161 if config.get('control') == 'material-detail' else 160
-    view=camera(((view_x+origin)/10,4.4,(170+origin)/10),
-                ((view_x+origin)/10,target[1]/10,target[2]/10))
+    frozen=plan('localized',side_count(config['preset']),config['seed'],-int(config['side_m'])*5,
+                config.get('control') or 'base',config.get('schedule','localized-v1'))
+    action=frozen['actions'][0]
+    action.pop('_eye')
+    target=[f32(value(x)*10) for x in action['target_m']]
+    require(all(x==round(x) for x in target), 'inexact localized target round trip')
     owners=generate(config['preset'],int(config['seed']),config.get('control'))
-    hit,reference=checked_result([(i,b,0.) for i,o in enumerate(owners,1) for b in o.boxes],center(view))
+    hit,reference=checked_result([(i,b,0.) for i,o in enumerate(owners,1) for b in o.boxes],action['pre_edit_ray'])
     require((hit['owner'],hit['material'],hit['kind']) == ('1','2','1') and reference['distance']<256,
             'localized pre-edit terrain target unreachable')
     remaining,removed=remove_cells(owners[0].boxes,target)
     expected_materials = {2,5} if config.get('control') == 'material-detail' else {2}
     require(len(removed)==16 and set(removed.values())==expected_materials and connected(remaining), 'localized removal/reference mismatch')
-    action={'action':'0','frame':'121','measured_ordinal':'0','target_m':point,'radius_m':bits(.2),
-            'required':True,'expected_removed_cells':str(len(removed)), 'expected_owner':'1','expected_material':'2',
-            'pre_edit_ray':center(view),'pre_edit_hit':hit}
-    frames=[{'frame':str(i),'phase':'startup' if i==0 else 'warmup' if i<=120 else 'edit' if i==121 else 'ordinary',
-             'measured_ordinal':str(i-121) if i>120 else None,'camera':opening if i<=120 else view,
-             'picking':False,'actions':['0'] if i==121 else []} for i in range(3721)]
-    return {'schema':SCHEMA,'record_type':'schedule','schedule_id':config.get('schedule','localized-v1'),'fixed_step':'0x3c888889',
-            'warmup_frames':'120','measured_frames':'3600','opening':opening,'frames':frames,'actions':[action],
-            'reference_removed_cells':[[*map(str,p),str(m)] for p,m in sorted(removed.items())],
-            'review_views':[{'name':'opening','frame':'0','features':['building silhouettes','span silhouettes','major shadows']},
-                            {'name':'cut','frame':'121','features':['localized terrain hole','new exposed cut surfaces','unchanged nearby terrain']},
-                            {'name':'completion','frame':'3720','features':['unchanged cut geometry','new exposed cut surfaces']}],
-            'required_checkpoints':[{'name':'initialization','frame':'0'},{'name':'review_opening','frame':'0'},
-                                    {'name':'warmup_end','frame':'120'},{'name':'action_0','frame':'121'},
-                                    {'name':'completion','frame':'3720'}],
-            'checkpoint_implementation':'megascene-checkpoint/1','update_order':['physics','edit','view_picking_disabled','render']}
+    action['expected_removed_cells']=str(len(removed))
+    action['pre_edit_hit']=hit
+    frozen['reference_removed_cells']=[[*map(str,p),str(m)] for p,m in sorted(removed.items())]
+    return frozen
 
 
 def action_outcome(frozen):

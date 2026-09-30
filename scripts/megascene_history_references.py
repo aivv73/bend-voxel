@@ -5,12 +5,11 @@ from megascene_picking import value
 from megascene_references import dense, reference
 from megascene_edit_references import bodies, real
 from megascene_support import motion
-from megascene_history import _target
 
 
 TERRAIN=Owner('terrain_revisit',None,[Box((0,0,0),(20,1,20),1),Box((0,1,0),(20,4,20),2)])
 SPAN=generate('small',45)[2]
-MOVING=_target(5,{'preset':'small','seed':'45'})[-1]
+MOVING=['0xc1c33333','0x40e68588','0xc1600000']
 ACTIONS={1:(.8,.2,.8),2:(1.1,.2,.8),3:(-29.5,4.,-14.),4:(-19.3,4.,-14.),
          16:tuple(map(value,MOVING))}
 

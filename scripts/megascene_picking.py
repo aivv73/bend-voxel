@@ -6,17 +6,14 @@ without agreeing with the independent geometric result and declared target.
 """
 from fractions import Fraction as Q
 import math
-import ctypes
-import ctypes.util
 import struct
 
 from megascene_inventory import require
-from megascene_recipe import Box, bits, f32, generate
+from megascene_recipe import bits, f32, generate
 from megascene_scale import side_count
-from megascene_traversal import PHASES, schedule as traversal_schedule
+from megascene_schedule import numeric, plan
 
 ROUTES = ("picking-v1", "picking-v2")
-ENABLED = {"wall", "interior", "cavity", "assembly", "sky"}
 ZERO = "0x00000000"
 
 
@@ -25,21 +22,8 @@ def value(word):
 
 
 def center(camera):
-    yaw, pitch = value(camera["yaw"]), value(camera["pitch"])
-    # Freeze the normalized center direction once, before either replay.
-    libm = ctypes.CDLL(ctypes.util.find_library("m"))
-    def unary(name, x):
-        fn=getattr(libm,name)
-        fn.argtypes=[ctypes.c_float]; fn.restype=ctypes.c_float
-        return fn(x)
-    direction = [f32(unary("sinf",yaw)*unary("cosf",pitch)), unary("sinf",pitch),
-                 f32(unary("cosf",yaw)*unary("cosf",pitch))]
-    # Adding the two zero screen offsets in ray.direction canonicalizes -0.
-    direction = [f32(x+0.) for x in direction]
-    squared=[f32(x*x) for x in direction]
-    length=unary("sqrtf",f32(f32(squared[0]+squared[1])+squared[2]))
-    inverse=f32(1/length)
-    return {"origin_m": camera["eye_m"], "direction": [bits(f32(x*inverse)) for x in direction]}
+    return numeric("center", *(value(word).hex() for word in
+                   [*camera["eye_m"], camera["yaw"], camera["pitch"]]))
 
 
 def exact_pick(boxes, origin, direction):
@@ -126,42 +110,30 @@ def checked_result(boxes, ray):
 def schedule(config, owners=None):
     route = config.get("schedule", "picking-v2")
     require(route in ROUTES, "unsupported frozen picking schedule")
-    frozen = traversal_schedule({**config,"schedule":route.replace("picking", "traversal")})
-    frozen["schedule_id"] = route
-    frozen["camera_route_id"] = route.replace("picking", "traversal")
-    frozen["update_order"] = ["physics","edit_disabled","view_picking","render"]
+    require(int(config["warmup"]) == 120 and int(config["frames"]) == 3600,
+            "primary traversal requires the complete 120/3600 schedule")
+    q=side_count(config["preset"])
+    frozen = plan("traversal",q,int(config["seed"]),route)
     owners = owners if owners is not None else generate(config["preset"],int(config["seed"]))
     boxes = [(i,b,0.) for i,owner in enumerate(owners,1) for b in owner.boxes]
     cache = {}
-    rays = {}
-    q=side_count(config["preset"])
     for frame in frozen["frames"]:
-        active = frame["route_phase"] in ENABLED and int(frame["phase_offset"]) < 120
-        frame["picking"] = active
-        key=tuple(frame["camera"]["eye_m"]+[frame["camera"]["yaw"],frame["camera"]["pitch"]])
-        if active and key not in rays:
-            rays[key]=center(frame["camera"])
-        frame["ray"] = rays[key] if active else None
         frame["expected_pick"] = {"owner":"0","material":"0","kind":"0","distance_m":ZERO,"position_m":[ZERO]*3}
-        frame["target"] = None
-        if not active:
+        if not frame["picking"]:
             continue
-        phase = int(frame["measured_ordinal"])//300
-        if phase not in cache:
+        key=tuple(frame["ray"]["origin_m"]+frame["ray"]["direction"])
+        if key not in cache:
             result, reference = checked_result(boxes,frame["ray"])
             pose = frame["route_phase"]
-            expected = {"wall":("2","5","1"),"interior":("2","5","1"),"cavity":("1","2","1"),
-                        "assembly":("6","3","1"),"sky":("0","0","0")}[pose]
+            target = frame["target"]
+            expected = (target["owner"],target["material"],"0" if target["outcome"]=="miss" else "1")
             require(tuple(result[k] for k in ("owner","material","kind")) == expected, f"unreachable or incorrect declared {pose} target")
             if pose in ("wall","interior","cavity","assembly"):
-                q=side_count(config["preset"])
                 axis,plane = {"wall":(0,(16-160*q)/10),"interior":(0,(20-160*q)/10),
                               "cavity":(1,.8),"assembly":(1,(58+(int(config['seed'])-45)%2)/10)}[pose]
                 require(abs(reference["point"][axis]-plane)<1e-6, f"wrong declared {pose} face")
-            target = {"name":pose,"neighborhood":str(q*q-1 if PHASES[phase][1]==-1 else 0) if pose!="sky" else "0",
-                      "owner":expected[0],"material":expected[1],"outcome":"miss" if pose=="sky" else "hit"}
-            cache[phase] = result,target
-        frame["expected_pick"],frame["target"] = cache[phase]
+            cache[key] = result
+        frame["expected_pick"] = cache[key]
     frozen["picking_admission"] = {"status":"pass","enabled_samples":"720","required_hits":"600","required_misses":"120",
         "reach_m":"256","reach_comparison":"strictly_less", "reference":"rational face intersections against source geometry",
         "runtime_guard":"actual tree bounds and F32 cell/metre/offset/slab/hit arithmetic before unsafe traversal"}

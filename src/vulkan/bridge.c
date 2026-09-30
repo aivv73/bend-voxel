@@ -101,6 +101,7 @@ static u64 mega_frame,mega_previous_end;
 static int mega_detailed, mega_final_audit;
 static u32 mega_warmup,mega_measured;
 static float mega_ground;
+static int voxel_mega_selected(u32 review,u64 frame);
 #ifdef CID_VULKAN_VULKAN_MARK
 static u64 mega_edit_begin;
 static u32 mega_edit_action,mega_edit_removed,mega_edit_status;
@@ -156,21 +157,7 @@ Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
   char path[4096];
   if (directory) {
     u64 rendered=mega_frame-1;
-    const char* diagnostic=getenv("MEGASCENE_PROXY_DIAGNOSTIC");
-    u64 hold=diagnostic && strcmp(diagnostic,"mixed-world")==0?1200:120;
-    u64 count=diagnostic && strcmp(diagnostic,"mixed-world")==0?3:9;
-    int review=rendered==0 || rendered==(u64)mega_warmup+mega_measured ||
-      (diagnostic ? (rendered>mega_warmup && (rendered-mega_warmup-1)/hold<count &&
-                     (rendered-mega_warmup-1)%hold==hold/2) :
-       getenv("MEGASCENE_HISTORY") ?
-        ((rendered>mega_warmup && (rendered-mega_warmup-1)%12==0 && rendered<=mega_warmup+1429) || rendered==mega_warmup+1561) :
-       getenv("MEGASCENE_SUPPORT") ?
-        ((rendered>mega_warmup && rendered<=mega_warmup+31 && (rendered-mega_warmup-1)%6==0) ||
-         rendered==mega_warmup+32 || rendered==mega_warmup+43) :
-       getenv("MEGASCENE_LOCALIZED") ? rendered==(u64)mega_warmup+1 :
-       (rendered>mega_warmup && (rendered-mega_warmup-1)%300==60));
-    if(mega_policy_phase(rendered)) review=(mega_policy_flags(rendered)&1)!=0;
-    if (!review) return f[0];
+    if (!voxel_mega_selected(1,rendered)) return f[0];
     if (snprintf(path,sizeof path,"%s/frame-%04llu.ppm",directory,(unsigned long long)rendered)>=(int)sizeof path)
       err_fail("capture path too long");
   }
@@ -181,7 +168,7 @@ Term vulkan_capture_run(Env e, Term* f, IoWork* work) {
     snprintf(record,sizeof record,"\"record_type\":\"capture\",\"rendered_frame\":\"%llu\"",(unsigned long long)(mega_frame-1));
     mega_record(record);
   } else mega_record("\"record_type\":\"opening_capture\"");
-  if(directory && (getenv("MEGASCENE_SUPPORT") || getenv("MEGASCENE_SUPPLEMENTARY_FILE"))) voxel_support_detail(win);
+  if(directory && getenv("MEGASCENE_SUPPLEMENTARY_FILE")) voxel_support_detail(win);
   return f[0];
 }
 
@@ -195,6 +182,16 @@ static void voxel_vk_load(void) {
   voxel_vk_render_fn = (VoxelVkRender)dlsym(voxel_vk_library, "voxel_vk_render_timed");
   voxel_vk_release_fn = (VoxelVkRelease)dlsym(voxel_vk_library, "voxel_vk_release");
   if (!voxel_vk_render_fn || !voxel_vk_release_fn) err_fail("incomplete Vulkan renderer library");
+}
+static int voxel_mega_selected(u32 review,u64 frame) {
+  voxel_vk_load();
+  typedef int (*Select)(uint32_t,uint64_t,uint32_t,uint32_t,char*,size_t);
+  static Select select;
+  if(!select) select=(Select)dlsym(voxel_vk_library,"voxel_mega_schedule_selected");
+  if(!select) err_fail("frozen schedule point capability unavailable");
+  char error[1024]; int selected=select(review,frame,mega_warmup,mega_measured,error,sizeof error);
+  if(selected<0) err_fail(error);
+  return selected;
 }
 
 static float voxel_vk_float(Term t) {
@@ -312,17 +309,8 @@ static VoxelMegaBox mega_tree(Env e,Term tree,VoxelMegaBox** boxes,u32* count,u6
 static void voxel_mega_check(Env e,u64 st,u64 al,const VoxelVkFrame* frame) {
   int validation=getenv("MEGASCENE_VALIDATE")!=NULL;
   if (!mega_detailed && mega_frame && !mega_final_audit) return;
-  const char* diagnostic=getenv("MEGASCENE_PROXY_DIAGNOSTIC");
-  u64 hold=diagnostic && strcmp(diagnostic,"mixed-world")==0?1200:120;
-  u64 count=diagnostic && strcmp(diagnostic,"mixed-world")==0?3:9;
-  int review=diagnostic ? (mega_frame>mega_warmup && (mega_frame-mega_warmup-1)/hold<count &&
-                           (mega_frame-mega_warmup-1)%hold==hold/2) :
-    getenv("MEGASCENE_HISTORY") ? mega_frame==mega_warmup+1561 :
-    getenv("MEGASCENE_SUPPORT") ? mega_frame>=mega_warmup+32 && mega_frame<=mega_warmup+43 :
-    !getenv("MEGASCENE_PROXY_DIAGNOSTIC") && !getenv("MEGASCENE_LOCALIZED") && getenv("MEGASCENE_CAMERA_FILE") && mega_frame>mega_warmup &&
-    (mega_frame-mega_warmup-1)%300==60;
-  if(mega_policy_phase(mega_frame)) review=(mega_policy_flags(mega_frame)&2)!=0;
-  if(!validation&&!review&&!mega_edit_pending&&mega_frame!=0&&mega_frame!=mega_warmup&&mega_frame!=(u64)mega_warmup+mega_measured) return;
+  int selected=voxel_mega_selected(0,mega_frame);
+  if(!validation&&!selected) return;
   u64 begin=voxel_vk_tick();
   VoxelMegaBody* raw=io_mem(calloc(frame->body_count,sizeof *raw));
   VoxelVkBody* actual=io_mem(calloc(frame->body_count,sizeof *actual));
@@ -655,8 +643,8 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
   }
   Term result=io_tup(e, f[0], io_tup(e, f[1], events));
 #ifdef CID_VULKAN_VULKAN_CAPTURE
-  if(mega_stream && getenv("MEGASCENE_VALIDATE") && getenv("MEGASCENE_FRAME_POLICY") &&
-     !getenv("MEGASCENE_CAMERA_FILE") && (mega_policy_flags(mega_frame)&1)) {
+  if(mega_stream && getenv("MEGASCENE_VALIDATE") && getenv("MEGASCENE_QUERY_PAIRS") &&
+     !getenv("MEGASCENE_CAMERA_FILE") && voxel_mega_selected(1,mega_frame)) {
     char path[4096],capture[160];
     const char* directory=mega_env("MEGASCENE_CAPTURE_DIR");
     if(snprintf(path,sizeof path,"%s/frame-%04llu.ppm",directory,(unsigned long long)mega_frame)>=(int)sizeof path)
@@ -672,10 +660,9 @@ Term vulkan_frame_run(Env e, Term* f, IoWork* work) {
     // and subsequent bookkeeping belongs to the following frame interval.
     u64 end=voxel_vk_tick();
     char record[512];
-    const char* population=!mega_frame?"startup":mega_frame<=mega_warmup?"warmup":"ordinary";
-    if(getenv("MEGASCENE_SUPPORT") && mega_frame>=mega_warmup+32 && mega_frame<=mega_warmup+43) population="motion";
     const char* planned=mega_policy_phase(mega_frame);
-    if(planned) population=planned;
+    if(!planned) err_fail("schedule frame policy unavailable");
+    const char* population=planned;
 #ifdef CID_VULKAN_VULKAN_MARK
     if(mega_edit_pending) {
       if(planned && strcmp(planned,"edit")) err_fail("performance edit population mismatch");
@@ -716,31 +703,28 @@ static void voxel_support_detail(BendWin* win) {
   u64 frame=mega_frame-1;
   if(!getenv("MEGASCENE_VALIDATE")) return;
   const char* extra=getenv("MEGASCENE_SUPPLEMENTARY_FILE");
-  if(!extra && (frame<=mega_warmup || frame>mega_warmup+31 || (frame-mega_warmup-1)%6)) return;
-  unsigned action=extra?UINT32_MAX:(unsigned)((frame-mega_warmup-1)/6);
-  const char* count_text=mega_env(extra?"MEGASCENE_SUPPLEMENTARY_COUNT":"MEGASCENE_DETAIL_CAMERA_COUNT");
+  if(!extra) return;
+  unsigned action=UINT32_MAX;
+  const char* count_text=mega_env("MEGASCENE_SUPPLEMENTARY_COUNT");
   char* end=NULL;
   unsigned long count=strtoul(count_text,&end,10);
-  if(!end || *end || (extra?(!count || count>128):(count!=2 && count!=4 && count!=6))) err_fail("invalid supplementary camera count");
-  if(!extra && action>=count) return;
-  FILE* file=fopen(extra?extra:mega_env("MEGASCENE_DETAIL_CAMERA_FILE"),"rb");
-  u32 views[7*128]; size_t stride=extra?7:5;
-  if(!file || fread(views,4,stride*count,file)!=stride*count || fgetc(file)!=EOF || fclose(file)) err_fail("supplementary camera input unavailable");
-  u32* words=extra?NULL:views+5*action;
-  if(extra) {
-    for(unsigned i=0;i<count;i++) if(views[7*i]==frame) {
-      if(words) err_fail("duplicate supplementary frame");
-      action=views[7*i+1]; words=views+7*i+2;
-    }
-    if(!words) return;
+  if(!end || *end || !count || count>128) err_fail("invalid supplementary camera count");
+  FILE* file=fopen(extra,"rb");
+  u32 views[7*128];
+  if(!file || fread(views,4,7*count,file)!=7*count || fgetc(file)!=EOF || fclose(file)) err_fail("supplementary camera input unavailable");
+  u32* words=NULL;
+  for(unsigned i=0;i<count;i++) if(views[7*i]==frame) {
+    if(words) err_fail("duplicate supplementary frame");
+    action=views[7*i+1]; words=views+7*i+2;
   }
+  if(!words) return;
   VoxelVkFrame detail=mega_capture_frame;
   for(unsigned i=0;i<5;i++) {
     float value; memcpy(&value,words+i,4);
     if(!isfinite(value)) err_fail("nonfinite supplementary camera");
     if(i<3) detail.eye[i]=value; else if(i==3) detail.yaw=value; else detail.pitch=value;
   }
-  detail.hud=extra?"MEGASCENE / SUPPLEMENTARY / VALIDATION ONLY":"MEGASCENE / SUPPORT CUT / VALIDATION DETAIL";
+  detail.hud=getenv("MEGASCENE_SUPPORT")?"MEGASCENE / SUPPORT CUT / VALIDATION DETAIL":"MEGASCENE / SUPPLEMENTARY / VALIDATION ONLY";
   detail.record=mega_detail_record;
   VoxelVkRender render=(VoxelVkRender)dlsym(voxel_vk_library,"voxel_vk_render_detail");
   if(!render) err_fail("supplementary render unavailable");

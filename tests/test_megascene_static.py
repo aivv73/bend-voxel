@@ -250,17 +250,18 @@ class StaticReports(unittest.TestCase):
         self.assertTrue(all(f["camera"] == s["opening"] and not f["picking"] and not f["actions"] for f in s["frames"]))
 
     def test_prelaunch_failure_has_no_invented_worker_exit(self):
-        with tempfile.TemporaryDirectory(prefix="megascene-prelaunch-", dir=Path.home()) as d:
-            path = Path(d)/"output"
-            result = subprocess.run([sys.executable,str(ROOT/"scripts/megascene.py"),"--case","static",
-                "--output",str(path),"--archive",str(Path(d)/"archive")],
-                env={**os.environ,"PATH":"/nonexistent"},capture_output=True,text=True,timeout=10)
-            self.assertEqual(result.returncode,2)
-            failure = read_evidence(path/"summary.json")
-            self.assertEqual(failure["attempt_kind"],"development_observation")
-            self.assertEqual(failure["termination"]["cause"],"prelaunch_failure")
-            self.assertIsNone(failure["termination"]["exit_code"])
-            self.assertFalse(failure["completed_prefix"]["startup"])
+        for case in ("static", "traversal", "picking", "localized", "support", "history"):
+            with self.subTest(case=case), tempfile.TemporaryDirectory(prefix="megascene-prelaunch-", dir=Path.home()) as d:
+                path = Path(d)/"output"
+                result = subprocess.run([sys.executable,str(ROOT/"scripts/megascene.py"),"--case",case,
+                    "--output",str(path),"--archive",str(Path(d)/"archive")],
+                    env={**os.environ,"PATH":"/nonexistent"},capture_output=True,text=True,timeout=10)
+                self.assertEqual(result.returncode,2,result.stderr)
+                failure = read_evidence(path/"summary.json")
+                self.assertEqual(failure["attempt_kind"],"development_observation")
+                self.assertEqual(failure["termination"]["cause"],"prelaunch_failure")
+                self.assertIsNone(failure["termination"]["exit_code"])
+                self.assertFalse(failure["completed_prefix"]["startup"])
 
     def test_validator_import_failure_retains_prelaunch_evidence(self):
         from unittest.mock import patch

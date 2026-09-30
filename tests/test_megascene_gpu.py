@@ -134,12 +134,14 @@ class NativeGpu(unittest.TestCase):
         result=subprocess.run([str(self.binary),'unused','capacity_env'],env=environment,capture_output=True,text=True)
         self.assertEqual((result.returncode,result.stdout),(0,'3721\n'))
         environment['MEGASCENE_FRAME_POLICY']='fixture'
+        result=subprocess.run([str(self.binary),'unused','capacity_env'],env=environment,capture_output=True,text=True)
+        self.assertEqual((result.returncode,result.stdout),(0,'3721\n'))
         for capacity,code in (('21721',0),('21722',2),('3721',2),('0',2),('-1',2),('1e4',2),('',2),('999999999999999999999999',2)):
             result=subprocess.run([str(self.binary),'unused','capacity_env'],env={**environment,'MEGASCENE_QUERY_PAIRS':capacity},
                                   capture_output=True,text=True)
             self.assertEqual(result.returncode,code,capacity)
         result=subprocess.run([str(self.binary),'unused','capacity_env'],env=environment,capture_output=True)
-        self.assertEqual(result.returncode,2)
+        self.assertEqual((result.returncode,result.stdout),(0,b'3721\n'))
 
     def test_driver_states_and_exact_values(self):
         for mode,status in (("supported","measured"),("zero","measured"),("wrapped","measured"),("fractional","measured"),

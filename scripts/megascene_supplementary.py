@@ -3,7 +3,7 @@ import struct
 
 from megascene_inventory import digest, require
 from megascene_recipe import bits
-from megascene_traversal import camera
+from megascene_schedule import numeric
 
 
 HISTORY_CUTS = frozenset((88, 89, 98, 99, 108, 109, 118, 119))
@@ -27,9 +27,9 @@ def history_view(action, source, created, removed):
                                   cell, box.material, point))
     require(faces, 'no independent exposed cavity face for supplementary history view')
     _, cell, material, point = min(faces)
-    eye = [point[i] + normal[i] * 3 + (3 if i == 1 else 4 if i == 2 else 0) for i in range(3)]
+    view = numeric("history-face", *(x.hex() for x in point), *normal)
     return {'name': 'face_' + action['action'], 'frame': action['frame'],
-            'action': action['action'], 'camera': camera(eye, point),
+            'action': action['action'], 'camera': view,
             'features': ['removed material', 'new exposed surfaces'],
             'supplementary_to': 'cut_' + action['action'], 'purpose': 'history_face',
             'reference_face': {'cell': list(map(str, cell)), 'normal': list(normal),
@@ -41,17 +41,13 @@ def history_view(action, source, created, removed):
 
 def proxy_views(source, reviews):
     boxes = [box for owner in source for box in owner.boxes]
-    lo = [min(b.lo[i] for b in boxes)/10 for i in range(3)]
-    hi = [max(b.hi[i] for b in boxes)/10 for i in range(3)]
-    side = max(hi[0]-lo[0], hi[2]-lo[2], 2*hi[1], 4) + 6
-    look = [(lo[0]+hi[0])/2, 0, (lo[2]+hi[2])/2]
-    eye = [look[0]+.45*side, .85*side, look[2]+.75*side]
-    view = camera(eye, look)
+    lo = [min(b.lo[i] for b in boxes) for i in range(3)]
+    hi = [max(b.hi[i] for b in boxes) for i in range(3)]
+    view = numeric("proxy-shadow", *lo, *hi)
     return [{'name': 'shadow_' + r['name'], 'frame': r['frame'], 'action': None,
              'camera': view, 'features': ['major shadows'],
              'supplementary_to': r['name'], 'purpose': 'proxy_shadow',
-             'source_bounds_cells': {'lo': list(map(lambda x: str(round(x*10)), lo)),
-                                     'hi': list(map(lambda x: str(round(x*10)), hi))}}
+             'source_bounds_cells': {'lo': list(map(str, lo)), 'hi': list(map(str, hi))}}
             for r in reviews if 'major shadows' in r['features']]
 
 

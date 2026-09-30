@@ -23,13 +23,22 @@ class NativeCheckpoints(unittest.TestCase):
         cls.folder=tempfile.TemporaryDirectory()
         cls.binary=Path(cls.folder.name)/'native-checkpoints'
         subprocess.run(['g++','-O2','-std=c++17',str(ROOT/'tests/native_checkpoints.cpp'),'-lvulkan','-lX11','-lcrypto','-o',str(cls.binary)],check=True,capture_output=True)
+        cls.regular_plan=Path(cls.folder.name)/'checkpoints.tsv'
+        cls.regular_plan.write_bytes(b'megascene-checkpoints/1\t2\t4\n0\tinitialization\n0\treview_opening\n0\twarmup_end\n1\tcompletion\n')
+        cls.action_plan=Path(cls.folder.name)/'actions.tsv'
+        cls.action_plan.write_bytes(b'megascene-checkpoints/1\t3721\t5\n0\tinitialization\n0\treview_opening\n120\twarmup_end\n121\taction_0\n3720\tcompletion\n')
 
     @classmethod
     def tearDownClass(cls):
         cls.folder.cleanup()
 
+    def execute(self, mode='whole'):
+        plan=self.action_plan if mode in ('rejection','noop') else self.regular_plan
+        return subprocess.run([str(self.binary),mode],capture_output=True,text=True,
+                              env={**os.environ,'MEGASCENE_CHECKPOINT_FILE':str(plan)})
+
     def record(self, mode='whole'):
-        result=subprocess.run([str(self.binary),mode],capture_output=True,text=True)
+        result=self.execute(mode)
         self.assertEqual(result.returncode,0,result.stderr)
         return read_json(result.stdout)
 
@@ -54,12 +63,13 @@ class NativeCheckpoints(unittest.TestCase):
                  'winding':'winding','tree':'tree node','stale_native':'stale native mesh',
                  'cache_changed':'anchor mismatch'}
         for mode, reason in reasons.items():
-            result=subprocess.run([str(self.binary),mode],capture_output=True,text=True)
+            result=self.execute(mode)
             self.assertEqual(result.returncode,2,(mode,result.stdout,result.stderr))
             self.assertIn(reason,result.stderr,mode)
 
     def test_unchanged_geometry_cache_preserves_checkpoint_bytes(self):
-        result=subprocess.run([str(self.binary),'cache_repeat'],capture_output=True,text=True,check=True)
+        result=self.execute('cache_repeat')
+        self.assertEqual(result.returncode,0,result.stderr)
         first,second=(read_json(line) for line in result.stdout.splitlines())
         self.assertEqual(first['sha256'],second['sha256'])
         self.assertEqual(first['body_sha256'],second['body_sha256'])
@@ -84,6 +94,15 @@ class NativeCheckpoints(unittest.TestCase):
             self.assertEqual({k:v for k,v in payload.items() if k not in ('status','action_outcomes')},
                              {k:v for k,v in initial.items() if k not in ('status','action_outcomes')})
             self.assertEqual(record['sha256'],digest(payload))
+
+    def test_names_follow_frozen_order_without_native_derivation(self):
+        plan=Path(self.folder.name)/'ordered.tsv'
+        plan.write_bytes(b'megascene-checkpoints/1\t2\t4\n0\tz_review\n0\ta_initial\n0\tmotion_window\n1\tfinish\n')
+        result=subprocess.run([str(self.binary),'whole'],capture_output=True,text=True,
+                              env={**os.environ,'MEGASCENE_CHECKPOINT_FILE':str(plan),
+                                   'MEGASCENE_HISTORY':'1','MEGASCENE_SUPPORT':'1'})
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(read_json(result.stdout)['names'],['z_review','a_initial','motion_window'])
 
 
 class CanonicalContracts(unittest.TestCase):
