@@ -3,7 +3,7 @@
   "issue": 68,
   "reviewer": "Codex",
   "reviewed_at_utc": "2026-09-30T04:30:19.423423+00:00",
-  "implementation_acceptance": "pass",
+  "implementation_acceptance": "pending_allowance_reconciliation",
   "qualified_performance": "unqualified",
   "future_limit_discovery": "outside_issue_68",
   "scope": "Minimum accepted matrix and observed implementation behavior on the archived host; no universal proof of unsafe/native behavior or performance readiness",
@@ -1163,5 +1163,11 @@
   "failure_reference_search_reproduction": "Retained independent reference, numeric/rollback, injected failure, search/recovery and archived reproduction checks; current full suite passes. See indexed corroboration and supporting artifacts.",
   "declared_shared_allowance_seconds": 54000,
   "allowance_ledger": "allowance.json",
-  "retention": "Earlier failed, incomplete and insufficient attempts remain indexed. Noneligible pending reviews cannot establish acceptance. No timing populations or calibration controls are pooled into a performance pass."
+  "retention": "Earlier failed, incomplete and insufficient attempts remain indexed. Noneligible pending reviews cannot establish acceptance. No timing populations or calibration controls are pooled into a performance pass.",
+  "runtime_and_fidelity": "pass",
+  "allowance_status": "overrun_retained; explicit additional declaration required",
+  "final_audit_log": {
+    "path": "/home/aivv/megascene-68-final-review.log",
+    "sha256": "1f5dd44f8716a75ef6e71d88f9804d43d43c152f9cbd627623bbad4606472fc5"
+  }
 }

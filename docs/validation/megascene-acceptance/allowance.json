@@ -1,6 +1,7 @@
 {
   "allowance_ns": "54000000000000",
   "charging_policy": "Conservative gross charge of every retained earlier Megascene campaign root, including development and failed attempts; new work charged once through new_work",
+  "completion_status": "awaiting_explicit_extension_for_retained_final_review_overrun",
   "declared_extension_ns": "46800000000000",
   "declared_extensions": [
     {
@@ -2781,9 +2782,20 @@
       "name": "supervisor-gross-overhead",
       "status": "charged",
       "wrapped_ns": "141613956596"
+    },
+    {
+      "elapsed_ns": "334257505544",
+      "end_utc_ns": "1790742790054535790",
+      "log": "/home/aivv/megascene-68-final-review.log",
+      "log_sha256": "1f5dd44f8716a75ef6e71d88f9804d43d43c152f9cbd627623bbad4606472fc5",
+      "name": "final-reviewed-archive-and-documentation",
+      "scope": "Final index, selected archive hashes, reviewed decision, documentation and conservative ten-second bookkeeping reserve; overrun explicitly retained",
+      "start_utc_ns": "1790742455797030246",
+      "status": "charged_over_allowance"
     }
   ],
-  "new_work_charge_ns": "30446201462599",
+  "new_work_charge_ns": "30780458968143",
+  "over_allowance_ns": "123539339601",
   "prior_campaigns": [
     {
       "archive": "/home/aivv/megascene-calibration-64",
@@ -2976,8 +2988,8 @@
     }
   ],
   "prior_gross_charge_ns": "23343080371458",
-  "recorded_utc": "2026-09-29T16:34:07.929025+00:00",
-  "remaining_ns": "210718165943",
+  "recorded_utc": "2026-09-30T04:33:00.054618+00:00",
+  "remaining_ns": "0",
   "runner_campaign": {
     "path": "/home/aivv/megascene-acceptance-68-final/campaign.json",
     "scope": "Internal supervisor cap transferred from remaining shared 54,000-second allowance after retained output-copy failure; no new shared grant"

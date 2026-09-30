@@ -1,8 +1,8 @@
 # Issue #68 implementation acceptance record
 
-Issue [#68](https://github.com/aivv73/bend-voxel/issues/68) has a completed local
-implementation acceptance record. The separate [reviewed decision](acceptance.json)
-passes all 45 required configurations and binds each to specific eligible
+Issue [#68](https://github.com/aivv73/bend-voxel/issues/68) has a completed runtime and fidelity matrix; overall acceptance remains
+incomplete pending an explicit allowance extension. The separate [reviewed decision](acceptance.json)
+records passing results for all 45 required configurations and binds each to specific eligible
 attempts and verified archive hashes. GitHub publication and issue closure have
 not been performed. **Qualified performance remains unestablished.**
 
@@ -102,3 +102,13 @@ inputs, schedules, validations, raw records, captures, assessments and summaries
 Their artifact/evidence entries were checked against file sizes and SHA-256
 hashes for the reviewed decision. Earlier failed and incomplete attempts remain
 indexed alongside successes.
+
+### Final allowance reconciliation
+
+Final archive review and documentation exceeded the declared allowance. All
+charges are retained in `allowance.json`, with `remaining_ns` zero and the
+overrun recorded explicitly. The runtime/fidelity matrix and proof/runtime
+checks pass, but the overall implementation acceptance decision is pending
+allowance reconciliation. No further acceptance run is authorized by the
+exhausted allowance. The previous local completion decision in commit
+`8b39052` predates this final charge and is superseded by this correction.
