@@ -32,8 +32,7 @@ below. All other earlier policy requirements remain in force.
 
 The reviewed [prototype at c60a880](https://github.com/aivv73/bend-voxel/blob/c60a880/docs/prototypes/megascene-43.md)
 establishes representativeness, not exact geometry, measured inventories or
-approved scale presets. Domain terms follow [CONTEXT.md](../CONTEXT.md); the
-current representation follows [ADR 0001](adr/0001-sparse-cuboid-world.md).
+approved scale presets. Domain terms follow [CONTEXT.md](../CONTEXT.md).
 
 ## Compatibility and scenario coverage
 
