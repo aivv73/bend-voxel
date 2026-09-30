@@ -2,7 +2,8 @@
 
 from collections import Counter
 
-from megascene_recipe import generate, volume
+from megascene_recipe import generate
+from megascene_inventory import volume
 
 
 def source_effects(config, transformed):

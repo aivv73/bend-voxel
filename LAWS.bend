@@ -1,4 +1,5 @@
 import Base
+import ./src/megascene_admission.bend as Admission
 import ./src/color.bend as Color
 import ./src/math.bend as R
 import ./src/material.bend as Material
@@ -403,6 +404,20 @@ law history_no_prior_visits:
   for neighborhood: Scale.Integer
   for index: U32
   {Scale.history_visit.prior(0n,count,stride,offset,neighborhood,index) == 0 : U32}
+
+law admission_add_limit:
+  {Admission.checked.add(4294967295,0,"count") == Done{4294967295} : Result<&2,&2,String,U32>}
+law admission_add_overflow:
+  {Admission.checked.add(4294967295,1,"count") ==
+    Fail{"count: unsigned integer exceeds supported range"} : Result<&2,&2,String,U32>}
+law admission_mul_limit:
+  {Admission.checked.mul(4294967295,1,"count") == Done{4294967295} : Result<&2,&2,String,U32>}
+law admission_mul_overflow:
+  {Admission.checked.mul(2147483648,2,"count") ==
+    Fail{"count: unsigned integer exceeds supported range"} : Result<&2,&2,String,U32>}
+law admission_mul_zero:
+  for value: U32
+  {Admission.checked.mul(0,value,"count") == Done{0} : Result<&2,&2,String,U32>}
 law scale_midpoint_lower_tie:
   {Scale.midpoint_refinement(Scale.Integer.from_u32(4n,2),Scale.Integer.from_u32(4n,9)) ==
     Some{Scale.Integer.from_u32(4n,6)} : Maybe<&2,Scale.Integer>}

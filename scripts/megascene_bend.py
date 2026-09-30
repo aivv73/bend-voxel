@@ -12,6 +12,7 @@ ROOT = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR
 DEPENDENCIES = {
     "megascene_source": ("megascene_source", "megascene_recipe", "math"),
     "megascene_policy": ("megascene_policy", "megascene_scale"),
+    "megascene_admit": ("megascene_admit", "megascene_admission", "megascene_scale", "megascene_recipe", "math"),
 }
 
 
@@ -45,7 +46,7 @@ def invoke(worker, arguments):
     return result.stdout
 
 
-def run(module, *arguments):
+def worker(module):
     names = DEPENDENCIES[module]
     version = compiler_version()
     sources = {name: (source_directory() / (name + ".bend")).read_bytes() for name in names}
@@ -70,4 +71,20 @@ def run(module, *arguments):
                 if result.returncode:
                     raise RuntimeError("Bend worker build failed\n" + result.stdout + result.stderr)
                 os.replace(stage / "worker", worker)
-    return invoke(worker, tuple(str(argument) for argument in arguments))
+    return worker
+
+
+def run(module, *arguments):
+    return invoke(worker(module), tuple(str(argument) for argument in arguments))
+
+
+def run_input(module, text):
+    executable = worker(module)
+    with tempfile.NamedTemporaryFile(mode="w", encoding="ascii") as request:
+        request.write(text)
+        request.flush()
+        result = subprocess.run([str(executable), "--threads", "1", "--", request.name],
+                                capture_output=True, text=True, timeout=60)
+    if result.returncode:
+        raise ValueError(result.stderr.strip() or "Bend worker rejected input")
+    return result.stdout

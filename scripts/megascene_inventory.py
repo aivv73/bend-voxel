@@ -11,9 +11,33 @@ import math
 import re
 import struct
 
-from megascene_recipe import Box, bits, checked, connected, f32, volume
+from megascene_recipe import Box, bits, checked, f32
 
 SCHEMA = "megascene-evidence/1"
+
+
+def volume(box):
+    value = 1
+    for lo, hi in zip(box.lo, box.hi):
+        value = checked(value * checked(hi - lo, "box dimension"), "box volume")
+    return value
+
+
+def connected(boxes):
+    if not boxes:
+        return False
+    reached, pending = {0}, [0]
+    while pending:
+        a = boxes[pending.pop()]
+        for j, b in enumerate(boxes):
+            if j in reached:
+                continue
+            if any((a.hi[k] == b.lo[k] or b.hi[k] == a.lo[k]) and
+                   all(max(a.lo[t], b.lo[t]) < min(a.hi[t], b.hi[t])
+                       for t in range(3) if t != k) for k in range(3)):
+                reached.add(j)
+                pending.append(j)
+    return len(reached) == len(boxes)
 
 
 def canonical(value):

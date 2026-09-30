@@ -55,4 +55,9 @@ def Laws.scale_half_double(a):
     case Scale.ScaleBit{b,t}: {==}
 def Laws.scale_sqrt_fuel(target,lo,hi): {==}
 def Laws.history_no_prior_visits(count,stride,offset,neighborhood,index): {==}
+def Laws.admission_add_limit(): {==}
+def Laws.admission_add_overflow(): {==}
+def Laws.admission_mul_limit(): {==}
+def Laws.admission_mul_overflow(): {==}
+def Laws.admission_mul_zero(value): {==}
 def Laws.scale_midpoint_lower_tie(): {==}

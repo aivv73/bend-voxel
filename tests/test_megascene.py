@@ -17,11 +17,11 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from megascene_inventory import (SCHEMA, canonical, coordinate, inventory, measurement,
+from megascene_inventory import (SCHEMA, canonical, connected, coordinate, inventory, measurement,
                                  read_evidence, read_json, surface_actual, surface_reference,
-                                 verify_vertices)
+                                 verify_vertices, volume)
 from megascene_recipe import (Box, Owner, admit_sources, bend_program, bits, checked,
-                              connected, generate, volume)
+                              generate)
 from megascene_reference import boxes as reference_boxes
 
 

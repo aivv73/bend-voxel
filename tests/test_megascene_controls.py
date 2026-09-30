@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from megascene import configuration, parser
-from megascene_recipe import generate, volume, connected, admit_sources
+from megascene_recipe import generate, admit_sources
+from megascene_inventory import connected, volume
 from megascene_static import audit_observation, schedule
 from megascene_compare_controls import compare
 from megascene_inventory import surface_reference
