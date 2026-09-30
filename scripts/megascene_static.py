@@ -16,6 +16,9 @@ from megascene_recipe import admit_sources, bend_program, bits, checked, envelop
 from megascene_scale import side_count, operational_bounds, admit_schedule, preflight
 from megascene_gpu import u64
 
+AUDIT_STAGES = ("audit_mesh_validation", "audit_visibility", "audit_proxy", "audit_hashing", "audit_output")
+GEOMETRY_STAGES = {"geometry_mesh_update", "geometry_audit", *AUDIT_STAGES}
+
 
 def settings(args, base):
     from megascene_performance import SCHEDULES, admit as admit_performance
@@ -241,6 +244,14 @@ def audit_observation(records, config, frames, frozen=None):
         by_frame = {}
         for r in records:
             by_frame.setdefault(r["frame"], []).append(r)
+        # Archived workers have only the aggregate geometry marker. A worker
+        # declaring detailed timing must supply the full set on every frame,
+        # even when all its detailed records are missing from the stream.
+        detailed_geometry = any(r["record_type"] == "stage" and r["stage"] in GEOMETRY_STAGES for r in records)
+        if frames:
+            timing_schema = actual.get("geometry_timing_schema")
+            require(timing_schema in (None, "native-geometry-timing/1"), "unsupported native geometry timing schema")
+            detailed_geometry |= timing_schema is not None
         for f in frames:
             items = by_frame[f["frame"]]
             state = [r for r in items if r["record_type"] == "static_state"]
@@ -278,12 +289,25 @@ def audit_observation(records, config, frames, frozen=None):
                 require(int(work["main_body_draws"])+int(work["proxied_bodies"])==int(work["visible_bodies"]), "proxy/main visibility coverage mismatch")
             stages = [r for r in items if r["record_type"] == "stage"]
             required = {"transport", "renderer", "geometry", "fence_wait", "vertex_upload", "acquire", "command_record", "submit_present", "events"}
+            if detailed_geometry:
+                required |= GEOMETRY_STAGES
             required |= {"generation", "initial_surfaces", "initial_inventory", "window_setup", "renderer_setup"} if f["frame"] == "0" else {"physics", "view"}
             if planned["actions"]:
                 required |= {"carve", "connectivity", "surfaces", "commit"}
             if any(r["record_type"] in ("checkpoint", "static_audit") for r in items):
                 required.add("checkpoint")
             require({r["stage"] for r in stages} == required and len(stages) == len(required), "missing or duplicate CPU stage")
+            if detailed_geometry:
+                intervals = {r["stage"]: (u64(r["begin_ns"]), u64(r["end_ns"])) for r in stages}
+                geometry, mesh, audit = (intervals[name] for name in ("geometry", "geometry_mesh_update", "geometry_audit"))
+                require(geometry[0] <= mesh[0] <= mesh[1] == audit[0] <= audit[1] == geometry[1],
+                        "invalid geometry update/audit boundaries")
+                previous = None
+                for name in AUDIT_STAGES:
+                    begin, end = intervals[name]
+                    require(audit[0] <= begin <= end <= audit[1], "CPU audit stage outside geometry audit")
+                    require(previous is None or begin == previous, "CPU audit phases overlap or have a gap")
+                    previous = end
             for r in stages:
                 require(int(r["end_ns"]) <= int(f["end_ns"]), "CPU stage ends outside its frame")
                 if f["frame"] != "0":

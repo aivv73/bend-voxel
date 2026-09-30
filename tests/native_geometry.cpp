@@ -235,6 +235,69 @@ static void expect_visibility_fixtures() {
   check({-1,-1,-20},{1,1,-10},0,{0,0,0},false);
 }
 
+static std::vector<std::pair<std::string,uint64_t>> audit_records;
+static void capture_audit(const char* record) {
+  audit_records.emplace_back(record,monotonic_ns());
+}
+static uint64_t audit_number(const std::string& record,const char* field) {
+  auto key="\""+std::string(field)+"\":\"";
+  auto first=record.find(key);
+  assert(first!=std::string::npos);
+  return std::stoull(record.substr(first+key.size()));
+}
+static void expect_native_audit_phases() {
+  VoxelVkBody bodies[5]{};
+  VoxelVkFace faces[5]{};
+  VoxelVkVertex vertices[5][6]{};
+  for(unsigned i=0;i<5;i++) {
+    auto& b=bodies[i]; b.id=i+1; b.anchored=1; b.revision=1;
+    b.lo[0]=i*4; b.hi[0]=i*4+2; b.hi[1]=20; b.hi[2]=10;
+    auto& f=faces[i]; f.side=5; f.material=2;
+    std::copy(b.lo,b.lo+3,f.lo); std::copy(b.hi,b.hi+3,f.hi); f.lo[2]=f.hi[2];
+    b.faces=&f; b.face_count=1; b.vertices=vertices[i]; b.vertex_count=6;
+    unsigned j=0;
+    for(auto [x,y]:std::initializer_list<std::pair<unsigned,unsigned>>{{0,0},{1,0},{1,1},{0,0},{1,1},{0,1}})
+      vertices[i][j++]={{(x?b.hi[0]:b.lo[0])*.1f,y*2.f,1.f},5,2};
+  }
+  VoxelVkFrame frame{}; test_colors(frame);
+  frame.width=640; frame.height=360; frame.ground_half_extent=40;
+  frame.eye[0]=.9f; frame.eye[1]=1; frame.eye[2]=50; frame.yaw=3.14159265f;
+  frame.body_count=5; frame.bodies=bodies; frame.record=capture_audit;
+  GeometryCache cache; bool reused=false;
+  geometry(frame,cache,reused);
+  assert(cache.proxy_draws==1);
+  for(bool full:{false,true}) for(bool hash:{false,true}) {
+    frame.full_geometry=full;
+    if(hash) setenv("MEGASCENE_HISTORY","1",1); else unsetenv("MEGASCENE_HISTORY");
+    geometry(frame,cache,reused); audit_records.clear();
+    audit_native(frame,cache);
+    assert(audit_records.size()==6);
+    const auto& payload=audit_records[0].first;
+    assert(payload.find("\"record_type\":\"native_audit\"")!=std::string::npos);
+    assert(audit_number(payload,"vertices_checked")==30);
+    assert((payload.find("\"mesh_sha256\"")!=std::string::npos)==hash);
+    assert(payload.find("\"proxy_cache_sha256\":{}") == std::string::npos);
+    assert(payload.find(full?"\"proxied_ids\":[]":"\"drawn_ids\":[]")!=std::string::npos);
+    const char* phases[]={"audit_mesh_validation","audit_visibility","audit_proxy","audit_hashing","audit_output"};
+    uint64_t previous=0;
+    for(unsigned i=0;i<5;i++) {
+      const auto& [record,emitted]=audit_records[i+1];
+      assert(record.find("\"stage\":\""+std::string(phases[i])+"\"")!=std::string::npos);
+      auto begin=audit_number(record,"begin_ns"),end=audit_number(record,"end_ns");
+      assert(begin<=end && end<=emitted && (!i || begin==previous));
+      assert(audit_number(record,"duration_ns")==end-begin); previous=end;
+      if(i==4) assert(begin<=audit_records[0].second && audit_records[0].second<=end);
+    }
+  }
+  unsetenv("MEGASCENE_HISTORY");
+  cache.geometry.vertices[cache.meshes.at(1).first].position.x+=1;
+  bool rejected=false;
+  try { audit_native(frame,cache); } catch(const std::runtime_error& e) {
+    rejected=std::string(e.what())=="stale native mesh vertex/material";
+  }
+  assert(rejected);
+}
+
 int main() {
   GeometryCache selection_cache;
   selection_cache.proxies[1].selected=true;
@@ -248,6 +311,7 @@ int main() {
   assert(detail_failed && selection_cache.proxies.at(1).selected && !selection_cache.groups.at(2).selected);
 
   expect_visibility_fixtures();
+  expect_native_audit_phases();
   assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR,VK_PRESENT_MODE_IMMEDIATE_KHR})==VK_PRESENT_MODE_IMMEDIATE_KHR);
   assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR})==VK_PRESENT_MODE_MAILBOX_KHR);
   bool unsupported=false;

@@ -15,7 +15,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/"scripts"))
 from megascene_inventory import SCHEMA, canonical, read_evidence
-from megascene_static import read_stream, report, schedule
+from megascene_static import audit_observation, read_stream, report, schedule
 from test_megascene_gpu import fixtures as gpu_fixtures
 
 CONFIG = {"case": "static", "preset": "small", "side_m": "64", "seed": "45", "threads": "6",
@@ -56,6 +56,26 @@ def fixtures():
     return records
 
 
+def detailed_geometry_fixtures():
+    records = []
+    phases = (("geometry_mesh_update", 5, 30), ("geometry_audit", 30, 90),
+              ("audit_mesh_validation", 31, 40), ("audit_visibility", 40, 50),
+              ("audit_proxy", 50, 60), ("audit_hashing", 60, 70), ("audit_output", 70, 85))
+    for r in fixtures():
+        records.append(r)
+        if r["record_type"] == "render_settings":
+            r["geometry_timing_schema"] = "native-geometry-timing/1"
+        if r.get("stage") == "geometry":
+            start = int(r["begin_ns"])
+            r.update(end_ns=str(start+90), duration_ns="90")
+            for name, begin, end in phases:
+                records.append(dict(r, stage=name, begin_ns=str(start+begin), end_ns=str(start+end),
+                                    duration_ns=str(end-begin)))
+    for i, r in enumerate(records):
+        r["sequence"] = str(i)
+    return records
+
+
 class StaticReports(unittest.TestCase):
     def summarize(self, records, code=0, cause="normal_exit"):
         result = report(records,[],CONFIG,code,cause,10**15-500,"fixture",gpu_records=gpu_fixtures() if records else [])
@@ -70,6 +90,53 @@ class StaticReports(unittest.TestCase):
         self.assertEqual(result["cold_startup"]["value"],"600")
         for name in ("qualified_capacity", "interactive_pass", "state_correctness", "calibration", "rendering_correctness", "visual_quality", "responsiveness"):
             self.assertEqual(result[name]["status"],"inconclusive")
+
+    def test_geometry_phases_are_reported_separately(self):
+        records = detailed_geometry_fixtures()
+        self.assertEqual(audit_observation(records, CONFIG, [r for r in records if r["record_type"] == "frame"]), [])
+        result = self.summarize(records)
+        self.assertEqual(result["schedule_completion"]["status"], "pass")
+        from megascene_report import classify
+        manifest = {"schema": SCHEMA, "record_type": "manifest", "attempt_id": "fixture",
+                    "campaign_id": "fixture", "series_id": "fixture", "synthetic": True,
+                    "effective": dict(CONFIG, schedule="static-v1"), "attempt_kind": "development_observation"}
+        result = classify(result, manifest, records)
+        for name, duration in (("geometry_mesh_update", 25), ("geometry_audit", 60),
+                               ("audit_visibility", 10), ("audit_hashing", 10),
+                               ("audit_proxy", 10), ("audit_output", 15)):
+            self.assertEqual(result["stage_populations"][name]["ordinary"]["mean"], duration)
+
+    def test_incomplete_or_duplicate_geometry_phases_fail(self):
+        records = [r for r in detailed_geometry_fixtures()
+                   if r.get("stage") not in {"geometry_mesh_update", "geometry_audit", "audit_mesh_validation",
+                                             "audit_visibility", "audit_proxy", "audit_hashing", "audit_output"}]
+        self.assertNotEqual(self.summarize(records)["schedule_completion"]["status"], "pass")
+        for name in ("geometry_mesh_update", "geometry_audit", "audit_mesh_validation",
+                     "audit_visibility", "audit_proxy", "audit_hashing", "audit_output"):
+            for mutation in ("missing_frame", "missing_stream", "duplicate"):
+                with self.subTest(stage=name, mutation=mutation):
+                    records = detailed_geometry_fixtures()
+                    target = next(r for r in records if r.get("stage") == name)
+                    if mutation == "missing_frame":
+                        records.remove(target)
+                    elif mutation == "missing_stream":
+                        records = [r for r in records if r.get("stage") != name]
+                    else:
+                        records.append(dict(target))
+                    self.assertNotEqual(self.summarize(records)["schedule_completion"]["status"], "pass")
+
+    def test_geometry_phase_boundaries_fail_on_overlap_gap_or_escape(self):
+        for name, field, delta in (("geometry_mesh_update", "end_ns", -1),
+                                   ("geometry_audit", "end_ns", 11),
+                                   ("audit_visibility", "begin_ns", -1),
+                                   ("audit_hashing", "begin_ns", 1),
+                                   ("audit_output", "end_ns", 6)):
+            with self.subTest(stage=name, field=field):
+                records = detailed_geometry_fixtures()
+                target = next(r for r in records if r.get("stage") == name)
+                target[field] = str(int(target[field])+delta)
+                target["duration_ns"] = str(int(target["end_ns"])-int(target["begin_ns"]))
+                self.assertNotEqual(self.summarize(records)["schedule_completion"]["status"], "pass")
 
     def test_actual_settings_and_work_cannot_be_missing_or_reduced(self):
         mutations = [("render_settings","present_mode","fifo"), ("render_settings","width","1920"),
