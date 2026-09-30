@@ -1,0 +1,1237 @@
+{
+  "schema": "megascene-feature-assessments/1",
+  "views": {
+    "completion": {
+      "remaining uncut later targets": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "retained geometry after 48 cuts": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "settled fragments": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_0": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_1": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_10": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_11": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_12": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_13": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_14": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_15": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_16": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_17": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_18": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_19": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_2": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_20": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_21": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_22": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_23": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_24": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_25": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_26": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_27": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_28": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_29": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_3": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_30": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_31": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_32": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_33": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_34": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_35": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_36": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_37": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_38": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_39": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_4": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_40": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_41": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "note": "The original capture shows a nearly flat wall without a discernible new opening; the reference reports a 32-cell removal at this frame.",
+        "readability": "insufficient"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "note": "The original capture shows a nearly flat wall without a discernible new opening; the reference reports a 32-cell removal at this frame.",
+        "readability": "insufficient"
+      }
+    },
+    "cut_42": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_43": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_44": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_45": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_46": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_47": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_5": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_6": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_7": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_8": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_9": {
+      "new exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "removed material": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "history_overview": {
+      "destruction after 48 cuts": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining uncut later targets": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "opening": {
+      "district and structures": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_100": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_101": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_102": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_103": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_104": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_105": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_106": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_107": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_108": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_109": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_110": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_111": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_112": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_113": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_114": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_115": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_116": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_117": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_118": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_119": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_48": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_49": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_50": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_51": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_52": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_53": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_54": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_55": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_56": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_57": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_58": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_59": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_60": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_61": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_62": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_63": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_64": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_65": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_66": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_67": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_68": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_69": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_70": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_71": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_72": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_73": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_74": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_75": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_76": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_77": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_78": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_79": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_80": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_81": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_82": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_83": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_84": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_85": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_86": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_87": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_88": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_89": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_90": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_91": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_92": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_93": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_94": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_95": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_96": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_97": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_98": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_99": {
+      "no new cut at this camera visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "remaining material at later target": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    }
+  }
+}

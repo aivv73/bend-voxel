@@ -137,10 +137,12 @@ def schedule(config, source):
     checkpoints.append({"name":"completion","frame":"3720"})
     enabled_count=sum(f["picking"] for f in frames)
     hit_count=sum(f["picking"] and f["expected_pick"]["kind"] != "0" for f in frames)
+    from megascene_supplementary import proxy_views
     return {"schema":SCHEMA,"record_type":"schedule","fixed_step":"0x3c888889",
             "schedule_id":f"proxy-{diagnostic}-{config['case']}-v1", "diagnostic":diagnostic,
             "warmup_frames":"120","measured_frames":"3600","opening":opening,
             "frames":frames,"actions":[],"review_views":reviews,"required_checkpoints":checkpoints,
+            "supplementary_views":proxy_views(source, reviews),
             "group_reference":g,"hold_length":str(hold_length),"hold_labels":list(labels),
             "picking_admission":{"status":"pass","enabled_samples":str(enabled_count),
                 "required_hits":str(hit_count),"required_misses":str(enabled_count-hit_count),

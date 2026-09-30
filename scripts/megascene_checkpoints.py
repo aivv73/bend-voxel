@@ -256,11 +256,15 @@ def compare_threads(bundles):
         validation = read_json((root/"validation.json").read_text())
         applicable(validation, identity(manifest, root, manifest["effective"]))
         summary = read_json((root/"summary.json").read_text())
-        require(summary["state_correctness"]["status"] == "pass" and summary["attempt_kind"] == "development_observation", "thread comparison requires validated timed attempt")
+        require(summary["state_correctness"]["status"] == "pass" and
+                summary["attempt_kind"] in ("development_observation", "calibration_on"),
+                "thread comparison requires validated timed attempt")
         comparison = read_json((root/"comparison.json").read_text())
         require(comparison["status"] == "pass", "thread comparison has failed checkpoints")
         summaries.append((manifest, validation, comparison))
     require(sorted(m["effective"]["threads"] for m,_,_ in summaries) == ["1", "12", "6"], "thread comparison requires 1/6/12 separately")
+    require(len({m["attempt_kind"] for m,_,_ in summaries}) == 1,
+            "thread comparison requires one attempt kind")
     first = summaries[0]
     differences = []
     for manifest, validation, comparison in summaries[1:]:

@@ -1,0 +1,593 @@
+{
+  "bundles": [
+    "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/c83e0d54-ff9d-4abd-b354-08d8116c46ff/35d8d8a0-3521-40f2-91d1-9a2c9465124b",
+    "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/b8ae84a1-91fc-404a-8bc7-1fea79e0a485/58c0e7fb-e2cd-49e4-bafe-c561e64fdb89",
+    "/home/aivv/megascene-acceptance-68-extension4/8ce9ae93-a01d-49f8-ba51-a5b5e89bcb71/f977344a-0116-4339-ab36-5b393d4d50c5/1fbfeee1-5281-43ea-8400-c6b3a59c7213"
+  ],
+  "differences": [],
+  "record_type": "thread_comparison",
+  "schema": "megascene-evidence/1",
+  "scope": "exact logical state and geometry; separate validation per thread count",
+  "status": "pass",
+  "synthetic": false,
+  "threads": [
+    "1",
+    "6",
+    "12"
+  ],
+  "work_inventories": {
+    "1": [
+      {
+        "cells": "9704448",
+        "cuboids": "40",
+        "id": "1",
+        "protected_cells": "409600",
+        "surface_rectangles": "172",
+        "tree_nodes": "79",
+        "vertices": "1032"
+      },
+      {
+        "cells": "173568",
+        "cuboids": "21",
+        "id": "2",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "3",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "4",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "5",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "8608",
+        "cuboids": "5",
+        "id": "6",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "186240",
+        "cuboids": "21",
+        "id": "7",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "8",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "9",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "10",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "9104",
+        "cuboids": "5",
+        "id": "11",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "177792",
+        "cuboids": "21",
+        "id": "12",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "13",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "14",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "15",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "9104",
+        "cuboids": "5",
+        "id": "16",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "173568",
+        "cuboids": "21",
+        "id": "17",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "18",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "19",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "20",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "8608",
+        "cuboids": "5",
+        "id": "21",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      }
+    ],
+    "12": [
+      {
+        "cells": "9704448",
+        "cuboids": "40",
+        "id": "1",
+        "protected_cells": "409600",
+        "surface_rectangles": "172",
+        "tree_nodes": "79",
+        "vertices": "1032"
+      },
+      {
+        "cells": "173568",
+        "cuboids": "21",
+        "id": "2",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "3",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "4",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "5",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "8608",
+        "cuboids": "5",
+        "id": "6",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "186240",
+        "cuboids": "21",
+        "id": "7",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "8",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "9",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "10",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "9104",
+        "cuboids": "5",
+        "id": "11",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "177792",
+        "cuboids": "21",
+        "id": "12",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "13",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "14",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "15",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "9104",
+        "cuboids": "5",
+        "id": "16",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "173568",
+        "cuboids": "21",
+        "id": "17",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "18",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "19",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "20",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "8608",
+        "cuboids": "5",
+        "id": "21",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      }
+    ],
+    "6": [
+      {
+        "cells": "9704448",
+        "cuboids": "40",
+        "id": "1",
+        "protected_cells": "409600",
+        "surface_rectangles": "172",
+        "tree_nodes": "79",
+        "vertices": "1032"
+      },
+      {
+        "cells": "173568",
+        "cuboids": "21",
+        "id": "2",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "3",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "4",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "5",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "8608",
+        "cuboids": "5",
+        "id": "6",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "186240",
+        "cuboids": "21",
+        "id": "7",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "8",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "9",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4376",
+        "cuboids": "5",
+        "id": "10",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "9104",
+        "cuboids": "5",
+        "id": "11",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "177792",
+        "cuboids": "21",
+        "id": "12",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "13",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "14",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4360",
+        "cuboids": "5",
+        "id": "15",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "9104",
+        "cuboids": "5",
+        "id": "16",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      },
+      {
+        "cells": "173568",
+        "cuboids": "21",
+        "id": "17",
+        "protected_cells": "512",
+        "surface_rectangles": "109",
+        "tree_nodes": "41",
+        "vertices": "654"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "18",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "19",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "4352",
+        "cuboids": "5",
+        "id": "20",
+        "protected_cells": "144",
+        "surface_rectangles": "36",
+        "tree_nodes": "9",
+        "vertices": "216"
+      },
+      {
+        "cells": "8608",
+        "cuboids": "5",
+        "id": "21",
+        "protected_cells": "128",
+        "surface_rectangles": "31",
+        "tree_nodes": "9",
+        "vertices": "186"
+      }
+    ]
+  }
+}

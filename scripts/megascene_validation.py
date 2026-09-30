@@ -106,6 +106,9 @@ def validate_or_reuse(config, archive, manifest, loader, campaign, source, owner
         snapshot(destination/"inventory.json", achieved)
         expected, work = initial_payload(text, frozen, manifest["worker_environment"]["MEGASCENE_SCHEDULE_SHA256"], config)
         result = audit(records, frozen, expected, work, summary["schedule_completion"]["status"] == "pass", thorough=True)
+        from megascene_supplementary import audit as audit_supplementary
+        detail_audit = audit_supplementary(records, frozen, True)
+        if detail_audit: result["supplementary_validation"] = detail_audit
         require(not result["synthetic"], "synthetic replay cannot validate a real configuration")
         snapshot(destination/"comparison.json", result)
         value["loaded_host_artifacts"] = host_artifacts(read_json((destination/"invocation.json").read_text()), archive)
@@ -161,6 +164,9 @@ def compare_attempt(config, archive, manifest, validation, summary, records):
         frozen = read_json((archive/"schedule.json").read_text())
         result = audit(records, frozen, validation["expected"], validation["actual_work"],
                        summary["schedule_completion"]["status"] == "pass")
+        from megascene_supplementary import audit as audit_supplementary
+        detail_audit = audit_supplementary(records, frozen, False)
+        if detail_audit: result["supplementary_validation"] = detail_audit
         if config["case"] in ("localized", "support", "history"):
             require(result.get("edited_work") == validation.get("edited_work"), "post-edit work differs from validation")
         if config["case"] == "support":

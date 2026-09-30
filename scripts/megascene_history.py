@@ -159,7 +159,7 @@ def schedule(config):
     owners=generate(config['preset'],int(config['seed']),config.get('control'))
     bodies=[Body(i,o.boxes,True) for i,o in enumerate(owners,1)]
     opening=camera(*pose('opening',0,config['preset'],int(config['seed']),'traversal-v2',config.get('control')))
-    actions=[];views=[];removed_total=0
+    actions=[];views=[];removed_total=0;details=[]
     for k,frame in enumerate(CUT_FRAMES):
         n,r,a,v,local,target=_target(k,config)
         view,eye=_view(a,n,r,v,local,target,config)
@@ -180,6 +180,9 @@ def schedule(config):
                         'reference_removed_cells':[[*map(str,p),str(m)] for p,m in sorted(removed.items())],
                         'pre_edit_ray':ray,'pre_edit_hit':{key:str(val) for key,val in hit.items() if key!='point'},
                         'reference_components':str(len(created))})
+        from megascene_supplementary import HISTORY_CUTS, history_view
+        if config['preset'] == 'small' and count == 120 and k in HISTORY_CUTS:
+            details.append(history_view(actions[-1], source, created, removed))
         views.append(view)
     if not config.get('control'):
         if config['preset'] in ('small','large'):
@@ -233,6 +236,8 @@ def schedule(config):
             'review_views':review,'required_checkpoints':points,'checkpoint_implementation':'megascene-checkpoint/1',
             'update_order':['physics','edit','view_picking_disabled','render'],
             'history_populations':populations}
+    if details:
+        frozen['supplementary_views'] = details
     if schedule_id == 'history-v2':
         frozen['history_neighborhood_mapping']={'version':'coprime-prior-visits-v1',
             'stride':str(history_stride(side_count(config['preset'])**2)),

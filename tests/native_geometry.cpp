@@ -236,6 +236,17 @@ static void expect_visibility_fixtures() {
 }
 
 int main() {
+  GeometryCache selection_cache;
+  selection_cache.proxies[1].selected=true;
+  selection_cache.groups[2].selected=false;
+  auto change=[&]() { selection_cache.proxies.at(1).selected=false; selection_cache.groups.at(2).selected=true; };
+  with_preserved_proxy_selection(selection_cache,change);
+  assert(selection_cache.proxies.at(1).selected && !selection_cache.groups.at(2).selected);
+  bool detail_failed=false;
+  try { with_preserved_proxy_selection(selection_cache,[&]() { change(); throw std::runtime_error("detail failure"); }); }
+  catch(const std::runtime_error&) { detail_failed=true; }
+  assert(detail_failed && selection_cache.proxies.at(1).selected && !selection_cache.groups.at(2).selected);
+
   expect_visibility_fixtures();
   assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR,VK_PRESENT_MODE_IMMEDIATE_KHR})==VK_PRESENT_MODE_IMMEDIATE_KHR);
   assert(unpaced_mode({VK_PRESENT_MODE_FIFO_KHR,VK_PRESENT_MODE_MAILBOX_KHR})==VK_PRESENT_MODE_MAILBOX_KHR);

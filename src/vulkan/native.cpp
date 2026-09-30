@@ -657,6 +657,19 @@ VkPresentModeKHR unpaced_mode(const std::vector<VkPresentModeKHR>& modes) {
 struct Push { float eye_yaw[4],pitch_offset[4],viewport[4],shadow_matrix[16]; };
 static_assert(sizeof(Push)==112,"shadow push constants must fit Vulkan's 128-byte minimum");
 
+template<class Render>
+static void with_preserved_proxy_selection(GeometryCache& cache, Render render) {
+  std::vector<std::pair<uint64_t,bool>> proxies,groups;
+  for(const auto& [key,mesh]:cache.proxies) proxies.emplace_back(key,mesh.selected);
+  for(const auto& [key,group]:cache.groups) groups.emplace_back(key,group.selected);
+  auto restore=[&]() {
+    for(const auto& [key,selected]:proxies) cache.proxies.at(key).selected=selected;
+    for(const auto& [key,selected]:groups) cache.groups.at(key).selected=selected;
+  };
+  try { render(); } catch(...) { restore(); throw; }
+  restore();
+}
+
 class Renderer {
   Display* display;
   ::Window window;
@@ -1054,6 +1067,9 @@ public:
     if (instance) vkDestroyInstance(instance,nullptr);
   }
   bool matches(Display* d,::Window w) const { return d==display&&w==window; }
+  void render_detail(const VoxelVkFrame& frame,VoxelVkTimings& timings) {
+    with_preserved_proxy_selection(geometry_cache,[&]() { render(frame,timings,true); });
+  }
   void render(const VoxelVkFrame& frame,VoxelVkTimings& timings,bool supplementary=false) {
     uint64_t ns_start=frame.record?monotonic_ns():0;
     if(frame.gpu_evidence && frame.record && !gpu_queries.active()) {
@@ -1376,10 +1392,13 @@ extern "C" int voxel_vk_render_timed(void* display,unsigned long window,const Vo
 extern "C" int voxel_vk_render_detail(void* display,unsigned long window,const VoxelVkFrame* frame,
   VoxelVkTimings* timings,char* error,size_t error_cap) {
   try {
-    if(!std::getenv("MEGASCENE_VALIDATE") || !std::getenv("MEGASCENE_SUPPORT") || !renderer ||
+    if(!std::getenv("MEGASCENE_VALIDATE") ||
+       !(std::getenv("MEGASCENE_SUPPORT") || (std::getenv("MEGASCENE_SUPPLEMENTARY_FILE") &&
+         (std::getenv("MEGASCENE_HISTORY") || std::getenv("MEGASCENE_PROXY_DIAGNOSTIC")))) || !renderer ||
        !frame || !frame->record || !timings || !renderer->matches(static_cast<Display*>(display),window))
-      throw std::runtime_error("supplementary render outside support validation");
-    *timings={}; renderer->render(*frame,*timings,true); return 1;
+      throw std::runtime_error("supplementary render outside approved validation");
+    *timings={};
+    renderer->render_detail(*frame,*timings); return 1;
   } catch(const std::exception& e) {
     std::snprintf(error,error_cap,"%s",e.what()); return 0;
   }

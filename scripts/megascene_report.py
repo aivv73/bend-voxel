@@ -231,7 +231,10 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
     for field, aggregator, summary_key in (("rss_bytes",max,"observed_maxima"),
                                            ("available_ram_bytes",min,"observed_minima"),
                                            ("device_free_bytes",min,"observed_minima")):
-        samples = [integer(r[field]) for r in resources if field in r]
+        # Supervisor extrema cover observed worker samples. The earlier
+        # preflight sample belongs to resource admission, not that population.
+        samples = [integer(r[field]) for r in resources
+                   if field in r and r.get("phase") != "preflight"]
         if samples and supervision.get(summary_key,{}).get(field) != str(aggregator(samples)):
             errors.append("resource "+field+" observed extremum mismatch")
     heap_maxima = {}
@@ -260,7 +263,12 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
     gpu_ok = gpu.get("required_evidence_complete") is True
     if frames and not gpu_ok:
         errors.append("required GPU evidence incomplete")
-    prior_errors = [e for e in summary.get("evidence_errors", []) if not e.startswith("GPU: ")]
+    # Preserve errors from the raw launch report, not errors computed by an
+    # earlier classification. Review updates may classify the same raw bundle
+    # again, and derived errors must be recomputed from its current evidence.
+    source_errors = summary.get("source_evidence_errors", summary.get("evidence_errors", []))
+    result["source_evidence_errors"] = source_errors
+    prior_errors = [e for e in source_errors if not e.startswith("GPU: ")]
     errors = list(dict.fromkeys(prior_errors+errors))
     cause = summary.get("termination", {}).get("cause", "unknown")
     failed_allocations = [r for r in allocations if r["record_type"] == "allocation_failed"]
@@ -287,7 +295,8 @@ def classify(summary, manifest, cpu, cpu_errors=(), gpu_errors=(), resources=(),
         prior_completion.get("reason","").startswith("required GPU evidence incomplete"))
     schedule_pass = (full_frames and action_ok and cause == "normal_exit" and cpu_complete and
                      prior_allows_completion and cpu_integrity_ok and not cpu_errors and
-                     not any(e for e in summary.get("evidence_errors",[]) if not e.startswith("GPU: ")))
+                     not any(e for e in errors if e != "required GPU evidence incomplete"
+                             and not e.startswith("GPU: ")))
     if cause == "required_edit_rejection" or (full_frames and not action_ok):
         schedule_status, schedule_reason = "fail", "required action rejected, missing or extra"
     elif schedule_pass:

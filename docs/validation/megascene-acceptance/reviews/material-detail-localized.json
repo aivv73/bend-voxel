@@ -1,0 +1,43 @@
+{
+  "schema": "megascene-feature-assessments/1",
+  "views": {
+    "completion": {
+      "new exposed cut surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged cut geometry": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut": {
+      "localized terrain hole": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "new exposed cut surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unchanged nearby terrain": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "opening": {
+      "building silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "span silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    }
+  }
+}

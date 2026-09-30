@@ -1,0 +1,137 @@
+{
+  "schema": "megascene-feature-assessments/1",
+  "views": {
+    "completion": {
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "unchanged geometry": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "opening": {
+      "full source geometry": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_0": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_1": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_2": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_3": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_4": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_5": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_6": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_7": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    },
+    "review_hold_8": {
+      "group silhouette": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "note": "Original-resolution capture shows the required source or selected group silhouette and the visible ground-shadow outline; independent reference and representation audits establish the source state.",
+        "readability": "readable"
+      }
+    }
+  }
+}

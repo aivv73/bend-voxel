@@ -1,0 +1,153 @@
+{
+  "schema": "megascene-feature-assessments/1",
+  "views": {
+    "completion": {
+      "1 settled released span": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "protected anchored stumps": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "unsevered later spans": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_0": {
+      "anchored stump": {
+        "geometry": "correct",
+        "note": "The overview hides the severed support behind the span; the matched same-frame detail view shows it.",
+        "readability": "insufficient"
+      },
+      "support cut and exposed surfaces": {
+        "geometry": "correct",
+        "note": "The overview hides the severed support behind the span; the matched same-frame detail view shows it.",
+        "readability": "insufficient"
+      },
+      "supported span": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "cut_1": {
+      "anchored stump": {
+        "geometry": "correct",
+        "note": "The overview hides the severed support behind the span; the matched same-frame detail view shows it.",
+        "readability": "insufficient"
+      },
+      "released span": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "support cut and exposed surfaces": {
+        "geometry": "correct",
+        "note": "The overview hides the severed support behind the span; the matched same-frame detail view shows it.",
+        "readability": "insufficient"
+      }
+    },
+    "detail_0": {
+      "anchored stump": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "support cut and exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "detail_1": {
+      "anchored stump": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "support cut and exposed surfaces": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "motion_31": {
+      "1 distinct released span": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "beam_0_top_center": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "moving body shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "motion_42": {
+      "1 distinct released span": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "beam_0_top_center": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "moving body shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "opening": {
+      "building silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "major shadows": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "span silhouettes": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_2": {
+      "later span remains supported": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "no support cut at this overview visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_3": {
+      "later span remains supported": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "no support cut at this overview visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_4": {
+      "later span remains supported": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "no support cut at this overview visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    },
+    "uncut_visit_5": {
+      "later span remains supported": {
+        "geometry": "correct",
+        "readability": "readable"
+      },
+      "no support cut at this overview visit": {
+        "geometry": "correct",
+        "readability": "readable"
+      }
+    }
+  }
+}

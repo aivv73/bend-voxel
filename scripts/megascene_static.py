@@ -499,7 +499,13 @@ def execute(config, output, manifest, campaign):
     if config['case']=='support':
         from megascene_traversal import camera_bytes
         (output/'support-review.bin').write_bytes(camera_bytes({'frames':frozen['supplementary_views']}))
+    extra_views = frozen.get('supplementary_views', []) if config['case'] != 'support' else []
+    if extra_views:
+        from megascene_supplementary import camera_bytes
+        (output/'supplementary-review.bin').write_bytes(camera_bytes(extra_views))
     input_names = (("support-review.bin",) if config['case']=='support' else ()) + ("inputs.json", "schedule.json") + (("camera.bin",) if config["case"] in ("traversal", "picking", "localized", "support", "history") else ()) + (("rays.bin",) if config["case"] == "picking" else ())
+    if extra_views:
+        input_names += ('supplementary-review.bin',)
     if config["case"] in ("traversal", "picking", "localized", "support", "history"):
         from megascene_traversal import camera_bytes
         (output/"camera.bin").write_bytes(camera_bytes(frozen))
@@ -527,7 +533,7 @@ def execute(config, output, manifest, campaign):
         manifest["source"] = original["source"]
         loader = Path(original["worker_command"][0]).name
         if not config.get("validated"):
-            for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+            for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_supplementary.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
                 shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
         manifest["artifacts"] += [artifact(output/name,output) for name in input_names]
@@ -535,7 +541,7 @@ def execute(config, output, manifest, campaign):
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_supplementary.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())
@@ -622,6 +628,9 @@ def execute(config, output, manifest, campaign):
     if config['case']=='support':
         manifest['worker_environment']['MEGASCENE_DETAIL_CAMERA_FILE']='../support-review.bin'
         manifest['worker_environment']['MEGASCENE_DETAIL_CAMERA_COUNT']=str(len(frozen['supplementary_views']))
+    if extra_views:
+        manifest['worker_environment']['MEGASCENE_SUPPLEMENTARY_FILE']='../supplementary-review.bin'
+        manifest['worker_environment']['MEGASCENE_SUPPLEMENTARY_COUNT']=str(len(extra_views))
     if config["case"] == "picking":
         manifest["worker_environment"]["MEGASCENE_RAY_FILE"] = "../rays.bin"
     if config["case"] in ("localized", "support", "history"):
@@ -659,6 +668,9 @@ def execute(config, output, manifest, campaign):
                 view['body_features']=[f for f in validation.get('beam_features',[]) if f['frame']==view['frame']]
         if config['case']=='support':
             from megascene_support_review import review_details
+            review_details(archive,frozen,replay_records,traversal_review)
+        elif extra_views:
+            from megascene_supplementary import review_details
             review_details(archive,frozen,replay_records,traversal_review)
         snapshot(archive/"review.json", traversal_review)
     manifest["capabilities"]["validation_replay"] = measurement(
