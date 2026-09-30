@@ -200,7 +200,9 @@ class Admission(unittest.TestCase):
         result = subprocess.run([str(path/"fixture"), "--threads", "1"],
                                 capture_output=True, text=True, timeout=30, check=True)
         records = [read_json(line) for line in result.stdout.splitlines()][1:-1]
-        for owner, record in zip(owners, records):
+        self.assertEqual(len(records), len(owners))
+        for i, (owner, record) in enumerate(zip(owners, records), 1):
+            self.assertEqual(record["id"], str(i))
             dense = {p: b.material for b in owner.boxes for p in product(*[range(l,h) for l,h in zip(b.lo,b.hi)])}
             seen, pending = set(), [next(iter(dense))]
             exposed = {}
@@ -244,17 +246,10 @@ class ReferencesAndReports(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "diagonal"):
             verify_vertices([face], vertices)
 
-    def test_source_and_arithmetic_guards(self):
+    def test_connectivity_and_arithmetic_reference_guards(self):
         base = Box((0,0,0),(1,1,1),1)
         for other in (Box((1,1,0),(2,2,1),2), Box((1,1,1),(2,2,2),2)):
             self.assertFalse(connected([base, other]))
-            with self.assertRaises(ValueError):
-                admit_sources([Owner("bad", None, [base, other])], 320, 2048)
-        bad = [[base,base], [Box((0,0,0),(1,1,1),2)], [Box((0,0,0),(0,1,1),1)],
-               [Box((-321,0,0),(1,1,1),1)], [Box((0,0,0),(1,129,1),1)]]
-        for boxes in bad:
-            with self.assertRaises(ValueError):
-                admit_sources([Owner("bad",None,boxes)], 320, 2048)
         self.assertEqual(checked(2**32-1, "counter"), 2**32-1)
         with self.assertRaises(ValueError):
             checked(2**32, "counter")

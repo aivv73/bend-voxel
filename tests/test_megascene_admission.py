@@ -37,10 +37,13 @@ class AdmissionParity(unittest.TestCase):
 
     def test_owner_order_and_allowed_boundary_contact(self):
         owners = [Owner("a", None, [Box((0, 0, 0), (1, 1, 1), 1)]),
-                  Owner("b", None, [Box((1, 0, 0), (2, 1, 1), 1)])]
+                  Owner("b", None, [Box((1, 0, 0), (2, 1, 1), 1),
+                                    Box((2, 0, 0), (3, 1, 1), 1)])]
         self.assertEqual(admit_sources(owners, 320, 2**32 - 1),
-                         {"cells": "2", "surface_rectangle_bounds": ["6", "6"],
-                          "vertex_bound": "72", "geometry_byte_bound": "4608"})
+                         {"cells": "3", "surface_rectangle_bounds": ["6", "12"],
+                          "vertex_bound": "108", "geometry_byte_bound": "6912"})
+        self.assertEqual(admit_sources(owners[::-1], 320, 2**32 - 1)["surface_rectangle_bounds"],
+                         ["12", "6"])
         self.assertEqual(admit_sources([], 320, 0),
                          {"cells": "0", "surface_rectangle_bounds": [],
                           "vertex_bound": "0", "geometry_byte_bound": "0"})
@@ -71,6 +74,7 @@ class AdmissionParity(unittest.TestCase):
         cases = [([], "connected"),
                  ([unit, Box((1, 1, 0), (2, 2, 1), 2)], "connected"),
                  ([unit, Box((1, 1, 1), (2, 2, 2), 2)], "connected"),
+                 ([unit, unit], "connected"),
                  ([Box((0, 0, 0), (1, 1, 1), 2)], "anchor"),
                  ([Box((0, 0, 0), (1, 1, 1), 6)], "material"),
                  ([Box((0, 0, 0), (0, 1, 1), 1)], "envelope"),

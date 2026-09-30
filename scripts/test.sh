@@ -11,3 +11,4 @@ g++ -O2 -std=c++17 -Wall -Wextra -Wno-missing-field-initializers \
   tests/native_geometry.cpp -lvulkan -lX11 -lcrypto -o build/native-geometry-tests
 build/native-geometry-tests
 python3 -m unittest discover -s tests -p 'test_*.py'
+python3 scripts/megascene_schedule_parity.py
