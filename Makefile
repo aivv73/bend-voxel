@@ -20,6 +20,9 @@ $(BINARY): $(SOURCES) | build
 build/geometry-tests: tests.bend voxel.bend | build
 	$(BEND) tests.bend -o $@
 
+build/reference-check: scripts/reference_check.bend | build
+	$(BEND) scripts/reference_check.bend -o $@
+
 build/ui-check: scripts/ui_check.bend scripts/ui_native.bend scripts/ui_native.c scripts/ui_native.js $(SOURCES) | build
 	$(UI_BEND) scripts/ui_check.bend -o $@
 
@@ -30,8 +33,8 @@ proof:
 	$(BEND) PROOF.bend
 	$(BEND) PROOF.bend --verdict
 
-geometry: build/geometry-tests
-	$(PYTHON) scripts/reference_check.py
+geometry: build/geometry-tests build/reference-check
+	./build/reference-check --gpu off
 
 images: $(BINARY)
 	$(PYTHON) scripts/image_check.py

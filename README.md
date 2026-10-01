@@ -48,7 +48,7 @@ Run the formal laws, geometry reference cases, and complete CPU/GPU image compar
 	make test
 ```
 
-The reference scripts require Python 3 and its standard library. Geometry checks compare complete cell and face sets. Image checks force both `--gpu off` and `--gpu on` across several work decompositions.
+The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. The image and benchmark scripts still require Python 3 and its standard library. Image checks force both `--gpu off` and `--gpu on` across several work decompositions.
 
 To compare images on a machine without a GPU, run the CPU cases:
 
