@@ -111,6 +111,17 @@ static double schedule_float_eval(char* code,int benchmark) {
 Term host_run(Env e,Term* f,IoWork* work) {
   size_t length;
   char* code=io_cstr(e,f[0],&length);
+  if((u32)f[1]==3) {
+    char* end;
+    double value=strtod(code,&end);
+    int valid=length<=1048576 && !memchr(code,0,length) && end!=code && !*end && isfinite(value);
+    free(code);
+    if(!valid) return io_str(e,"invalid",7);
+    char result[64];
+    int written=snprintf(result,sizeof result,"%a",value);
+    if(written<0 || written>=(int)sizeof result) return io_str(e,"invalid",7);
+    return io_str(e,result,(size_t)written);
+  }
   if(length>1048576 || memchr(code,0,length)) err_fail("invalid schedule numeric input");
   double value=schedule_float_eval(code,(u32)f[1]==2);
   free(code);

@@ -1,6 +1,6 @@
 # Bend ecosystem review for the voxel engine (2026-09-27)
 
-This review uses the [Awesome Bend catalog](https://github.com/777genius/awesome-bend/blob/c5a344553ccb0b01f4c110c2319427457fcad241/README.md), [BendHub](https://hub.bend-lang.com/), and the authors' repositories. It evaluated possible uses against the project's then-current Bend 2.0.31, sparse cuboid trees, native Vulkan renderer, and [stress workload](../../scripts/benchmark_stress.py). The project used Bend 2.0.32 when this review was finalized.
+This review uses the [Awesome Bend catalog](https://github.com/777genius/awesome-bend/blob/c5a344553ccb0b01f4c110c2319427457fcad241/README.md), [BendHub](https://hub.bend-lang.com/), and the authors' repositories. It evaluated possible uses against the project's then-current Bend 2.0.31, sparse cuboid trees, native Vulkan renderer, and [stress workload](../../scripts/benchmark_stress.sh). The project used Bend 2.0.32 when this review was finalized.
 
 ## What the current workload says
 

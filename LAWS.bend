@@ -11,6 +11,24 @@ import ./src/schedule_binary.bend as Binary
 import ./src/schedule_json.bend as Json
 import ./src/megascene_operational.bend as Operational
 import ./src/megascene_configuration.bend as Configuration
+import ./src/stress_contract.bend as Stress
+
+law stress_first_measured_edit:
+  {Stress.scheduled(30,30,30) == 1 : U32}
+
+law stress_warmup_has_no_edit:
+  {Stress.scheduled(29,30,30) == 0 : U32}
+
+law stress_six_edit_limit:
+  {Stress.scheduled(210,30,30) == 0 : U32}
+
+law stress_disabled_edits:
+  for frame: U32
+  for warmup: U32
+  {Stress.scheduled(frame,warmup,0) == 0 : U32}
+
+law stress_nearest_rank_p95:
+  {Stress.rank(20n,95n) == 18n : Nat}
 
 law operational_u32_limit:
   {Operational.counter("4294967295","count") == Done{4294967295} : Result<&2,&2,String,U32>}

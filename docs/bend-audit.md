@@ -6,6 +6,25 @@ This audit used the then-installed, project-pinned Bend 2.0.32: `bend guide`,
 `src/vulkan/native.cpp`, its header, and the native bridge. Existing uncommitted
 palette and bridge changes were part of the baseline and were preserved.
 
+## Stress diagnostic migration
+
+The stress diagnostic now uses `scripts/benchmark_stress.sh` and
+`src/stress_tool.bend`. The runner keeps the five-case CLI, raw CSV and stderr,
+source and binary hashes, presentation checks, and JSON report fields.
+`src/stress_parser.bend` owns timing, view, world, mesh, LOD, body, and lighting
+validation. `src/stress_metrics.bend` owns the stress statistics.
+
+The runner reuses the existing Bend benchmark file, path, hashing, and JSON
+operations. GNU `timeout` runs each case with a fixed shell redirect program.
+Paths and executable arguments travel as positional arguments. Partial logs
+remain after a deadline or nonzero exit, and later cases still run.
+
+Binary64 decoding and arithmetic remain in the existing numeric host boundary.
+Its behavior needs runtime and reference tests. Proof success does not prove
+those foreign operations, world/cache telemetry, process cleanup, or report
+parity. This migration adds no production parallelism. The dated measurements
+and validation results below remain the original audit record.
+
 ## Current idioms
 
 The application already puts simulation, sparse geometry, material colors,
