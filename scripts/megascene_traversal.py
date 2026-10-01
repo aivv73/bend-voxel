@@ -1,10 +1,10 @@
 """Frozen primary Megascene traversal views and independent route checks."""
 import hashlib
-import struct
 
 from megascene_inventory import SCHEMA, canonical, digest, integer, require
 from megascene_recipe import bits
 from megascene_scale import side_count
+from megascene_schedule import camera_bytes
 
 PHASES = (("opening", 0), ("wall", 0), ("interior", 0), ("cavity", 0),
           ("assembly", 0), ("far", None), ("opening", -1), ("cavity", -1),
@@ -36,21 +36,17 @@ def camera(eye, look):
     return numeric("camera", *(float(x).hex() for x in (*eye, *look)))
 
 
-def schedule(config):
-    from megascene_schedule import plan
+def arguments(config):
     warmup, measured = int(config["warmup"]), int(config["frames"])
     require(warmup == 120 and measured == 3600, "primary traversal requires the complete 120/3600 schedule")
     route = config.get("schedule", "traversal-v2")
     require(route in ROUTES, "unsupported traversal route")
-    return plan("traversal", side_count(config["preset"]), int(config["seed"]), route)
+    return "traversal", side_count(config["preset"]), int(config["seed"]), route
 
 
-def camera_bytes(frozen):
-    data = bytearray()
-    for frame in frozen["frames"]:
-        view = frame["camera"]
-        data.extend(struct.pack("<5I", *(int(value,16) for value in (*view["eye_m"],view["yaw"],view["pitch"]))))
-    return bytes(data)
+def schedule(config):
+    from megascene_schedule import plan
+    return plan(*arguments(config))
 
 
 def expected_payload(initial, frame):

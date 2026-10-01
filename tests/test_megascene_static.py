@@ -251,7 +251,7 @@ class StaticReports(unittest.TestCase):
 
     def test_prelaunch_failure_has_no_invented_worker_exit(self):
         for case in ("static", "traversal", "picking", "localized", "support", "history"):
-            with self.subTest(case=case), tempfile.TemporaryDirectory(prefix="megascene-prelaunch-", dir=Path.home()) as d:
+            with self.subTest(case=case), tempfile.TemporaryDirectory(prefix="megascene-prelaunch-", dir=ROOT.parent) as d:
                 path = Path(d)/"output"
                 result = subprocess.run([sys.executable,str(ROOT/"scripts/megascene.py"),"--case",case,
                     "--output",str(path),"--archive",str(Path(d)/"archive")],
@@ -266,7 +266,7 @@ class StaticReports(unittest.TestCase):
     def test_validator_import_failure_retains_prelaunch_evidence(self):
         from unittest.mock import patch
         from megascene import main
-        with tempfile.TemporaryDirectory(prefix="megascene-import-test-",dir=Path.home()) as d:
+        with tempfile.TemporaryDirectory(prefix="megascene-import-test-",dir=ROOT.parent) as d:
             root=Path(d)
             with patch("megascene_static.execute",side_effect=ImportError("validator import fixture")):
                 code=main(["--case","static","--output",str(root/"output"),"--archive",str(root/"archive")])

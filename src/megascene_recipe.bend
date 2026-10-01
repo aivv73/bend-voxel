@@ -242,3 +242,11 @@ def owners.patch(p: Patch, q: U32, c: Control) -> List<&2,Owner>:
 def owners(d: District) -> List<&2,Owner>:
   District{+q,seed,+c} = d
   owners.patch(patches(U32.to_nat((q * q : U32)),0,q,seed,c),q,c)
+
+def compact(n: Nat, +i: U32) -> List<&2,Owner>:
+  match n:
+    case 0n: Nil{}
+    case 1n+p:
+      Owner{"irregular",Some{i},translate.list(irregular(i),
+        (U32.to_f32((40 * (i % 2) : U32)) - 272.0 : F32),
+        (U32.to_f32((40 * (i / 2) : U32)) - 168.0 : F32),0.0)} <> compact(p,(i + 1 : U32))

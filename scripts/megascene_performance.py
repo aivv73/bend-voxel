@@ -1,7 +1,6 @@
 import argparse
 import hashlib
 from functools import lru_cache
-import struct
 from pathlib import Path
 
 from megascene_inventory import SCHEMA, integer, read_json, require
@@ -84,7 +83,8 @@ def validate(frozen):
 
 def policy_bytes(frozen):
     validate(frozen)
-    return b"".join(struct.pack("<II", PHASES.index(f["phase"]), integer(f["policy_flags"])) for f in frozen["frames"])
+    from megascene_schedule import policy_bytes as encode
+    return encode(frozen)
 
 
 def scope_keys(config):

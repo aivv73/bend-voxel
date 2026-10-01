@@ -16,17 +16,16 @@ def center(p: Route.Pose) -> IO(String):
   Route.Pose{+eye,look} = p
   center.delta(eye,F.delta(eye,look))
 
-def frames(n: Nat,+index: U32,+opening: String,+view: String,+cuts: U32,+spacing: U32,+moving: Bool) -> IO(Unit):
+def frames(n: Nat,+index: U32,+opening: String,+view: String,+cuts: U32,+spacing: U32,+moving: Bool) -> List<&2,String>:
   match n:
-    case 0n: IO.pure(Unit,Unit{})
+    case 0n: Nil{}
     case 1n+rest:
       +edit = (index >= 121 : U32) && (index < (121 + cuts * spacing : U32) : U32) &&
         U32.is_eq(((index - 121) % spacing : U32),0)
       motion = moving && (index >= 152 : U32) && (index <= 163 : U32)
       actions = Route.select(String,edit,J.array([J.number(((index - 121) / spacing : U32))]),"[]")
       camera = Route.select(String,(index <= 120 : U32),opening,view)
-      do IO<Unit>:
-        IO.print(Route.frame(index,120,Route.frame.phase(index,120,edit,motion),camera,False{},actions,Nil{}))
+      Route.frame(index,120,Route.frame.phase(index,120,edit,motion),camera,False{},actions,Nil{}) <>
         frames(rest,(index + 1 : U32),opening,view,cuts,spacing,moving)
 
 def localized.pose(+origin: String,control: String) -> Route.Pose:
@@ -34,17 +33,17 @@ def localized.pose(+origin: String,control: String) -> Route.Pose:
   +offset = Route.vec(origin,"0",origin)
   Route.Pose{Route.meters(Route.vec(x,"44","170"),offset),Route.meters(Route.vec(x,"24","160"),offset)}
 
-def localized.action(+point: F.Vec,+view: Route.Pose) -> IO(Unit):
+def localized.action(+point: F.Vec,+view: Route.Pose) -> IO(String):
   Route.Pose{eye,_} = view
-  do IO<Unit>:
+  do IO<String>:
     target : String <- F.vector(point)
     ray : String <- center(view)
     exact : String <- F.exact.vector(eye)
-    IO.print(J.object([J.field("record_type",J.quote("action")),J.field("action",J.number(0)),
+    return J.object([J.field("action",J.number(0)),
       J.field("frame",J.number(121)),J.field("measured_ordinal",J.number(0)),J.field("target_m",target),
       J.field("radius_m",J.quote("0x3e4ccccd")),J.field("required","true"),
       J.field("expected_owner",J.number(1)),J.field("expected_material",J.number(2)),
-      J.field("pre_edit_ray",ray),J.field("_eye",exact)]))
+      J.field("pre_edit_ray",ray),J.field("_eye",exact)])
 
 def localized(+q: U32,+seed: U32,+origin: String,+control: String,id: String) -> IO(Unit):
   +p = localized.pose(origin,control)
@@ -56,9 +55,8 @@ def localized(+q: U32,+seed: U32,+origin: String,+control: String,id: String) ->
   do IO<Unit>:
     +opening : String <- Route.pose.camera(Route.pose("opening",0,q,seed,"traversal-v2","base"))
     +view : String <- Route.pose.camera(p)
-    IO.print(Route.header(id,120,3600,opening,reviews,points,True{},Nil{}))
-    localized.action(point,p)
-    frames(3721n,0,opening,view,1,1,False{})
+    action : String <- localized.action(point,p)
+    IO.print(Route.document(Route.header(id,120,3600,opening,reviews,points,True{},Nil{}),frames(3721n,0,opening,view,1,1,False{}),[action]))
 
 def support.eye(+origin: String,+height: U32) -> F.Vec:
   F.Vec{F.Div{F.Add{Route.real("160"),Route.real(origin)},Route.real("10")},
@@ -160,22 +158,23 @@ def support.beams(n: Nat,+span: U32,+q: U32,+height: U32,+seed: U32) -> List<&2,
         J.field("local_top_center_cells",J.array([J.quote(signed.cell(q,76)),J.number((76 + seed - 45 + height : U32)),
           J.quote(signed.cell(q,(180 + 24 * span : U32)))]))]) <> support.beams(rest,(span + 1 : U32),q,height,seed)
 
-def support.actions(n: Nat,+action: U32,+origin: String,+height: U32,+seed: U32,+eye: F.Vec) -> IO(Unit):
+def support.actions(n: Nat,+action: U32,+origin: String,+height: U32,+seed: U32,+eye: F.Vec) -> IO(List<&2,String>):
   match n:
-    case 0n: IO.pure(Unit,Unit{})
+    case 0n: IO.pure(List<&2,String>,Nil{})
     case 1n+rest:
       +visible = support.visibility(origin,seed,height,action)
-      do IO<Unit>:
+      do IO<List<&2,String>>:
         target : String <- F.vector(support.target(origin,height,action))
         visibility : String <- F.vector(visible)
         ray : String <- F.ray_to(eye,visible)
         exact : String <- F.exact.vector(eye)
-        IO.print(J.object([J.field("record_type",J.quote("action")),J.field("action",J.number(action)),
+        record : String = J.object([J.field("action",J.number(action)),
           J.field("frame",J.number((121 + 6 * action : U32))),J.field("measured_ordinal",J.number((6 * action : U32))),
           J.field("span",J.number((action / 2 : U32))),J.field("target_m",target),J.field("radius_m",J.quote("0x3e4ccccd")),
           J.field("required","true"),J.field("expected_material",J.number(3)),J.field("source_owner",J.number((3 + (action / 2 : U32) : U32))),
-          J.field("visibility_point_m",visibility),J.field("pre_edit_ray",ray),J.field("_eye",exact)]))
-        support.actions(rest,(action + 1 : U32),origin,height,seed,eye)
+          J.field("visibility_point_m",visibility),J.field("pre_edit_ray",ray),J.field("_eye",exact)])
+        remaining : List<&2,String> <- support.actions(rest,(action + 1 : U32),origin,height,seed,eye)
+        return record <> remaining
 
 def support(+q: U32,+seed: U32,+origin: String,+control: String,id: String,+spans: U32) -> IO(Unit):
   +height = lift(control)
@@ -192,9 +191,8 @@ def support(+q: U32,+seed: U32,+origin: String,+control: String,id: String,+span
     beams : List<&2,String> = support.beams(U32.to_nat(spans),0,q,height,seed)
     extra : List<&2,String> = Route.append([J.field("beam_features",J.array(beams)),J.field("released_bottom_cells",J.number((42 + height : U32))),
       J.field("moving_window",window),J.field("supplementary_views",J.array(details)),J.field("_eye",exact)],support.variant(spans,cuts))
-    IO.print(Route.header(id,120,3600,opening,support.reviews(spans,cuts),points,True{},extra))
-    support.actions(U32.to_nat(cuts),0,origin,height,seed,eye)
-    frames(3721n,0,opening,view,cuts,6,True{})
+    actions : List<&2,String> <- support.actions(U32.to_nat(cuts),0,origin,height,seed,eye)
+    IO.print(Route.document(Route.header(id,120,3600,opening,support.reviews(spans,cuts),points,True{},extra),frames(3721n,0,opening,view,cuts,6,True{}),actions))
 def spans(id: String) -> U32:
   match id:
     case "support-1-span-v1": 1

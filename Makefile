@@ -14,7 +14,7 @@ test-blender:
 benchmark-stress: build
 	python3 scripts/benchmark_stress.py
 benchmark-faces:
-	python3 scripts/benchmark_faces.py
+	./scripts/benchmark_faces.sh
 export-atelier-assets:
 	blender -b assets/light_atelier.blend --python-exit-code 1 --python scripts/export_atelier_assets.py
 clean:

@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 
 from megascene_inventory import canonical
-from megascene_static import schedule
+from megascene_static import schedule_document
+from megascene_schedule import checkpoint_bytes, review_bytes, camera_bytes, policy_bytes, ray_bytes, supplementary_bytes
 
 
 def configurations():
@@ -55,18 +56,40 @@ def signature(frozen):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline", type=Path, default=Path(__file__).resolve().parents[1] / "tests/fixtures/megascene_schedule_bits.json")
+    parser.add_argument("--runtime-baseline", type=Path, default=Path(__file__).resolve().parents[1] / "tests/fixtures/megascene_runtime_artifact_bits.json")
     parser.add_argument("--capture", action="store_true")
     args = parser.parse_args()
     if args.capture and args.baseline.exists():
         parser.error("refusing to overwrite a retained baseline; choose a new --baseline path")
     expected = None if args.capture else json.loads(args.baseline.read_text())
+    runtime_expected = None if args.capture else json.loads(args.runtime_baseline.read_text())
+    if expected is not None and len(expected) != len(runtime_expected):
+        raise AssertionError("runtime baseline configuration count differs")
     rows = []
     for index, config in enumerate(configurations()):
-        actual = {"config": config, **signature(schedule(config))}
+        frozen, data = schedule_document(config)
+        if data is not None and data != canonical(frozen)+b"\n":
+            raise AssertionError(f"Bend schedule document is not canonical for {config}")
+        actual = {"config": config, **signature(frozen)}
         if expected is not None and actual != expected[index]:
             raise AssertionError(f"schedule parity differs for {config}\nexpected {expected[index]}\nactual {actual}")
+        if runtime_expected is not None:
+            if runtime_expected[index]["config"] != config:
+                raise AssertionError("runtime baseline configuration differs")
+            artifacts = {"checkpoints": checkpoint_bytes(frozen), "reviews": review_bytes(frozen),
+                         "camera": camera_bytes(frozen), "policy": policy_bytes(frozen)}
+            if "ray" in frozen["frames"][0]:
+                artifacts["rays"] = ray_bytes(frozen)
+            if frozen.get("supplementary_views"):
+                artifacts["supplementary"] = supplementary_bytes(frozen["supplementary_views"])
+            if set(artifacts) != set(runtime_expected[index]["artifacts"]):
+                raise AssertionError("runtime baseline artifact set differs")
+            for kind, data in artifacts.items():
+                measured = {"sha256": hashlib.sha256(data).hexdigest(), "size_bytes": len(data)}
+                if measured != runtime_expected[index]["artifacts"][kind]:
+                    raise AssertionError(f"{kind} byte parity differs for {config}")
         rows.append(actual)
-        print(f"{index + 1} {config['schedule']} {config['preset']} seed {config['seed']} exact", flush=True)
+        print(f"{index + 1} {config['schedule']} {config['preset']} seed {config['seed']} schedule/runtime bytes exact", flush=True)
     if args.capture:
         args.baseline.write_text(json.dumps(rows, indent=2) + "\n")
     elif len(rows) != len(expected):

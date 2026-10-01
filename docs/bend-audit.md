@@ -110,7 +110,7 @@ then run (without other CPU benchmarks/compilations):
 bend tests/parallel-profile.bend -o build/profile-before
 # Apply one candidate, then build it:
 bend tests/parallel-profile.bend -o build/profile-after
-python3 scripts/benchmark_parallel.py build/profile-before build/profile-after \
+./scripts/benchmark_parallel.sh build/profile-before build/profile-after \
   --runs 4 --threads 1 6 12 --output build/parallel
 ```
 
@@ -121,6 +121,24 @@ checks every non-timing count against the baseline, and reports medians of
 initialization and summed six-cut stages. It records binary SHA-256 hashes.
 `edit` is the per-run sum of carve/connectivity/surface/finalize, not the sum of
 stage medians. This is a CPU experiment, not evidence of a GPU speedup.
+
+Both benchmark drivers now compile `src/benchmark_tool.bend` with pinned Bend
+2.0.34 and run its parsing, counter checks, F64 statistics and reports. The
+shell entry points only compile and launch it; Linux GNU core utilities provide
+directory, hash and formatting effects. The profiler arguments, warmups,
+alternating order and JSON/CSV field order are retained. Timings use the existing
+F64 effect, including compensated sums and shortest round-trip decimal output;
+profiler timing/count words remain U32. Initialization retains arbitrary integer
+input until the F64 division. A separate mode of the existing numeric effect
+retains positive infinity for overflowing benchmark medians and decimal
+round-trip candidates; schedule F64/F32 modes still reject nonfinite values.
+The process effect supports a positive timeout up
+to 4,294,967 seconds; larger timeouts fail explicitly before multiplication into
+milliseconds. Faces outputs are relative to the repository; parallel outputs
+and executable paths are relative to the invoking directory.
+The Base process effect caps combined captured stdout/stderr at 1 MiB, well
+above the fixed six-row profiler protocol. The frozen byte and negative-input
+checks run in `make test`; they qualify no performance improvement.
 
 Follow headless results with all five Vulkan stress cases and geometry checks
 before retaining a candidate. Use A/A comparisons when gains are close to noise.

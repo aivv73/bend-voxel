@@ -8,7 +8,7 @@ import math
 import struct
 
 from megascene_inventory import SCHEMA, require
-from megascene_recipe import Box, Owner, bits, f32, generate
+from megascene_recipe import bits, f32, generate, _source, source_owners
 from megascene_picking import center, checked_result, ZERO
 from megascene_schedule import plan
 from megascene_scale import side_count
@@ -19,19 +19,8 @@ DIAGNOSTICS = ("mixed-world", "compact-reference")
 def owners(config):
     if config.get("diagnostic") != "compact-reference":
         return generate(config["preset"], int(config["seed"]))
-    result = []
-    for iz in range(2):
-        for ix in range(2):
-            v, ox, oz = ix + 2*iz, -272 + 40*ix, -168 + 40*iz
-            boxes = [Box((x[0]+ox, y[0], z[0]+oz), (x[1]+ox, y[1], z[1]+oz), m)
-                     for x,y,z,m in (
-                         ((280,288),(24,26),(176,184),1),
-                         ((280,288),(26,42),(176,184),4),
-                         ((272,288),(42,50),(168,184),4),
-                         ((280,296),(50,58+v%2),(176,192),3),
-                         ((288,302+v%2),(34,50),(184,199),4))]
-            result.append(Owner("irregular", ix+2*iz, boxes))
-    return result
+    seed = int(config.get("seed", "45"))
+    return source_owners(_source(2, seed, "compact-reference"), 2, seed, "compact-reference")
 
 
 def group(source):

@@ -13,7 +13,11 @@ DEPENDENCIES = {
     "megascene_source": ("megascene_source", "megascene_recipe", "math"),
     "megascene_policy": ("megascene_policy", "megascene_scale"),
     "megascene_admit": ("megascene_admit", "megascene_admission", "megascene_scale", "megascene_recipe", "math"),
-    "megascene_schedule": ("megascene_schedule", "schedule_route", "schedule_history", "schedule_cut", "schedule_policy", "schedule_proxy", "schedule_float", "schedule_json", "megascene_scale"),
+    "megascene_schedule": ("megascene_schedule", "schedule_route", "schedule_history", "schedule_cut", "schedule_policy", "schedule_proxy", "schedule_float", "schedule_json", "schedule_points", "megascene_scale"),
+    "schedule_points": ("schedule_points",),
+    "schedule_binary": ("schedule_binary", "schedule_points", "schedule_file"),
+    "megascene_inputs": ("megascene_inputs", "megascene_source", "megascene_recipe", "math", "schedule_points", "schedule_json"),
+    "megascene_admission_inputs": ("megascene_admission_inputs", "megascene_inputs", "megascene_source", "megascene_recipe", "math", "schedule_points", "schedule_json"),
 }
 
 
@@ -34,6 +38,19 @@ def compiler_version():
 def source_directory():
     generator = ROOT / "generator"
     return generator if generator.is_dir() else ROOT / "src"
+
+
+def cache_root():
+    explicit = os.environ.get("MEGASCENE_CACHE_ROOT")
+    if explicit:
+        root = Path(explicit)
+        if not root.is_absolute():
+            raise ValueError("MEGASCENE_CACHE_ROOT must be an absolute path")
+        return root
+    xdg = os.environ.get("XDG_CACHE_HOME")
+    if xdg and Path(xdg).is_absolute():
+        return Path(xdg) / "bend-voxel"
+    return ROOT / "build" if SCRIPT_DIR.name == "scripts" else Path.home() / ".cache" / "bend-voxel"
 
 
 def retain_sources(runtime):
@@ -59,8 +76,7 @@ def worker(module):
     fingerprint = hashlib.sha256(version.encode())
     for name, content in sources.items():
         fingerprint.update(name.encode() + b"\0" + content + b"\0")
-    cache_root = ROOT / "build" if SCRIPT_DIR.name == "scripts" else Path.home() / ".cache" / "bend-voxel"
-    cache = cache_root / "megascene-bend"
+    cache = cache_root() / "megascene-bend"
     cache.mkdir(parents=True, exist_ok=True)
     key = fingerprint.hexdigest()
     worker = cache / key
@@ -94,3 +110,16 @@ def run_input(module, text):
     if result.returncode:
         raise ValueError(result.stderr.strip() or "Bend worker rejected input")
     return result.stdout
+
+
+def run_binary(module, text):
+    executable = worker(module)
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        request, output = root / "request", root / "output"
+        request.write_text(text, encoding="ascii")
+        result = subprocess.run([str(executable), "--threads", "1", "--", str(request), str(output)],
+                                capture_output=True, text=True, timeout=60)
+        if result.returncode:
+            raise ValueError(result.stderr.strip() or "Bend worker rejected input")
+        return output.read_bytes()

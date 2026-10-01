@@ -6,6 +6,31 @@ import ./src/material.bend as Material
 import ./src/resolution.bend as Resolution
 import ./src/megascene_recipe.bend as Recipe
 import ./src/megascene_scale.bend as Scale
+import ./src/schedule_points.bend as Points
+import ./src/schedule_binary.bend as Binary
+import ./src/schedule_json.bend as Json
+
+law canonical_json_newline:
+  {Json.quote("\n") == "\"\\n\"" : String}
+
+law canonical_json_non_bmp:
+  {Json.quote(SCon{Chr{128512},SNil{}}) == "\"\\ud83d\\ude00\"" : String}
+
+law canonical_schedule_field_order:
+  {Json.object([Json.field("phase_offset","null"),Json.field("phase","false")]) ==
+    "{\"phase\":false,\"phase_offset\":null}" : String}
+
+law checkpoint_coincident_order:
+  for a: String
+  for b: String
+  {Points.sort([Points.Point{0,a},Points.Point{0,b}]) ==
+    [Points.Point{0,a},Points.Point{0,b}] : List<&2,Points.Point>}
+
+law runtime_signed_zero_word:
+  {Binary.byte(2147483648) == [0,0,0,128] : List<&2,U32>}
+
+law runtime_null_action_word:
+  {Binary.byte(4294967295) == [255,255,255,255] : List<&2,U32>}
 
 # Schedule policy lives in Bend. Python independently checks source geometry
 # and evolving edit/motion references, then annotates the frozen plan.

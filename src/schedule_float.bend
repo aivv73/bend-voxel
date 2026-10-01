@@ -79,7 +79,7 @@ def camera.delta(eye: Vec, d: Vec) -> IO(String):
         position : String <- vector(eye)
         yaw : String <- bits(Atan2{x,z})
         pitch : String <- bits(Atan2{y,Hypot{x,z}})
-        return "{\"eye_m\":" ++ position ++ ",\"yaw\":" ++ yaw ++ ",\"pitch\":" ++ pitch ++ "}"
+        return "{\"eye_m\":" ++ position ++ ",\"pitch\":" ++ pitch ++ ",\"yaw\":" ++ yaw ++ "}"
 
 def camera(+eye: Vec, look: Vec) -> IO(String):
   camera.delta(eye,delta(eye,look))
@@ -91,7 +91,7 @@ def ray_to.delta(eye: Vec, d: Vec) -> IO(String):
       do IO<String>:
         origin : String <- vector(eye)
         direction : String <- vector(Vec{Div{x,length},Div{y,length},Div{z,length}})
-        return "{\"origin_m\":" ++ origin ++ ",\"direction\":" ++ direction ++ "}"
+        return "{\"direction\":" ++ direction ++ ",\"origin_m\":" ++ origin ++ "}"
 
 def ray_to(+eye: Vec, look: Vec) -> IO(String):
   ray_to.delta(eye,delta(eye,look))
@@ -112,4 +112,4 @@ def center(eye: Vec, yaw: Expr, pitch: Expr) -> IO(String):
   do IO<String>:
     origin : String <- vector(eye)
     direction : String <- vector(center.normalized(center.direction(yaw,pitch)))
-    return "{\"origin_m\":" ++ origin ++ ",\"direction\":" ++ direction ++ "}"
+    return "{\"direction\":" ++ direction ++ ",\"origin_m\":" ++ origin ++ "}"

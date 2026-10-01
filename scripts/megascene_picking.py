@@ -11,7 +11,7 @@ import struct
 from megascene_inventory import require
 from megascene_recipe import bits, f32, generate
 from megascene_scale import side_count
-from megascene_schedule import numeric, plan
+from megascene_schedule import numeric, plan, ray_bytes
 
 ROUTES = ("picking-v1", "picking-v2")
 ZERO = "0x00000000"
@@ -138,14 +138,6 @@ def schedule(config, owners=None):
         "reach_m":"256","reach_comparison":"strictly_less", "reference":"rational face intersections against source geometry",
         "runtime_guard":"actual tree bounds and F32 cell/metre/offset/slab/hit arithmetic before unsafe traversal"}
     return frozen
-
-
-def ray_bytes(frozen):
-    data=bytearray()
-    for frame in frozen["frames"]:
-        ray=frame["ray"] or {"origin_m":[ZERO]*3,"direction":[ZERO]*3}
-        data.extend(struct.pack("<7I",int(frame["picking"]),*(int(x,16) for x in ray["origin_m"]+ray["direction"])))
-    return bytes(data)
 
 
 def expected_payload(initial,frame):

@@ -70,5 +70,5 @@ For an alternating before/after comparison, `--binary build/saved-demo` selects 
 saved Bend executable. Both versions use the current native library and shaders;
 save those separately if they also change. Reports identify the binary by SHA-256
 and label source hashes as the current checkout. The [Bend audit](bend-audit.md)
-also documents `scripts/benchmark_parallel.py` for initialization and six-cut CPU
+also documents `scripts/benchmark_parallel.sh` for initialization and six-cut CPU
 comparisons with configurable thread counts and independent surface validation.

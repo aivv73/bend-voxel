@@ -1,0 +1,2952 @@
+[
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "452f03376d37fd5a01eaedd5072265f532368d142060ccbbc48f6532fb17797f",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "179768549aacade946ba42674754defa4eee8f1a5559ebc46f126abd71125d6a",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "179768549aacade946ba42674754defa4eee8f1a5559ebc46f126abd71125d6a",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "44cdbe05c4c7c1b652346841ea6c79b553d5c3c63fd46a32a109b0d96472c78c",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "26cbf0de50c2c61824d1ea9c8336aed7fcb379b7685973f6c985d15438287efa",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "515622c1dad62d023db864b69101b5a0400eefebd8a7cc027cb14247c759f65b",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "04c282cd7d6b5951edd6c9a90acacbd3726860ff96e3440b4888a16d79ec4b67",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "49d65b8a94198ec0768e7717cc7ff8045489db8ad6b78ca176aeab6c5db615bf",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "be247a1795ba79c147af5433f299ad7f93f5e5af911086c0442fe138e2a35d26",
+        "size_bytes": 224
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "452f03376d37fd5a01eaedd5072265f532368d142060ccbbc48f6532fb17797f",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "b34a38f2c3ec76dd9f0b0de03f1fd17d0fa5ec30691317bb7ae9d6592bfe78ec",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "b34a38f2c3ec76dd9f0b0de03f1fd17d0fa5ec30691317bb7ae9d6592bfe78ec",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "89246f9179676a344d8e558c7afdd89af79625c5381cc54ceaabf00f7eb4accb",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "26cbf0de50c2c61824d1ea9c8336aed7fcb379b7685973f6c985d15438287efa",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "515622c1dad62d023db864b69101b5a0400eefebd8a7cc027cb14247c759f65b",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "04c282cd7d6b5951edd6c9a90acacbd3726860ff96e3440b4888a16d79ec4b67",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "54c7c269dc17bc32c180e92fe8e06506846642291f180651646525d57c5aa323",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "66de7156056fb2e99cddea82354e6d00f02db4cf19e318284c14897b9bd35289",
+        "size_bytes": 224
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "bd501574f40e33e4f7ea96f643636f4b86709499383ffa8fbd5f26af60d08d87",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "b1662efb8b1b449d66faff9d9d762f20f53c9a77237a604d3b04b031e7cd03a3",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "b1662efb8b1b449d66faff9d9d762f20f53c9a77237a604d3b04b031e7cd03a3",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "6e5e1b5077af86d6606cd1cef08396653bbeaea69257070a375d845e09775ca2",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "5ab5a155b46625132eba89886a9c4eb92e57351d9df7ecbb96426bbf61868450",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "1cef05d3f32cd21c414be441c937a8f0cee7d45fc3fc230b5aee18de91a76c19",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "4e7fa4a1818423c7a5c71369421e4f65dc107090b07605dbf0617cab0ad34488",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "6b246c86cd3fc5bf2ebc2c0bd5b1522bd4712c6db5f3aed71bd946f84a7ef1c9",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "bd501574f40e33e4f7ea96f643636f4b86709499383ffa8fbd5f26af60d08d87",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "cc32ddd95a7aeb396a0e8c06742f489684e56ac7d9a8513bddb1584237dc67fd",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "cc32ddd95a7aeb396a0e8c06742f489684e56ac7d9a8513bddb1584237dc67fd",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "1214965f9ff4544296f5e8fab6197407e500a4d1ded3fb40cb6d11f8d2180ef5",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "5ab5a155b46625132eba89886a9c4eb92e57351d9df7ecbb96426bbf61868450",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "1cef05d3f32cd21c414be441c937a8f0cee7d45fc3fc230b5aee18de91a76c19",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "4e7fa4a1818423c7a5c71369421e4f65dc107090b07605dbf0617cab0ad34488",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "436667f272c0ad8bcac2a46bb073b052ea56500010ab86a75fd84d36f7b99a50",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "a0f59c866ab3130ee6c8acc8f6916357b21cf86a050346aba9746992bfb89048",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "70d20a31fe444e05b050f49d09f7801b05223b62af5521c2e308378c411d0ef0",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "70d20a31fe444e05b050f49d09f7801b05223b62af5521c2e308378c411d0ef0",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "3776351560388ab9523b5d3b2c2bebdf498ef1e3dc6141f5dae1464bee016a5e",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "3d7cbd103b398593970f4aa69ea86c4ec0daaeb011e8373f3e463bb837916c14",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "835a6c0e58ca29f655f615fea86b5a113c003803338064156df416348c9098e9",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "dd45b91a561ce81b5e6ea94d735b8bbf90aed1d7d00297f0da83cc75c17a1f3b",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "a496c90f9924ae1da1235ae115a9f7bc3831171f8c0c53380cf4e478c3e47b8d",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "a0f59c866ab3130ee6c8acc8f6916357b21cf86a050346aba9746992bfb89048",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "869df6362c3e08face87ba985f1a52e49e83daa1993f52d03ab5d64a6de4cf15",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "869df6362c3e08face87ba985f1a52e49e83daa1993f52d03ab5d64a6de4cf15",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "eec9ac1f0481f1e29fcf6c0c5a3529d015cf7fb138495b48840793f4fc40b50b",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "3d7cbd103b398593970f4aa69ea86c4ec0daaeb011e8373f3e463bb837916c14",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "835a6c0e58ca29f655f615fea86b5a113c003803338064156df416348c9098e9",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "dd45b91a561ce81b5e6ea94d735b8bbf90aed1d7d00297f0da83cc75c17a1f3b",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "71c1922227534cea7728bb590447523b8958d47a9bc2366837397db0730c8858",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "4472dd5011f69a44805150ae23bcc134fb37d50f30c883620427a8e57d33bcae",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "d9c353c2f89edda8e3de738af8d1953af7379199eacaacfc1dbb5593ed2fc50e",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "d9c353c2f89edda8e3de738af8d1953af7379199eacaacfc1dbb5593ed2fc50e",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "7bbc5ecf54481556c83f16f4d74abf1c85fc5087eacd68db8b496ff7ddacfbcf",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "bec0dd87dbff417b845025f8c6ff9073f62fda0b0c1dbd2cdca7b5258435623d",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "3d80f833463487bc615f581b506aed87a42f48cdc17c652a0d437e2a4eeefdfc",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "2ac2ccd91d5940ab0621a0752900a6f95c77c70da1c9abd459db7517961c1da6",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "c75d41ccbc3c969a770a6bfee26632dd958009e417d3860559f54b82a86c1c70",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "4472dd5011f69a44805150ae23bcc134fb37d50f30c883620427a8e57d33bcae",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "b8d713b75cfd730f40bed7b7a27d0b7a120727d5cadbf0297e2d208c77e015e2",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "b8d713b75cfd730f40bed7b7a27d0b7a120727d5cadbf0297e2d208c77e015e2",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "8543b7863bc6c81d8d87d34233fe3ebe2bdc4bee1bbba6d2b59a1e18e299bd36",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "bec0dd87dbff417b845025f8c6ff9073f62fda0b0c1dbd2cdca7b5258435623d",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "3d80f833463487bc615f581b506aed87a42f48cdc17c652a0d437e2a4eeefdfc",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "2ac2ccd91d5940ab0621a0752900a6f95c77c70da1c9abd459db7517961c1da6",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "fbe221e1211e4f0c964f565078f7f01d2dd825de67961d97184d422faf6d24f2",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "d67701938789b1095a8cbc27e81575ec57d0a16c9e271ee694b84b46471f8020",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "d67701938789b1095a8cbc27e81575ec57d0a16c9e271ee694b84b46471f8020",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "f32d6f5b175bee01ef6822a7b5a644dbc89ea6517472833e984c2f718d39462f",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-12-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "8ab9e1491999b3531bcbd3662db75877947acbdcf34b4441d80f3d317035919d",
+        "size_bytes": 294
+      },
+      "reviews": {
+        "sha256": "41baf23432348be607379711178abe76ac058728cb829a360cba32eab2f0d89f",
+        "size_bytes": 2317
+      },
+      "camera": {
+        "sha256": "49d65b8a94198ec0768e7717cc7ff8045489db8ad6b78ca176aeab6c5db615bf",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "159203d9302381daa73867a859fc49bf4a8b0088466906ba6296948acfdfa5ac",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "schedule": "history-48-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "3918d1e8b2ff7cce474bc5d0d7832ce8067993ec1383fe2fa219b35a1dfd87e0",
+        "size_bytes": 815
+      },
+      "reviews": {
+        "sha256": "10fe3d365d701b442bdcfa5342dc42850607a96edfd5453f27018c08f0a9c582",
+        "size_bytes": 2029
+      },
+      "camera": {
+        "sha256": "49d65b8a94198ec0768e7717cc7ff8045489db8ad6b78ca176aeab6c5db615bf",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "77a91dae74fa8321b875baac333893d7e498a430bf2cb98edc26053fe6fb8310",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "21600",
+      "case": "history",
+      "schedule": "history-perf-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "7bf52fee07bb183e6da225faeb78329dfad19de230364081bf70d0aa37ec071f",
+        "size_bytes": 2047
+      },
+      "reviews": {
+        "sha256": "6ea5520344a00dfe3e056728a5a2ee4ebd34c7096a93c90447e0d0ee66194ac2",
+        "size_bytes": 1588
+      },
+      "camera": {
+        "sha256": "7aa4f2686e0413ff90273db967dc7229aa6ea736bdb9c5e4eff4f9e59fb26f7d",
+        "size_bytes": 434420
+      },
+      "policy": {
+        "sha256": "6e50a61dbdcb2f35639ec06ae4aa493b770b7c2d7301cd90e43f5d806e23b30e",
+        "size_bytes": 173768
+      },
+      "supplementary": {
+        "sha256": "d697e1f3609ee438ef1515f00561c43b62f717032b1a774253dcb0677a3e4f5d",
+        "size_bytes": 224
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-1-span-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "bacbea6b6ad00e4302457438a74c054428597be86afd651f9c2096c79bb02c6d",
+        "size_bytes": 291
+      },
+      "reviews": {
+        "sha256": "b796e582d740eec03987acd06d193f25d78ee70dffd4c8fe178bde39c97e3c5b",
+        "size_bytes": 174
+      },
+      "camera": {
+        "sha256": "515622c1dad62d023db864b69101b5a0400eefebd8a7cc027cb14247c759f65b",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "3094f4ce75c58b08ae3217647f8d1c190b713719d627af267a5acd2227c2f0ba",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "4ae42d4481676917736fa39c55cbca7d5726c220136ed0ce322068e11087bf7c",
+        "size_bytes": 56
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "schedule": "support-2-span-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "3c2afba7e65d90dc9fc336a7ac595dc7a5c182c05b72e959fa305bdb10bef70b",
+        "size_bytes": 317
+      },
+      "reviews": {
+        "sha256": "69b5bbe6548295f342a85d75470b0ac6eadf24efc12fe7e8cd88eb1cbbab316b",
+        "size_bytes": 158
+      },
+      "camera": {
+        "sha256": "515622c1dad62d023db864b69101b5a0400eefebd8a7cc027cb14247c759f65b",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "78ff7a5f36a3349aad93e55d418904a7e88f1865c05ed181831c33b66ff56a32",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "eaf70fa7f0882fd4f0f36984f59818cfa9403cf2ad51ecba25ae21a19a0795ba",
+        "size_bytes": 112
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "21600",
+      "case": "static",
+      "schedule": "static-perf-v2"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "8c660246c139a2bf31e75dd6d715969e158abf7f94ad20ed1f03390820b2c00e",
+        "size_bytes": 98
+      },
+      "reviews": {
+        "sha256": "7b7795e65c6ae83c9d86b5c3164731b448278c283e68e00e6b3c4ae200c49e1b",
+        "size_bytes": 38
+      },
+      "camera": {
+        "sha256": "5d75bb35722acb9e2ad5215c954b8ed2aa6319b8bd0f3701d148234a50ca0a45",
+        "size_bytes": 434420
+      },
+      "policy": {
+        "sha256": "41572f30fefc9d8335b3b787897431f7fa59f435fa2db71661bc25168e1760df",
+        "size_bytes": 173768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "control": "spread",
+      "schedule": "spread-static-v1",
+      "envelope_side_m": "128"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "bd501574f40e33e4f7ea96f643636f4b86709499383ffa8fbd5f26af60d08d87",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "control": "material-detail",
+      "schedule": "material-detail-static-v1",
+      "envelope_side_m": "64"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "452f03376d37fd5a01eaedd5072265f532368d142060ccbbc48f6532fb17797f",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "static",
+      "control": "surface-detail",
+      "schedule": "surface-detail-static-v1",
+      "envelope_side_m": "64"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "d30ba046307df6dea4dbd0dccef87d737bfb842eab85756ae3be108e5e80f495",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "640e42d9fdb7cca3c1a0777102405781c7a5aec61fe16091bb6a5161b87d1eea",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "452f03376d37fd5a01eaedd5072265f532368d142060ccbbc48f6532fb17797f",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "localized",
+      "control": "material-detail",
+      "schedule": "material-detail-localized-v1",
+      "envelope_side_m": "64"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "4371e283207e42857e1e84cbf024479f659253fcc6de3f1571c342ae624667e3",
+        "size_bytes": 109
+      },
+      "reviews": {
+        "sha256": "7c04fbdf72d93336c78b4d921e87a24619106ee3cae908c5221b6986c36b972a",
+        "size_bytes": 61
+      },
+      "camera": {
+        "sha256": "6d87dc172d0bde4440d589bf8322107d79be526bed9d58dda61861178541b07e",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "9c08c961a1a8d8dd1e424d40a25fa5618cbbb455ddffd1da85b10d5fb180e498",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "support",
+      "control": "fill",
+      "schedule": "fill-support-v1",
+      "envelope_side_m": "64"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "0150723de1d67a5e00f38558971851461dea3d471fbd841ae5ce30eb4cc6cab2",
+        "size_bytes": 343
+      },
+      "reviews": {
+        "sha256": "42b9859d13fda9534f08984aadd4e785a833c7d7ebc1792ba9674cbded471ada",
+        "size_bytes": 142
+      },
+      "camera": {
+        "sha256": "6b289ca3d23b748fa77ab9e6f84054b661902a6ffd480dd5316fa5a7ca9be9e7",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "7f4aca44b36293c70657a07dbd789f1ff749b33620912866f24aea38ce2593a4",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "e8770ed64966118537fa4ce5a13395add369e2a23b9e1f97893fa6f3cefa37c2",
+        "size_bytes": 168
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "control": "fill",
+      "schedule": "fill-history-v1",
+      "envelope_side_m": "64"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "aa8b64985123a755908419313c72795feef4182803ffed0b9082d5846f0be38a",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "2385382d7367664c6c03ea7ca7f686f3103c26257b48753948c35288c1b6f125",
+        "size_bytes": 224
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "history",
+      "control": "body-rich",
+      "schedule": "body-rich-history-v1",
+      "envelope_side_m": "64"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "fe4edb854800780b761a0f69369388c0518b561b8100182af23b1976c60e4256",
+        "size_bytes": 1909
+      },
+      "reviews": {
+        "sha256": "0ea008414020754a6e2b831e7786b0b88c6088c65a17200f9f9d33affdef086d",
+        "size_bytes": 1453
+      },
+      "camera": {
+        "sha256": "5ebf89da2d9ee901945a72c0504cb97acbbd8aaeca5d873503b476c4397150b6",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "bb4b68ec623c124863cb4b6495164370d820131dd68e87e12037474e0cec4850",
+        "size_bytes": 29768
+      },
+      "supplementary": {
+        "sha256": "be247a1795ba79c147af5433f299ad7f93f5e5af911086c0442fe138e2a35d26",
+        "size_bytes": 224
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "diagnostic": "compact-reference",
+      "schedule": "proxy-compact-reference-traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "9ce4ea2e997593d6a4003c843b4e15f1f5b0d2b4d0cf7e10ce1b8070d1c83389",
+        "size_bytes": 261
+      },
+      "reviews": {
+        "sha256": "2371ed91589b2fea0a498857e59df1878be93195d5399187d1f05474faf6c524",
+        "size_bytes": 218
+      },
+      "camera": {
+        "sha256": "20df76e59731bda0925b855817a1ed1ebf9286842d70a5f277d098a3858bd3ca",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "b083241ee62d03db4b87ba29cc7c1f5e9a20ef384c114978314d54bfb4413cb5",
+        "size_bytes": 104188
+      },
+      "supplementary": {
+        "sha256": "c6a73a88bd1a7ca595792d0d4f8e0c674ac59bfd719b78bc62c40c399d81b8b9",
+        "size_bytes": 308
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "diagnostic": "compact-reference",
+      "schedule": "proxy-compact-reference-picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "9ce4ea2e997593d6a4003c843b4e15f1f5b0d2b4d0cf7e10ce1b8070d1c83389",
+        "size_bytes": 261
+      },
+      "reviews": {
+        "sha256": "2371ed91589b2fea0a498857e59df1878be93195d5399187d1f05474faf6c524",
+        "size_bytes": 218
+      },
+      "camera": {
+        "sha256": "20df76e59731bda0925b855817a1ed1ebf9286842d70a5f277d098a3858bd3ca",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "5eec112954f2d5603019f45273b9c1abe96bbb26778fff15529d1647918e2b15",
+        "size_bytes": 104188
+      },
+      "supplementary": {
+        "sha256": "c6a73a88bd1a7ca595792d0d4f8e0c674ac59bfd719b78bc62c40c399d81b8b9",
+        "size_bytes": 308
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "diagnostic": "mixed-world",
+      "schedule": "proxy-mixed-world-traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "50e25e336831633c54bc72f4ea0f3ba0deb1b5f0e96e241df22376b07fe2428c",
+        "size_bytes": 163
+      },
+      "reviews": {
+        "sha256": "819b78aa8fb02f62713f937ee521e4de293a582d0d3cd41cee0efc0adba418cd",
+        "size_bytes": 120
+      },
+      "camera": {
+        "sha256": "d8c74767390856717cfc1fe1a006435a9d7886963e9dc43d33b38376150ffe2e",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "b083241ee62d03db4b87ba29cc7c1f5e9a20ef384c114978314d54bfb4413cb5",
+        "size_bytes": 104188
+      },
+      "supplementary": {
+        "sha256": "2810ff653596f5a59cd63195ec19e11c1b224dfdd06cd830c146684eea0bb8c6",
+        "size_bytes": 140
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "diagnostic": "mixed-world",
+      "schedule": "proxy-mixed-world-picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "50e25e336831633c54bc72f4ea0f3ba0deb1b5f0e96e241df22376b07fe2428c",
+        "size_bytes": 163
+      },
+      "reviews": {
+        "sha256": "819b78aa8fb02f62713f937ee521e4de293a582d0d3cd41cee0efc0adba418cd",
+        "size_bytes": 120
+      },
+      "camera": {
+        "sha256": "d8c74767390856717cfc1fe1a006435a9d7886963e9dc43d33b38376150ffe2e",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "708e7bee68c1f7824824b40faad4f37359b8d715e231a77a2522162a3dc3f5fd",
+        "size_bytes": 104188
+      },
+      "supplementary": {
+        "sha256": "2810ff653596f5a59cd63195ec19e11c1b224dfdd06cd830c146684eea0bb8c6",
+        "size_bytes": 140
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "0",
+      "frames": "1",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "786824a5c7c1740636b9755b60c231d22a09d946a617e058c6f3ece764ba2bb3",
+        "size_bytes": 88
+      },
+      "reviews": {
+        "sha256": "a775beb542e7843fbe56de343b8d7f0047603fa1ec6c138f3d8163c53eae732f",
+        "size_bytes": 34
+      },
+      "camera": {
+        "sha256": "a0a88ce3df7a27421422267c5b3c4cdd37fd70d3cca451cf80ac00dc92176984",
+        "size_bytes": 40
+      },
+      "policy": {
+        "sha256": "c571327cb01ac1de6972713cbf6cc1fc3c2cab8b581ee0bc3fe6d8b56963fd5b",
+        "size_bytes": 16
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "1",
+      "frames": "2",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "62fcb12ec54c2a52bb958ac9b97b4b296b28bfaa2ef850d3e295df59e37835cf",
+        "size_bytes": 88
+      },
+      "reviews": {
+        "sha256": "b2374c1647063830f6d7eb52a1c27f66f49ea30dc5746e82e13e0b124bee487f",
+        "size_bytes": 34
+      },
+      "camera": {
+        "sha256": "8506eb6a7cd74ceccb358d18cfc53172ff39d413ac34d664c16b650ffb130b5a",
+        "size_bytes": 80
+      },
+      "policy": {
+        "sha256": "f4d03f0bee0ca7c1ec55a1e843292733a6d95119140e2dc2d1ec4746b02d27d7",
+        "size_bytes": 32
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3599",
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "e59c6151b9e429fdfb246e743c709e6726fb8e9ef43e915082dfedf91a7cc636",
+        "size_bytes": 96
+      },
+      "reviews": {
+        "sha256": "d69a7f4175b86fb7b39b93b3a0c595da41137ceeab8ca5041e78a15d08f5ed76",
+        "size_bytes": 37
+      },
+      "camera": {
+        "sha256": "b094cfdddce8910c49180214f09f49ce5a3d67972e5e1ce3df50938fce136e15",
+        "size_bytes": 74400
+      },
+      "policy": {
+        "sha256": "d306c0a8f80a85a03f4d83cb81023a3469e4a71228cc0299971d91e504ada7ba",
+        "size_bytes": 29760
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "7172dc48cded23b44fc724362996b63ae4029c6cda17695e7142821a9148e061",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "7172dc48cded23b44fc724362996b63ae4029c6cda17695e7142821a9148e061",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "696a38952bd4e6d1f923735c81adcebe22d2f858a6c943d907d5b44eeb339146",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "fb7fd4a2e5fdd0e1a0a6a4100d21194ded81115744bfb843bb4081870e8e0273",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "fb7fd4a2e5fdd0e1a0a6a4100d21194ded81115744bfb843bb4081870e8e0273",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "22fc46b0b34fc3c0b4085757fd356ab99383cdc6a215d7418962682209f98ef1",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "31a72893389e4dbf875729ad3bfea101f7f6f05f46ed44151f9d41f626d1579d",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "large",
+      "side_m": "128",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "31a72893389e4dbf875729ad3bfea101f7f6f05f46ed44151f9d41f626d1579d",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "6c999913e74da29c358b4a5caa12b837bd17de87b8f49756309d05f22d81121d",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "0a39f216d163b56eb254d2e12a69eec71ce7f6812ee5063fb8ba6965ecd34c88",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "0a39f216d163b56eb254d2e12a69eec71ce7f6812ee5063fb8ba6965ecd34c88",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "5b16db69b1afd37dbc00e71fe93dc5cd74f33cd8140847ba4e617a049934f1f7",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "05d495d8998321e7bd08d79cc6c28f689fece81008f8ae6de04a141e5f97c546",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "05d495d8998321e7bd08d79cc6c28f689fece81008f8ae6de04a141e5f97c546",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "1f73fba47c0f614cd9e33a2c34f0ba55e6897970a32152ce169cde8fd99aabf6",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "8e5dd83b090bd049ea35890908501783ed7819d9d52b6c1656f73613f00d91d3",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "8e5dd83b090bd049ea35890908501783ed7819d9d52b6c1656f73613f00d91d3",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "6ae2b30dcfe63d99aea53b33ec5f1868d87f93c4af9da6a6c8f347516d14134f",
+        "size_bytes": 104188
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "ba75bb91f3cb95e5bff39b4cc41b205bf3e5b3d6d3ff68eadc8d18753e44e708",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      }
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-5",
+      "side_m": "160",
+      "seed": "46",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "artifacts": {
+      "checkpoints": {
+        "sha256": "408d1e1325695921ba19341f00a84774408ee15cefa53de7fa132d25cd89da73",
+        "size_bytes": 346
+      },
+      "reviews": {
+        "sha256": "8a3434f0579be2317b085e628cd6801326b35143da075ca3d42884f76270c480",
+        "size_bytes": 303
+      },
+      "camera": {
+        "sha256": "ba75bb91f3cb95e5bff39b4cc41b205bf3e5b3d6d3ff68eadc8d18753e44e708",
+        "size_bytes": 74420
+      },
+      "policy": {
+        "sha256": "2c65b3c416902f4b261a06286349f514ac25f259327fd53fce27d2c9a0283ba6",
+        "size_bytes": 29768
+      },
+      "rays": {
+        "sha256": "7428df26cfadb4e39f02d2abe24f658595cfde549099ab880520f566a1153760",
+        "size_bytes": 104188
+      }
+    }
+  }
+]

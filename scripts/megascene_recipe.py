@@ -71,6 +71,10 @@ def source_owners(text, q, seed, control=None):
     roles = (("building_left", "building_right") if control == "body-rich" else ("building",)) + (
         "span0", "span1", "span2", "irregular")
     expected_owners = [("terrain", None)] + [(role, n) for n in range(q*q) for role in roles]
+    if control == "compact-reference":
+        if q != 2:
+            raise ValueError("compact source requires q=2")
+        expected_owners = [("irregular", n) for n in range(4)]
     if (type(header) is not dict or
             set(header) != {"record_type", "schema", "side", "seed", "control", "envelope_cells"} or
             header["record_type"] != "source" or header["schema"] != "megascene-source/1" or
@@ -104,7 +108,7 @@ def source_owners(text, q, seed, control=None):
                 raise ValueError("invalid Bend source box")
             boxes.append(Box(tuple(map(coordinate,b["lo"])),tuple(map(coordinate,b["hi"])),b["material"]))
         owners.append(Owner(record["role"],n,boxes))
-    if owners[0].role != "terrain" or sum(o.role == "terrain" for o in owners) != 1:
+    if control != "compact-reference" and (owners[0].role != "terrain" or sum(o.role == "terrain" for o in owners) != 1):
         raise ValueError("invalid Bend terrain ownership")
     return owners
 
@@ -117,6 +121,17 @@ def generate(preset, seed, control=None):
     if control not in (None, *CONTROLS):
         raise ValueError("unsupported terrain control")
     return source_owners(_source(q,seed,control),q,seed,control)
+
+
+def generation_inputs(config):
+    args = ((config["preset"], config["seed"], config["side_m"], config["fragment_budget"], config["threads"], "none")
+            if config.get("case") == "admission" else
+            (config["preset"], config["seed"], config["side_m"], config["envelope_side_m"], config["control"] or "none",
+             config["fragment_budget"], config.get("diagnostic") or "none"))
+    module = "megascene_admission_inputs" if config.get("case") == "admission" else "megascene_inputs"
+    record, source = run(module, *args, "source").split("\n", 1)
+    control = "compact-reference" if config.get("diagnostic") == "compact-reference" else config.get("control")
+    return (record + "\n").encode("ascii"), source_owners(source, side_count(config["preset"]), int(config["seed"]), control)
 
 
 def signed_decimal(value):
