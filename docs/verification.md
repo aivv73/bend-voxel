@@ -1,6 +1,6 @@
 # Slice verification
 
-`make test` reruns the formal and headless runtime checks. `make ui` verifies real native input and screenshots. `make benchmark` measures native displayed frames.
+`make test` reruns the formal and headless runtime checks. `make ui UI_BEND='bun ../bend/bend2/main.ts'` verifies real native input and screenshots with the owned-window reference API. `make benchmark` measures native displayed frames.
 
 ## Formal scope
 
@@ -35,12 +35,20 @@ The far-sphere case guards unsigned distance overflow. Bounds and edge cases gua
 
 `scripts/image_check.py` compares every RGB word for the full and destroyed scenes. It runs the same executable with forced CPU and forced GPU execution at several tile and fork depths. It also checks known pixels and requires the front cut to change exactly 18,520 pixels.
 
-`scripts/ui_check.py` sends native X11 input to the actual Bend window. It captures the client image before destruction, after Space, after reset, and after primary-click carving. Background clicks must preserve the image. Reset must restore identical pixels. Escape and the window close event must exit successfully.
+`scripts/ui_check.bend` opens the slice's native window and drives its actual view and reducer through `App.step`. It exports `X11WindowRef{display, id}` after the first frames. The test queries and sends input to that exact reference through a separate X11 connection; it never enumerates windows or matches titles. The owner is renamed during the test, and repeated exports must preserve its identity.
 
-`make ui` checks Escape. To check the window close event, run:
+`scripts/ui_native.c` is the narrow OS boundary for native pixel capture, key and mouse events, close requests, and checking that the exported window has expired. It returns captured pixels as a Bend `Image`; Bend checks every pixel and writes PPM evidence. No Python, Pillow, ImageMagick, or python-xlib is used by the native check. The JavaScript adapter reports unsupported native X11 operations.
+
+The test captures the client image before destruction, after Space, after repeating Space, after reset, and after primary-click carving. Space must change exactly 18,520 pixels; repeating it must preserve the image. Background clicks must preserve the image. Both resets must restore every pixel. Primary click must carve a different region from Space. Escape and the window close event must stop the actual app reducer, and the exported window must then be gone. A completion channel prevents an unexpected early Close from being counted as success.
+
+The assertions are runtime checks. Native identity, capture, event delivery, and lifetime depend on foreign IO and are not claimed as formally proven. Compile and run the UI check; `--verdict` remains the gate for `PROOF.bend`'s six local laws.
+
+The harness owns its window in the test process and imports the slice's shared view and reducer. It does not launch the standalone application binary. The development run passed CPU and GPU execution with both Escape and Close, and all seven captured states matched across the four runs. The full and destroyed captures also matched the existing renderer exports. An injected premature Close exited with status 1 without reporting success. The JavaScript adapter's unsupported path exited with status 95.
+
+`make ui` checks Escape. To check the window close event, run the built test:
 
 ```sh
-	python3 scripts/ui_check.py --binary build/bend-voxel-rewrite --gpu on --close-method window --output .audit/screenshots/window-close
+	./build/ui-check --gpu on -- --close-method window --output .audit/screenshots/window-close
 ```
 
 The development machine exercised the current Linux GPU lane. Metal and future WebGPU lanes have not been tested in this slice. Core code uses Bend types and parallel calls rather than backend-specific operations.
