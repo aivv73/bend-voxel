@@ -1,21 +1,44 @@
-.PHONY: build run test proof proof-verdict test-blender benchmark-stress benchmark-faces export-atelier-assets clean
+BEND ?= bend
+PYTHON ?= python3
+CUDA_HOME ?= $(if $(wildcard /opt/cuda),/opt/cuda,$(if $(wildcard /usr/local/cuda),/usr/local/cuda,))
+export CUDA_HOME
+
+BINARY := build/bend-voxel-rewrite
+SOURCES := main.bend voxel.bend render.bend dump.bend
+
+.PHONY: all run proof test geometry images ui benchmark clean
+
+all: $(BINARY)
+
 build:
-	./scripts/build.sh
-run: build
-	./scripts/run.sh
-test:
-	./scripts/test.sh
+	mkdir -p build
+
+$(BINARY): $(SOURCES) | build
+	$(BEND) main.bend -o $@
+
+build/geometry-tests: tests.bend voxel.bend | build
+	$(BEND) tests.bend -o $@
+
+run: $(BINARY)
+	./$(BINARY)
+
 proof:
-	bash scripts/proof.sh
-proof-verdict:
-	bash scripts/proof.sh --verdict
-test-blender:
-	blender -b --factory-startup --python-exit-code 1 --python tests/blender_voxelize.py
-benchmark-stress: build
-	./scripts/benchmark_stress.sh
-benchmark-faces:
-	./scripts/benchmark_faces.sh
-export-atelier-assets:
-	blender -b assets/light_atelier.blend --python-exit-code 1 --python scripts/export_atelier_assets.py
+	$(BEND) PROOF.bend
+	$(BEND) PROOF.bend --verdict
+
+geometry: build/geometry-tests
+	$(PYTHON) scripts/reference_check.py
+
+images: $(BINARY)
+	$(PYTHON) scripts/image_check.py
+
+ui: $(BINARY)
+	$(PYTHON) scripts/ui_check.py --binary $(BINARY) --gpu on --output .audit/screenshots/ui
+
+benchmark: $(BINARY)
+	$(PYTHON) scripts/benchmark.py
+
+test: proof geometry images
+
 clean:
 	rm -rf build

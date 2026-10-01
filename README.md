@@ -1,86 +1,101 @@
-# Bend Voxel
+# Bend voxel rewrite
 
-A destructible voxel demo built with [Bend 2](https://github.com/bendlang/bend) and a native Vulkan renderer. Explore and carve three sculptures in **Light Atelier**.
+Run one editable 8³ voxel body in a native window. Destroy part of the body and inspect the newly exposed surfaces.
 
-![Light Atelier](docs/validation/light-atelier/day.png)
+![Voxel body after destruction](docs/slice.png)
 
-## Run
+## Run the slice
 
-Requires [Bend 2.0.34](https://github.com/bendlang/bend/releases/tag/v2.0.34), Linux with X11 or XWayland, a Vulkan 1.3 driver with Xlib surface support, Vulkan, X11 and OpenSSL development headers, `glslc`, `g++`, and `make`.
-
-```sh
-make run
-```
-
-Set `VOXEL_RESOLUTION=1280x720` before `make run` to change the render resolution.
-
-## Controls
-
-| Input | Action |
-| --- | --- |
-| Pointer / left click | Aim / carve |
-| Right drag | Look around |
-| W / A / S / D, Q / E | Move horizontally, down / up |
-| Shift | Move faster |
-| L | Preview night lighting |
-| R or RESET | Restore the scene |
-| Escape | Release controls; click the scene to resume |
-
-## Verify
+Use Bend 2.0.34 or newer. Native GPU builds require the compiler and SDK for the available Bend execution lane. On Linux, install `libx11-dev` for the window.
 
 ```sh
-make test
-make proof-verdict
-make benchmark-stress
-make benchmark-faces
+	make
+	make run
 ```
 
-The stress and face benchmarks run in Bend. The test suite also needs Python 3 and `jq`. See the [Light Atelier guide](docs/showcase.md) for Blender assets, the [benchmark guide](docs/stress-benchmark.md) for workloads and results, and the [renderer guide](docs/vulkan-renderer.md) for implementation details.
+Use these controls:
 
-The separate [Megascene admission command](docs/megascene-admission.md) constructs
-and inventories the fixed 64/128 m districts before rendering. Admission does
-not qualify a Vulkan benchmark attempt. [Static replay validation](docs/megascene-validation.md)
-adds independent references, complete replays and exact timed state/geometry checkpoints.
-The [static Vulkan runner](docs/megascene-static.md)
-opens the frozen district view and archives bounded observations and an optional
-opening capture. Its [supervisor](docs/megascene-supervision.md)
-enforces resource reserves and deadlines, retains interrupted evidence, and
-accounts for a persistent campaign allowance.
-The [primary traversal runner](docs/megascene-traversal.md) freezes the full
-camera route, checks moving-view visibility and cache reuse, and archives
-separate feature captures and review outcomes.
-The [bounded picking runner](docs/megascene-picking.md) replays the same route
-with declared hit/miss holds, independent target references and numeric guards.
-The separate [proxy diagnostics](docs/megascene-proxy.md) pair full and proxy
-traversal/picking on mixed-world and compact-reference routes, with actual
-selection, hysteresis, aim, retained-work and midpoint-capture evidence.
-The [localized cut runner](docs/megascene-localized.md) performs one frozen terrain
-edit, checks exact removal and atomic rejection, and keeps its single edit
-response separate from ordinary-frame measurements.
-The [support runner](docs/megascene-support.md) severs three spans with six cuts,
-verifies their actual concurrent motion at frames 31–42, and retains component,
-mesh, shadow and named beam-feature evidence.
-The [history runner](docs/megascene-history.md) replays 120 frozen irregular cuts,
-checks every evolving edit and retains the separate history and moving-span
-populations.
-The [history and span controls](docs/megascene-schedule-variants.md) run the
-12/48-cut prefixes and one/two-span releases as separately validated schedules.
-The [terrain pressure controls](docs/megascene-controls.md) replay spread,
-material-detail, surface-detail, fill-support, fill-history and body-rich-history
-variants with separate validation identities and actual inventory evidence.
-The [attempt reporter](docs/megascene-report.md) reads retained raw evidence and
-classifies correctness, fidelity, completion, availability, populations,
-calibration, responsiveness, capacity and termination independently.
-The [archive reproduction command](docs/megascene-reproduction.md) restores
-saved static and localized runtimes and frozen inputs for exact checkpoint comparison.
+- Press **Space** to remove a sphere near the visible front corner.
+- Click a visible voxel with the primary mouse button to apply the same sphere brush at that voxel.
+- Press **R** to restore the solid body.
+- Press **Escape**, or close the window, to exit.
 
-`make test` checks `PROOF.bend` before running runtime/reference tests. The separate
-`make proof-verdict` check requires [Lean 4.34.0](https://github.com/leanprover/lean4/releases/tag/v4.34.0),
-pinned in `lean-toolchain`; install it with `elan toolchain install leanprover/lean4:v4.34.0`.
-The [Bend audit](docs/bend-audit.md) records proof scope, parallelization measurements,
-and remaining native computation. Properties depending on `@unsafe` are covered
-by runtime tests, not claimed as formally proven.
+The image uses a fixed isometric camera. The brush removes cells within a radius of three cells. Repeating the same cut leaves the body unchanged.
 
-Megascene district generation, terrain controls, and integer scale/history policy
-now run in Bend. The [migration notes](docs/bend-migration.md) describe the
-Python transport, frozen-input archives, and exact behavior checks.
+To run on the CPU, disable GPU dispatch through Bend's runtime option:
+
+```sh
+	./build/bend-voxel-rewrite --gpu off
+```
+
+To require the available GPU lane, force GPU execution:
+
+```sh
+	./build/bend-voxel-rewrite --gpu on
+```
+
+Keep `build/bend-voxel-rewrite.gpu` beside the executable. On the development Linux machine, the CUDA SDK is at `/opt/cuda`. The Makefile detects that path at the build boundary. To use a different SDK path, set `CUDA_HOME`:
+
+```sh
+	make CUDA_HOME=/path/to/cuda
+```
+
+## Verify the slice
+
+Run the formal laws, geometry reference cases, and complete CPU/GPU image comparisons:
+
+```sh
+	make test
+```
+
+The reference scripts require Python 3 and its standard library. Geometry checks compare complete cell and face sets. Image checks force both `--gpu off` and `--gpu on` across several work decompositions.
+
+To compare images on a machine without a GPU, run the CPU cases:
+
+```sh
+	python3 scripts/image_check.py --cpu-only
+```
+
+To exercise the real native window on the development X11 display, run the input and screenshot check:
+
+Close any existing slice window before this check.
+
+```sh
+	make ui
+	python3 scripts/ui_check.py --binary build/bend-voxel-rewrite --gpu off --output .audit/screenshots/cpu
+```
+
+The GPU target saves screenshots in `.audit/screenshots/ui`. The CPU command saves them in `.audit/screenshots/cpu`.
+
+The native check requires X11, `libX11`, ImageMagick's `import` command, Pillow, and python-xlib. Read [the verification notes](docs/verification.md) for the scope of formal proofs and runtime checks.
+
+## Export an image
+
+Write the same rendered `Image` to a deterministic PPM file:
+
+```sh
+	./build/bend-voxel-rewrite --gpu on --dump build/full.ppm
+	./build/bend-voxel-rewrite --gpu on --cut --dump build/destroyed.ppm
+```
+
+## Measure native frames
+
+Measure displayed frames with cached scenes and scripted destruction and reset:
+
+```sh
+	make benchmark
+```
+
+The command records interleaved CPU and GPU measurements in `build/benchmark.json`. Each run excludes eight warm-up frames. CPU thread counts and GPU work decomposition are measured separately. The benchmark uses one thread, half the reported CPU cores, and all reported CPU cores. Override those counts with `scripts/benchmark.py --cpu-threads 1 4 8`.
+
+To choose a work decomposition, set both depths:
+
+```sh
+	./build/bend-voxel-rewrite --gpu on --tile-depth 5 --fork-depth 5 --bench 120
+```
+
+The default tile and fork depths are both five. Native measurements selected that configuration for the available GPU lane.
+
+`--tile-depth` chooses the tile tree depth within the 512-pixel image. `--fork-depth` chooses how many tile tree levels may fork. Both accept values from zero to nine. Leaves run sequentially. These settings change scheduling and candidate lists while preserving the pixels.
+
+Read [the design notes](docs/design.md) for the data flow, boundaries, and examples considered.
