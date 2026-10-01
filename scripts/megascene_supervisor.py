@@ -725,39 +725,5 @@ def pipe_ready(pipe):
 
 
 def audit_allocations(records, normal=False):
-    require(records and records[0]['record_type'] == 'ledger_start', 'missing ledger initialization')
-    require(records[0]['live_bytes'] == records[0]['peak_bytes'] == '0', 'nonzero initial ledger')
-    live, peak, next_id = 0, 0, 1
-    owned, heaps, peaks = {}, {}, {}
-    device = None
-    for r in records[1:]:
-        kind = r['record_type']
-        if kind == 'vulkan_error':
-            require(int(r['vk_result']) != 0 and r['operation'], 'invalid Vulkan failure')
-            continue
-        require(kind in ('allocate','free','allocation_failed'), 'unexpected ledger event')
-        ident, size, heap = integer(r['allocation_id']), integer(r['size_bytes']), integer(r['heap'])
-        integer(r['memory_type'])
-        require(size > 0, 'zero allocation size')
-        device = r['device'] if device is None else device
-        require(r['device'] == device, 'allocation device changed')
-        if kind != 'free':
-            require(ident == next_id, 'allocation identity gap/duplicate')
-            next_id += 1
-        if kind == 'allocate':
-            require(r['vk_result'] == '0', 'successful allocation has error status')
-            owned[ident] = (size,heap,r['memory_type'])
-            live += size; heaps[heap] = heaps.get(heap,0)+size
-        elif kind == 'free':
-            require(owned.pop(ident,None) == (size,heap,r['memory_type']), 'free identity/size/type mismatch')
-            require(r['vk_result'] == '0', 'invalid free result')
-            live -= size; heaps[heap] -= size
-        else:
-            require(int(r['vk_result']) != 0, 'failed allocation has successful result')
-        peak = max(peak,live); peaks[heap] = max(peaks.get(heap,0),heaps.get(heap,0))
-        require((r['live_bytes'],r['peak_bytes'],r['heap_live_bytes'],r['heap_peak_bytes']) ==
-                tuple(map(str,(live,peak,heaps.get(heap,0),peaks[heap]))), 'ledger totals mismatch')
-    if normal:
-        require(not owned, 'normal teardown left live explicit allocations')
-    return {'live_bytes':str(live),'peak_bytes':str(peak),'live_allocations':str(len(owned)),
-            'scope':'explicit Vulkan allocations; not residency or heap budgets'}
+    from megascene_evidence import run
+    return run("allocation_audit", {"records": records, "normal": normal}, module="evidence_integrity")

@@ -15,6 +15,7 @@ import sys
 import uuid
 
 from megascene_acceptance_index import campaigns, coverage
+from megascene_evidence import run as evidence
 
 
 def inventory(base):
@@ -40,20 +41,11 @@ def retain_failure(output, archive):
 
 
 def source_for(row, rows, by_id, preferred_root):
-    groups = row["repeat_groups"]
-    if groups:
-        chosen = max(groups.values(), key=len)[0]
-        return by_id[chosen]
-    if row["group"] == "primary" and row["preset"] == "small" and row["threads"] in ("1", "12"):
-        peer = next((item for item in rows if item["group"] == "primary" and
-                     item["case"] == row["case"] and item["preset"] == "small" and
-                     item["threads"] == "6" and item["complete_runtime_attempts"]), None)
-        if peer:
-            candidates = [by_id[item] for item in peer["complete_runtime_attempts"]]
-            preferred = [item for item in candidates if Path(item["archive"]).is_relative_to(
-                preferred_root)]
-            return (preferred or candidates)[-1]
-    return None
+    return evidence("source_for", {"row": row, "rows": rows, "by_id": by_id,
+                                   "preferred_ids": [identifier for identifier, item in by_id.items()
+                                                     if item.get("archive") is not None and
+                                                     Path(item["archive"]).is_relative_to(preferred_root)]},
+                    "evidence_acceptance")
 
 
 def main():
@@ -67,8 +59,7 @@ def main():
     args = parser.parse_args()
     script = Path(__file__).resolve().parent
     attempts, rows = inventory(args.archive_base)
-    pending = [r for r in rows if r["group"] in ("primary", "resolution") and
-               r["runtime_coverage"] == "missing"]
+    pending = evidence("primary_pending", rows, "evidence_acceptance")
     for row in pending:
         print(f"PENDING {row['group']} {row['case']} {row['preset']} "
               f"threads={row['threads']} resolution={row['resolution']} "

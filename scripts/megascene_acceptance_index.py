@@ -10,27 +10,13 @@ import hashlib
 import json
 from pathlib import Path
 
+from megascene_evidence import run as evidence
+
 
 CASES = ("static", "traversal", "picking", "localized", "support", "history")
-SCHEDULES = {"static": "static-v1", "traversal": "traversal-v2",
-             "picking": "picking-v2", "localized": "localized-v1",
-             "support": "support-v1", "history": "history-v1"}
 OUTCOMES = ("schedule_completion", "state_correctness", "rendering_correctness",
             "visual_quality", "numeric_validity", "population_qualification",
             "calibration", "responsiveness", "qualified_capacity")
-CONTROLS = (
-    ("static", "spread-static-v1", "spread"),
-    ("support", "fill-support-v1", "fill"),
-    ("history", "fill-history-v1", "fill"),
-    ("history", "body-rich-history-v1", "body-rich"),
-    ("static", "material-detail-static-v1", "material-detail"),
-    ("localized", "material-detail-localized-v1", "material-detail"),
-    ("static", "surface-detail-static-v1", "surface-detail"),
-    ("history", "history-12-v1", None),
-    ("history", "history-48-v1", None),
-    ("support", "support-1-span-v1", None),
-    ("support", "support-2-span-v1", None),
-)
 CORROBORATION = (
     ("independent_reference_and_mismatch", "docs/validation/megascene-checkpoints/failures.json"),
     ("static_thread_equality", "docs/validation/megascene-checkpoints/thread-comparison.json"),
@@ -156,80 +142,15 @@ def campaigns(base):
 
 
 def requirements():
-    rows = []
-    for preset, threads in (("small", (1, 6, 12)), ("large", (6,))):
-        for case in CASES:
-            for thread in threads:
-                rows.append({"group": "primary", "case": case, "preset": preset,
-                             "threads": str(thread), "resolution": "1920x1080",
-                             "profile": "full", "schedule": SCHEDULES[case],
-                             "diagnostic": None, "control": None,
-                             "required_complete_attempts": 3 if preset == "small" and
-                                 case in ("static", "history") else 1})
-    for case in ("static", "history"):
-        rows.append({"group": "resolution", "case": case, "preset": "small",
-                     "threads": "6", "resolution": "640x360", "profile": "full",
-                     "schedule": SCHEDULES[case], "diagnostic": None,
-                     "control": None, "required_complete_attempts": 1})
-    for diagnostic in ("mixed-world", "compact-reference"):
-        for case in ("traversal", "picking"):
-            for profile in ("full", "proxy"):
-                rows.append({"group": "proxy", "case": case, "preset": "small",
-                             "threads": "6", "resolution": "1920x1080", "profile": profile,
-                             "schedule": f"proxy-{diagnostic}-{case}-v1",
-                             "diagnostic": diagnostic, "control": None,
-                             "required_complete_attempts": 1})
-    for case, schedule, control in CONTROLS:
-        rows.append({"group": "control", "case": case, "preset": "small",
-                     "threads": "6", "resolution": "1920x1080", "profile": "full",
-                     "schedule": schedule, "diagnostic": None, "control": control,
-                     "required_complete_attempts": 1})
-    return rows
+    return evidence("requirements", None, "evidence_acceptance")
 
 
 def complete(row):
-    config = row["configuration"] or {}
-    outcomes = row["outcomes"]
-    return (config.get("warmup") == "120" and config.get("frames") == "3600" and
-            not config.get("validation_only") and row["completed_prefix"] ==
-            {"startup": True, "warmup": "120", "measured": "3600"} and
-            all(outcomes[key] == "pass" for key in
-                ("schedule_completion", "state_correctness", "rendering_correctness")) and
-            row["validation_status"] == "pass" and
-            row["runtime_artifacts"]["present_entries"] ==
-            row["runtime_artifacts"]["manifest_entries"] and
-            row["raw_evidence"]["present_entries"] ==
-            row["raw_evidence"]["manifest_entries"])
+    return evidence("complete", row, "evidence_acceptance")
 
 
 def coverage(attempts):
-    result = []
-    keys = ("case", "preset", "threads", "resolution", "profile", "schedule",
-            "diagnostic", "control")
-    for needed in requirements():
-        matching = []
-        for row in attempts:
-            config = row["configuration"] or {}
-            if (config.get("seed") == "45" and
-                    all(config.get(key) == needed[key] for key in keys) and
-                    row["attempt_kind"] != "calibration_off"):
-                matching.append(row)
-        completed = [row for row in matching if complete(row)]
-        repeat_groups = {}
-        for row in completed:
-            repeat_groups.setdefault(row["repeat_identity_sha256"], []).append(row["attempt_id"])
-        result.append({**needed,
-                       "candidate_attempts": [row["attempt_id"] for row in matching],
-                       "complete_runtime_attempts": [row["attempt_id"] for row in completed],
-                       "visual_quality_pass_attempts": [row["attempt_id"] for row in
-                                                        completed if row["outcomes"]["visual_quality"] == "pass"],
-                       "numeric_validity_pass_attempts": [row["attempt_id"] for row in
-                                                          completed if row["outcomes"]["numeric_validity"] == "pass"],
-                       "repeat_groups": repeat_groups,
-                       "runtime_coverage": "observed" if max(map(len, repeat_groups.values()), default=0) >=
-                           needed["required_complete_attempts"] else "missing",
-                       "acceptance": "unassessed"})
-    return result
+    return evidence("coverage", attempts, "evidence_acceptance")
 
 
 def calibration_series(base):

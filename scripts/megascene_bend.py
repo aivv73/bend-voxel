@@ -10,6 +10,12 @@ import tempfile
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR
 DEPENDENCIES = {
+    "evidence_report": ("evidence_report", "evidence_integrity", "evidence_thresholds", "evidence_value", "megascene_scale"),
+    "evidence_calibration": ("evidence_calibration", "evidence_report", "evidence_integrity", "evidence_thresholds", "evidence_value", "megascene_scale"),
+    "evidence_integrity": ("evidence_integrity", "evidence_value", "megascene_scale"),
+    "evidence_comparison": ("evidence_comparison", "evidence_value", "megascene_scale", "schedule_json"),
+    "evidence_search": ("evidence_search", "evidence_acceptance", "evidence_thresholds", "evidence_value", "megascene_scale"),
+    "evidence_acceptance": ("evidence_acceptance", "evidence_value", "megascene_scale"),
     "megascene_operational": ("megascene_operational", "megascene_scale"),
     "megascene_frozen_admit": ("megascene_frozen_admit", "frozen_admission", "schedule_float"),
     "megascene_configuration": ("megascene_configuration", "schedule_json"),

@@ -1,0 +1,6886 @@
+[
+  {
+    "expected": {
+      "baseline": {
+        "attempt_id": "base",
+        "schedule_sha256": "base",
+        "validation_id": "base-validation"
+      },
+      "bounds": {
+        "baseline": {
+          "hi": [
+            "320",
+            "86",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "variant": {
+          "hi": [
+            "320",
+            "86",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        }
+      },
+      "case": "static",
+      "control": "spread",
+      "delta": {
+        "cells": "46080",
+        "cuboids": "6",
+        "exposed_area_cell_faces": "23660",
+        "protected_cells": "1920",
+        "surface_rectangles": "32",
+        "vertices": "192"
+      },
+      "density": {
+        "baseline": {
+          "denominator": "52428800",
+          "numerator": "10503360"
+        },
+        "variant": {
+          "denominator": "117964800",
+          "numerator": "10549440"
+        }
+      },
+      "exposed_area_by_material_cell_faces": {
+        "baseline": {
+          "1": "100",
+          "2": "200"
+        },
+        "variant": {
+          "1": "100",
+          "2": "200"
+        }
+      },
+      "materials": {
+        "baseline": {
+          "1": "413888",
+          "2": "9388032"
+        },
+        "variant": {
+          "1": "413888",
+          "2": "9388032"
+        }
+      },
+      "owners": {
+        "baseline": {
+          "initial_owners": "21"
+        },
+        "variant": {
+          "initial_owners": "21"
+        }
+      },
+      "record_type": "terrain_control_comparison",
+      "schema": "megascene-evidence/1",
+      "scope": "validated achieved work comparison; unqualified development observations",
+      "source_effects": {
+        "baseline_source": {
+          "cells": "10503360"
+        },
+        "control": "spread",
+        "control_source": {
+          "cells": "10549440"
+        }
+      },
+      "status": "pass",
+      "variant": {
+        "attempt_id": "variant",
+        "schedule_sha256": "variant",
+        "validation_id": "variant-validation"
+      }
+    },
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10549440"
+            }
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232",
+          "vertices": "7392"
+        }
+      ]
+    }
+  },
+  {
+    "error": "spread work mismatch",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10503360"
+            }
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1200",
+          "vertices": "7392"
+        }
+      ]
+    }
+  },
+  {
+    "expected": {
+      "baseline": {
+        "attempt_id": "base",
+        "schedule_sha256": "base",
+        "validation_id": "base-validation"
+      },
+      "bounds": {
+        "baseline": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "variant": {
+          "hi": [
+            "320",
+            "97",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        }
+      },
+      "case": "support",
+      "control": "fill",
+      "delta": {
+        "cells": "3276800",
+        "cuboids": "4",
+        "exposed_area_cell_faces": "20480",
+        "protected_cells": "0",
+        "surface_rectangles": "4",
+        "vertices": "0"
+      },
+      "density": {
+        "baseline": {
+          "denominator": "52428800",
+          "numerator": "10503360"
+        },
+        "variant": {
+          "denominator": "52428800",
+          "numerator": "13780160"
+        }
+      },
+      "exposed_area_by_material_cell_faces": {
+        "baseline": {
+          "1": "10",
+          "2": "20"
+        },
+        "variant": {
+          "1": "10",
+          "2": "20"
+        }
+      },
+      "materials": {
+        "baseline": {
+          "1": "413888",
+          "2": "9388032",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        },
+        "variant": {
+          "1": "413888",
+          "2": "12664832",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        }
+      },
+      "owners": {
+        "baseline": {
+          "initial_owners": "21"
+        },
+        "variant": {
+          "initial_owners": "21"
+        }
+      },
+      "record_type": "terrain_control_comparison",
+      "schema": "megascene-evidence/1",
+      "scope": "validated achieved work comparison; unqualified development observations",
+      "source_effects": {
+        "baseline_source": {
+          "cells": "10503360"
+        },
+        "control": "fill",
+        "control_source": {
+          "cells": "13780160"
+        }
+      },
+      "status": "pass",
+      "variant": {
+        "attempt_id": "variant",
+        "schedule_sha256": "variant",
+        "validation_id": "variant-validation"
+      }
+    },
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "support",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "support-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032",
+            "3": "179104",
+            "4": "26208",
+            "5": "496128"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "10",
+            "2": "20"
+          },
+          "exposed_area_cell_faces": "1412588",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "89",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1088",
+          "vertices": "6500"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "support",
+            "control": "fill",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "fill-support-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "13780160",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "12664832",
+            "3": "179104",
+            "4": "26208",
+            "5": "496128"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "fill",
+            "control_source": {
+              "cells": "13780160"
+            }
+          },
+          "cuboids": "208",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "13780160"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "10",
+            "2": "20"
+          },
+          "exposed_area_cell_faces": "1433068",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "97",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1092",
+          "vertices": "6500"
+        }
+      ]
+    }
+  },
+  {
+    "expected": {
+      "baseline": {
+        "attempt_id": "base",
+        "schedule_sha256": "base",
+        "validation_id": "base-validation"
+      },
+      "bounds": {
+        "baseline": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "variant": {
+          "hi": [
+            "320",
+            "97",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        }
+      },
+      "case": "history",
+      "control": "fill",
+      "delta": {
+        "cells": "3276800",
+        "cuboids": "4",
+        "exposed_area_cell_faces": "20480",
+        "protected_cells": "0",
+        "surface_rectangles": "4",
+        "vertices": "0"
+      },
+      "density": {
+        "baseline": {
+          "denominator": "52428800",
+          "numerator": "10503360"
+        },
+        "variant": {
+          "denominator": "52428800",
+          "numerator": "13780160"
+        }
+      },
+      "exposed_area_by_material_cell_faces": {
+        "baseline": {
+          "1": "10",
+          "2": "20"
+        },
+        "variant": {
+          "1": "10",
+          "2": "20"
+        }
+      },
+      "materials": {
+        "baseline": {
+          "1": "413888",
+          "2": "9388032",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        },
+        "variant": {
+          "1": "413888",
+          "2": "12664832",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        }
+      },
+      "owners": {
+        "baseline": {
+          "initial_owners": "21"
+        },
+        "variant": {
+          "initial_owners": "21"
+        }
+      },
+      "record_type": "terrain_control_comparison",
+      "schema": "megascene-evidence/1",
+      "scope": "validated achieved work comparison; unqualified development observations",
+      "source_effects": {
+        "baseline_source": {
+          "cells": "10503360"
+        },
+        "control": "fill",
+        "control_source": {
+          "cells": "13780160"
+        }
+      },
+      "status": "pass",
+      "variant": {
+        "attempt_id": "variant",
+        "schedule_sha256": "variant",
+        "validation_id": "variant-validation"
+      }
+    },
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032",
+            "3": "179104",
+            "4": "26208",
+            "5": "496128"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "10",
+            "2": "20"
+          },
+          "exposed_area_cell_faces": "1412588",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "89",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1088",
+          "vertices": "6500"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": "fill",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "fill-history-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "13780160",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "12664832",
+            "3": "179104",
+            "4": "26208",
+            "5": "496128"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "fill",
+            "control_source": {
+              "cells": "13780160"
+            }
+          },
+          "cuboids": "208",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "13780160"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "10",
+            "2": "20"
+          },
+          "exposed_area_cell_faces": "1433068",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "97",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1092",
+          "vertices": "6500"
+        }
+      ]
+    }
+  },
+  {
+    "expected": {
+      "baseline": {
+        "attempt_id": "base",
+        "schedule_sha256": "base",
+        "validation_id": "base-validation"
+      },
+      "bounds": {
+        "baseline": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "variant": {
+          "hi": [
+            "320",
+            "89",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        }
+      },
+      "case": "history",
+      "control": "body-rich",
+      "delta": {
+        "cells": "-76032",
+        "cuboids": "0",
+        "exposed_area_cell_faces": "-38400",
+        "protected_cells": "0",
+        "surface_rectangles": "-28",
+        "vertices": "0"
+      },
+      "density": {
+        "baseline": {
+          "denominator": "52428800",
+          "numerator": "10503360"
+        },
+        "variant": {
+          "denominator": "52428800",
+          "numerator": "10427328"
+        }
+      },
+      "exposed_area_by_material_cell_faces": {
+        "baseline": {
+          "1": "10",
+          "2": "20"
+        },
+        "variant": {
+          "1": "10",
+          "2": "20"
+        }
+      },
+      "materials": {
+        "baseline": {
+          "1": "413888",
+          "2": "9388032",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        },
+        "variant": {
+          "1": "413888",
+          "2": "9388032",
+          "3": "179104",
+          "4": "26208",
+          "5": "496128"
+        }
+      },
+      "owners": {
+        "baseline": {
+          "initial_owners": "21"
+        },
+        "variant": {
+          "initial_owners": "25"
+        }
+      },
+      "record_type": "terrain_control_comparison",
+      "schema": "megascene-evidence/1",
+      "scope": "validated achieved work comparison; unqualified development observations",
+      "source_effects": {
+        "baseline_source": {
+          "cells": "10503360"
+        },
+        "control": "body-rich",
+        "control_source": {
+          "cells": "10427328"
+        }
+      },
+      "status": "pass",
+      "variant": {
+        "attempt_id": "variant",
+        "schedule_sha256": "variant",
+        "validation_id": "variant-validation"
+      }
+    },
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032",
+            "3": "179104",
+            "4": "26208",
+            "5": "496128"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "10",
+            "2": "20"
+          },
+          "exposed_area_cell_faces": "1412588",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "89",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1088",
+          "vertices": "6500"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": "body-rich",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "body-rich-history-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "25"
+          },
+          "cells": "10427328",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032",
+            "3": "179104",
+            "4": "26208",
+            "5": "496128"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "body-rich",
+            "control_source": {
+              "cells": "10427328"
+            }
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10427328"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "10",
+            "2": "20"
+          },
+          "exposed_area_cell_faces": "1374188",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "89",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1060",
+          "vertices": "6500"
+        }
+      ]
+    }
+  },
+  {
+    "expected": {
+      "baseline": {
+        "attempt_id": "base",
+        "schedule_sha256": "base",
+        "validation_id": "base-validation"
+      },
+      "bounds": {
+        "baseline": {
+          "hi": [
+            "320",
+            "86",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "variant": {
+          "hi": [
+            "320",
+            "86",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        }
+      },
+      "case": "static",
+      "control": "material-detail",
+      "delta": {
+        "cells": "0",
+        "cuboids": "1",
+        "exposed_area_cell_faces": "0",
+        "protected_cells": "0",
+        "surface_rectangles": "1",
+        "vertices": "6"
+      },
+      "density": {
+        "baseline": {
+          "denominator": "52428800",
+          "numerator": "10503360"
+        },
+        "variant": {
+          "denominator": "52428800",
+          "numerator": "10503360"
+        }
+      },
+      "exposed_area_by_material_cell_faces": {
+        "baseline": {
+          "1": "100",
+          "2": "200"
+        },
+        "variant": {
+          "1": "100",
+          "2": "200",
+          "5": "1"
+        }
+      },
+      "materials": {
+        "baseline": {
+          "1": "413888",
+          "2": "9388032"
+        },
+        "variant": {
+          "1": "413888",
+          "2": "9388032",
+          "5": "1"
+        }
+      },
+      "owners": {
+        "baseline": {
+          "initial_owners": "21"
+        },
+        "variant": {
+          "initial_owners": "21"
+        }
+      },
+      "record_type": "terrain_control_comparison",
+      "schema": "megascene-evidence/1",
+      "scope": "validated achieved work comparison; unqualified development observations",
+      "source_effects": {
+        "baseline_source": {
+          "cells": "10503360"
+        },
+        "control": "material-detail",
+        "control_source": {
+          "cells": "10503360"
+        }
+      },
+      "status": "pass",
+      "variant": {
+        "attempt_id": "variant",
+        "schedule_sha256": "variant",
+        "validation_id": "variant-validation"
+      }
+    },
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "material-detail",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "material-detail-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032",
+            "5": "1"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "material-detail",
+            "control_source": {
+              "cells": "10503360"
+            }
+          },
+          "cuboids": "205",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200",
+            "5": "1"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1201",
+          "vertices": "7206"
+        }
+      ]
+    }
+  },
+  {
+    "error": "material control invariants mismatch",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "material-detail",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "material-detail-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032",
+            "5": "1"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "material-detail",
+            "control_source": {
+              "cells": "10503360"
+            }
+          },
+          "cuboids": "205",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200",
+            "5": "1"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7206"
+        }
+      ]
+    }
+  },
+  {
+    "expected": {
+      "baseline": {
+        "attempt_id": "base",
+        "schedule_sha256": "base",
+        "validation_id": "base-validation"
+      },
+      "bounds": {
+        "baseline": {
+          "hi": [
+            "320",
+            "86",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        },
+        "variant": {
+          "hi": [
+            "320",
+            "86",
+            "320"
+          ],
+          "lo": [
+            "-320",
+            "0",
+            "-320"
+          ]
+        }
+      },
+      "case": "static",
+      "control": "surface-detail",
+      "delta": {
+        "cells": "-2048",
+        "cuboids": "1",
+        "exposed_area_cell_faces": "1",
+        "protected_cells": "0",
+        "surface_rectangles": "1",
+        "vertices": "6"
+      },
+      "density": {
+        "baseline": {
+          "denominator": "52428800",
+          "numerator": "10503360"
+        },
+        "variant": {
+          "denominator": "52428800",
+          "numerator": "10503360"
+        }
+      },
+      "exposed_area_by_material_cell_faces": {
+        "baseline": {
+          "1": "100",
+          "2": "200"
+        },
+        "variant": {
+          "1": "100",
+          "2": "200"
+        }
+      },
+      "materials": {
+        "baseline": {
+          "1": "413888",
+          "2": "9388032"
+        },
+        "variant": {
+          "1": "413888",
+          "2": "9388032"
+        }
+      },
+      "owners": {
+        "baseline": {
+          "initial_owners": "21"
+        },
+        "variant": {
+          "initial_owners": "21"
+        }
+      },
+      "record_type": "terrain_control_comparison",
+      "schema": "megascene-evidence/1",
+      "scope": "validated achieved work comparison; unqualified development observations",
+      "source_effects": {
+        "baseline_source": {
+          "cells": "10503360"
+        },
+        "control": "surface-detail",
+        "control_source": {
+          "cells": "10501312"
+        }
+      },
+      "status": "pass",
+      "variant": {
+        "attempt_id": "variant",
+        "schedule_sha256": "variant",
+        "validation_id": "variant-validation"
+      }
+    },
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "surface-detail",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "surface-detail-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10501312",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "surface-detail",
+            "control_source": {
+              "cells": "10501312"
+            }
+          },
+          "cuboids": "205",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500001",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1201",
+          "vertices": "7206"
+        }
+      ]
+    }
+  },
+  {
+    "error": "surface control invariants mismatch",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "surface-detail",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "surface-detail-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10501312",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "surface-detail",
+            "control_source": {
+              "cells": "10501312"
+            }
+          },
+          "cuboids": "205",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500001",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7206"
+        }
+      ]
+    }
+  },
+  {
+    "expected": {
+      "baseline": {
+        "actions": "2",
+        "attempt_id": "base",
+        "final_bodies": "2",
+        "final_cells": "100",
+        "final_geometry_sha256": "24d5083fa5859eeaad7bc2805463416828c0ddaf36f59d5aec1847d288e8fac6",
+        "final_next_id": "4",
+        "removed_cell_set_sha256": "5ab7066154c9bc7ae3b8270c5c4ac34573078400ef3d10757c6599355389454b",
+        "schedule_id": "history-v1",
+        "validation_id": "base-validation"
+      },
+      "case": "history",
+      "identical_final_geometry_witness": true,
+      "record_type": "schedule_variant_comparison",
+      "retention_specific_attribution": "candidate witness only; attribution requires a separate controlled analysis",
+      "same_final_geometry": true,
+      "same_removed_cell_set": true,
+      "schema": "megascene-evidence/1",
+      "scope": "separately validated/timed action and camera comparison; no benchmark qualification",
+      "status": "pass",
+      "variant": {
+        "actions": "1",
+        "attempt_id": "variant",
+        "edit_population": {
+          "count": "1"
+        },
+        "edited_work_checkpoints": "1",
+        "final_bodies": "2",
+        "final_cells": "100",
+        "final_geometry_sha256": "24d5083fa5859eeaad7bc2805463416828c0ddaf36f59d5aec1847d288e8fac6",
+        "final_next_id": "4",
+        "frame_populations": {
+          "ordinary": {
+            "mean": 0.1
+          }
+        },
+        "history_populations": null,
+        "moving_window": [
+          {
+            "human": "input retained"
+          }
+        ],
+        "removed_cell_set_sha256": "5ab7066154c9bc7ae3b8270c5c4ac34573078400ef3d10757c6599355389454b",
+        "schedule_id": "history-12-v1",
+        "validation_id": "variant-validation"
+      }
+    },
+    "name": "True-None",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "variant actions or camera differ from frozen baseline prefix",
+    "name": "False-None",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "history_populations": {
+            "sample": {
+              "mean": 1.25
+            }
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-2",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x3f800000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "variant actions or camera differ from frozen baseline prefix",
+    "name": "True-camera",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x3f800000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "shortened schedule mislabeled as baseline completion",
+    "name": "True-label",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": true,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "reused attempt identity",
+    "name": "True-identity",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "'attempt_id'",
+    "exception": "KeyError",
+    "name": "missing validation identity",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {},
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10549440"
+            }
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232",
+          "vertices": "7392"
+        }
+      ]
+    }
+  },
+  {
+    "error": "'attempt_id'",
+    "exception": "KeyError",
+    "name": "missing variant validation identity",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {},
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10549440"
+            }
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232",
+          "vertices": "7392"
+        }
+      ]
+    }
+  },
+  {
+    "error": "'worker_environment'",
+    "exception": "KeyError",
+    "name": "missing baseline environment",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10549440"
+            }
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232",
+          "vertices": "7392"
+        }
+      ]
+    }
+  },
+  {
+    "error": "'MEGASCENE_SCHEDULE_SHA256'",
+    "exception": "KeyError",
+    "name": "missing variant schedule binding",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {}
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10549440"
+            }
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232",
+          "vertices": "7392"
+        }
+      ]
+    }
+  },
+  {
+    "error": "'seed'",
+    "exception": "KeyError",
+    "name": "missing matched seed",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10549440"
+            }
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232",
+          "vertices": "7392"
+        }
+      ]
+    }
+  },
+  {
+    "error": "'cells'",
+    "exception": "KeyError",
+    "name": "missing source cell",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {}
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232",
+          "vertices": "7392"
+        }
+      ]
+    }
+  },
+  {
+    "error": "'vertices'",
+    "exception": "KeyError",
+    "name": "missing canonical numeric vertex counter",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10549440"
+            }
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232"
+        }
+      ]
+    }
+  },
+  {
+    "error": "noncanonical integer",
+    "exception": "ValueError",
+    "name": "numeric vertex counter",
+    "operation": "controls",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "static",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "base"
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10503360",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "cuboids": "204",
+          "density": {
+            "denominator": "52428800",
+            "numerator": "10503360"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1500000",
+          "generation_envelope_cells": {
+            "hi": [
+              "320",
+              "128",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "413888",
+          "surface_rectangles": "1200",
+          "vertices": "7200"
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "static",
+            "control": "spread",
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "spread-static-v1",
+            "seed": "45",
+            "threads": "6",
+            "warmup": "120"
+          },
+          "worker_environment": {
+            "MEGASCENE_SCHEDULE_SHA256": "variant"
+          }
+        },
+        {
+          "attempt_id": "variant-validation"
+        },
+        {
+          "bodies": {
+            "initial_owners": "21"
+          },
+          "cells": "10549440",
+          "cells_by_material": {
+            "1": "413888",
+            "2": "9388032"
+          },
+          "control_comparison": {
+            "baseline_source": {
+              "cells": "10503360"
+            },
+            "control": "spread",
+            "control_source": {
+              "cells": "10549440"
+            }
+          },
+          "cuboids": "210",
+          "density": {
+            "denominator": "117964800",
+            "numerator": "10549440"
+          },
+          "exposed_area_by_material_cell_faces": {
+            "1": "100",
+            "2": "200"
+          },
+          "exposed_area_cell_faces": "1523660",
+          "generation_envelope_cells": {
+            "lo": [
+              "-480",
+              "0",
+              "-480"
+            ]
+          },
+          "occupied_bounds_cells": {
+            "hi": [
+              "320",
+              "86",
+              "320"
+            ],
+            "lo": [
+              "-320",
+              "0",
+              "-320"
+            ]
+          },
+          "protected_cells": "415808",
+          "surface_rectangles": "1232",
+          "vertices": 7392
+        }
+      ]
+    }
+  },
+  {
+    "error": "'actual_work'",
+    "exception": "KeyError",
+    "name": "missing both achieved work bindings",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "'camera'",
+    "exception": "KeyError",
+    "name": "missing both camera records",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {}
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {}
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "'cells'",
+    "exception": "KeyError",
+    "name": "missing final cell count",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "'next_id'",
+    "exception": "KeyError",
+    "name": "missing final body next id",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "'populations'",
+    "exception": "KeyError",
+    "name": "missing required frame population",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "'edited_work'",
+    "exception": "KeyError",
+    "name": "missing edited work collection",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": false,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "shortened schedule mislabeled as baseline completion",
+    "exception": "ValueError",
+    "name": "numeric false is not Boolean false",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": 0,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "error": "shortened schedule mislabeled as baseline completion",
+    "exception": "ValueError",
+    "name": "float false is not Boolean false",
+    "operation": "schedules",
+    "payload": {
+      "baseline": [
+        {
+          "attempt_id": "base",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "2"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "base-validation"
+        },
+        {
+          "cells": "100",
+          "requested_controls": []
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            },
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              },
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ],
+      "variant": [
+        {
+          "attempt_id": "variant",
+          "effective": {
+            "case": "history",
+            "control": null,
+            "fragment_budget": "2048",
+            "frames": "3600",
+            "preset": "small",
+            "profile": "full",
+            "resolution": "1920x1080",
+            "schedule": "history-12-v1",
+            "seed": "45",
+            "side_m": "64",
+            "threads": "6",
+            "warmup": "120"
+          }
+        },
+        {
+          "accepted_edits": {
+            "count": "1"
+          },
+          "baseline_schedule_completion": {
+            "status": "not_applicable"
+          },
+          "populations": {
+            "ordinary": {
+              "mean": 0.1
+            }
+          }
+        },
+        {
+          "actual_work": {
+            "cells": "100"
+          },
+          "attempt_id": "variant-validation",
+          "edited_work": [
+            {}
+          ],
+          "moving_window": [
+            {
+              "human": "input retained"
+            }
+          ]
+        },
+        {
+          "cells": "100",
+          "requested_controls": [
+            "history-12-v1"
+          ]
+        },
+        {
+          "actions": [
+            {
+              "pre_edit_hit": {
+                "owner": "2"
+              },
+              "reference_removed_cells": [
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ],
+                [
+                  "-1",
+                  "0",
+                  "2",
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "frames": {
+            "repeat": 3721,
+            "value": {
+              "camera": {
+                "eye_m": [
+                  "0x00000000",
+                  "0x00000000",
+                  "0x00000000"
+                ],
+                "pitch": "0x00000000",
+                "yaw": "0x00000000"
+              }
+            }
+          },
+          "variant": {
+            "baseline_completion_equivalence": 0.0,
+            "baseline_schedule_id": "history-v1",
+            "omitted_action_disposition": "not_required_for_variant",
+            "omitted_actions": {
+              "count": "1"
+            },
+            "required_actions": "1"
+          }
+        },
+        {
+          "payload": {
+            "bodies": [
+              {
+                "anchored": true,
+                "id": "1",
+                "occupancy": [
+                  [
+                    "4",
+                    "5",
+                    "6"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "1": [
+                    "two"
+                  ]
+                }
+              },
+              {
+                "anchored": false,
+                "id": "2",
+                "occupancy": [
+                  [
+                    "1",
+                    "2",
+                    "3"
+                  ]
+                ],
+                "offset_m": "0x00000000",
+                "surface": {
+                  "2": [
+                    "one"
+                  ]
+                }
+              }
+            ],
+            "cells": "100",
+            "next_id": "4"
+          }
+        }
+      ]
+    }
+  }
+]
