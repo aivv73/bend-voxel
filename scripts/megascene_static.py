@@ -6,14 +6,13 @@ from pathlib import Path
 import re
 import shutil
 import signal
-import struct
 import subprocess
 import time
 import uuid
 
 from megascene_inventory import SCHEMA, canonical, integer, inventory, measurement, outcome, read_json, require
-from megascene_recipe import admit_sources, bend_program, bits, checked, envelope_cells, generation_inputs, CONTROLS
-from megascene_scale import side_count, operational_bounds, admit_schedule, preflight
+from megascene_recipe import admit_sources, generation_inputs
+from megascene_scale import side_count, operational_bounds, native_geometry_bound, history_bounds, admit_schedule, preflight
 from megascene_gpu import u64
 
 AUDIT_STAGES = ("audit_mesh_validation", "audit_visibility", "audit_proxy", "audit_hashing", "audit_output")
@@ -21,92 +20,19 @@ GEOMETRY_STAGES = {"geometry_mesh_update", "geometry_audit", *AUDIT_STAGES}
 
 
 def settings(args, base):
-    from megascene_performance import SCHEDULES, admit as admit_performance
-    performance = args.schedule in SCHEDULES
-    for name in ("search",):
-        require(getattr(args, name) is None, f"--{name} is not implemented")
-    require(args.calibration in (None, "on", "off"), "--calibration must be on or off")
-    if args.calibration:
-        require(args.case in ("static", "history") and args.diagnostic is None and
-                args.profile in (None, "full") and args.resolution in (None, "1920x1080") and
-                not args.capture_opening, "calibration requires primary static/history full geometry at 1920x1080")
-    else:
-        require(args.calibration_peer_validation is None, "peer validation requires a calibration mode")
-    control = args.diagnostic if args.diagnostic in CONTROLS else None
-    diagnostic = None if control else args.diagnostic
-    if control:
-        require((args.case, control) in (("static", "spread"), ("static", "material-detail"),
-                ("localized", "material-detail"), ("static", "surface-detail"),
-                ("support", "fill"), ("history", "fill"), ("history", "body-rich")), "unsupported control/case combination")
-        require(base["preset"] == "small" and base["seed"] == "45" and base["threads"] == "6"
-                and args.resolution in (None, "1920x1080"), "terrain controls require small/seed-45/1080p/6 threads")
-    if diagnostic is not None:
-        from megascene_proxy import DIAGNOSTICS
-        require(diagnostic in DIAGNOSTICS and args.case in ("traversal", "picking"), "proxy diagnostics require traversal or picking")
-        require(args.profile in ("full", "proxy"), "proxy diagnostic requires explicit full or proxy profile")
-        require(base["preset"] == "small" and args.resolution in (None,"1920x1080"), "proxy diagnostic requires small/1080p")
-    else:
-        require(args.profile in (None, "full"), "primary replays require --profile full")
-    if performance:
-        schedule_id = args.schedule
-    elif args.case in ("traversal", "picking"):
-        if args.case == "picking":
-            from megascene_picking import ROUTES
-        else:
-            from megascene_traversal import ROUTES
-        schedule_id = f"proxy-{diagnostic}-{args.case}-v1" if diagnostic else args.schedule or args.case+"-v2"
-        require(args.schedule is None or args.schedule == schedule_id, "unsupported frozen schedule")
-    elif args.case in ("localized", "support", "history"):
-        variants = {"history-12-v1", "history-48-v1", "support-1-span-v1", "support-2-span-v1"}
-        schedule_id = (args.schedule if args.schedule in variants and not control else
-                       f"{control}-{args.case}-v1" if control else
-                       "history-v2" if args.case == "history" and base["preset"] not in ("small","large") else
-                       args.case+"-v1")
-        if schedule_id in variants:
-            require((args.case == "history" and schedule_id.startswith("history-")) or
-                    (args.case == "support" and schedule_id.startswith("support-")),
-                    "variant schedule/case mismatch")
-            require(base["preset"] == "small" and base["seed"] == "45" and base["threads"] == "6"
-                    and args.resolution in (None, "1920x1080"),
-                    "history/span controls require small/seed-45/1080p/6 threads")
-        require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
-    else:
-        schedule_id = f"{control}-static-v1" if control else "static-v1"
-        require(args.schedule in (None, schedule_id), "unsupported frozen schedule")
-    require(args.resolution in (None, "640x360", "1920x1080"), "supported replay resolutions are 640x360 and 1920x1080")
-    warmup = integer(args.warmup if args.warmup is not None else "120")
-    frames = integer(args.frames if args.frames is not None else "21600" if performance else "3600")
-    deadline = integer(args.deadline if args.deadline is not None else "300")
-    require(0 <= warmup <= 120 and 1 <= frames <= (21600 if performance else 3600), "unsupported replay frame count")
-    if args.case in ("traversal", "picking", "localized", "support", "history") and not performance:
-        require((warmup, frames) == (120, 3600), "primary replay requires the complete 120/3600 schedule")
-        require(not args.capture_opening, "replay captures come from the separate validation replay")
-    if control:
-        require((warmup, frames) == (120, 3600), "terrain controls require the complete 120/3600 schedule")
-    if args.calibration and (performance or (warmup, frames) == (120, 3600)) and not args.validation_only:
-        require(args.calibration_peer_validation is not None,
-                "complete calibration controls require prior opposite-mode validation")
-    require(1 <= deadline <= 300, "development deadline must be 1..300 seconds")
+    from megascene_configuration import policy
+    admitted = policy("replay", args)
     require(args.archive, "Vulkan replays require an explicit durable --archive destination")
     archive = Path(args.archive).expanduser().resolve()
     output = Path(args.output).expanduser().resolve()
     require(not any(p in ("build", "dist", "tmp") for p in archive.parts), "archive must be outside disposable build/dist/tmp directories")
     require(archive != output and output not in archive.parents and archive not in output.parents,
             "archive and output must be separate directory trees")
-    require(not (args.validated and args.runtime_from), "choose --validated or --runtime-from")
-    require(not (args.validation_only and (args.validated or args.capture_opening)), "validation-only cannot reuse validation or request capture")
-    config = {**base, "validation_only": args.validation_only, "validated": args.validated, "runtime_from": args.runtime_from, "case": args.case, "diagnostic": diagnostic, "control": control, "calibration_mode": args.calibration, "calibration_peer_validation": args.calibration_peer_validation, "envelope_side_m": str(envelope_cells(base["preset"], control)//10), "profile": args.profile or "full", "resolution": args.resolution or "1920x1080",
-            "warmup": str(warmup), "frames": str(frames), "schedule": schedule_id, "deadline_s": str(deadline),
-            "capture_opening": args.capture_opening, "archive": str(archive),
-            "schedule_kind": "performance_v2" if performance else "declared_control" if schedule_id in {"history-12-v1", "history-48-v1",
-                                                                    "support-1-span-v1", "support-2-span-v1"} else
-                             "accepted" if (warmup, frames) == (120, 3600) else "declared_development_prefix"}
-    if performance:
-        admit_performance(config)
-        require(not args.capture_opening, "performance captures use separate validation evidence")
-        if args.case == 'history':
-            config['validation_deadline_s'] = str(deadline if args.deadline is not None else 480)
-    return config
+    require(admitted["late_error"] is None, admitted["late_error"])
+    return {**base, **admitted["configuration"], "validation_only": args.validation_only,
+            "validated": args.validated, "runtime_from": args.runtime_from,
+            "calibration_peer_validation": args.calibration_peer_validation,
+            "capture_opening": args.capture_opening, "archive": str(archive)}
 
 
 def schedule(config, owners=None):
@@ -146,39 +72,19 @@ def schedule_document(config, owners=None):
 
 
 def worker_program(owners, config, frozen):
-    source = bend_program(owners, int(config["fragment_budget"])).split("def main()", 1)[0]
-    module = {"history":"megascene_history", "support":"megascene_support", "localized":"megascene_localized", "picking":"megascene_picking_replay", "traversal":"megascene_traversal", "static":"megascene_static"}[config["case"]]
-    source = source.replace("import Base", f"import Base\nimport ./src/{module}.bend as Static\nimport ./src/vulkan.bend as VK\nimport ./src/render.bend as V")
-    def real(value):
-        decoded = struct.unpack(">f", bytes.fromhex(value[2:]))[0]
-        return f"(0.0 - {abs(decoded)!r} : F32)" if decoded < 0 else repr(decoded)
-    camera = frozen["opening"]
+    from megascene_bend import run_input
+    from megascene_recipe import worker_owner_tokens
     width, height = config["resolution"].split("x")
-    cam = "V.Camera{R.Vec{"+",".join(map(real, camera["eye_m"]))+"},"+real(camera["yaw"])+","+real(camera["pitch"])+f",{width},{height}"+"}"
-    start_args = f"{width},{height}" if config['case'] in ('traversal','picking','localized','support','history') else f"{cam},{width},{height}"
-    if config['case'] == 'localized':
-        point = "R.Vec{"+",".join(map(real,frozen['actions'][0]['target_m']))+"}"
-        start_args = point+","+start_args
-    if config['case'] in ('support','history'):
-        cuts = ["Static.Cut{"+a['frame']+","+a['action']+",R.Vec{"+",".join(map(real,a['target_m']))+"}"+
-                (","+a['expected_removed_cells'] if config['case']=='history' else "")+"}" for a in frozen['actions']]
-        start_args = "["+",".join(cuts)+"],"+start_args
-    entry = "Static.start.proxy" if config["case"] == "picking" and config.get("diagnostic") else "Static.start"
-    source += f'''def main() -> IO(Unit):
-  do IO<Unit>:
-    VK.vulkan.mark(0)
-    VK.vulkan.mark(1)
-    sources : List<&2,Showcase.Assembly> <- IO.pure(List<&2,Showcase.Assembly>,[{','.join(f'owner{i}()' for i in range(len(owners)))}])
-    VK.vulkan.mark(2)
-    VK.vulkan.mark(3)
-    +world : W.World <- IO.pure(W.World,W.from.bodies(W.assemblies(sources,1),{config['fragment_budget']}))
-    VK.vulkan.mark(4)
-    VK.vulkan.mark(5)
-    M.emit(world)
-    VK.vulkan.mark(6)
-    {entry}(world,{start_args},{int(config['warmup'])+int(config['frames'])}n)
-'''
-    return source.replace("./src/", "./")
+    camera = frozen["opening"]
+    tokens = ["megascene-worker/1", "replay", config["case"],
+              "true" if config.get("diagnostic") else "false", config["fragment_budget"],
+              width, height, config["warmup"], config["frames"],
+              *camera["eye_m"], camera["yaw"], camera["pitch"], str(len(frozen["actions"]))]
+    for action in frozen["actions"]:
+        tokens.extend([action["frame"], action["action"], *action["target_m"],
+                       action.get("expected_removed_cells", "0")])
+    tokens.extend(worker_owner_tokens(owners))
+    return run_input("megascene_worker_source", " ".join(tokens))
 
 
 def read_stream(path, attempt_id):
@@ -495,27 +401,15 @@ def execute(config, output, manifest, campaign):
     if config.get("control"):
         from megascene_controls import source_effects
         bounds["control_effects"] = source_effects(config, owners)
-    # This initial-state bound covers full meshes, retained box proxies, ground
-    # and HUD. Edit cases additionally rely on evolving pre-edit native guards.
-    render_vertices = checked(int(bounds["vertex_bound"])+36*len(owners)+6+50000, "static render vertices")
-    bounds["static_native_byte_bound"] = str(checked(render_vertices*64*2, "static native arena capacity"))
+    bounds["static_native_byte_bound"] = native_geometry_bound(len(owners),int(bounds["vertex_bound"]))
     manifest["numeric_bounds"] = bounds
     manifest["numeric_admission"] = outcome("pass", "checked source and declared operational scale envelope",
                                              "candidate source, frame and native sizes", ["inputs.json"])
     frozen, schedule_data = preflight(schedule_document,config, owners)
     bounds["frozen_schedule"] = preflight(admit_schedule,config,frozen)
     if config["case"] == "history":
-        created=sum(int(a["reference_components"]) for a in frozen["actions"])
-        removed=sum(int(a["expected_removed_cells"]) for a in frozen["actions"])
-        next_id=checked(len(owners)+1+created,"history lifetime next ID")
-        live=checked(len(owners)+created-len(frozen["actions"]),"history live bodies")
-        require(live<=len(owners)+int(config["fragment_budget"]),"history fragment budget preflight")
-        bounds["history_evolving"]={"accepted_actions":str(len(frozen["actions"])),
-                                    "planned_removed_cells":str(removed),
-                                    "planned_final_cells":str(int(bounds["cells"])-removed),
-                                    "planned_lifetime_next_id":str(next_id),
-                                    "planned_final_live_bodies":str(live),
-                                    "scope":"independent sparse preflight; each actual edit is re-guarded before unsafe code"}
+        bounds["history_evolving"] = history_bounds(len(owners),int(bounds["cells"]),
+                                                    int(config["fragment_budget"]),frozen["actions"])
     if config["case"] == "picking":
         bounds["picking"] = frozen["picking_admission"]
         manifest["numeric_admission"] = outcome("pass", "frozen target/operation preflight plus actual runtime guards before picking",
@@ -572,7 +466,7 @@ def execute(config, output, manifest, campaign):
         if not config.get("validated") and not enabled(config):
             from megascene_bend import retain_sources
             retain_sources(runtime)
-            for name in ("megascene.py", "megascene_recipe.py", "megascene_bend.py", "megascene_schedule.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_calibration_series.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_supplementary.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_performance.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+            for name in ("megascene.py", "megascene_configuration.py", "megascene_recipe.py", "megascene_bend.py", "megascene_schedule.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_calibration_series.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_supplementary.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_performance.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
                 shutil.copy2(ROOT/"scripts"/name, runtime/name)
         manifest["artifacts"] = [artifact(p,output) for p in sorted(runtime.rglob("*")) if p.is_file()]
         manifest["artifacts"] += [artifact(output/name,output) for name in input_names]
@@ -580,7 +474,7 @@ def execute(config, output, manifest, campaign):
         runtime.mkdir()
         shutil.copytree(ROOT/"src", runtime/"src")
         (runtime/"build").mkdir()
-        for name in ("megascene.py", "megascene_recipe.py", "megascene_bend.py", "megascene_schedule.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_calibration_series.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_supplementary.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_performance.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
+        for name in ("megascene.py", "megascene_configuration.py", "megascene_recipe.py", "megascene_bend.py", "megascene_schedule.py", "megascene_scale.py", "megascene_controls.py", "megascene_inventory.py", "megascene_static.py", "megascene_report.py", "megascene_calibration.py", "megascene_calibration_series.py", "megascene_traversal.py", "megascene_picking.py", "megascene_proxy.py", "megascene_picking_references.py", "megascene_localized.py", "megascene_support.py", "megascene_history.py", "megascene_history_references.py", "megascene_support_references.py", "megascene_support_review.py", "megascene_supplementary.py", "megascene_edit_references.py", "megascene_gpu.py", "megascene_performance.py", "megascene_supervisor.py", "megascene_monitor.py", "megascene_checkpoints.py", "megascene_references.py", "megascene_validation.py"):
             shutil.copy2(ROOT/"scripts"/name, runtime/name)
         from megascene_references import program as reference_program
         (runtime/"src/megascene_reference_entry.bend").write_text(reference_program())

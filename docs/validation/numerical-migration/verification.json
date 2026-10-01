@@ -1,0 +1,182 @@
+{
+  "recorded_at_utc": "2026-10-01T05:11:05.485161+00:00",
+  "scope": "Megascene numerical admission, configuration, frozen validation and generated worker construction migration to Bend",
+  "source_sha256": {
+    "LAWS.bend": "b04d35a1cdbe931b81182e60f2757439535b523bfa84085a03d60baf75b84f85",
+    "PROOF.bend": "0322a2043adf7c36e68411fe3a068006271a7602667acb05a9aa9841f53c1c93",
+    "src/megascene_operational.bend": "0cf33570ef5663237f88c483170da4b14a28fcd52344f801ac7adf32f5ad831f",
+    "src/megascene_configuration.bend": "17b56455aee4d9907eb66f53179232a83f29fbed37107fa2190179968b24d04b",
+    "src/frozen_admission.bend": "6f7102e228aaef6f858202176daf380e7563f0c7e35a24374dfe4026afa5a2dd",
+    "src/megascene_frozen_admit.bend": "e86ec8187cb638063dfad6d6d3ebc5c2a461fbf9b4abf009d9058f2b6d20139c",
+    "src/megascene_worker_source.bend": "ed2897dd8869c5f9f0ab8721dd15c9c6b876f206df0c95f278144140ea131924",
+    "scripts/megascene_configuration.py": "d38248d7886ff0c84587f51e070921ea9f5b0a3e716f10a87553988bf11d4ed8",
+    "scripts/megascene_bend.py": "b4c3e74acae6abe3529e982d2d5a962fadbf184e99905f3684ad15b3f0ca0bb3",
+    "scripts/megascene.py": "a6a98e384e1243a8576d39c5762dd107e9a223d057d1be07e9f09d7b3ed8cc74",
+    "scripts/megascene_scale.py": "1f0707b7d990857442e5aaec34e5e80732c7218b6218efa44fc691be2ab41a76",
+    "scripts/megascene_recipe.py": "15ca4ca8647fe343d21c18eaf27c1adc0a89e028a16e18d3cbd1f9ded9c42dbc",
+    "scripts/megascene_static.py": "d9a8d82989be0893133858a91bfb0a4d5264bf31285770b333623b9f9ddb09fe"
+  },
+  "repository_tests": {
+    "command": "make test",
+    "status": "pass",
+    "exit_code": 0,
+    "log": "make-test-final.log",
+    "python_tests": 236,
+    "skipped_vulkan_tests": 4,
+    "python_elapsed_seconds": 930.562,
+    "schedule_artifact_parity_configurations": 84,
+    "bend_runtime_suites": "pass",
+    "native_geometry_cache_suite": "pass",
+    "schedule_contracts": "pass",
+    "benchmark_contracts": "pass"
+  },
+  "proof": {
+    "commands": [
+      "bend PROOF.bend",
+      "bend PROOF.bend --verdict"
+    ],
+    "status": "pass",
+    "logs": [
+      "proof-final.log",
+      "proof-verdict-final.log"
+    ],
+    "unsafe_or_foreign_properties_proven": false,
+    "safe_claims_added": 5
+  },
+  "bounds_reference": {
+    "cases": 280,
+    "status": "pass",
+    "log": "bounds-review.log"
+  },
+  "configuration_reference": {
+    "cases": 614,
+    "fixture": "tests/fixtures/megascene_configuration_baseline.json"
+  },
+  "frozen_reference": {
+    "generated_families": 23,
+    "unicode_decimal_digits": 760,
+    "unicode_float_whitespace": 19,
+    "additional_ascii_boundary_cases": 384,
+    "additional_lexical_and_numeric_forms": 23,
+    "foreign_float_evaluation": "runtime/reference evidence"
+  },
+  "source_reference": {
+    "admission_hashes": 48,
+    "replay_configurations": 84,
+    "replay_comparison": "source matches after replacing exact bit casts with the old decimal literals",
+    "compiled_replay_cases": [
+      "static",
+      "traversal",
+      "picking",
+      "localized",
+      "support",
+      "history"
+    ],
+    "world_geometry_threads": [
+      1,
+      6,
+      12
+    ],
+    "world_geometry_reference_sha256": "0d9fb50b9179b737a4dc01391f794fa5ab4f5e39fb287c829b55b7afce53ab82",
+    "compiled_replay_sha256": {
+      "static": "87af155481f5a44cee05feeb3d4bf0935b29339683b2a3e8b388ca8667a52294",
+      "traversal": "b4ab27fbb67034d3584455c6ac2e2e13664e629b3de4bae69de3f82f7bae2c09",
+      "picking": "41cde94fa0a6749cac4322dc8deb0617e9d6b8ea78b96802d21406230333d8ea",
+      "localized": "12c26592f71ebf97285e22801a01f34d94b63e9b0692565768c884fb751f902d",
+      "support": "45ae56cc941acf74140fa758273ce13366e40402909105c554b8c551df996052",
+      "history": "6ef1326fc936ec0ceb6a25d163ab4362554d8cd6c4fa607e50844263307b26dc"
+    }
+  },
+  "public_admission": {
+    "case": "admission",
+    "preset": "small",
+    "seed": "45",
+    "threads": "6",
+    "status": "pass",
+    "bundle": "admission-retention",
+    "retained_helpers": "pass outside checkout with fresh cache and unchanged archive hashes"
+  },
+  "review": {
+    "method": "independent reviews using the same model",
+    "blocking_findings_remaining": 0,
+    "resolved": [
+      "cold bounds compiler fallback duplication",
+      "archived helper dependency closure",
+      "compensated ray norm summation",
+      "Unicode decimal and underscore compatibility",
+      "early configuration infrastructure failure reporting",
+      "legacy boolean distances"
+    ]
+  },
+  "vulkan": {
+    "status": "inconclusive",
+    "executed": false,
+    "campaign": "/home/aivv/megascene-evidence/campaign.json",
+    "campaign_state": "interrupted",
+    "remaining_seconds": 0.0,
+    "doctor_log": "doctor.log",
+    "reason": "Existing campaign has no usable allowance. Additional allowance requires explicit authorization."
+  },
+  "limits": [
+    "No new production parallelism or performance claim.",
+    "Malformed non-three-component vectors now reject.",
+    "History preflight rejects removed cells beyond the source population.",
+    "Fresh Vulkan execution is not verified by compile or historical renderer evidence."
+  ],
+  "local_evidence_root": "build/verification/numerical-migration",
+  "log_sha256": {
+    "make-test-final.log": "ea297018b425c2ff91b0fe9eec14e68be8bf09ed26b76bb045f16494f377c0e4",
+    "proof-final.log": "931f1e664a679af1355a9ca547ac1daef9f7b14137bc7cc21b110b0cc504b5b1",
+    "proof-verdict-final.log": "61b73cda11b6b665b9f99f2defd3d3b57f985c865225e942a5bdaa594a503e47",
+    "bounds-review.log": "6a1f9b447501d5871db4de8168642b58d8da94136bb9d37946b7046d17e008bd",
+    "ascii-distance-parity.log": "df836297ec222f6d3e3f883c7c044f1b1abdd593f62476670dd69e12b752d09d",
+    "extra-distance-parity-final.log": "816814f7c8a523847dcf84035100e2ca2d2a416eb28601ca5102b69566d21036",
+    "doctor.log": "66a711de9a93eded95e2b9b664cb6fe457c8a5fc5cd5a48871daf52737620d2e",
+    "pr-docstring-review.log": "5112f08cca660c4d5b9093ac736a792b60b2812b924eaafd02a7d90b89eb001a",
+    "pr-proof.log": "931f1e664a679af1355a9ca547ac1daef9f7b14137bc7cc21b110b0cc504b5b1",
+    "pr-proof-verdict.log": "61b73cda11b6b665b9f99f2defd3d3b57f985c865225e942a5bdaa594a503e47"
+  },
+  "baseline_sha256": {
+    "tests/fixtures/megascene_configuration_baseline.json": "4d8c20d350683156f7029b3c7b27536d041eccbe184a94cfccdd061b57f644c5",
+    "tests/fixtures/megascene_frozen_admission_baseline.json": "65eeb30b644a79da9aea6a4f1a4b4ebb80424ce298606d73d709a72043ea6be4",
+    "tests/fixtures/megascene_frozen_schedule_baseline.json": "4cd88bfb7388d5a7b9fcf5881aacb847afbada3ae621dd701c736e7193d0e0cf",
+    "tests/fixtures/megascene_unicode_decimal_table.json": "325fb21169fcf22c2af71a7c96d0d1171aef277ce059ed5710cd11750848915a",
+    "tests/fixtures/megascene_worker_source_baseline.json": "970eadd13c5946ea405bf107b28674a6d0a6b267cb87e5eb885717819f1b9d5f"
+  },
+  "remaining_checks": [
+    "Fresh supervised Vulkan execution requires explicit additional campaign allowance."
+  ],
+  "tested_source_sha256": {
+    "LAWS.bend": "b04d35a1cdbe931b81182e60f2757439535b523bfa84085a03d60baf75b84f85",
+    "PROOF.bend": "0322a2043adf7c36e68411fe3a068006271a7602667acb05a9aa9841f53c1c93",
+    "src/megascene_operational.bend": "0cf33570ef5663237f88c483170da4b14a28fcd52344f801ac7adf32f5ad831f",
+    "src/megascene_configuration.bend": "17b56455aee4d9907eb66f53179232a83f29fbed37107fa2190179968b24d04b",
+    "src/frozen_admission.bend": "a4013b439ac966cf381ed0e768ed6378c172b312c5904c589fe982bd92778272",
+    "src/megascene_frozen_admit.bend": "e86ec8187cb638063dfad6d6d3ebc5c2a461fbf9b4abf009d9058f2b6d20139c",
+    "src/megascene_worker_source.bend": "ed2897dd8869c5f9f0ab8721dd15c9c6b876f206df0c95f278144140ea131924",
+    "scripts/megascene_configuration.py": "9abd616407589caf02e742899725c89a4a88692d2789d7ad63f4486c3e2588ea",
+    "scripts/megascene_bend.py": "b4c3e74acae6abe3529e982d2d5a962fadbf184e99905f3684ad15b3f0ca0bb3",
+    "scripts/megascene.py": "a6a98e384e1243a8576d39c5762dd107e9a223d057d1be07e9f09d7b3ed8cc74",
+    "scripts/megascene_scale.py": "3dcfda935163646fc7297e71de5a990c90e0fc78cc20ef11ac50110f5bdd8470",
+    "scripts/megascene_recipe.py": "e814c67a5cb19328186e72389be0bf7ee2b8802d8c890532214b2625936c381d",
+    "scripts/megascene_static.py": "d9a8d82989be0893133858a91bfb0a4d5264bf31285770b333623b9f9ddb09fe"
+  },
+  "post_test_changes": {
+    "change": "Delete six narration docstrings from five Python files and one trailing blank line from frozen_admission.bend before PR commit.",
+    "functional_change": false,
+    "validation": "Python AST statements are identical after excluding docstrings. Bend source is identical except for one trailing blank line.",
+    "log": "pr-docstring-review.log",
+    "full_test_source_hashes": "tested_source_sha256"
+  },
+  "precommit_proof": {
+    "commands": [
+      "bend PROOF.bend",
+      "bend PROOF.bend --verdict"
+    ],
+    "status": "pass",
+    "logs": [
+      "pr-proof.log",
+      "pr-proof-verdict.log"
+    ]
+  }
+}

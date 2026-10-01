@@ -5,7 +5,7 @@ mkdir -p build
 bash scripts/proof.sh
 rm -f build/megascene-admission-generator
 bend src/megascene_admit.bend -o build/megascene-admission-generator
-for suite in world input-aim probe resolution mesh face-audit color invariants megascene-admission; do
+for suite in world input-aim probe resolution mesh face-audit color invariants megascene-admission megascene-operational; do
   rm -f "build/$suite-tests"
   bend "tests/$suite.bend" -o "build/$suite-tests"
   "build/$suite-tests"

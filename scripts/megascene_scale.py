@@ -5,7 +5,6 @@ All search choices use integer squared area, avoiding floating-point ties.
 """
 
 import json
-import math
 import struct
 import time
 
@@ -100,117 +99,80 @@ def _integer(digits):
 
 def operational_bounds(q, owners, cells, surface_rectangles, vertices, frame_count, budget,
                        resolution=(1920, 1080)):
-    """Conservative before-unsafe bounds for the currently validated q range."""
-    preset_for(q)
     width, height = resolution
-    values = {"neighborhoods": q*q, "initial_owners": owners, "source_cells": cells,
-              "source_surface_bound": surface_rectangles, "source_vertices": vertices,
-              "frames_including_startup": frame_count, "fragment_budget": budget,
-              "initial_next_id": owners + 1,
-              "live_body_upper_bound": owners + budget,
-              "initial_native_geometry_bytes_bound": vertices*128 + owners*36*128 + 50000*128,
-              "maximum_edit_vertex_count": cells*36,
-              "framebuffer_byte_bound": width*height*16,
-              "shadow_byte_bound": 2048*2048*4,
-              "frame_counter_upper_bound": frame_count+1}
-    for name, value in values.items():
-        if type(value) is not int or value < 0 or value > U32_MAX:
-            raise ValueError(f"unsupported {name}: exceeds checked U32/native size envelope")
-    # Each side's endpoints and split sums, squared brush offsets and metres
-    # stay in the small, tested binary32 range. The source guard checks every
-    # actual coordinate, product, surface and native byte count separately.
-    extent = 160*q
-    if extent > 800 or 2*extent > 2**23:
-        raise ValueError("unsupported spatial split/coordinate envelope")
-    if (width,height) not in ((640,360),(1920,1080)):
-        raise ValueError("unsupported native framebuffer resolution")
-    now = time.monotonic_ns()
-    deadline = 300 * 1_000_000_000
-    if now < 0 or now + deadline + frame_count*1_000_000_000 > U64_MAX:
-        raise ValueError("unsupported monotonic clock arithmetic")
-    return {key: str(value) for key, value in values.items()} | {
-        "signed_cell_extent": str(extent), "maximum_split_sum": str(2*extent),
-        "monotonic_admission_ns": str(now), "monotonic_deadline_upper_ns": str(now+deadline),
-        "scope": "q=2..5 source/frame representation; actual edits and native allocation have evolving guards; not a physical capacity ceiling"}
+    arguments = (q, owners, cells, surface_rectangles, vertices, frame_count, budget,
+                 width, height, time.monotonic_ns())
+    return json.loads(run("megascene_operational", *map(_counter_word, arguments)))
+
+
+def _counter_word(value):
+    return _decimal(value) if type(value) is int and value >= 0 else "invalid"
+
+
+def native_geometry_bound(owners, vertices):
+    return run("megascene_operational", "native", _counter_word(owners),
+               _counter_word(vertices)).strip()
+
+
+def history_bounds(owners, cells, budget, actions):
+    arguments = [_counter_word(owners), _counter_word(cells), _counter_word(budget)]
+    for action in actions:
+        arguments.extend((action["reference_components"], action["expected_removed_cells"]))
+    return json.loads(run("megascene_operational", "history", *arguments))
 
 
 def admit_schedule(config, frozen):
-    """Check the complete frozen input stream before any unsafe replay."""
-    def binary32(word):
-        if not isinstance(word, str) or len(word) != 10 or not word.startswith("0x"):
-            raise ValueError("malformed frozen binary32")
-        try:
-            result = struct.unpack(">f", bytes.fromhex(word[2:]))[0]
-        except (ValueError, struct.error) as exc:
-            raise ValueError("malformed frozen binary32") from exc
-        if not math.isfinite(result):
-            raise ValueError("nonfinite frozen binary32")
-        return result
-
-    frames = frozen["frames"]
+    from megascene_bend import run_input
     from megascene_performance import enabled, admit, validate
     if enabled(config):
         admit(config)
         validate(frozen)
-    expected = 1+int(config["warmup"])+int(config["frames"])
-    if len(frames) != expected or expected > U32_MAX-1:
-        raise ValueError("unsupported frozen frame count")
-    max_eye = 0.
-    for index, frame in enumerate(frames):
-        if frame["frame"] != str(index):
-            raise ValueError("frozen frame order mismatch")
-        view = frame["camera"]
-        eye = [binary32(x) for x in view["eye_m"]]
-        yaw, pitch = binary32(view["yaw"]), binary32(view["pitch"])
-        if abs(yaw) > math.pi+1e-6 or abs(pitch) > math.pi/2+1e-6:
-            raise ValueError("frozen camera angle outside supported range")
-        max_eye = max(max_eye, *(abs(x) for x in eye))
-        if max_eye > 2048:
-            raise ValueError("frozen camera outside supported numeric envelope")
-        ray = frame.get("ray")
-        if ray is not None:
-            if any(abs(binary32(x)) > 2048 for x in ray["origin_m"]):
-                raise ValueError("frozen ray origin outside supported numeric envelope")
-            direction = [binary32(x) for x in ray["direction"]]
-            if abs(sum(x*x for x in direction)-1) > 2e-6:
-                raise ValueError("frozen ray direction invalid")
-        pick = frame.get("expected_pick")
-        if pick and pick["kind"] != "0" and not 0 <= binary32(pick["distance_m"]) < 256:
-            raise ValueError("required picking result outside strict reach")
-    seen_details = set()
-    for detail in frozen.get("supplementary_views", []):
-        frame = int(detail["frame"])
-        if not 0 <= frame < expected or frame in seen_details:
-            raise ValueError("invalid supplementary frame")
-        seen_details.add(frame)
-        view = detail["camera"]
-        eye = [binary32(x) for x in view["eye_m"]]
-        yaw, pitch = binary32(view["yaw"]), binary32(view["pitch"])
-        if max(map(abs, eye)) > 2048 or abs(yaw) > math.pi+1e-6 or abs(pitch) > math.pi/2+1e-6:
-            raise ValueError("supplementary camera outside supported envelope")
-        max_eye = max(max_eye, *map(abs, eye))
-        if detail.get("action") is not None and detail["action"] not in frames[frame]["actions"]:
-            raise ValueError("supplementary action missing from its frame")
-        original = next((v for v in frozen["review_views"] if v["name"] == detail["supplementary_to"]), None)
-        if original is None or original["frame"] != detail["frame"] or not set(detail["features"]) <= set(original["features"]):
-            raise ValueError("supplementary view does not bind an original feature")
-    required = set()
-    for action in frozen["actions"]:
-        if not action.get("required", False):
-            raise ValueError("frozen action silently optional")
-        frame = int(action["frame"])
-        if frame <= int(config["warmup"]) or frame >= expected or action["action"] not in frames[frame]["actions"]:
-            raise ValueError("frozen action missing from its frame")
-        if (frame, action["action"]) in required:
-            raise ValueError("duplicate frozen action")
-        required.add((frame, action["action"]))
-        if any(abs(binary32(x)) > 1024 for x in action["target_m"]):
-            raise ValueError("frozen edit target outside supported numeric envelope")
-        hit = action.get("pre_edit_hit")
-        if hit is not None:
-            distance = binary32(hit["distance_m"]) if "distance_m" in hit else float(hit["distance"])
-            if not math.isfinite(distance) or not 0 <= distance < 256:
-                raise ValueError("required edit target outside strict reach")
-    return {"frozen_frames":str(len(frames)), "frozen_actions":str(len(required)),
-            "maximum_camera_coordinate_m":repr(max_eye),
-            "scope":"all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"}
+
+    def field(value):
+        if value is None:
+            return "n"
+        if isinstance(value, str):
+            return "s" + value.encode("utf-8").hex()
+        if isinstance(value, bool):
+            return "b1" if value else "b0"
+        if type(value) is int:
+            return "i" + str(value)
+        if isinstance(value, float):
+            return "f" + repr(value).encode("ascii").hex()
+        if isinstance(value, (list, tuple)):
+            return "l" + ",".join(field(x) for x in value)
+        return "x"
+
+    def camera(view):
+        return [field(view["eye_m"]), field(view["yaw"]), field(view["pitch"])]
+
+    try:
+        frames = []
+        for frame in frozen["frames"]:
+            ray = frame.get("ray")
+            pick = frame.get("expected_pick")
+            kind = pick["kind"] if pick else None
+            distance = pick.get("distance_m") if pick else None
+            frames.append(" ".join(["F", field(frame["frame"]), *camera(frame["camera"]),
+                field(ray is not None), field(ray["origin_m"] if ray is not None else []),
+                field(ray["direction"] if ray is not None else []), field(kind), field(distance), field(frame["actions"])]))
+        reviews = [" ".join(["R", field(view["name"]), field(view["frame"]), field(view["features"])])
+                   for view in frozen.get("review_views", [])]
+        details = [" ".join(["S", field(view["frame"]), *camera(view["camera"]),
+                   field(view.get("action")), field(view["supplementary_to"]), field(view["features"])])
+                   for view in frozen.get("supplementary_views", [])]
+        actions = []
+        for action in frozen["actions"]:
+            hit = action.get("pre_edit_hit")
+            kind, distance = (("n", None) if hit is None else
+                              ("b", hit["distance_m"]) if "distance_m" in hit else ("d", hit["distance"]))
+            actions.append(" ".join(["A", field(action["frame"]), field(action["action"]),
+                field(action.get("required", False)), field(action["target_m"]), kind, field(distance)]))
+        request = "\n".join([" ".join(["v1", field(config["warmup"]), field(config["frames"])]),
+                              "|".join(frames), "|".join(reviews), "|".join(details), "|".join(actions)])
+    except (KeyError, TypeError, AttributeError) as exc:
+        raise ValueError("malformed frozen admission input") from exc
+    report = json.loads(run_input("megascene_frozen_admit", request))
+    maximum = struct.unpack(">f", int(report.pop("maximum_word")).to_bytes(4, "big"))[0]
+    return report | {"maximum_camera_coordinate_m": repr(maximum),
+        "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"}

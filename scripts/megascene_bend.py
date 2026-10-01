@@ -10,6 +10,10 @@ import tempfile
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR
 DEPENDENCIES = {
+    "megascene_operational": ("megascene_operational", "megascene_scale"),
+    "megascene_frozen_admit": ("megascene_frozen_admit", "frozen_admission", "schedule_float"),
+    "megascene_configuration": ("megascene_configuration", "schedule_json"),
+    "megascene_worker_source": ("megascene_worker_source", "megascene_admit", "megascene_admission", "megascene_scale", "megascene_recipe", "math", "schedule_binary", "schedule_points", "schedule_file"),
     "megascene_source": ("megascene_source", "megascene_recipe", "math"),
     "megascene_policy": ("megascene_policy", "megascene_scale"),
     "megascene_admit": ("megascene_admit", "megascene_admission", "megascene_scale", "megascene_recipe", "math"),

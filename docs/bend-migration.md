@@ -18,6 +18,33 @@ in bounded chunks without changing the interpreter's global conversion limit.
 Worker execution still has a 60-second timeout. The supported district envelope
 remains q=2..5.
 
+`src/megascene_configuration.bend` owns common and replay option policy, numeric
+limits, defaults and schedule selection. Its decimal parser records overflow
+before accepting a U32 value. Python resolves archive and output paths and
+checks directory relationships after the Bend policy accepts the request.
+
+`src/megascene_operational.bend` owns memory, vertex, body, ID, frame and clock
+bounds. Exact binary integers compute products and sums before narrowing to
+U32. Clock arithmetic retains the full U64 envelope. The same worker checks
+the native arena bound and planned history body and ID populations. History
+preflight also rejects a removed-cell total larger than its source population.
+
+`src/frozen_admission.bend` validates the frozen frame order, camera and ray
+envelopes, ray normalization, strict picking reach, required action bindings,
+duplicate actions and supplementary view bindings. The adapter transports
+tagged raw fields. Binary32 words remain exact. Ray arithmetic uses the existing
+binary64 expression effect and compensated sum to preserve the original
+comparison order and tolerance. Legacy decimal distances retain Python's
+underscore rules, Unicode 16.0.0 decimal digits and float whitespace through
+pure Bend normalization. Those foreign arithmetic results require
+runtime/reference tests.
+
+`src/megascene_worker_source.bend` constructs admission and replay source from
+the supplied owner records. It checks integers before emitting literals and
+builds typed camera and cut records. Admission source retains its exact bytes.
+Replay source uses binary32 bit casts for camera and target values, preserving
+signed zero and subnormal words without decimal conversion.
+
 `scripts/megascene_bend.py` builds native workers from frozen dependency bytes.
 The cache key includes their source bytes and the pinned Bend version. Result
 caching uses that key, so editing Bend dependencies invalidates previous results.
@@ -65,13 +92,33 @@ The aggregate invokes them through `test_schedule_contracts.sh`, using one owned
 temporary directory and bounded Base process effects. Python retains the archive
 identity and field-adapter checks until those callers migrate.
 
-Python continues to freeze camera, ray, and action schedules, manage processes and
-archives, and perform independent occupancy, surface, picking, edit, and motion
+Python transports frozen camera, ray, and action schedules, manages processes and
+archives, and performs independent occupancy, surface, picking, edit, and motion
 checks. Generated replay entries still contain the admitted frozen cuboids.
 Generation therefore stays outside measured startup and before unsafe construction.
 The migration adds no parallel calls or performance claims.
 
 ## Verification
+
+`tests/megascene-operational.bend` checks literal memory bounds, U32 overflow,
+U64 clock endpoints and evolving history counters. Configuration parity fixtures
+retain 614 requests and their original outcomes. Worker-source fixtures retain
+48 admission-source hashes and 84 replay configurations. The source tests
+compare replay construction after replacing bit casts with the original
+literals, compile representative generated workers and compare actual values.
+Frozen admission tests retain original accepted and rejected schedules and
+exercise numeric limits and malformed input through the native Bend worker.
+The numerical laws cover safe U32 limit, overflow and negative-input claims,
+the U64 clock limit and rejection of a wrapped configuration word.
+
+The [numerical verification record](validation/numerical-migration/verification.json)
+binds the passing repository checks to source and log hashes. Its
+[decision trail](validation/numerical-migration/decisions.tsv) records the
+migration choices and the remaining Vulkan verification gap.
+
+These numerical migration checks are separate from the historical Vulkan
+verification below. A fresh replay requires a usable allowance in the established
+campaign. Retained renderer evidence remains bound to its original bytes.
 
 `tests/fixtures/megascene_recipe_baseline.json` records exact ordered source hashes
 captured before the port. `tests/test_megascene_bend.py` checks all 48 combinations
