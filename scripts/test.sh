@@ -15,5 +15,7 @@ g++ -O2 -std=c++17 -Wall -Wextra -Wno-missing-field-initializers \
 build/native-geometry-tests
 bash scripts/test_schedule_contracts.sh
 bash scripts/test_benchmark_contracts.sh
+bash scripts/test_stress_parser.sh
+bash scripts/test_stress_runner.sh
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/megascene_schedule_parity.py

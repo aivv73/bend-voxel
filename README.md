@@ -35,7 +35,7 @@ make benchmark-stress
 make benchmark-faces
 ```
 
-The benchmarks need Python 3. See the [Light Atelier guide](docs/showcase.md) for Blender assets, the [benchmark guide](docs/stress-benchmark.md) for workloads and results, and the [renderer guide](docs/vulkan-renderer.md) for implementation details.
+The stress and face benchmarks run in Bend. The test suite also needs Python 3 and `jq`. See the [Light Atelier guide](docs/showcase.md) for Blender assets, the [benchmark guide](docs/stress-benchmark.md) for workloads and results, and the [renderer guide](docs/vulkan-renderer.md) for implementation details.
 
 The separate [Megascene admission command](docs/megascene-admission.md) constructs
 and inventories the fixed 64/128 m districts before rendering. Admission does

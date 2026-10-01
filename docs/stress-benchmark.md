@@ -8,10 +8,14 @@ The default suite runs **five Light Atelier workloads**, with 30 warm-up frames 
 
 ```sh
 make build
-python3 scripts/benchmark_stress.py --cases atelier-camera atelier-aim atelier-carve --warmup 10 --frames 60 --output build/stress-pilot
+scripts/benchmark_stress.sh --cases atelier-camera atelier-aim atelier-carve --warmup 10 --frames 60 --output build/stress-pilot
 ```
 
-To measure at 1920 × 1080, run `make build` and then `python3 scripts/benchmark_stress.py --resolution 1920x1080 --output build/stress-1920x1080`. The default is 640 × 360. Camera paths and aim pointer coordinates scale with the selected resolution. Compare throughput between resolutions as separate workloads.
+To measure at 1920 × 1080, run `make build` and then `scripts/benchmark_stress.sh --resolution 1920x1080 --output build/stress-1920x1080`. The default is 640 × 360. Camera paths and aim pointer coordinates scale with the selected resolution. Compare throughput between resolutions as separate workloads.
+
+The launcher compiles `src/stress_tool.bend` into a temporary executable. Bend owns argument validation, case scheduling, CSV parsing, statistics, world and cache checks, and report generation. It uses the existing file, process, hashing, and binary64 numeric boundaries. The shell launcher only compiles and invokes the runner. GNU `timeout` enforces each case deadline, and the runner retains partial CSV and stderr after a failed or interrupted process. Later selected cases still run, and any failed case makes the command exit with code 1.
+
+Deadlines report process status 124, including forced termination after the grace period. Other signal failures use the process bridge's conventional `128 + signal` status. The bridge cannot distinguish self-SIGTERM from an explicit exit 143. Both fail validation. Malformed logs can return fewer diagnostics than the former Python parser; semantic world and lighting failures retain their summaries. A zero measured duration returns a failed report with null throughput.
 
 ## Light Atelier workloads
 
@@ -44,7 +48,7 @@ Physics advances by exactly 1/60 second per benchmark frame. Camera paths, point
 - **Atelier camera:** 0.5° per frame around the sculptures. The day, night, and carve views keep the opening camera fixed.
 - **Atelier aim:** five logical pixels per frame across a 480-pixel span. The fixed opening camera previews removable geometry on the exhibits.
 - **Atelier carve:** one cut at each requested interval, beginning at the first measured frame, for up to six cuts distributed across the three sculptures.
-`--edit-every` controls the carve case; zero disables edits. Use `--cases`, `--warmup`, `--frames`, `--body-budget`, `--timeout`, `--resolution`, and `--output` to select a run. The default body budget is 2,048. Camera and aim cases require at least four measured frames.
+`--edit-every` controls the carve case; zero disables edits. Use `--cases`, `--warmup`, `--frames`, `--body-budget`, `--timeout`, `--resolution`, and `--output` to select a run. The default body budget is 2,048. Camera and aim cases require at least four measured frames. Each case permits at most 5,000 total frames. The timeout is 1 through 4,294,964 seconds, and each retained input file is limited to 16 MiB during analysis. The raw files remain available if their size exceeds that analysis limit.
 
 ## Measurements and validation
 

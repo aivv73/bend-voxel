@@ -2,6 +2,12 @@ import Base
 import ./LAWS.bend as Laws
 import ./src/megascene_scale.bend as Scale
 
+def Laws.stress_first_measured_edit(): {==}
+def Laws.stress_warmup_has_no_edit(): {==}
+def Laws.stress_six_edit_limit(): {==}
+def Laws.stress_disabled_edits(frame,warmup): {==}
+def Laws.stress_nearest_rank_p95(): {==}
+
 def Laws.operational_u32_limit(): {==}
 def Laws.operational_u32_overflow(): {==}
 def Laws.operational_negative_rejected(): {==}

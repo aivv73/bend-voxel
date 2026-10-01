@@ -42,6 +42,11 @@ def host(code: String, format: U32) -> IO(String):
   import "./schedule_float.c"
   import "./schedule_float.js"
 
+def literal.finite(s: String) -> IO(Maybe<&2,String>):
+  do IO<Maybe<&2,String>>:
+    +value : String <- host(s,3)
+    return Bool.pick(Maybe<&2,String>,String.eq(value,"invalid"),None{},Some{value})
+
 def evaluate(expr: Expr) -> IO(String):
   host(encode(expr),0)
 

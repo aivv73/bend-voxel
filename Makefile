@@ -12,7 +12,7 @@ proof-verdict:
 test-blender:
 	blender -b --factory-startup --python-exit-code 1 --python tests/blender_voxelize.py
 benchmark-stress: build
-	python3 scripts/benchmark_stress.py
+	./scripts/benchmark_stress.sh
 benchmark-faces:
 	./scripts/benchmark_faces.sh
 export-atelier-assets:
