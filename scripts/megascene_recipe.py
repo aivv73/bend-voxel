@@ -200,21 +200,19 @@ def admit_sources(owners, half_extent, budget):
     return result
 
 
+def worker_owner_tokens(owners):
+    tokens = [str(len(owners))]
+    for owner in owners:
+        tokens.append(str(len(owner.boxes)))
+        for box in owner.boxes:
+            tokens.append(signed_decimal(box.material) if type(box.material) is int else "invalid")
+            coordinates = (*box.lo, *box.hi) if len(box.lo) == len(box.hi) == 3 else (None,) * 6
+            tokens.extend(signed_decimal(value) if type(value) is int else "invalid" for value in coordinates)
+    tokens.append("complete")
+    return tokens
+
+
 def bend_program(owners, budget):
-    """Only call after admission; serialize integer literals, never user code."""
-    def number(n):
-        return f"(0.0 - {-n}.0 : F32)" if n < 0 else f"{n}.0"
-
-    def vec(v):
-        return "R.Vec{" + ",".join(map(number, v)) + "}"
-
-    lines = ["import Base", "import ./src/math.bend as R",
-             "import ./src/spatial.bend as S", "import ./src/showcase.bend as Showcase",
-             "import ./src/world.bend as W", "import ./src/megascene.bend as M"]
-    for i, owner in enumerate(owners):
-        boxes = [f"S.Box{{{vec(b.lo)},{vec(b.hi)},{b.material}}}" for b in owner.boxes]
-        lines += [f"def owner{i}() -> Showcase.Assembly:",
-                  "  Showcase.Assembly{S.build([" + ",\n    ".join(boxes) + "])}"]
-    lines += ["def main() -> IO(Unit):", "  M.emit(W.from.bodies(W.assemblies([" +
-              ",".join(f"owner{i}()" for i in range(len(owners))) + f"],1),{budget}))"]
-    return "\n".join(lines) + "\n"
+    tokens = ["megascene-worker/1", "admission",
+              signed_decimal(budget) if type(budget) is int else "invalid", *worker_owner_tokens(owners)]
+    return run_input("megascene_worker_source", " ".join(tokens))

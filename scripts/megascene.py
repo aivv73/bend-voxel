@@ -16,7 +16,7 @@ import time
 import uuid
 
 from megascene_recipe import admit_sources, bend_program, generation_inputs
-from megascene_scale import side_count, preset_for, operational_bounds, NumericRejection, preflight
+from megascene_scale import side_count, operational_bounds, NumericRejection, preflight
 from megascene_inventory import (SCHEMA, canonical, integer, inventory, measurement,
                                  outcome, require)
 
@@ -53,34 +53,12 @@ def parser():
 
 
 def configuration(args):
-    require(args.case in ("admission", "static", "traversal", "picking", "localized", "support", "history"), "unsupported Megascene case")
-    require(args.additional_allowance is None or args.campaign or args.archive, "additional allowance requires a campaign archive")
-    if args.additional_allowance is not None:
-        require(1 <= integer(args.additional_allowance) <= 86400, "additional allowance must be 1..86400 seconds")
-    if args.case in ("static", "traversal", "picking", "localized", "support", "history") and args.campaign:
+    from megascene_configuration import policy
+    if args.case != "admission" and args.campaign:
+        policy("request", args)
         require(Path(args.campaign).expanduser().resolve() == Path(args.archive or "").expanduser().resolve(), "static campaign must use its archive root")
-    if args.case == "admission":
-        require(not args.validation_only and args.validated is None and args.runtime_from is None and
-                args.calibration_peer_validation is None, "validation options require --case static")
-        require(not args.capture_opening and args.deadline is None, "capture/deadline require --case static")
-        for name in ("diagnostic", "resolution", "profile", "schedule", "frames", "warmup", "archive", "calibration", "search"):
-            require(getattr(args, name) is None, f"--{name} requires --case static or a later capability; request rejected")
-    seed, threads, budget = map(integer, (args.seed, args.threads, args.fragment_budget))
-    require(seed in (45, 46), "supported seeds are 45 and 46")
-    require(threads in (1, 6, 12), "supported thread counts are 1, 6 and 12")
-    require(budget <= 2**32-1, "fragment budget exceeds U32")
-    side = integer(args.side_m) if args.side_m is not None else None
-    if side is not None:
-        require(side % 32 == 0, "district side must be 32*q metres")
-        q = side // 32
-        preset_for(q)
-    else:
-        q = side_count(args.preset or "small")
-    preset = preset_for(q)
-    require(args.preset is None or args.preset == preset, "contradictory preset and side")
-    config = {"case": args.case, "preset": preset, "side_m": str(32*q),
-            "neighborhoods_per_side": str(q), "seed": str(seed), "threads": str(threads), "fragment_budget": str(budget)}
-    if args.case in ("static", "traversal", "picking", "localized", "support", "history"):
+    config = policy("common", args)
+    if args.case != "admission":
         from megascene_static import settings
         return settings(args, config)
     return config
@@ -193,7 +171,9 @@ def execute(config, output, manifest):
     # loaded by this worker. The generated C includes Bend's runtime and effects.
     for name in ("math", "spatial", "mesh", "world", "showcase", "atelier_assets", "material", "megascene", "megascene_recipe", "megascene_source", "megascene_scale", "megascene_policy", "megascene_admission", "megascene_admit", "megascene_inputs", "megascene_admission_inputs", "schedule_points", "schedule_json"):
         shutil.copyfile(ROOT / f"src/{name}.bend", runtime / f"src/{name}.bend")
-    for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_bend.py", "megascene_inventory.py"):
+    from megascene_bend import retain_sources
+    retain_sources(runtime)
+    for name in ("megascene.py", "megascene_configuration.py", "megascene_recipe.py", "megascene_scale.py", "megascene_bend.py", "megascene_inventory.py"):
         shutil.copyfile(ROOT / "scripts" / name, runtime / name)
     (runtime / "input.bend").write_text(bend_program(owners, int(config["fragment_budget"])))
     version = subprocess.run(["bend", "version"], capture_output=True, text=True, check=True).stdout.strip()
@@ -317,7 +297,7 @@ def main(argv=None):
             print(f"Admitted {config['preset']} seed {config['seed']}: {output / 'inventory.json'}")
         completed = True
         return 0
-    except (ValueError, OSError, subprocess.SubprocessError, KeyError, TypeError, ImportError) as error:
+    except (ValueError, OSError, subprocess.SubprocessError, KeyError, TypeError, ImportError, RuntimeError) as error:
         reason = str(error)
         if isinstance(manifest.get("effective"), dict) and manifest["effective"]["case"] in ("static", "traversal", "picking", "localized", "support", "history"):
             from megascene_static import report as static_report
@@ -344,6 +324,14 @@ def main(argv=None):
             print(reason, file=sys.stderr)
             return 2
         report = summary("fail", reason)
+        configuration_unavailable = manifest["effective"] is None and isinstance(
+            error, (OSError, subprocess.SubprocessError, ImportError, RuntimeError))
+        if configuration_unavailable:
+            report["termination"] = {"cause": "prelaunch_failure", "exit_code": None, "signal": None, "reason": reason}
+            report["admission"] = outcome("inconclusive", reason, "configuration admission unavailable")
+            if manifest["requested"].get("options", {}).get("case") in ("static", "traversal", "picking", "localized", "support", "history"):
+                manifest["attempt_kind"] = report["attempt_kind"] = "development_observation"
+                report["completed_prefix"] = {"startup": False, "warmup": "0", "measured": "0"}
         # A build, process, or validation failure is not a rejected setting and
         # must not masquerade as an observed capacity limit.
         if manifest["effective"] is not None and not isinstance(error,NumericRejection):
@@ -355,7 +343,7 @@ def main(argv=None):
         report["numeric_validity"] = outcome("fail",reason,"requested operational representation") if isinstance(error,NumericRejection) else manifest["numeric_admission"]
         if isinstance(error,NumericRejection):
             manifest["numeric_admission"] = report["numeric_validity"]
-        manifest["admission"] = outcome("fail", reason, "initialization only")
+        manifest["admission"] = report["admission"] if configuration_unavailable else outcome("fail", reason, "initialization only")
         if created_output:
             snapshot(output / "manifest.json", manifest)
             snapshot(output / "summary.json", report)

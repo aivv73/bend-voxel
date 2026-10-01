@@ -9,6 +9,25 @@ import ./src/megascene_scale.bend as Scale
 import ./src/schedule_points.bend as Points
 import ./src/schedule_binary.bend as Binary
 import ./src/schedule_json.bend as Json
+import ./src/megascene_operational.bend as Operational
+import ./src/megascene_configuration.bend as Configuration
+
+law operational_u32_limit:
+  {Operational.counter("4294967295","count") == Done{4294967295} : Result<&2,&2,String,U32>}
+
+law operational_u32_overflow:
+  {Operational.counter("4294967296","count") ==
+    Fail{"unsupported count: exceeds checked U32/native size envelope"} : Result<&2,&2,String,U32>}
+
+law operational_negative_rejected:
+  {Operational.counter("-1","count") ==
+    Fail{"unsupported count: exceeds checked U32/native size envelope"} : Result<&2,&2,String,U32>}
+
+law configuration_wrapped_seed_rejected:
+  {Configuration.exact(Configuration.Decimal{45,True{}},45) == False{} : Bool}
+
+law operational_u64_limit:
+  {Scale.Integer.show(Operational.clock.limit()) == "18446744073709551615" : String}
 
 law canonical_json_newline:
   {Json.quote("\n") == "\"\\n\"" : String}

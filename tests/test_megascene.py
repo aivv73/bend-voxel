@@ -92,6 +92,8 @@ class Admission(unittest.TestCase):
 
     def test_recoverable_artifacts_and_thread_determinism(self):
         path = self.bundles["small", 45]
+        from test_megascene_configuration import assert_retained_numeric_workers
+        assert_retained_numeric_workers(self, path)
         manifest = read_evidence(path / "manifest.json")
         for entry in manifest["artifacts"] + manifest["evidence"]:
             content = (path / entry["path"]).read_bytes()

@@ -2,6 +2,12 @@ import Base
 import ./LAWS.bend as Laws
 import ./src/megascene_scale.bend as Scale
 
+def Laws.operational_u32_limit(): {==}
+def Laws.operational_u32_overflow(): {==}
+def Laws.operational_negative_rejected(): {==}
+def Laws.configuration_wrapped_seed_rejected(): {==}
+def Laws.operational_u64_limit(): {==}
+
 def Laws.canonical_json_newline(): {==}
 def Laws.canonical_json_non_bmp(): {==}
 def Laws.canonical_schedule_field_order(): {==}

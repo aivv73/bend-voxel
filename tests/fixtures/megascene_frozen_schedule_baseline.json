@@ -1,0 +1,527 @@
+[
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "static",
+      "schedule": "static-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "17.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "traversal",
+      "schedule": "traversal-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "traversal",
+      "schedule": "traversal-v2"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "picking",
+      "schedule": "picking-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "picking",
+      "schedule": "picking-v2"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "localized",
+      "schedule": "localized-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "1",
+      "maximum_camera_coordinate_m": "17.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "history",
+      "schedule": "history-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "120",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "history",
+      "schedule": "history-12-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "12",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "history",
+      "schedule": "history-48-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "48",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "support",
+      "schedule": "support-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "6",
+      "maximum_camera_coordinate_m": "29.5",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "support",
+      "schedule": "support-1-span-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "2",
+      "maximum_camera_coordinate_m": "29.5",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "support",
+      "schedule": "support-2-span-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "4",
+      "maximum_camera_coordinate_m": "29.5",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "scale-3",
+      "side_m": "96",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": null,
+      "case": "history",
+      "schedule": "history-v2"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "120",
+      "maximum_camera_coordinate_m": "120.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "21600",
+      "diagnostic": null,
+      "control": null,
+      "case": "static",
+      "schedule": "static-perf-v2"
+    },
+    "result": {
+      "frozen_frames": "21721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "17.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "21600",
+      "diagnostic": null,
+      "control": null,
+      "case": "history",
+      "schedule": "history-perf-v2"
+    },
+    "result": {
+      "frozen_frames": "21721",
+      "frozen_actions": "120",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "proxy",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": "mixed-world",
+      "control": null,
+      "case": "traversal"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "1002.3499755859375",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "proxy",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": "compact-reference",
+      "control": null,
+      "case": "traversal"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "179.00172424316406",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "proxy",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": "mixed-world",
+      "control": null,
+      "case": "picking"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "1002.3499755859375",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "proxy",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": "compact-reference",
+      "control": null,
+      "case": "picking"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "0",
+      "maximum_camera_coordinate_m": "179.00172424316406",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": "fill",
+      "case": "support",
+      "schedule": "fill-support-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "6",
+      "maximum_camera_coordinate_m": "29.5",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": "fill",
+      "case": "history",
+      "schedule": "fill-history-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "120",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": "body-rich",
+      "case": "history",
+      "schedule": "body-rich-history-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "120",
+      "maximum_camera_coordinate_m": "80.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  },
+  {
+    "config": {
+      "preset": "small",
+      "side_m": "64",
+      "seed": "45",
+      "threads": "6",
+      "fragment_budget": "2048",
+      "resolution": "1920x1080",
+      "profile": "full",
+      "warmup": "120",
+      "frames": "3600",
+      "diagnostic": null,
+      "control": "material-detail",
+      "case": "localized",
+      "schedule": "material-detail-localized-v1"
+    },
+    "result": {
+      "frozen_frames": "3721",
+      "frozen_actions": "1",
+      "maximum_camera_coordinate_m": "17.0",
+      "scope": "all camera/ray/action values frozen before unsafe replay; actual evolving edit/pick guards remain required"
+    }
+  }
+]
