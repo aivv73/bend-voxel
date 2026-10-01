@@ -1,0 +1,7 @@
+Suzanne cut 1: surface 0.300 ms, 2 cuboids, 4 face checks, 2 clips, 9 local faces (8 full rebuild)
+Oculus cut 1: surface 0.300 ms, 2 cuboids, 4 face checks, 2 clips, 9 local faces (8 full rebuild)
+Twist cut 1: surface 0.300 ms, 2 cuboids, 4 face checks, 2 clips, 9 local faces (8 full rebuild)
+Suzanne cut 2: surface 0.300 ms, 2 cuboids, 4 face checks, 2 clips, 9 local faces (8 full rebuild)
+Oculus cut 2: surface 0.300 ms, 2 cuboids, 4 face checks, 2 clips, 9 local faces (8 full rebuild)
+Twist cut 2: surface 0.300 ms, 2 cuboids, 4 face checks, 2 clips, 9 local faces (8 full rebuild)
+Report: @ROOT@/face-out/report.json

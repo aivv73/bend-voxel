@@ -2,6 +2,14 @@ import Base
 import ./LAWS.bend as Laws
 import ./src/megascene_scale.bend as Scale
 
+def Laws.canonical_json_newline(): {==}
+def Laws.canonical_json_non_bmp(): {==}
+def Laws.canonical_schedule_field_order(): {==}
+
+def Laws.checkpoint_coincident_order(a,b): {==}
+def Laws.runtime_signed_zero_word(): {==}
+def Laws.runtime_null_action_word(): {==}
+
 def Laws.palette_length():
   {==}
 

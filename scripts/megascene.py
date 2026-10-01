@@ -15,7 +15,7 @@ import tempfile
 import time
 import uuid
 
-from megascene_recipe import admit_sources, bend_program, generate
+from megascene_recipe import admit_sources, bend_program, generation_inputs
 from megascene_scale import side_count, preset_for, operational_bounds, NumericRejection, preflight
 from megascene_inventory import (SCHEMA, canonical, integer, inventory, measurement,
                                  outcome, require)
@@ -87,8 +87,11 @@ def configuration(args):
 
 
 def snapshot(path, value):
+    snapshot_bytes(path, canonical(value) + b"\n")
+
+
+def snapshot_bytes(path, data):
     # Snapshots are atomic; a failed worker cannot leave a success-shaped prefix.
-    data = canonical(value) + b"\n"
     with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as f:
         temporary = Path(f.name)
         f.write(data)
@@ -168,7 +171,7 @@ def summary(status, reason):
 
 def execute(config, output, manifest):
     manifest["extensions"]["phase"] = "source_admission"
-    owners = preflight(generate,config["preset"], int(config["seed"]))
+    inputs, owners = preflight(generation_inputs,config)
     numeric = preflight(admit_sources,owners, int(config["side_m"])*5, int(config["fragment_budget"]))
     q = side_count(config["preset"])
     if config["preset"] in ("small", "large"):
@@ -182,17 +185,13 @@ def execute(config, output, manifest):
     manifest["numeric_bounds"] = numeric
     manifest["extensions"]["phase"] = "build"
     snapshot(output / "manifest.json", manifest)
-    source = {"schema": SCHEMA, "record_type": "generation_inputs", "configuration": config,
-              "owners": [{"id": str(i), "role": owner.role,
-                          "neighborhood": None if owner.neighborhood is None else str(owner.neighborhood),
-                          "boxes": [b.record() for b in owner.boxes]} for i, owner in enumerate(owners, 1)]}
-    snapshot(output / "inputs.json", source)
+    snapshot_bytes(output / "inputs.json", inputs)
     runtime = output / "runtime"
     runtime.mkdir()
     (runtime / "src").mkdir()
     # Preserve the actual dependency closure. No native renderer is linked or
     # loaded by this worker. The generated C includes Bend's runtime and effects.
-    for name in ("math", "spatial", "mesh", "world", "showcase", "atelier_assets", "material", "megascene", "megascene_recipe", "megascene_source", "megascene_scale", "megascene_policy", "megascene_admission", "megascene_admit"):
+    for name in ("math", "spatial", "mesh", "world", "showcase", "atelier_assets", "material", "megascene", "megascene_recipe", "megascene_source", "megascene_scale", "megascene_policy", "megascene_admission", "megascene_admit", "megascene_inputs", "megascene_admission_inputs", "schedule_points", "schedule_json"):
         shutil.copyfile(ROOT / f"src/{name}.bend", runtime / f"src/{name}.bend")
     for name in ("megascene.py", "megascene_recipe.py", "megascene_scale.py", "megascene_bend.py", "megascene_inventory.py"):
         shutil.copyfile(ROOT / "scripts" / name, runtime / name)

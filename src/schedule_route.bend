@@ -2,6 +2,8 @@ import Base
 import ./schedule_float.bend as F
 import ./schedule_json.bend as J
 import ./megascene_scale.bend as Scale
+import ./schedule_policy.bend as Policy
+import ./schedule_points.bend as Points
 
 type Pose is Data:
   Pose{eye: F.Vec, look: F.Vec}
@@ -49,13 +51,6 @@ def initial.points(warmup: U32) -> List<&2,String>:
   [J.point("initialization",0),J.point("review_opening",0),J.point("warmup_end",warmup)]
 def interpolate(+a: F.Expr,+b: F.Expr,+t: F.Expr) -> F.Expr:
   F.Round32{F.Add{a,F.Mul{F.Sub{b,a},t}}}
-def frame.phase.flags(start: Bool,warm: Bool,edit: Bool,moving: Bool) -> String:
-  match start warm edit moving:
-    case True{} _ _ _: "startup"
-    case _ True{} _ _: "warmup"
-    case _ _ True{} _: "edit"
-    case _ _ _ True{}: "motion"
-    case _ _ _ _: "ordinary"
 def pose.emit(p: Pose) -> IO(Unit):
   Pose{+eye,+look} = p
   do IO<Unit>:
@@ -115,13 +110,15 @@ def interpolate.vec(a: F.Vec,b: F.Vec,+t: F.Expr) -> F.Vec:
   F.Vec{bx,by,bz} = b
   F.Vec{interpolate(ax,bx,t),interpolate(ay,by,t),interpolate(az,bz,t)}
 def frame.phase(+index: U32,+warmup: U32,edit: Bool,moving: Bool) -> String:
-  frame.phase.flags(U32.is_eq(index,0),(index <= warmup : U32),edit,moving)
+  Policy.phase(U32.is_eq(index,0),(index <= warmup : U32),edit,moving)
 def frame(+index: U32,+warmup: U32,phase: String,camera: String,picking: Bool,actions: String,extra: List<&2,String>) -> String:
   ordinal = select(String,(index > warmup : U32),J.number((index - warmup - 1 : U32)),"null")
-  J.object(append([J.field("record_type",J.quote("frame")),J.field("frame",J.number(index)),J.field("phase",J.quote(phase)),J.field("measured_ordinal",ordinal),J.field("camera",camera),J.field("picking",J.boolean(picking)),J.field("actions",actions)],extra))
-def header(+id: String,warmup: U32,measured: U32,opening: String,reviews: List<&2,String>,points: List<&2,String>,edit: Bool,extra: List<&2,String>) -> String:
+  J.object(append([J.field("frame",J.number(index)),J.field("phase",J.quote(phase)),J.field("measured_ordinal",ordinal),J.field("camera",camera),J.field("picking",J.boolean(picking)),J.field("actions",actions)],extra))
+def header(+id: String,warmup: U32,measured: U32,opening: String,reviews: List<&2,String>,points: List<&2,String>,edit: Bool,extra: List<&2,String>) -> List<&2,String>:
   editing = select(String,edit,"edit","edit_disabled")
-  J.object(append([J.field("schema",J.quote("megascene-evidence/1")),J.field("record_type",J.quote("schedule")),J.field("fixed_step",J.quote("0x3c888889")),J.field("schedule_id",J.quote(id)),J.field("warmup_frames",J.number(warmup)),J.field("measured_frames",J.number(measured)),J.field("opening",opening),J.field("review_views",J.array(reviews)),J.field("required_checkpoints",J.array(points)),J.field("checkpoint_implementation",J.quote("megascene-checkpoint/1")),J.field("update_order",J.array([J.quote("physics"),J.quote(editing),J.quote(select(String,is.picking(id),"view_picking","view_picking_disabled")),J.quote("render")]))],extra))
+  append([J.field("schema",J.quote("megascene-evidence/1")),J.field("record_type",J.quote("schedule")),J.field("fixed_step",J.quote("0x3c888889")),J.field("schedule_id",J.quote(id)),J.field("warmup_frames",J.number(warmup)),J.field("measured_frames",J.number(measured)),J.field("opening",opening),J.field("review_views",J.array(reviews)),J.field("required_checkpoints",J.array(points)),J.field("checkpoint_implementation",J.quote("megascene-checkpoint/1")),J.field("update_order",J.array([J.quote("physics"),J.quote(editing),J.quote(select(String,is.picking(id),"view_picking","view_picking_disabled")),J.quote("render")]))],extra)
+def document(fields: List<&2,String>,frames: List<&2,String>,actions: List<&2,String>) -> String:
+  J.object(append(fields,[J.field("frames",J.array(frames)),J.field("actions",J.array(actions))]))
 def pose.ray(p: Pose) -> IO(String):
   Pose{+eye,look} = p
   pose.ray.delta(eye,F.delta(eye,look))
@@ -160,13 +157,13 @@ def interpolate.pose(p: Pose,s: Pose,+t: F.Expr) -> Pose:
   Pose{eye,look} = p
   Pose{seye,slook} = s
   Pose{interpolate.vec(eye,seye,t),interpolate.vec(look,slook,t)}
-def static.frames(n: Nat,+i: U32,+warmup: U32,+opening: String) -> IO(Unit):
+def static.frames(n: Nat,+i: U32,+warmup: U32,+end: U32,+performance: Bool,+opening: String) -> List<&2,String>:
   match n:
-    case 0n: IO.pure(Unit,Unit{})
+    case 0n: Nil{}
     case 1n+p:
-      do IO<Unit>:
-        IO.print(frame(i,warmup,frame.phase(i,warmup,False{},False{}),opening,False{},"[]",Nil{}))
-        static.frames(p,(i + 1 : U32),warmup,opening)
+      flags = (Bool.to_u32(U32.is_eq(i,0)) + 2 * Bool.to_u32(U32.is_eq(i,0) || U32.is_eq(i,warmup) || U32.is_eq(i,end)) : U32)
+      extra = select(List<&2,String>,performance,[J.field("policy_flags",J.number(flags))],Nil{})
+      frame(i,warmup,frame.phase(i,warmup,False{},False{}),opening,False{},"[]",extra) <> static.frames(p,(i + 1 : U32),warmup,end,performance,opening)
 def pick.target(+phase: U32,q: U32) -> String:
   owner = select(String,U32.is_eq(phase,4),"6",select(String,U32.is_eq(phase,3) || U32.is_eq(phase,7),"1",select(String,U32.is_eq(phase,8),"0","2")))
   material = select(String,U32.is_eq(phase,4),"3",select(String,U32.is_eq(phase,3) || U32.is_eq(phase,7),"2",select(String,U32.is_eq(phase,8),"0","5")))
@@ -180,13 +177,14 @@ def pose(+name: String,+n: U32,+q: U32,+seed: U32,+route: String,+control: Strin
       +o = origin(q,n)
       v = ((3 * (n % q : U32) + 5 * (n / q : U32) + seed - 45) % 4 : U32)
       pose.local(local(name,v,route,control),o,control)
-def static.eye(+eye: F.Vec,+warmup: U32,+measured: U32,id: String) -> IO(Unit):
+def static.eye(+eye: F.Vec,+warmup: U32,+measured: U32,+id: String) -> IO(Unit):
   F.Vec{x,y,z} = eye
   look = {F.Vec{F.Add{x,real("-74")},F.Add{y,real("-72")},F.Add{z,real("-234")}} : F.Vec}
   do IO<Unit>:
     +opening : String <- F.camera(eye,look)
-    IO.print(header(id,warmup,measured,opening,[J.review("opening",0,features("opening"))],append(initial.points(warmup),[J.point("completion",(warmup + measured : U32))]),False{},Nil{}))
-    static.frames(U32.to_nat((1 + warmup + measured : U32)),0,warmup,opening)
+    +performance : Bool = String.eq(id,"static-perf-v2")
+    fields : List<&2,String> = header(id,warmup,measured,opening,[J.review("opening",0,features("opening"))],append(initial.points(warmup),[J.point("completion",(warmup + measured : U32))]),False{},select(List<&2,String>,performance,[J.field("performance_protocol",Policy.protocol(False{}))],Nil{}))
+    IO.print(document(fields,static.frames(U32.to_nat((1 + warmup + measured : U32)),0,warmup,(warmup + measured : U32),performance,opening),Nil{}))
 def route.record(active: Bool,+picking: Bool,+i: U32,q: U32,+phase: U32,+offset: U32,p: Pose,+cam: String) -> IO(String):
   match active:
     case True{}:
@@ -220,33 +218,61 @@ def arguments.pose(name: String,n: Maybe<&2,U32>,q: Maybe<&2,U32>,seed: Maybe<&2
     case _ _ _: IO.die(Unit,2,"invalid pose arguments")
 def route.frame(+i: U32,+q: U32,+seed: U32,+route: String,opening: String) -> IO(String):
   route.frame.when((i <= 120 : U32),i,q,seed,route,opening)
-def arguments.static(origin: String,warmup: Maybe<&2,U32>,measured: Maybe<&2,U32>,id: String) -> IO(Unit):
-  match warmup measured:
-    case Some{warmup} Some{measured}: static(origin,warmup,measured,id)
-    case _ _: IO.die(Unit,2,"invalid static arguments")
-def route.frames(n: Nat,+i: U32,+q: U32,+seed: U32,+route: String,+opening: String) -> IO(Unit):
+def number.result(value: Result<&2,&2,String,U32>) -> IO(U32):
+  match value:
+    case Done{value}: IO.pure(U32,value)
+    case Fail{_}: IO.die(U32,2,"invalid schedule integer")
+def number(text: String) -> IO(U32): number.result(Points.number(text))
+def require(ok: Bool) -> IO(Unit):
+  match ok:
+    case True{}: IO.pure(Unit,Unit{})
+    case False{}: IO.die(Unit,2,"invalid schedule arguments")
+def origin.number(value: Result<&2,&2,String,U32>,negative: Bool) -> Bool:
+  match value:
+    case Done{+n}: ((n <= 8388608 : U32) && (Bool.not(negative) || (n > 0 : U32)))
+    case Fail{_}: False{}
+def origin.valid(text: String) -> Bool:
+  match text:
+    case SCon{Chr{45},rest}: origin.number(Points.number(rest),True{})
+    case text: origin.number(Points.number(text),False{})
+def scene.valid(+q: U32,+seed: U32) -> Bool:
+  (((q >= 2) && (q <= 5)) && (U32.is_eq(seed,45) || U32.is_eq(seed,46)) : U32)
+def arguments.static(+origin: String,warmup: String,measured: String,+id: String) -> IO(Unit):
+  do IO<Unit>:
+    +w : U32 <- number(warmup)
+    +m : U32 <- number(measured)
+    performance : Bool = String.eq(id,"static-perf-v2")
+    _ : Unit <- require(origin.valid(origin) && select(Bool,performance,U32.is_eq(w,120) && U32.is_eq(m,21600),
+      (((w <= 120) && (m >= 1) && (m <= 3600) : U32) &&
+        (String.eq(id,"static-v1") || String.eq(id,"spread-static-v1") || String.eq(id,"material-detail-static-v1") || String.eq(id,"surface-detail-static-v1")))))
+    static(origin,w,m,id)
+def route.frames(n: Nat,+i: U32,+q: U32,+seed: U32,+route: String,+opening: String) -> IO(List<&2,String>):
   match n:
-    case 0n: IO.pure(Unit,Unit{})
+    case 0n: IO.pure(List<&2,String>,Nil{})
     case 1n+p:
-      do IO<Unit>:
+      do IO<List<&2,String>>:
         row : String <- route.frame(i,q,seed,route,opening)
-        IO.print(row)
-        route.frames(p,(i + 1 : U32),q,seed,route,opening)
+        rest : List<&2,String> <- route.frames(p,(i + 1 : U32),q,seed,route,opening)
+        return row <> rest
 def traversal(+q: U32,+seed: U32,+route: String) -> IO(Unit):
   do IO<Unit>:
     +opening : String <- pose.camera(pose("opening",0,q,seed,camera.route(route),"base"))
-    IO.print(header(route,120,3600,opening,J.review("opening",0,features("opening")) <> route.reviews(12n,0,q),append(initial.points(120),route.points(12n,0)),False{},select(List<&2,String>,is.picking(route),[J.field("camera_route_id",J.quote(camera.route(route)))],Nil{})))
-    route.frames(3721n,0,q,seed,route,opening)
-def arguments.traversal(q: Maybe<&2,U32>,seed: Maybe<&2,U32>,route: String) -> IO(Unit):
-  match q seed:
-    case Some{q} Some{seed}: traversal(q,seed,route)
-    case _ _: IO.die(Unit,2,"invalid traversal arguments")
+    fields : List<&2,String> = header(route,120,3600,opening,J.review("opening",0,features("opening")) <> route.reviews(12n,0,q),append(initial.points(120),route.points(12n,0)),False{},select(List<&2,String>,is.picking(route),[J.field("camera_route_id",J.quote(camera.route(route)))],Nil{}))
+    frames : List<&2,String> <- route.frames(3721n,0,q,seed,route,opening)
+    IO.print(document(fields,frames,Nil{}))
+def arguments.traversal(q: String,seed: String,+route: String) -> IO(Unit):
+  do IO<Unit>:
+    +q : U32 <- number(q)
+    +seed : U32 <- number(seed)
+    _ : Unit <- require(scene.valid(q,seed) &&
+      (String.eq(route,"traversal-v1") || String.eq(route,"traversal-v2") || String.eq(route,"picking-v1") || String.eq(route,"picking-v2")))
+    traversal(q,seed,route)
 def arguments(xs: List<String>) -> IO(Unit):
   match xs:
     case _ <> "traversal" <> q <> seed <> route <> Nil{}:
-      arguments.traversal(U32.read(q),U32.read(seed),route)
+      arguments.traversal(q,seed,route)
     case _ <> "static" <> origin <> warmup <> measured <> id <> Nil{}:
-      arguments.static(origin,U32.read(warmup),U32.read(measured),id)
+      arguments.static(origin,warmup,measured,id)
     case _ <> "pose" <> name <> n <> q <> seed <> route <> control <> Nil{}:
       arguments.pose(name,U32.read(n),U32.read(q),U32.read(seed),route,control)
     case _ <> "camera" <> x <> y <> z <> a <> b <> c <> Nil{}:

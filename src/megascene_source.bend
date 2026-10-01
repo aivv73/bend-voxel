@@ -28,22 +28,23 @@ def emit(bs: List<&2,Recipe.Owner>) -> IO(Unit):
         IO.print("{\"record_type\":\"owner\",\"role\":\"" ++ role ++ "\",\"neighborhood\":" ++
           neighborhood(n) ++ ",\"boxes\":" ++ boxes(source) ++ "}")
         emit(rest)
-def generate(d: Maybe<&2,Recipe.District>) -> IO(Unit):
+def generate(d: Maybe<&2,Recipe.District>, +compact: Bool) -> IO(Unit):
   match d:
     case None{}: IO.die(Unit,2,"unsupported district scale or seed")
     case Some{+d}:
       Recipe.District{+q,seed,+c} = d
       do IO<Unit>:
         IO.print("{\"record_type\":\"source\",\"schema\":\"megascene-source/1\",\"side\":" ++
-          U32.show(q) ++ ",\"seed\":" ++ U32.show(seed) ++ ",\"control\":\"" ++ Recipe.control.name(c) ++
+          U32.show(q) ++ ",\"seed\":" ++ U32.show(seed) ++ ",\"control\":\"" ++ Bool.pick(String,compact,"compact-reference",Recipe.control.name(c)) ++
           "\",\"envelope_cells\":" ++ U32.show(Recipe.envelope(q,c)) ++ "}")
-        emit(Recipe.owners(d))
+        emit(Bool.pick(List<&2,Recipe.Owner>,compact,Recipe.compact(4n,0),Recipe.owners(d)))
 def parsed(q: Maybe<&2,U32>, seed: Maybe<&2,U32>, c: Maybe<&2,Recipe.Control>) -> IO(Unit):
   match q seed c:
-    case Some{q} Some{seed} Some{c}: generate(Recipe.district(q,seed,c))
+    case Some{q} Some{seed} Some{c}: generate(Recipe.district(q,seed,c),False{})
     case _ _ _: IO.die(Unit,2,"unsupported source arguments")
 def args(xs: List<String>) -> IO(Unit):
   match xs:
+    case _ <> "2" <> seed <> "compact-reference" <> Nil{}: generate(Recipe.district(2,Maybe.default(&2,U32,U32.read(seed),0),Recipe.Plain{}),True{})
     case _ <> q <> seed <> c <> Nil{}: parsed(U32.read(q),U32.read(seed),Recipe.control(c))
     case _: IO.die(Unit,2,"usage: megascene-source SIDE SEED CONTROL")
 def main() -> IO(Unit):

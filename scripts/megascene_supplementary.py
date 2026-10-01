@@ -1,9 +1,8 @@
 """User-approved frozen history face and proxy shadow validation views."""
-import struct
 
 from megascene_inventory import digest, require
 from megascene_recipe import bits
-from megascene_schedule import numeric
+from megascene_schedule import numeric, supplementary_bytes as camera_bytes
 
 
 HISTORY_CUTS = frozenset((88, 89, 98, 99, 108, 109, 118, 119))
@@ -49,15 +48,6 @@ def proxy_views(source, reviews):
              'supplementary_to': r['name'], 'purpose': 'proxy_shadow',
              'source_bounds_cells': {'lo': list(map(str, lo)), 'hi': list(map(str, hi))}}
             for r in reviews if 'major shadows' in r['features']]
-
-
-def camera_bytes(views):
-    require(0 < len(views) <= 128, 'supplementary view count outside native bound')
-    require(len({v['frame'] for v in views}) == len(views), 'duplicate supplementary frame')
-    return b''.join(struct.pack('<7I', int(v['frame']),
-        0xffffffff if v['action'] is None else int(v['action']),
-        *(int(x, 16) for x in (*v['camera']['eye_m'], v['camera']['yaw'], v['camera']['pitch'])))
-        for v in views)
 
 
 def audit(records, frozen, validation):

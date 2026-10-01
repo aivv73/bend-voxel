@@ -124,15 +124,11 @@ def identity(manifest, root, config):
     require(artifacts and "schedule.json" in artifacts and "runtime/worker" in artifacts, "incomplete runtime artifacts")
     env = manifest["worker_environment"]
     if "MEGASCENE_CHECKPOINT_FILE" in env or "MEGASCENE_REVIEW_FILE" in env:
-        from megascene_checkpoint_plan import checkpoint_bytes, review_bytes
-        from megascene_performance import PHASES
-        import struct
+        from megascene_schedule import checkpoint_bytes, review_bytes, policy_bytes
         frozen = read_json((root/"schedule.json").read_text())
         for name, key, expected in (("checkpoints.tsv", "MEGASCENE_CHECKPOINT_FILE", checkpoint_bytes(frozen)),
                                     ("reviews.tsv", "MEGASCENE_REVIEW_FILE", review_bytes(frozen)),
-                                    ("frame-policy.bin", "MEGASCENE_FRAME_POLICY", b"".join(
-                                        struct.pack("<II", PHASES.index(frame["phase"]), int(frame.get("policy_flags", "0")))
-                                        for frame in frozen["frames"]))):
+                                    ("frame-policy.bin", "MEGASCENE_FRAME_POLICY", policy_bytes(frozen))):
             require(env.get(key) == "../"+name and name in artifacts and (root/name).read_bytes() == expected,
                     "runtime plan does not match frozen schedule: "+name)
     from megascene_performance import enabled, admit, policy_bytes

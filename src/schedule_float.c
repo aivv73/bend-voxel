@@ -56,7 +56,8 @@ static double schedule_float_hypot(double a,double b) {
   return schedule_float_round(result/scale);
 }
 
-static double schedule_float_eval(char* code) {
+// Format 2 retains IEEE positive overflow for benchmark statistics only.
+static double schedule_float_eval(char* code,int benchmark) {
   size_t capacity=strlen(code)+1,depth=0;
   double* stack=malloc(capacity*sizeof(double));
   if(!stack) err_fail("schedule numeric allocation failed");
@@ -70,7 +71,7 @@ static double schedule_float_eval(char* code) {
     char* end;
     double literal=strtod(token,&end);
     if(end!=token && !*end) {
-      if(!isfinite(literal)) err_fail("nonfinite schedule numeric literal");
+      if(!isfinite(literal) && !(benchmark && literal==INFINITY)) err_fail("nonfinite schedule numeric literal");
       stack[depth++]=literal;
       continue;
     }
@@ -97,7 +98,7 @@ static double schedule_float_eval(char* code) {
     else if(!strcmp(token,"cos32")) value=cosf((float)a);
     else if(!strcmp(token,"sqrt32")) value=sqrtf((float)a);
     else value=schedule_float_sum3(a,b,stack[depth-1]);
-    if(!isfinite(value)) err_fail("nonfinite schedule numeric result");
+    if(!isfinite(value) && !(benchmark && value==INFINITY)) err_fail("nonfinite schedule numeric result");
     depth-=arity;
     stack[depth++]=value;
   }
@@ -111,11 +112,11 @@ Term host_run(Env e,Term* f,IoWork* work) {
   size_t length;
   char* code=io_cstr(e,f[0],&length);
   if(length>1048576 || memchr(code,0,length)) err_fail("invalid schedule numeric input");
-  double value=schedule_float_eval(code);
+  double value=schedule_float_eval(code,(u32)f[1]==2);
   free(code);
   char result[64];
   int written;
-  if((u32)f[1]==0) written=snprintf(result,sizeof result,"%a",value);
+  if((u32)f[1]==0 || (u32)f[1]==2) written=snprintf(result,sizeof result,"%a",value);
   else if((u32)f[1]==1) {
     float rounded=(float)value;
     uint32_t word;

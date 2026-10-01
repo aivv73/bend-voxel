@@ -92,13 +92,11 @@ def frame(+i: U32,+length: U32,last: U32,+diagnostic: String,+scene: String,open
   +warm = (i <= 120 : U32)
   +index = Route.select(U32,warm,0,U32.min(((i - 121) / length : U32),last))
   frame.hold(hold.at(U32.to_nat(index),hs),i,length,diagnostic,scene,opening,warm,index)
-def frames(n: Nat,+i: U32,+length: U32,+last: U32,+diagnostic: String,+scene: String,+opening: String,+hs: List<&2,Hold>) -> IO(Unit):
+def frames(n: Nat,+i: U32,+length: U32,+last: U32,+diagnostic: String,+scene: String,+opening: String,+hs: List<&2,Hold>) -> List<&2,String>:
   match n:
-    case 0n: IO.pure(Unit,Unit{})
+    case 0n: Nil{}
     case 1n+p:
-      do IO<Unit>:
-        IO.print(frame(i,length,last,diagnostic,scene,opening,hs))
-        frames(p,(i + 1 : U32),length,last,diagnostic,scene,opening,hs)
+      frame(i,length,last,diagnostic,scene,opening,hs) <> frames(p,(i + 1 : U32),length,last,diagnostic,scene,opening,hs)
 def opening.hold(h: Hold) -> String:
   Hold{_,cam,_,_} = h
   cam
@@ -112,11 +110,11 @@ def proxy(q: U32,seed: U32,+diagnostic: String,+scene: String,height: U32,+lo: F
   do IO<Unit>:
     +hs : List<&2,Hold> <- holds(U32.to_nat(count),0,diagnostic,center(lo,hi),radius(lo,hi),height)
     +view : String <- opening(diagnostic,q,seed,hs)
-    IO.print(Route.header("proxy-" ++ diagnostic ++ "-" ++ scene ++ "-v1",120,3600,view,
+    fields : List<&2,String> = Route.header("proxy-" ++ diagnostic ++ "-" ++ scene ++ "-v1",120,3600,view,
       J.review("opening",0,[J.quote("full source geometry"),J.quote("major shadows")]) <> reviews(hs,0,length),
       Route.append(Route.initial.points(120),points(hs,0,length)),False{},
-      [J.field("diagnostic",J.quote(diagnostic)),J.field("hold_length",J.number(length)),J.field("hold_labels",J.array(labels(hs)))]))
-    frames(3721n,0,length,(count - 1 : U32),diagnostic,scene,view,hs)
+      [J.field("diagnostic",J.quote(diagnostic)),J.field("hold_length",J.number(length)),J.field("hold_labels",J.array(labels(hs)))])
+    IO.print(Route.document(fields,frames(3721n,0,length,(count - 1 : U32),diagnostic,scene,view,hs),Nil{}))
 def shadow.bounds(lo: F.Vec,hi: F.Vec) -> IO(String):
   F.Vec{+x,_,+z} = lo
   F.Vec{+a,+b,+c} = hi
