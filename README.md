@@ -48,7 +48,7 @@ Run the formal laws, geometry reference cases, and complete CPU/GPU image compar
 	make test
 ```
 
-The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. The image checker and its parser and SHA-256 tests are also written in Bend. Run them with `make images`, or run only the parser and hash tests with `make image-unit`. Image checks force both `--gpu off` and `--gpu on` across four tile and fork configurations. The benchmark script requires Python 3 and its standard library.
+The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. The image checker and its parser and SHA-256 tests are also written in Bend. Run them with `make images`, or run only the parser and hash tests with `make image-unit`. Image checks force both `--gpu off` and `--gpu on` across four tile and fork configurations. `make benchmark-unit` checks benchmark parsing, ordering, report generation, and numeric behavior without opening windows.
 
 To compare images on a machine without a GPU, run the CPU cases:
 
@@ -92,7 +92,17 @@ Measure displayed frames with cached scenes and scripted destruction and reset:
 	make benchmark
 ```
 
-The command records interleaved CPU and GPU measurements in `build/benchmark.json`. Each run excludes eight warm-up frames. CPU thread counts and GPU work decomposition are measured separately. The benchmark uses one thread, half the reported CPU cores, and all reported CPU cores. Override those counts with `scripts/benchmark.py --cpu-threads 1 4 8`.
+The Bend command records sequential CPU and GPU measurements in `build/benchmark.json`. Each child opens a native window and excludes eight warm-up frames. CPU thread counts and GPU work decomposition are measured separately. The default CPU counts are one, half the logical system processors, and all logical system processors, with duplicate defaults removed. Override the workload and CPU counts through the built benchmark:
+
+```sh
+	./build/benchmark --gpu off -- --frames 120 --repeats 3 --cpu-threads 1 4 8
+```
+
+Samples measure elapsed integer milliseconds divided by measured frames, in ms/frame, with 53-bit binary precision. The median selects the middle sample for an odd count and averages the two middle samples for an even count. Progress rounds the stored sample to exactly three fractional digits with ties to even. Report numbers retain the full stored precision. Repeated thread entries run repeated measurements and share one report row. Each alternate repeat reverses the complete configuration list.
+
+Numeric arguments accept unsigned ASCII decimal integers, including leading zeros. Frames must be in 24..4294967295, repeats in 2..4294967295, and thread counts in 1..4294967295. Options accept `--flag=value`; later occurrences replace earlier values. `--cpu-threads` accepts one or more counts. Use `--output path/to/report.json` to select a report path relative to your current directory.
+
+The benchmark resolves its repository from the canonical executable or script path, including a bare executable found through `PATH`. `--root /path/to/repository` selects another root. `--binary path/to/renderer` accepts an absolute path or a path under that root. Child processes run in the repository directory. The host helpers require POSIX `sh`, `getconf`, and GNU `realpath`, `dirname`, `date`, and `mkdir`; the current GNU/Linux host is verified. Read [the measurement contract and limits](docs/verification.md#native-measurement).
 
 To choose a work decomposition, set both depths:
 

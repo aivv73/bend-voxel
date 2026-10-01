@@ -1,13 +1,12 @@
 BEND ?= bend
 UI_BEND ?= $(BEND)
-PYTHON ?= python3
 CUDA_HOME ?= $(if $(wildcard /opt/cuda),/opt/cuda,$(if $(wildcard /usr/local/cuda),/usr/local/cuda,))
 export CUDA_HOME
 
 BINARY := build/bend-voxel-rewrite
 SOURCES := main.bend voxel.bend render.bend dump.bend
 
-.PHONY: all run proof test geometry image-unit images ui benchmark clean
+.PHONY: all run proof test geometry image-unit images ui benchmark benchmark-unit clean
 
 all: $(BINARY)
 
@@ -32,6 +31,15 @@ build/hash-tests: scripts/hash_tests.bend scripts/sha256.bend | build
 build/image-tests: scripts/image_tests.bend scripts/image_data.bend scripts/sha256.bend | build
 	$(BEND) scripts/image_tests.bend -o $@
 
+build/benchmark: scripts/benchmark.bend scripts/benchmark_host.bend scripts/benchmark_number.bend scripts/sha256.bend | build
+	$(BEND) scripts/benchmark.bend -o $@
+
+build/benchmark-tests: scripts/benchmark_tests.bend scripts/benchmark.bend scripts/benchmark_host.bend scripts/benchmark_number.bend scripts/sha256.bend | build
+	$(BEND) scripts/benchmark_tests.bend -o $@
+
+build/benchmark-number-tests: scripts/benchmark_number_tests.bend scripts/benchmark_number.bend | build
+	$(BEND) scripts/benchmark_number_tests.bend -o $@
+
 build/ui-check: scripts/ui_check.bend scripts/ui_native.bend scripts/ui_native.c scripts/ui_native.js $(SOURCES) | build
 	$(UI_BEND) scripts/ui_check.bend -o $@
 
@@ -55,10 +63,14 @@ images: $(BINARY) build/image-checker image-unit
 ui: build/ui-check
 	./build/ui-check --gpu on -- --output .audit/screenshots/ui
 
-benchmark: $(BINARY)
-	$(PYTHON) scripts/benchmark.py
+benchmark-unit: build/benchmark-tests build/benchmark-number-tests
+	./build/benchmark-tests --gpu off
+	./build/benchmark-number-tests --gpu off
 
-test: proof geometry images
+benchmark: $(BINARY) build/benchmark
+	./build/benchmark --gpu off
+
+test: proof geometry images benchmark-unit
 
 clean:
 	rm -rf build
