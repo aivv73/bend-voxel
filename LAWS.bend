@@ -12,6 +12,19 @@ import ./src/schedule_json.bend as Json
 import ./src/megascene_operational.bend as Operational
 import ./src/megascene_configuration.bend as Configuration
 import ./src/stress_contract.bend as Stress
+import ./src/evidence_thresholds.bend as Evidence
+
+law calibration_five_percent_inclusive:
+  {Evidence.within_five_percent(Scale.Integer.from_u32(32n,100),Scale.Integer.from_u32(32n,105)) == True{} : Bool}
+
+law calibration_above_five_percent:
+  {Evidence.within_five_percent(Scale.Integer.from_u32(32n,100),Scale.Integer.from_u32(32n,106)) == False{} : Bool}
+
+law qualification_edit_minimum:
+  {Evidence.edits(100) == True{} : Bool}
+
+law qualification_edit_below_minimum:
+  {Evidence.edits(99) == False{} : Bool}
 
 law stress_first_measured_edit:
   {Stress.scheduled(30,30,30) == 1 : U32}

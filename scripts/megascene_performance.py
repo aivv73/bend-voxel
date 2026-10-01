@@ -47,38 +47,8 @@ def finish(frozen, motion_limits=()):
 
 
 def validate(frozen):
-    require(frozen.get("schedule_id") in SCHEDULES and frozen.get("warmup_frames") == "120" and
-            frozen.get("measured_frames") == "21600" and len(frozen["frames"]) == FRAME_COUNT,
-            "performance frozen duration mismatch")
-    p = frozen["performance_protocol"]
-    require(p["version"] == PROTOCOL and p["query_pairs"] == str(FRAME_COUNT) and
-            p['ordinary_duration_min_ns']=='10000000000' and p['ordinary_count_min']=='1000',
-            "performance metadata mismatch")
-    history = frozen["schedule_id"] == "history-perf-v2"
-    actions = frozen["actions"]
-    require([int(a["frame"]) for a in actions] == (list(CUT_FRAMES) if history else []) and
-            [a["action"] for a in actions] == list(map(str,range(len(actions)))),
-            "performance action density mismatch")
-    require(p["overview_frame"] == (str(OVERVIEW) if history else None) and
-            p["history_action_offsets"] == (list(map(str,OFFSETS)) if history else None) and
-            p["history_group_frames"] == ("1800" if history else None) and p["history_final_suffix_frames"] == ("179" if history else None) and
-            p["history_actions_per_measured_frame"] == ({"numerator":"1", "denominator":"180"} if history else None),
-            "performance history regime mismatch")
-    checkpoints = {int(p["frame"]) for p in frozen["required_checkpoints"]}
-    reviews = {int(p["frame"]) for p in frozen["review_views"]}
-    action_at = {int(a["frame"]):a["action"] for a in actions}
-    for index,f in enumerate(frozen["frames"]):
-        require(f["frame"] == str(index) and f["phase"] in PHASES and
-                f["measured_ordinal"] == (str(index-121) if index>120 else None), "performance frame metadata mismatch")
-        expected = "startup" if index == 0 else "warmup" if index <=120 else "edit" if index in action_at else None
-        require(f["phase"] == expected if expected else f["phase"] in (("ordinary","motion") if history else ("ordinary",)),
-                "performance frame population mismatch")
-        require(f["actions"] == ([action_at[index]] if index in action_at else []), "performance frame actions mismatch")
-        flags = (REVIEW if index in reviews else 0) | (CHECKPOINT if index in checkpoints else 0) | (
-            OVERVIEW_FLAG if history and index == OVERVIEW else 0)
-        require(integer(f["policy_flags"]) == flags, "performance frame flags mismatch")
-    require(not history or any(p["name"] == "history_overview" and int(p["frame"]) == OVERVIEW
-                              for p in frozen["required_checkpoints"]), "performance overview checkpoint missing")
+    from megascene_evidence import run
+    return run("performance_validate", frozen, module="evidence_integrity")
 
 
 def policy_bytes(frozen):

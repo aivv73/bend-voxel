@@ -98,6 +98,31 @@ checks. Generated replay entries still contain the admitted frozen cuboids.
 Generation therefore stays outside measured startup and before unsafe construction.
 The migration adds no parallel calls or performance claims.
 
+Attempt classification, calibration assessment, control and schedule comparisons,
+acceptance coverage, allowance accounting, and search decisions now execute in
+the `evidence_*.bend` workers. Bend checks raw recorder sequences and allocation
+ledgers, aggregates distributions, applies qualification gates, and constructs
+the resulting records. Calibration also checks its exact configuration matrix,
+control order, resume exclusions and retained runtime bindings in Bend.
+
+The tagged adapter preserves arbitrary integers, binary64 values, signed zero,
+Unicode strings, unknown fields and ordered arrays. Exact rational arithmetic
+keeps the inclusive five-percent calibration rule. Report classification uses a
+prepare/finalize boundary so threshold checks see the same rounded binary64 means
+as the original reader. Descriptive division retains Python's operand conversion
+order. Python still reads files, parses JSON, verifies SHA256 bytes, samples clocks,
+starts processes and persists records. Named visual assessments remain external
+review inputs with the same capture hashes and feature order.
+
+Worker cache identities and retained generator sources include every policy
+dependency. Search records retain their existing workload fingerprints during
+reassessment, while new fingerprints bind the migrated classifier sources.
+The generic evidence traversals use `@unsafe`; their behavior is checked against
+literal original-reader observations and runtime tests. The four new formal
+claims cover safe, closed calibration and edit-count boundary examples only.
+The [evidence migration record](validation/evidence-migration/verification.json)
+and [decision trail](validation/evidence-migration/decisions.tsv) record the checks.
+
 ## Verification
 
 `tests/megascene-operational.bend` checks literal memory bounds, U32 overflow,

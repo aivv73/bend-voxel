@@ -11,6 +11,8 @@ import signal
 import subprocess
 import time
 
+from megascene_evidence import run as evidence
+
 
 def save(path, value):
     temporary = path.with_name(path.name + ".new")
@@ -24,14 +26,9 @@ def runner_remaining(ledger):
         return None
     value = json.loads(Path(runner["path"]).read_text())
     boot = Path("/proc/sys/kernel/random/boot_id").read_text().strip()
-    if value["state"] != "active":
-        elapsed_since_lease = 0
-    else:
-        elapsed_since_lease = (time.monotonic_ns() - int(value["lease_ns"])
-                               if boot == value["boot_id"] else
-                               time.time_ns() - int(value["lease_utc_ns"]))
-    used = int(value["elapsed_ns"]) + max(0, elapsed_since_lease)
-    return max(0, int(value["allowance_ns"]) - used)
+    return evidence("runner_remaining", {"campaign": value, "boot_id": boot,
+                                          "monotonic_ns": time.monotonic_ns(),
+                                          "utc_ns": time.time_ns()}, "evidence_acceptance")
 
 
 def main():
@@ -46,13 +43,12 @@ def main():
     if not command or args.timeout <= 0 or not args.name.replace("-", "").isalnum():
         parser.error("name, positive timeout and command required")
     ledger = json.loads(args.ledger.read_text())
-    remaining = int(ledger["remaining_ns"])
     supervised = runner_remaining(ledger)
-    if supervised is not None:
-        remaining = min(remaining, supervised)
-    if remaining <= 0:
-        parser.error("consolidated acceptance allowance exhausted")
-    timeout = min(args.timeout, remaining / 1_000_000_000)
+    try:
+        timeout = evidence("allowance_gate", {"ledger": ledger, "supervised": supervised,
+                                              "timeout": args.timeout}, "evidence_acceptance")
+    except ValueError as exc:
+        parser.error(str(exc))
     args.archive.mkdir(parents=True, exist_ok=True)
     log = args.archive / (args.name + ".log")
     if log.exists():
@@ -83,15 +79,8 @@ def main():
              "log": str(log), "log_sha256": hashlib.sha256(log.read_bytes()).hexdigest()}
     if ledger.get("runner_campaign"):
         entry["runner_campaign"] = ledger["runner_campaign"]["path"]
-    ledger["new_work"].append(entry)
-    ledger["new_work_charge_ns"] = str(int(ledger["new_work_charge_ns"]) + elapsed)
-    ledger["remaining_ns"] = str(max(0, int(ledger["allowance_ns"]) -
-                                   int(ledger["prior_gross_charge_ns"]) -
-                                   int(ledger["new_work_charge_ns"])))
-    supervised = runner_remaining(ledger)
-    if supervised is not None:
-        ledger["runner_campaign_remaining_ns"] = str(supervised)
-        ledger["remaining_ns"] = str(min(int(ledger["remaining_ns"]), supervised))
+    ledger = evidence("charge", {"ledger": ledger, "entry": entry,
+                                 "supervised": runner_remaining(ledger)}, "evidence_acceptance")
     save(args.ledger, ledger)
     print(json.dumps(entry, sort_keys=True))
     raise SystemExit(0 if status == "pass" else 1)

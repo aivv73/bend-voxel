@@ -1,0 +1,51 @@
+{
+  "adapter_source_sha256": {
+    "scripts/megascene_bend.py": "be105c49ff2e8c16e56f506a16fbb37518996ac781268a4ed7d7a560b2dec724",
+    "scripts/megascene_evidence.py": "449ae0baa8da4229b3488002348caff757a55cee81b9c448cacb9b5b0dce2cf5",
+    "scripts/megascene_report.py": "8d3232858d89bf5c2aeb85371773e10b2d8d1da453fb6c406fb33644f3480b7e"
+  },
+  "archive": "/home/aivv/megascene-evidence/8a26ddb3-3e8a-49c4-a59a-289c91c3702e/0c5fc11a-21c6-4402-b67b-fa25eb07b90c/52759ddd-3e33-42b4-9735-efb5cd275636",
+  "archive_file_count": 194,
+  "archive_manifest_sha256": {
+    "after": "eaf407d80eceeb79cbb60839b60b85bdcd4887b7aa7b659c3c778dc716af3d1a",
+    "before": "eaf407d80eceeb79cbb60839b60b85bdcd4887b7aa7b659c3c778dc716af3d1a"
+  },
+  "archive_snapshot_sha256": {
+    "after": "213ad91b4c2864cd1f76e4c3c972079181820ec53d1271b57a31d2ad39368520",
+    "before": "213ad91b4c2864cd1f76e4c3c972079181820ec53d1271b57a31d2ad39368520"
+  },
+  "archive_unchanged": true,
+  "changed_files": [],
+  "current_report_source_sha256": "8d3232858d89bf5c2aeb85371773e10b2d8d1da453fb6c406fb33644f3480b7e",
+  "fresh_replay": false,
+  "original_allocation_reference": "HEAD:scripts/megascene_supervisor.py::audit_allocations",
+  "original_report_source_sha256": "bf1fe92b55301c1ded0c958e6b6c9315a794d43e8c359266300a21e30f321ded",
+  "report_seconds": {
+    "current": 1.317817778999597,
+    "original": 0.05249401000037324
+  },
+  "report_sha256": {
+    "current": "c745b594192a62ee009e3a64a8bf3d741f87904f94cd6ce6708db3b903a88488",
+    "original": "c745b594192a62ee009e3a64a8bf3d741f87904f94cd6ce6708db3b903a88488"
+  },
+  "reports_equal": true,
+  "scope": "retained real static development prefix: one warm-up and two measured frames",
+  "workers": {
+    "current": {
+      "evidence_report": {
+        "binary": "/home/aivv/\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b/projects/bend-voxel/build/megascene-bend/10c9713b0bd09fdd87fdab66002fa3ad2495055ebaf4a203a443eec854ea0f31",
+        "binary_sha256": "050bfdd630b7ae48d6e8ced3cff4eb84c4351514b53bb41833db37b69680da91",
+        "compiler": "bend 2.0.34",
+        "dependency_sha256": {
+          "src/evidence_integrity.bend": "70cc6944a5e732393bdaf9ecb818c854ba52c653c9f56ecc98fbd18b1a3aaea8",
+          "src/evidence_report.bend": "263f9d95fc6513362841a6309a72c67c7e9b1f9f64cb6951da9b9d56fff1dae1",
+          "src/evidence_thresholds.bend": "a5935f8df3c287bf535032adc794590056315f1c8415ac7f4a9a7c640746035b",
+          "src/evidence_value.bend": "14e2ddf578720ad174f3940326f1d5df9d34621f5308aed6303ccf2d044a7fec",
+          "src/megascene_scale.bend": "365af8ad275154f9f36efdd08661051b5b35d4c807753831ae6ec055f551a688"
+        },
+        "source_fingerprint": "10c9713b0bd09fdd87fdab66002fa3ad2495055ebaf4a203a443eec854ea0f31"
+      }
+    },
+    "original": {}
+  }
+}

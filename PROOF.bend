@@ -2,6 +2,11 @@ import Base
 import ./LAWS.bend as Laws
 import ./src/megascene_scale.bend as Scale
 
+def Laws.calibration_five_percent_inclusive(): {==}
+def Laws.calibration_above_five_percent(): {==}
+def Laws.qualification_edit_minimum(): {==}
+def Laws.qualification_edit_below_minimum(): {==}
+
 def Laws.stress_first_measured_edit(): {==}
 def Laws.stress_warmup_has_no_edit(): {==}
 def Laws.stress_six_edit_limit(): {==}

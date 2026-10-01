@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 from megascene_acceptance_run import runner_remaining, save
+from megascene_evidence import run as evidence
 
 
 def main():
@@ -30,23 +31,15 @@ def main():
                           "campaign_id": value["campaign_id"],
                           "elapsed_ns": str(value["elapsed_ns"]),
                           "scope": "all retained earlier Megascene work; conservative gross charge"})
-    previous = {row["campaign"] for row in ledger["prior_campaigns"]}
-    found = {row["campaign"] for row in campaigns}
-    if not previous <= found:
-        parser.error(f"previously charged campaign missing: {sorted(previous - found)}")
-    ledger["prior_campaigns"] = campaigns
-    ledger["prior_gross_charge_ns"] = str(sum(int(row["elapsed_ns"]) for row in campaigns))
-    ledger["charging_policy"] = ("Conservative gross charge of every retained earlier "
-                                 "Megascene campaign root, including development and failed "
-                                 "attempts; new work charged once through new_work")
-    remaining = max(0, int(ledger["allowance_ns"]) -
-                    int(ledger["prior_gross_charge_ns"]) -
-                    int(ledger["new_work_charge_ns"]))
-    supervised = runner_remaining(ledger)
-    ledger["runner_campaign_remaining_ns"] = str(supervised)
-    ledger["remaining_ns"] = str(min(remaining, supervised))
+    result = evidence("reconcile", {"ledger": ledger, "campaigns": campaigns,
+                                    "supervised": None}, "evidence_acceptance")
+    if result["missing"]:
+        parser.error(f"previously charged campaign missing: {result['missing']}")
+    ledger = result["ledger"]
+    ledger = evidence("remaining", {"ledger": ledger, "supervised": runner_remaining(ledger)},
+                      "evidence_acceptance")
     print(json.dumps({"campaigns": len(campaigns),
-                      "newly_charged": sorted(found - previous),
+                      "newly_charged": result["newly_charged"],
                       "prior_gross_charge_s": round(int(ledger["prior_gross_charge_ns"]) / 1e9, 3),
                       "remaining_s": round(int(ledger["remaining_ns"]) / 1e9, 3)},
                      indent=2))

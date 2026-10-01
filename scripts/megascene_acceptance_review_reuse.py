@@ -10,27 +10,24 @@ import argparse
 import json
 from pathlib import Path
 
-from megascene_acceptance_index import campaigns, complete
+from megascene_acceptance_index import campaigns
+from megascene_evidence import run as evidence
 from megascene_review import assess
 
 
+def _review(attempt):
+    path = Path(attempt["archive"]) / "review.json"
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
 def signature(attempt):
-    config = attempt["configuration"] or {}
-    root = Path(attempt["archive"])
-    path = root / "review.json"
-    if not path.is_file():
+    value = evidence("review_signature", {"attempt": attempt, "review": _review(attempt)},
+                     "evidence_acceptance")
+    if value is None:
         return None
-    review = json.loads(path.read_text())
-    views = review.get("views")
-    if not views:
-        return None
-    scope = tuple(config.get(key) for key in
-                  ("case", "preset", "seed", "resolution", "profile", "schedule",
-                   "diagnostic", "control"))
-    captures = tuple((view["name"], view["frame"], view["capture"]["sha256"],
-                      tuple(feature["name"] for feature in view["features"]))
-                     for view in views)
-    return scope, review["schedule_sha256"], captures
+    scope, schedule_hash, captures = value
+    return tuple(scope), schedule_hash, tuple((name, frame, digest, tuple(features))
+                                              for name, frame, digest, features in captures)
 
 
 def main():
@@ -40,38 +37,15 @@ def main():
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
     _, attempts = campaigns(args.archive_base)
-    sources = {}
-    for item in attempts:
-        if not complete(item):
-            continue
-        key = signature(item)
-        if key is None:
-            continue
-        root = Path(item["archive"])
-        review = json.loads((root / "review.json").read_text())
-        if review.get("status") == "pass" and (root / "assessments.json").is_file():
-            sources.setdefault(key, item)
+    observed = [{"attempt": item, "review": _review(item),
+                 "assessments_present": (Path(item["archive"]) / "assessments.json").is_file()}
+                for item in attempts]
+    candidates = evidence("review_reuse", observed, "evidence_acceptance")
     results = []
-    for item in attempts:
-        if not complete(item):
-            continue
-        key = signature(item)
-        if key is None or key not in sources:
-            continue
-        root = Path(item["archive"])
-        review = json.loads((root / "review.json").read_text())
-        if review.get("status") != "awaiting_named_feature_review":
-            continue
-        source = sources[key]
-        if source["attempt_id"] == item["attempt_id"]:
-            continue
-        row = {"source_attempt": source["attempt_id"],
-               "source_archive": source["archive"],
-               "target_attempt": item["attempt_id"],
-               "target_archive": item["archive"],
-               "capture_count": len(key[2])}
+    for row in candidates:
+        root = Path(row["target_archive"])
         if args.execute:
-            row["assessment"] = assess(root, Path(source["archive"]) / "assessments.json",
+            row["assessment"] = assess(root, Path(row["source_archive"]) / "assessments.json",
                                        "Codex review of byte-identical archived captures")
         results.append(row)
         print(json.dumps(row, sort_keys=True), flush=True)
