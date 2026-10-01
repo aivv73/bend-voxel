@@ -48,13 +48,18 @@ Run the formal laws, geometry reference cases, and complete CPU/GPU image compar
 	make test
 ```
 
-The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. The image and benchmark scripts still require Python 3 and its standard library. Image checks force both `--gpu off` and `--gpu on` across several work decompositions.
+The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. The image checker and its parser and SHA-256 tests are also written in Bend. Run them with `make images`, or run only the parser and hash tests with `make image-unit`. Image checks force both `--gpu off` and `--gpu on` across four tile and fork configurations. The benchmark script requires Python 3 and its standard library.
 
 To compare images on a machine without a GPU, run the CPU cases:
 
 ```sh
-	python3 scripts/image_check.py --cpu-only
+	make build/image-checker image-unit
+	./build/image-checker --gpu off -- --cpu-only
 ```
+
+The checker saves exports under `build/image-check`. It resolves the repository from its executable path, so absolute or relative invocations also work from another directory. If you invoke a bare executable name through `PATH`, supply `--root /path/to/repository`. Use `--binary path/to/renderer` to select another renderer. Relative renderer paths resolve under that root.
+
+The parser accepts the renderer's unsigned ASCII P3 format with literal `P3 512 512 255` header tokens and exactly 786,432 channels in 0..255. ASCII whitespace and leading zeros in channels are accepted. PPM comments, signed values, digit underscores, and Unicode digits are rejected.
 
 The native window check uses `Window.export_ref` from [the aivv73 Bend fork](https://github.com/aivv73/bend). Choose that compiler for the UI test. With the fork checked out beside this project, run:
 
