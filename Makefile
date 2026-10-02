@@ -5,6 +5,7 @@ export CUDA_HOME
 
 BINARY := build/bend-voxel-rewrite
 SOURCES := main.bend voxel.bend render.bend dump.bend
+UI_TEST_SOURCES := deps/bend-ui-test/uitest.bend deps/bend-ui-test/plan.bend deps/bend-ui-test/uitest.c deps/bend-ui-test/uitest.js
 
 .PHONY: all run proof test geometry image-unit images ui ui-unit benchmark benchmark-unit clean
 
@@ -43,7 +44,7 @@ build/benchmark-number-tests: scripts/benchmark_number_tests.bend scripts/benchm
 build/ui-capture-tests: scripts/ui_capture_tests.bend scripts/ui_capture.bend | build
 	$(UI_BEND) scripts/ui_capture_tests.bend -o $@
 
-build/ui-check: scripts/ui_check.bend scripts/ui_capture.bend scripts/ui_native.bend scripts/ui_native.c scripts/ui_native.js $(SOURCES) | build
+build/ui-check: scripts/ui_check.bend scripts/ui_capture.bend $(UI_TEST_SOURCES) $(SOURCES) .gitmodules | build
 	$(UI_BEND) scripts/ui_check.bend -o $@
 
 run: $(BINARY)

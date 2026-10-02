@@ -61,9 +61,10 @@ The checker saves exports under `build/image-check`. It resolves the repository 
 
 The parser accepts the renderer's unsigned ASCII P3 format with literal `P3 512 512 255` header tokens and exactly 786,432 channels in 0..255. ASCII whitespace and leading zeros in channels are accepted. PPM comments, signed values, digit underscores, and Unicode digits are rejected.
 
-The native window check uses `Window.export_ref` and `Window.capture` from [the aivv73 Bend fork](https://github.com/aivv73/bend). Use fork commit `ecde8700807c5b7a5e5da49eaede0c5749d6e435` or later for the UI test. With the fork checked out beside this project, run:
+The native window check uses `Window.export_ref` and `Window.capture` from [the aivv73 Bend fork](https://github.com/aivv73/bend). Input and lifecycle checks use [bend-ui-test](https://github.com/aivv73/bend-ui-test), pinned as the `deps/bend-ui-test` submodule. The tested compiler revision is `de38700481244494b56a2f947df6fba25f798887`. With the fork checked out beside this project, initialize the pinned dependency and run:
 
 ```sh
+	git submodule update --init --recursive
 	make ui UI_BEND='bun ../bend/bend2/main.ts'
 	./build/ui-check --gpu off -- --output .audit/screenshots/cpu
 	./build/ui-check --gpu on -- --close-method window --output .audit/screenshots/window-close
@@ -71,11 +72,11 @@ The native window check uses `Window.export_ref` and `Window.capture` from [the 
 
 The GPU target saves native PPM screenshots in `.audit/screenshots/ui`. The CPU command saves them in `.audit/screenshots/cpu`.
 
-The native check runs the slice's real view, event reducer, and `App.step`. `Window.capture` reads the owned window's client pixels after earlier output completes. Keep the client fully on-screen and unobscured during the test. `scripts/ui_capture.bend` converts its RGB array to an `Image`; Bend checks the pixels and exports screenshots. A small C adapter uses the exported display and ID to send input and close requests and check window expiry. It contains no pixel-capture code. The check requires Linux/X11 and `libX11`. Unsupported backends report an error.
+The native check runs the slice's real view, event reducer, and `App.step`. `Window.capture` reads the owned window's client pixels after earlier output completes. Keep the client fully on-screen and unobscured during the test. `scripts/ui_capture.bend` converts its RGB array to an `Image`; Bend checks the pixels and exports screenshots. The checker passes `WindowRef` directly to `UITest.key`, `UITest.click`, `UITest.request_close`, and `UITest.alive`. The library owns native event delivery and expiry checks. A close request goes through the app reducer, which closes the owned window. The check requires Linux/X11 and `libX11`. Unsupported backends report an error.
 
 `make ui` also runs the pure capture-conversion tests. Run them without opening a window with `make ui-unit UI_BEND='bun ../bend/bend2/main.ts'`.
 
-The C input adapter uses Bend runtime internals. To rebuild with a different compiler, run `make -B ui UI_BEND='bun ../bend/bend2/main.ts'`. Read [the verification notes](docs/verification.md) for the tested fork revision and the scope of formal proofs and runtime checks.
+The library's native effects use Bend runtime internals. To rebuild with a different compiler, run `make -B ui UI_BEND='bun ../bend/bend2/main.ts'`. After checking out a different project revision, run `git submodule update --init --recursive` to select its pinned library version. Read [the verification notes](docs/verification.md) for the tested revisions and the scope of formal proofs and runtime checks.
 
 ## Export an image
 

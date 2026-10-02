@@ -1,7 +1,7 @@
 import Base
 import ../main.bend as Slice
 import ../dump.bend as D
-import ./ui_native.bend as N
+import ../deps/bend-ui-test/uitest.bend as UITest
 import ./ui_capture.bend as C
 
 type Stage is Data:
@@ -67,24 +67,12 @@ def Reference.unwrapped(exported: Window & Result<&1, &1, U32 & String, WindowRe
 def Reference.export(window: Window) -> IO(Window & WindowRef):
 	IO.bind(Window & Result<&1, &1, U32 & String, WindowRef>, Window & WindowRef, Window.export_ref(window), Reference.unwrapped)
 
-def Reference.key(ref: WindowRef, code: U32) -> IO(Unit):
-	X11WindowRef{display, id} = ref
-	IO.try(Unit, N.Desktop.key(display, id, code))
-
-def Reference.click(ref: WindowRef, x: U32, y: U32) -> IO(Unit):
-	X11WindowRef{display, id} = ref
-	IO.try(Unit, N.Desktop.click(display, id, x, y))
-
 def Reference.close(ref: WindowRef, button: Bool) -> IO(Unit):
-	match ref button:
-		case X11WindowRef{display, id} False{}:
-			IO.try(Unit, N.Desktop.key(display, id, 27))
-		case X11WindowRef{display, id} True{}:
-			IO.try(Unit, N.Desktop.close(display, id))
-
-def Reference.alive(ref: WindowRef) -> IO(Bool):
-	X11WindowRef{display, id} = ref
-	IO.try(Bool, N.Desktop.alive(display, id))
+	match button:
+		case False{}:
+			IO.try(Unit, UITest.key(ref, 27))
+		case True{}:
+			IO.try(Unit, UITest.request_close(ref))
 
 def Reference.report(ref: WindowRef) -> IO(Unit):
 	X11WindowRef{display, id} = ref
@@ -106,7 +94,7 @@ def Check.finish(+ref: WindowRef, close_window: Bool, completed: Chan(Bool), win
 	do IO<Unit>:
 		Reference.close(ref, close_window)
 		App.step(Slice.Model, App{Slice.Model.view, Slice.Model.tick}, window, model, Check.unclosed)
-		alive : Bool <- Reference.alive(ref)
+		alive : Bool <- IO.try(Bool, UITest.alive(ref))
 		Check.require(Bool.not(alive), "Exported window is still alive after app close")
 		sent : Bool <- Chan.send(Bool, completed, True{})
 		Check.require(sent, "Native check completion channel closed early")
@@ -118,37 +106,37 @@ def Check.image(stage: Stage, session: Session, window: Window, model: Slice.Mod
 			do IO<Maybe<Progress>>:
 				D.Dump.ppm(output ++ "/before.ppm", image)
 				Check.require(U32.is_eq(Pixels.at(9n, 0, 0, 512, image), 1054752) && U32.is_eq(Pixels.at(9n, 256, 256, 512, image), 15055994) && U32.is_eq(Pixels.at(9n, 256, 300, 512, image), 10515016), "Initial native pixels differ: " ++ U32.show(Pixels.at(9n, 0, 0, 512, image)) ++ "," ++ U32.show(Pixels.at(9n, 256, 256, 512, image)) ++ "," ++ U32.show(Pixels.at(9n, 256, 300, 512, image)))
-				Reference.key(ref, 32)
+				IO.try(Unit, UITest.key(ref, 32))
 				return Some{Progress{window, model, Session{output, ref, image, cut, close_window, completed}, Destroyed{}, 1n}}
 		case Destroyed{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
 				Check.require(U32.is_eq(Pixels.delta(9n, before, image), 18520), "Space must change exactly 18520 native pixels")
 				D.Dump.ppm(output ++ "/destroyed.ppm", image)
-				Reference.key(ref, 32)
+				IO.try(Unit, UITest.key(ref, 32))
 				return Some{Progress{window, model, Session{output, ref, before, image, close_window, completed}, Repeated{}, 1n}}
 		case Repeated{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
 				Check.require(U32.is_eq(Pixels.delta(9n, cut, image), 0), "Repeated native cut changed pixels")
 				D.Dump.ppm(output ++ "/repeated.ppm", image)
-				Reference.key(ref, 114)
+				IO.try(Unit, UITest.key(ref, 114))
 				return Some{Progress{window, model, Session{output, ref, before, cut, close_window, completed}, Reset{}, 1n}}
 		case Reset{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
 				Check.require(U32.is_eq(Pixels.delta(9n, before, image), 0), "Reset did not restore exact native pixels")
 				D.Dump.ppm(output ++ "/reset.ppm", image)
-				Reference.click(ref, 20, 20)
+				IO.try(Unit, UITest.click(ref, 20, 20))
 				return Some{Progress{window, model, Session{output, ref, before, cut, close_window, completed}, Background{}, 1n}}
 		case Background{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
 				Check.require(U32.is_eq(Pixels.delta(9n, before, image), 0), "Background click changed native pixels")
 				D.Dump.ppm(output ++ "/background-click.ppm", image)
-				Reference.click(ref, 256, 200)
+				IO.try(Unit, UITest.click(ref, 256, 200))
 				return Some{Progress{window, model, Session{output, ref, before, cut, close_window, completed}, Clicked{}, 1n}}
 		case Clicked{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
 				Check.require((Pixels.delta(9n, before, image) > 100 : U32) && (Pixels.delta(9n, cut, image) > 0 : U32), "Primary click did not carve the picked voxel")
 				D.Dump.ppm(output ++ "/clicked.ppm", image)
-				Reference.key(ref, 114)
+				IO.try(Unit, UITest.key(ref, 114))
 				return Some{Progress{window, model, Session{output, ref, before, cut, close_window, completed}, ClickReset{}, 1n}}
 		case ClickReset{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
