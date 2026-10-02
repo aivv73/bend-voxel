@@ -40,78 +40,6 @@ static void ui_x11_finish(UiConnection* connection) {
   XSetErrorHandler(connection->previous_error);
 }
 
-#ifdef CID(Desktop.capture)
-static u32 ui_x11_channel(unsigned long pixel, unsigned long mask) {
-  if (mask == 0) {
-    return 0;
-  }
-  while ((mask & 1) == 0) {
-    mask >>= 1;
-    pixel >>= 1;
-  }
-  return (u32)(((u64)(pixel & mask) * 255) / mask);
-}
-
-static Term ui_x11_node(Env e, u64 cid, const Term* fields) {
-  u32 count = cid_arity(cid);
-  u64 at = heap_alloc(e, cls_fit(count));
-  for (u32 i = 0; i < count; i += 1) {
-    e.mem[at + i] = io_seal(e, fields[i], cid);
-  }
-  return term_ctr(cid, at);
-}
-
-static Term ui_x11_image(Env e, XImage* image, unsigned int x,
-  unsigned int y, unsigned int size) {
-  if (size == 1) {
-    unsigned long pixel = XGetPixel(image, x, y);
-    u32 color = (ui_x11_channel(pixel, image->red_mask) << 16)
-      | (ui_x11_channel(pixel, image->green_mask) << 8)
-      | ui_x11_channel(pixel, image->blue_mask);
-    return term_pak(CID(Pix), color);
-  }
-  unsigned int half = size / 2;
-  Term tl = ui_x11_image(e, image, x, y, half);
-  Term tr = ui_x11_image(e, image, x + half, y, half);
-  Term bl = ui_x11_image(e, image, x, y + half, half);
-  Term br = ui_x11_image(e, image, x + half, y + half, half);
-  Term fields[] = {tl, tr, bl, br};
-  return ui_x11_node(e, CID(Qua), fields);
-}
-#endif
-#endif
-
-#ifdef CID(Desktop.capture)
-Term desktop_capture_run(Env e, Term* args, IoWork* work) {
-#if defined(__linux__) && !defined(__OBJC__)
-  UiConnection connection;
-  if (!ui_x11_open(e, args, &connection)) {
-    return io_fail(e, EIO, "UI capture: cannot open exported display");
-  }
-  if (ui_x11_error != 0 || connection.attrs.map_state != IsViewable
-    || connection.attrs.width != 512 || connection.attrs.height != 512
-    || connection.attrs.visual->class != TrueColor) {
-    ui_x11_finish(&connection);
-    return io_fail(e, EIO, "UI capture: expected a visible 512x512 TrueColor window");
-  }
-  XImage* image = XGetImage(connection.display, connection.id, 0, 0,
-    512, 512, AllPlanes, ZPixmap);
-  XSync(connection.display, False);
-  if (image == NULL || ui_x11_error != 0) {
-    if (image != NULL) {
-      XDestroyImage(image);
-    }
-    ui_x11_finish(&connection);
-    return io_fail(e, EIO, "UI capture: cannot read exported window pixels");
-  }
-  Term result = ui_x11_image(e, image, 0, 0, 512);
-  XDestroyImage(image);
-  ui_x11_finish(&connection);
-  return io_done(e, result);
-#else
-  return io_fail(e, ENOTSUP, "UI capture: X11 adapter unavailable");
-#endif
-}
 #endif
 
 #ifdef CID(Desktop.key)
@@ -236,9 +164,6 @@ Term desktop_alive_run(Env e, Term* args, IoWork* work) {
 #endif
 
 static void __attribute__((constructor)) ui_native_use(void) {
-#ifdef CID(Desktop.capture)
-  io_eff(CID(Desktop.capture), desktop_capture_run, 0);
-#endif
 #ifdef CID(Desktop.key)
   io_eff(CID(Desktop.key), desktop_key_run, 0);
 #endif

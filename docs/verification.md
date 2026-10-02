@@ -1,6 +1,6 @@
 # Slice verification
 
-`make test` reruns the formal and headless runtime checks. `make ui UI_BEND='bun ../bend/bend2/main.ts'` verifies real native input and screenshots with the owned-window reference API. `make benchmark` measures native displayed frames.
+`make test` reruns the formal and headless runtime checks. `make ui UI_BEND='bun ../bend/bend2/main.ts'` verifies capture conversion, real native input, and screenshots with the fork's owned-window APIs. `make benchmark` measures native displayed frames.
 
 ## Formal scope
 
@@ -53,15 +53,21 @@ The checker derives its root from its executable directory's parent. Absolute or
 
 The native sixteen-export report and all sixteen raw PPM files matched the recorded Python baseline. Native CPU-only execution from the build directory and Bun JavaScript CPU-only execution from another directory also matched the expected eight-export report. Parser fixtures passed on native CPU and Bun JavaScript. SHA-256, image parsing, equality, and foreign IO receive runtime checks. No formal SHA or parser proof is claimed.
 
-`scripts/ui_check.bend` opens the slice's native window and drives its actual view and reducer through `App.step`. It exports `X11WindowRef{display, id}` after the first frames. The test queries and sends input to that exact reference through a separate X11 connection; it never enumerates windows or matches titles. The owner is renamed during the test, and repeated exports must preserve its identity.
+`scripts/ui_check.bend` opens the slice's native window and drives its actual view and reducer through `App.step`. It exports `X11WindowRef{display, id}` after the first frames. A separate X11 connection sends input to that reference and checks its expiry; the test never enumerates windows or matches titles. The owner is renamed during the test, and repeated exports must preserve its identity.
 
-`scripts/ui_native.c` is the narrow OS boundary for native pixel capture, key and mouse events, close requests, and checking that the exported window has expired. It returns captured pixels as a Bend `Image`; Bend checks every pixel and writes PPM evidence. No Python, Pillow, ImageMagick, or python-xlib is used by the native check. The JavaScript adapter reports unsupported native X11 operations.
+The fork's `Window.capture` returns the same owned window and `Result<Capture>`. Its Linux/X11 implementation reads the actual client drawable after completing earlier output requests. Keep the client fully on-screen and unobscured; capture excludes its border and the cursor. Unsupported backends fail rather than substituting the renderer's input image. Capture or conversion failures close the returned window before exiting.
+
+`scripts/ui_capture.bend` converts `Capture{width, height, pixels}` to an `Image`. The checker requires 512x512 dimensions and exactly 262144 array entries before reading. Each leaf reads the top-left row-major index `y * 512 + x`. The affine array owner passes sequentially through all four quadrants and is released after conversion. RGB words retain all 24 bits. `scripts/ui_capture_tests.bend` checks a literal asymmetric 4x4 tree, a single pixel, full-frame color and coordinates, and rejection of invalid width, height, or array capacity. `make ui-unit UI_BEND='bun ../bend/bend2/main.ts'` runs these checks without a window.
+
+`scripts/ui_native.c` remains the OS boundary for key and mouse events, close requests, and checking that the exported window has expired. It has no pixel-capture implementation. Bend checks every pixel and writes PPM evidence. No Python, Pillow, ImageMagick, or python-xlib is used by the native check. The JavaScript input adapter reports unsupported native X11 operations.
 
 The test captures the client image before destruction, after Space, after repeating Space, after reset, and after primary-click carving. Space must change exactly 18,520 pixels; repeating it must preserve the image. Background clicks must preserve the image. Both resets must restore every pixel. Primary click must carve a different region from Space. Escape and the window close event must stop the actual app reducer, and the exported window must then be gone. A completion channel prevents an unexpected early Close from being counted as success.
 
 The assertions are runtime checks. Native identity, capture, event delivery, and lifetime depend on foreign IO and are not claimed as formally proven. Compile and run the UI check; `--verdict` remains the gate for `PROOF.bend`'s six local laws.
 
 The harness owns its window in the test process and imports the slice's shared view and reducer. It does not launch the standalone application binary. The development run passed CPU and GPU execution with both Escape and Close, and all seven captured states matched across the four runs. The full and destroyed captures also matched the existing renderer exports. An injected premature Close exited with status 1 without reporting success. The JavaScript adapter's unsupported path exited with status 95.
+
+The `Window.capture` migration was validated with fork commit `de38700481244494b56a2f947df6fba25f798887`, which contains the capture API merged in `ecde8700807c5b7a5e5da49eaede0c5749d6e435`. Pure conversion tests passed on native CPU and Bun JavaScript. Four serialized native runs covered CPU and strict GPU execution with both Escape and the window close request. All seven PPM files from each run matched the pre-migration C-capture baseline byte-for-byte, for 28 comparisons. Both proof gates also passed with the installed compiler and the fork. These checks preserve the existing UI contract; they do not formally prove native readback.
 
 `make ui` checks Escape. To check the window close event, run the built test:
 

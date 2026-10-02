@@ -10,7 +10,7 @@ Surface extraction creates a temporary immutable snapshot for neighbor reads. Th
 
 `main.bend` owns the affine `Model` and native events. The edit reducer replaces the body, surface, and scene together. Frames reuse the scene until another edit. Window effects stay outside geometry and rendering.
 
-`scripts/ui_check.bend` owns a native test window and exports its reference with the fork's `Window.export_ref`. The test drives the slice's shared view and reducer through `App.step`. A C adapter addresses that exact window through a separate X11 connection; Bend owns the assertions and screenshot export. Platform details stay inside the test adapter. The ordinary application still builds with upstream Bend.
+`scripts/ui_check.bend` owns a native test window and drives the slice's shared view and reducer through `App.step`. The fork's `Window.capture` reads its client pixels. `scripts/ui_capture.bend` consumes the affine RGB array and builds the existing `Image` used by assertions and screenshot export. It admits only the checker's 512x512 frame and its exact pixel capacity. Row-major reads pass the array owner sequentially through the four image quadrants. A C adapter uses `Window.export_ref` through a separate X11 connection for input, close requests, and expiry checks. The ordinary application still builds with upstream Bend.
 
 Projection uses integer-valued `F32` arithmetic within the exact integer range. Pixel centers, face coverage numerators, and depth numerators remain exact. Stable face identifiers resolve depth ties. CPU and GPU calls use the same algorithm and produce exactly equal pixels in the checked cases.
 

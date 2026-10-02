@@ -6,7 +6,7 @@ export CUDA_HOME
 BINARY := build/bend-voxel-rewrite
 SOURCES := main.bend voxel.bend render.bend dump.bend
 
-.PHONY: all run proof test geometry image-unit images ui benchmark benchmark-unit clean
+.PHONY: all run proof test geometry image-unit images ui ui-unit benchmark benchmark-unit clean
 
 all: $(BINARY)
 
@@ -40,7 +40,10 @@ build/benchmark-tests: scripts/benchmark_tests.bend scripts/benchmark.bend scrip
 build/benchmark-number-tests: scripts/benchmark_number_tests.bend scripts/benchmark_number.bend | build
 	$(BEND) scripts/benchmark_number_tests.bend -o $@
 
-build/ui-check: scripts/ui_check.bend scripts/ui_native.bend scripts/ui_native.c scripts/ui_native.js $(SOURCES) | build
+build/ui-capture-tests: scripts/ui_capture_tests.bend scripts/ui_capture.bend | build
+	$(UI_BEND) scripts/ui_capture_tests.bend -o $@
+
+build/ui-check: scripts/ui_check.bend scripts/ui_capture.bend scripts/ui_native.bend scripts/ui_native.c scripts/ui_native.js $(SOURCES) | build
 	$(UI_BEND) scripts/ui_check.bend -o $@
 
 run: $(BINARY)
@@ -60,7 +63,10 @@ image-unit: build/hash-tests build/image-tests
 images: $(BINARY) build/image-checker image-unit
 	./build/image-checker --gpu off
 
-ui: build/ui-check
+ui-unit: build/ui-capture-tests
+	./build/ui-capture-tests --gpu off
+
+ui: build/ui-check ui-unit
 	./build/ui-check --gpu on -- --output .audit/screenshots/ui
 
 benchmark-unit: build/benchmark-tests build/benchmark-number-tests

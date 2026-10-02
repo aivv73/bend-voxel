@@ -2,6 +2,7 @@ import Base
 import ../main.bend as Slice
 import ../dump.bend as D
 import ./ui_native.bend as N
+import ./ui_capture.bend as C
 
 type Stage is Data:
 	First{}
@@ -65,10 +66,6 @@ def Reference.unwrapped(exported: Window & Result<&1, &1, U32 & String, WindowRe
 
 def Reference.export(window: Window) -> IO(Window & WindowRef):
 	IO.bind(Window & Result<&1, &1, U32 & String, WindowRef>, Window & WindowRef, Window.export_ref(window), Reference.unwrapped)
-
-def Reference.capture(ref: WindowRef) -> IO(Image):
-	X11WindowRef{display, id} = ref
-	IO.try(Image, N.Desktop.capture(display, id))
 
 def Reference.key(ref: WindowRef, code: U32) -> IO(Unit):
 	X11WindowRef{display, id} = ref
@@ -160,13 +157,31 @@ def Check.image(stage: Stage, session: Session, window: Window, model: Slice.Mod
 				Check.finish(ref, close_window, completed, window, model)
 				return None{}
 
+def Check.converted(stage: Stage, session: Session, window: Window, model: Slice.Model, converted: Result<&2, &2, String, Image>) -> IO(Maybe<Progress>):
+	match converted:
+		case Fail{message}:
+			do IO<Maybe<Progress>>:
+				Window.close(window)
+				IO.die(Maybe<Progress>, 1, message)
+		case Done{image}:
+			Check.image(stage, session, window, model, image)
+
+def Check.captured(stage: Stage, session: Session, model: Slice.Model, captured: Window & Result<&1, &1, U32 & String, Capture>) -> IO(Maybe<Progress>):
+	match captured:
+		case (window, Fail{(code, message)}):
+			do IO<Maybe<Progress>>:
+				Window.close(window)
+				IO.die(Maybe<Progress>, code, message)
+		case (window, Done{capture}):
+			Check.converted(stage, session, window, model, C.Capture.image(capture))
+
 def Check.verified(stage: Stage, +session: Session, model: Slice.Model, exported: Window & WindowRef) -> IO(Maybe<Progress>):
 	Session{output, expected, before, cut, close_window, completed} = session
 	(window, +ref) = exported
 	do IO<Maybe<Progress>>:
 		Check.require(Reference.same(ref, expected), "Owned window reference changed")
-		image : Image <- Reference.capture(ref)
-		Check.image(stage, session, window, model, image)
+		captured : Window & Result<&1, &1, U32 & String, Capture> <- Window.capture(window)
+		Check.captured(stage, session, model, captured)
 
 def Check.run(stage: Stage, session: Session, window: Window, model: Slice.Model) -> IO(Maybe<Progress>):
 	IO.bind(Window & WindowRef, Maybe<Progress>, Reference.export(window), exported => Check.verified(stage, session, model, exported))
