@@ -7,7 +7,7 @@ BINARY := build/bend-voxel-rewrite
 SOURCES := main.bend voxel.bend render.bend dump.bend
 UI_TEST_SOURCES := deps/bend-ui-test/uitest.bend deps/bend-ui-test/plan.bend deps/bend-ui-test/uitest.c deps/bend-ui-test/uitest.js
 
-.PHONY: all run proof test geometry image-unit images ui ui-unit benchmark benchmark-unit clean
+.PHONY: all run proof test geometry image-unit image-regression images ui ui-unit benchmark benchmark-unit clean
 
 all: $(BINARY)
 
@@ -31,6 +31,12 @@ build/hash-tests: scripts/hash_tests.bend scripts/sha256.bend | build
 
 build/image-tests: scripts/image_tests.bend scripts/image_data.bend scripts/sha256.bend | build
 	$(BEND) scripts/image_tests.bend -o $@
+
+build/image-fixture: scripts/image_fixture.bend scripts/image_data.bend scripts/sha256.bend dump.bend | build
+	$(BEND) scripts/image_fixture.bend -o $@
+
+build/image-regressions: scripts/image_regressions.bend scripts/image_fixture.bend scripts/image_data.bend scripts/sha256.bend dump.bend | build
+	$(BEND) scripts/image_regressions.bend -o $@
 
 build/benchmark: scripts/benchmark.bend scripts/benchmark_host.bend scripts/benchmark_number.bend scripts/sha256.bend | build
 	$(BEND) scripts/benchmark.bend -o $@
@@ -61,7 +67,10 @@ image-unit: build/hash-tests build/image-tests
 	./build/hash-tests --gpu off
 	./build/image-tests --gpu off
 
-images: $(BINARY) build/image-checker image-unit
+image-regression: $(BINARY) build/image-checker build/image-fixture build/image-regressions
+	./build/image-regressions --gpu off
+
+images: $(BINARY) build/image-checker image-unit image-regression
 	./build/image-checker --gpu off
 
 ui-unit: build/ui-capture-tests

@@ -135,13 +135,49 @@ def Scene.name(cut: Bool) -> String:
 def Scene.boolean(cut: Bool) -> String:
 	Bool.pick(String, cut, "True", "False")
 
+def Scene.expected_hash(cut: Bool) -> String:
+	Bool.pick(String, cut,
+		"4071d9e26a5a50cf429d4f65c6392fa679d784c2b7671933d4a9f4209e11b49d",
+		"a259f628eaeb04b707de9e5dc960eca4d80007fba2530beb96786cbca7b14a9b")
+
 def Variant.label(cut: Bool, variant: Variant) -> String:
 	Variant{gpu, tile, fork} = variant
 	"cut=" ++ Scene.boolean(cut) ++ " GPU=" ++ gpu ++ " tile=" ++ tile ++ " fork=" ++ fork
 
-def Variant.path(root: String, cut: Bool, variant: Variant) -> String:
+def Variant.template(root: String, cut: Bool, variant: Variant) -> String:
 	Variant{gpu, tile, fork} = variant
-	Path.join(root, "build/image-check/" ++ Scene.name(cut) ++ "-" ++ gpu ++ "-" ++ tile ++ "-" ++ fork ++ ".ppm")
+	Path.join(root, "build/image-check/" ++ Scene.name(cut) ++ "-" ++ gpu ++ "-" ++ tile ++ "-" ++ fork ++ ".XXXXXX")
+
+def Run.directory_reverse(output: String) -> IO(String):
+	match output:
+		case SCon{'\n', rest}:
+			+path = String.reverse(rest)
+			do IO<String>:
+				Check.require(Bool.not(String.is_empty(path)) && Bool.not(String.contains(path, "\n")), "Image output reservation returned an invalid path")
+				return path
+		case _:
+			IO.die(String, 1, "Image output reservation did not return a newline-terminated path")
+
+def Run.directory_done(value: U32 & (String & String)) -> IO(String):
+	(+status, output) = value
+	(stdout, stderr) = output
+	do IO<String>:
+		Run.stderr_text(stderr)
+		Check.require(U32.is_eq(status, 0), "Image output reservation failed with exit " ++ U32.show(status))
+		Run.directory_reverse(String.reverse(stdout))
+
+def Run.directory_result(result: Result<&1, &1, U32 & String, U32 & (String & String)>) -> IO(String):
+	match result:
+		case Done{value}:
+			Run.directory_done(value)
+		case Fail{(code, message)}:
+			IO.die(String, 1, "Image output reservation failed: " ++ message)
+
+def Run.fresh_path(root: String, cut: Bool, variant: Variant) -> IO(String):
+	do IO<String>:
+		result : Result<&1, &1, U32 & String, U32 & (String & String)> <- Process.run("mktemp", ["-d", Variant.template(root, cut, variant)], "", 16777216, 30000)
+		directory : String <- Run.directory_result(result)
+		return directory ++ "/render.ppm"
 
 def Variant.args_cut(cut: Bool, args: List<String>) -> List<String>:
 	match cut:
@@ -154,29 +190,38 @@ def Variant.args(cut: Bool, variant: Variant, path: String) -> List<String>:
 	Variant{gpu, tile, fork} = variant
 	Variant.args_cut(cut, ["--gpu", gpu, "--threads", "1", "--tile-depth", tile, "--fork-depth", fork, "--dump", path])
 
-def Run.output(baseline: Maybe<&2, Data.Raster>, path: String, +label: String) -> IO(Data.Raster):
+def Check.golden(+cut: Bool, image: Data.Raster, +label: String) -> IO(Unit):
+	do IO<Unit>:
+		+hash : String <- Check.result(String, Data.Image.hash(image), label ++ " RGB SHA-256")
+		Check.require(String.eq(hash, Scene.expected_hash(cut)), "Golden RGB SHA-256 mismatch for " ++ Scene.name(cut) ++ ". " ++ label ++ " expected " ++ Scene.expected_hash(cut) ++ ", found " ++ hash)
+		IO.print(label ++ ": golden RGB sha256=" ++ hash)
+
+def Run.agreement(baseline: Maybe<&2, Data.Raster>, path: String, +label: String, candidate: Data.Raster) -> IO(Data.Raster):
 	match baseline:
 		case None{}:
-			do IO<Data.Raster>:
-				parsed : Result<&2, &2, String, Data.Raster> <- Data.Image.read(path)
-				image : Data.Raster <- Check.result(Data.Raster, parsed, label)
-				IO.print(label ++ ": exact image equal")
-				return image
+			IO.pure(Data.Raster, candidate)
 		case Some{+image}:
 			do IO<Data.Raster>:
 				compared : Result<&2, &2, String, Unit> <- Data.Image.compare(path, image)
 				Check.result(Unit, compared, label)
-				IO.print(label ++ ": exact image equal")
+				IO.print(label ++ ": exact image equal to CPU reference")
 				return image
+
+def Run.output(baseline: Maybe<&2, Data.Raster>, cut: Bool, +path: String, +label: String) -> IO(Data.Raster):
+	do IO<Data.Raster>:
+		parsed : Result<&2, &2, String, Data.Raster> <- Data.Image.read(path)
+		+image : Data.Raster <- Check.result(Data.Raster, parsed, label)
+		Check.golden(cut, image, label)
+		Run.agreement(baseline, path, label, image)
 
 def Run.variant(options: Options, +cut: Bool, +variant: Variant, baseline: Maybe<&2, Data.Raster>) -> IO(Data.Raster):
 	Options{cpu_only, +root, binary, help} = options
 	+label = Variant.label(cut, variant)
-	+path = Variant.path(root, cut, variant)
 	do IO<Data.Raster>:
+		+path : String <- Run.fresh_path(root, cut, variant)
 		result : Result<&1, &1, U32 & String, U32 & (String & String)> <- Process.run(Path.join(root, binary), Variant.args(cut, variant, path), "", 16777216, 180000)
 		Run.process(label, result)
-		Run.output(baseline, path, label)
+		Run.output(baseline, cut, path, label)
 
 def Run.variants(variants: List<&2, Variant>, +options: Options, +cut: Bool, baseline: Maybe<&2, Data.Raster>) -> IO(Data.Raster):
 	match variants baseline:
@@ -215,7 +260,7 @@ def Run.images(+options: Options) -> IO(Unit):
 def Run.options_checked(help: Bool, options: Options, +root: String, +binary: String) -> IO(Unit):
 	match help:
 		case True{}:
-			IO.print("Usage: image-checker [--cpu-only] [--root repository] [--binary renderer]\nCompare complete 512x512 P3 renderer exports across CPU and GPU variants.")
+			IO.print("Usage: image-checker [--cpu-only] [--root repository] [--binary renderer]\nCheck fresh complete 512x512 P3 exports against scene goldens and exact CPU/GPU agreement.")
 		case False{}:
 			do IO<Unit>:
 				Check.require(Bool.not(String.is_empty(root)), "Use an executable path containing '/' or provide --root repository")

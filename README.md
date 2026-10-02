@@ -48,7 +48,7 @@ Run the formal laws, geometry reference cases, and complete CPU/GPU image compar
 	make test
 ```
 
-The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. The image checker and its parser and SHA-256 tests are also written in Bend. Run them with `make images`, or run only the parser and hash tests with `make image-unit`. Image checks force both `--gpu off` and `--gpu on` across four tile and fork configurations. `make benchmark-unit` checks benchmark parsing, ordering, report generation, and numeric behavior without opening windows.
+The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. The image checker, process regressions, parser tests, and SHA-256 tests are also written in Bend. Run them with `make images`, or run only the parser and hash tests with `make image-unit`. Run the checker process regressions separately with `make image-regression`. Image checks force both `--gpu off` and `--gpu on` across four tile and fork configurations. `make benchmark-unit` checks benchmark parsing, ordering, report generation, and numeric behavior without opening windows.
 
 To compare images on a machine without a GPU, run the CPU cases:
 
@@ -57,7 +57,9 @@ To compare images on a machine without a GPU, run the CPU cases:
 	./build/image-checker --gpu off -- --cpu-only
 ```
 
-The checker saves exports under `build/image-check`. It resolves the repository from its executable path, so absolute or relative invocations also work from another directory. If you invoke a bare executable name through `PATH`, supply `--root /path/to/repository`. Use `--binary path/to/renderer` to select another renderer. Relative renderer paths resolve under that root.
+The checker reserves a fresh directory under `build/image-check` for each renderer dispatch and reads its new `render.ppm`. A zero-exit renderer that writes no file fails. Every complete 512x512 export must match the fixed full-scene or cut-scene RGB SHA-256 golden. Exact CPU variant and CPU/GPU comparisons run separately from the golden check. The sample pixels and 18,520-pixel destruction delta remain required. Read [the golden update procedure](docs/verification.md#update-the-image-goldens) before changing expected hashes.
+
+The checker resolves the repository from its executable path, so absolute or relative invocations also work from another directory. If you invoke a bare executable name through `PATH`, supply `--root /path/to/repository`. Use `--binary path/to/renderer` to select another renderer. Relative renderer paths resolve under that root.
 
 The parser accepts the renderer's unsigned ASCII P3 format with literal `P3 512 512 255` header tokens and exactly 786,432 channels in 0..255. ASCII whitespace and leading zeros in channels are accepted. PPM comments, signed values, digit underscores, and Unicode digits are rejected.
 
