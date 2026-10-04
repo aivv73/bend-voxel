@@ -16,7 +16,7 @@ type Bounds is Data:
 	Bounds{minx: U32, miny: U32, maxx: U32, maxy: U32}
 
 type Projected is Data:
-	Projected{cell: V.Cell, direction: V.Direction, plane_delta: F32, u_eye: F32, v_eye: F32, color: L.Ramp, visibility: L.ColorField, id: U32, bounds: Bounds}
+	Projected{cell: V.Cell, direction: V.Direction, plane_delta: F32, u_eye: F32, v_eye: F32, color: L.Ramp, visibility: L.ColorField, id: U32, bounds: Bounds, width: F32, height: F32, outline: Bool}
 
 type Tiles is Data:
 	Tile{x: U32, y: U32, size: U32, faces: List<&2, Projected>}
@@ -29,6 +29,7 @@ type Hit is Data:
 	Hit{depth: F32, color: U32, id: U32, cell: Maybe<&2, V.Cell>, direction: V.Direction}
 
 type ShadowDepth is Data:
+	Resolution{width: U32, image: ShadowDepth}
 	Depth{depth: F32}
 	DepthQuad{tl: ShadowDepth, tr: ShadowDepth, bl: ShadowDepth, br: ShadowDepth}
 
@@ -86,6 +87,9 @@ def Vec3.unit(a: Vec3, +length: F32) -> Vec3:
 
 def Camera.initial() -> Camera:
 	Camera{Vec3{18.0, 18.0, 15.0}, (0.0 - 2.35619449 : F32), (0.0 - 0.5070985 : F32)}
+
+def Camera.atelier() -> Camera:
+	Camera{Vec3{310.0,(0.0 - 50.0 : F32),110.0}, 1.90401163, (0.0 - 0.30 : F32)}
 
 def Camera.basis(camera: Camera) -> Basis:
 	Camera{eye, +yaw, +pitch} = camera
@@ -260,27 +264,30 @@ def Face.light(direction: V.Direction) -> M.Light:
 		case _:
 			M.Low{}
 
-def Projected.bounded(bounds: Maybe<&2, Bounds>, cell: V.Cell, direction: V.Direction, plane: F32, u_eye: F32, v_eye: F32, color: L.Ramp, visibility: L.ColorField, id: U32) -> Maybe<&2, Projected>:
+def Projected.bounded(bounds: Maybe<&2, Bounds>, cell: V.Cell, direction: V.Direction, plane: F32, u_eye: F32, v_eye: F32, color: L.Ramp, visibility: L.ColorField, id: U32, width: F32, height: F32, outline: Bool) -> Maybe<&2, Projected>:
 	match bounds:
 		case None{}:
 			None{}
 		case Some{b}:
-			Some{Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, b}}
+			Some{Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, b, width, height, outline}}
 
-def Projected.coordinates(+cell: V.Cell, +direction: V.Direction, +basis: Basis, id: U32, color: L.Ramp, visibility: L.ColorField, coordinates: Vec3, axis: Vec3) -> Maybe<&2, Projected>:
+def Projected.coordinates(+cell: V.Cell, +direction: V.Direction, +basis: Basis, id: U32, color: L.Ramp, visibility: L.ColorField, coordinates: Vec3, axis: Vec3, +width: F32, +height: F32, outline: Bool) -> Maybe<&2, Projected>:
 	Vec3{+plane, +u, +v} = coordinates
 	Vec3{ep, eu, ev} = axis
 	Projected.bounded(Bounds.quad(basis, Basis.local(basis, Face.point(direction, plane, u, v)),
-		Basis.local(basis, Face.point(direction, plane, (u + 1.0 : F32), v)),
-		Basis.local(basis, Face.point(direction, plane, (u + 1.0 : F32), (v + 1.0 : F32))),
-		Basis.local(basis, Face.point(direction, plane, u, (v + 1.0 : F32)))),
-		cell, direction, (plane - ep : F32), (eu - u : F32), (ev - v : F32), color, visibility, id)
+		Basis.local(basis, Face.point(direction, plane, (u + width : F32), v)),
+		Basis.local(basis, Face.point(direction, plane, (u + width : F32), (v + height : F32))),
+		Basis.local(basis, Face.point(direction, plane, u, (v + height : F32)))),
+		cell, direction, (plane - ep : F32), (eu - u : F32), (ev - v : F32), color, visibility, id, width, height, outline)
 
-def Projected.of(face: V.Face, +basis: Basis, palette: L.Palette, id: U32) -> Maybe<&2, Projected>:
-	V.Face{+cell, +direction, material} = face
-	Basis{eye, right, up, forward, focal, near} = basis
-	Projected.coordinates(cell, direction, basis, id, L.Palette.surface(palette, material, direction), L.Color{9},
-		Face.coordinates(direction, cell), Face.axes(direction, eye))
+def Projected.of(+face: V.Face, +basis: Basis, palette: L.Palette, id: U32) -> Maybe<&2, Projected>:
+	match face:
+		case V.Face{+cell,+direction,material}:
+			Basis{eye,right,up,forward,focal,near} = basis
+			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),L.Color{9},Face.coordinates(direction,cell),Face.axes(direction,eye),1.0,1.0,True{})
+		case V.Rectangle{+cell,+direction,material,width,height}:
+			Basis{eye,right,up,forward,focal,near} = basis
+			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),L.Color{9},Face.coordinates(direction,cell),Face.axes(direction,eye),U32.to_f32(width),U32.to_f32(height),False{})
 
 def Projected.add(value: Maybe<&2, Projected>, rest: List<&2, Projected>) -> List<&2, Projected>:
 	match value:
@@ -297,7 +304,7 @@ def Projected.list(faces: List<&2, V.Face>, +basis: Basis, +palette: L.Palette, 
 			Projected.add(Projected.of(face, basis, palette, id), Projected.list(rest, basis, palette, (id + 1 : U32)))
 
 def Projected.overlaps(face: Projected, +x: U32, +y: U32, +size: U32) -> Bool:
-	Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, Bounds{minx, miny, maxx, maxy}} = face
+	Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, Bounds{minx, miny, maxx, maxy}, width, height, outline} = face
 	((minx < x + size) && (miny < y + size) && (maxx > x) && (maxy > y) : U32)
 
 def Projected.filter(faces: List<&2, Projected>, +x: U32, +y: U32, +size: U32, found: List<&2, Projected>) -> List<&2, Projected>:
@@ -344,32 +351,46 @@ def Hit.closer(previous_cell: Maybe<&2, V.Cell>, +depth: F32, +previous: F32, id
 		case Some{cell}:
 			((depth < previous : F32) || (F32.is_eq(depth, previous) && (id < old_id : U32)))
 
-def Hit.covered(covered: Bool, +u: F32, +v: F32, cell: V.Cell, +depth: F32, color: L.Ramp, visibility: L.ColorField, +id: U32, direction: V.Direction, old: Hit) -> Hit:
+def Hit.covered(covered: Bool, +u: F32, +v: F32, cell: V.Cell, +depth: F32, color: L.Ramp, visibility: L.ColorField, +id: U32, direction: V.Direction, outline: Bool, old: Hit) -> Hit:
 	match covered:
 		case False{}:
 			old
 		case True{}:
 			Hit{+previous, old_color, +old_id, +old_cell, +old_direction} = old
 			Hit.accept(Hit.closer(old_cell, depth, previous, id, old_id), cell, depth,
-				color, visibility, u, v, ((u < 0.0225) || (v < 0.0225) || (u > 0.9775) || (v > 0.9775) : F32), id, direction, Hit{previous, old_color, old_id, old_cell, old_direction})
+				color, visibility, u, v, outline && ((u < 0.0225) || (v < 0.0225) || (u > 0.9775) || (v > 0.9775) : F32), id, direction, Hit{previous, old_color, old_id, old_cell, old_direction})
 
-def Hit.intersection(nonparallel: Bool, +denom: F32, plane: F32, u_eye: F32, v_eye: F32, du: F32, dv: F32, +near: F32, cell: V.Cell, color: L.Ramp, visibility: L.ColorField, id: U32, direction: V.Direction, old: Hit) -> Hit:
+def Face.offset(direction: V.Direction, +x: U32, +y: U32, +z: U32, +u: U32, +v: U32) -> V.Cell:
+	match direction:
+		case V.NegX{}: V.Cell{x,(y + u : U32),(z + v : U32)}
+		case V.PosX{}: V.Cell{x,(y + u : U32),(z + v : U32)}
+		case V.NegY{}: V.Cell{(x + u : U32),y,(z + v : U32)}
+		case V.PosY{}: V.Cell{(x + u : U32),y,(z + v : U32)}
+		case _: V.Cell{(x + u : U32),(y + v : U32),z}
+
+def Face.sample_cell(direction: V.Direction, cell: V.Cell, u: F32, v: F32, width: F32, height: F32) -> V.Cell:
+	V.Cell{+x,+y,+z} = cell
+	+du = F32.to_u32(F32.min(F32.floor(u), (width - 1.0 : F32)))
+	+dv = F32.to_u32(F32.min(F32.floor(v), (height - 1.0 : F32)))
+	Face.offset(direction, x,y,z,du,dv)
+
+def Hit.intersection(nonparallel: Bool, +denom: F32, plane: F32, u_eye: F32, v_eye: F32, du: F32, dv: F32, +near: F32, +cell: V.Cell, color: L.Ramp, visibility: L.ColorField, id: U32, +direction: V.Direction, +width: F32, +height: F32, outline: Bool, old: Hit) -> Hit:
 	match nonparallel:
 		case False{}:
 			old
 		case True{}:
 			+t = (plane / denom : F32)
-			+u = (u_eye + t * du : F32)
-			+v = (v_eye + t * dv : F32)
-			Hit.covered((F32.is_eq((t - t : F32), 0.0) && ((t >= near) && (u >= 0.0) && (u <= 1.0) && (v >= 0.0) && (v <= 1.0) : F32)), u, v, cell, t, color, visibility, id, direction, old)
+			+u = ((u_eye + t * du) / width : F32)
+			+v = ((v_eye + t * dv) / height : F32)
+			Hit.covered((F32.is_eq((t - t : F32), 0.0) && ((t >= near) && (u >= 0.0) && (u <= 1.0) && (v >= 0.0) && (v <= 1.0) : F32)), u, v, Face.sample_cell(direction, cell, (u * width : F32), (v * height : F32), width, height), t, color, visibility, id, direction, outline, old)
 
 def Hit.axes(face: Projected, axis: Vec3, near: F32, old: Hit) -> Hit:
-	Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds} = face
+	Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline} = face
 	Vec3{+denom, du, dv} = axis
-	Hit.intersection(F32.is_ne(denom, 0.0), denom, plane, u_eye, v_eye, du, dv, near, cell, color, visibility, id, direction, old)
+	Hit.intersection(F32.is_ne(denom, 0.0), denom, plane, u_eye, v_eye, du, dv, near, cell, color, visibility, id, direction, width, height, outline, old)
 
 def Hit.face(+face: Projected, ray: Vec3, near: F32, old: Hit) -> Hit:
-	Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds} = face
+	Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline} = face
 	Hit.axes(face, Face.axes(direction, ray), near, old)
 
 def Background.color(floor: Bool, +x: U32, +y: U32) -> U32:
@@ -402,12 +423,28 @@ def Shadow.depth() -> Nat:
 def Shadow.width() -> U32:
 	(1 << Shadow.depth() : U32)
 
-def Shadow.extent(faces: List<&2, V.Face>, extent: U32) -> U32:
+def Face.extent_axes(direction: V.Direction, cell: V.Cell, +width: U32, +height: U32) -> U32:
+	match direction cell:
+		case V.NegX{} V.Cell{x,y,z}: U32.max((x + 1 : U32),U32.max((y + width : U32),(z + height : U32)))
+		case V.PosX{} V.Cell{x,y,z}: U32.max((x + 1 : U32),U32.max((y + width : U32),(z + height : U32)))
+		case V.NegY{} V.Cell{x,y,z}: U32.max((y + 1 : U32),U32.max((x + width : U32),(z + height : U32)))
+		case V.PosY{} V.Cell{x,y,z}: U32.max((y + 1 : U32),U32.max((x + width : U32),(z + height : U32)))
+		case _ V.Cell{x,y,z}: U32.max((z + 1 : U32),U32.max((x + width : U32),(y + height : U32)))
+
+def Face.extent(face: V.Face) -> U32:
+	match face:
+		case V.Face{cell,direction,material}: Face.extent_axes(direction,cell,1,1)
+		case V.Rectangle{cell,direction,material,width,height}: Face.extent_axes(direction,cell,width,height)
+
+def Shadow.extent(faces: List<&2,V.Face>, extent: U32) -> U32:
 	match faces:
-		case Nil{}:
-			extent
-		case V.Face{V.Cell{x, y, z}, direction, material} <> rest:
-			Shadow.extent(rest, U32.max(extent, (U32.max(x, U32.max(y, z)) + 1 : U32)))
+		case Nil{}: extent
+		case face <> rest: Shadow.extent(rest,U32.max(extent,Face.extent(face)))
+
+def Shadow.resolution(depths: ShadowDepth) -> U32:
+	match depths:
+		case Resolution{width,image}: width
+		case _: Shadow.width()
 
 def Shadow.basis(+extent: U32) -> Basis:
 	+sun = Vec3.scale(Vec3{(0.0 - 0.45 : F32), 0.35, 0.82}, (1.0 / L.Sun.length() : F32))
@@ -427,25 +464,28 @@ def Shadow.bounds(vertices: List<&2, Vec3>, +scale: F32, minx: F32, miny: F32, m
 			+py = (256.0 - scale * y : F32)
 			Shadow.bounds(rest, scale, F32.min(minx, px), F32.min(miny, py), F32.max(maxx, px), F32.max(maxy, py))
 
-def Shadow.project(face: V.Face, +basis: Basis, coordinates: Vec3, axis: Vec3) -> Maybe<&2, Projected>:
-	V.Face{+cell, +direction, material} = face
-	Basis{+eye, right, up, forward, scale, near} = basis
-	Vec3{+plane, +u, +v} = coordinates
-	Vec3{ep, eu, ev} = axis
-	Projected.bounded(Shadow.bounds([Basis.local(basis, Face.point(direction, plane, u, v)),
-		Basis.local(basis, Face.point(direction, plane, (u + 1.0 : F32), v)),
-		Basis.local(basis, Face.point(direction, plane, (u + 1.0 : F32), (v + 1.0 : F32))),
-		Basis.local(basis, Face.point(direction, plane, u, (v + 1.0 : F32)))], scale, 512.0, 512.0, 0.0, 0.0),
-		cell, direction, (plane - ep : F32), (eu - u : F32), (ev - v : F32), L.Ramp.constant(0), L.Color{9}, 0)
+def Shadow.project(+cell: V.Cell, +direction: V.Direction, +width: F32, +height: F32, +basis: Basis, coordinates: Vec3, axis: Vec3) -> Maybe<&2, Projected>:
+	Basis{eye,right,up,forward,scale,near} = basis
+	Vec3{+plane,+u,+v} = coordinates
+	Vec3{ep,eu,ev} = axis
+	Projected.bounded(Shadow.bounds([Basis.local(basis,Face.point(direction,plane,u,v)),
+		Basis.local(basis,Face.point(direction,plane,(u + width : F32),v)),
+		Basis.local(basis,Face.point(direction,plane,(u + width : F32),(v + height : F32))),
+		Basis.local(basis,Face.point(direction,plane,u,(v + height : F32)))],scale,512.0,512.0,0.0,0.0),
+		cell,direction,(plane - ep : F32),(eu - u : F32),(ev - v : F32),L.Ramp.constant(0),L.Color{9},0,width,height,False{})
 
-def Shadow.of(+face: V.Face, +basis: Basis) -> Maybe<&2, Projected>:
-	V.Face{cell, +direction, material} = face
-	Basis{eye, right, up, forward, scale, near} = basis
-	Shadow.project(face, basis, Face.coordinates(direction, cell), Face.axes(direction, eye))
+def Shadow.of(face: V.Face, +basis: Basis) -> Maybe<&2, Projected>:
+	match face:
+		case V.Face{+cell,+direction,material}:
+			Basis{eye,right,up,forward,scale,near} = basis
+			Shadow.project(cell,direction,1.0,1.0,basis,Face.coordinates(direction,cell),Face.axes(direction,eye))
+		case V.Rectangle{+cell,+direction,material,width,height}:
+			Basis{eye,right,up,forward,scale,near} = basis
+			Shadow.project(cell,direction,U32.to_f32(width),U32.to_f32(height),basis,Face.coordinates(direction,cell),Face.axes(direction,eye))
 
-def Shadow.face_hit(cell: V.Cell, +direction: V.Direction, plane: F32, u_eye: F32, v_eye: F32, color: L.Ramp, visibility: L.ColorField, id: U32, bounds: Bounds, ray: Vec3, near: F32, hit: Hit, axis: Vec3) -> Hit:
+def Shadow.face_hit(cell: V.Cell, +direction: V.Direction, plane: F32, u_eye: F32, v_eye: F32, color: L.Ramp, visibility: L.ColorField, id: U32, bounds: Bounds, width: F32, height: F32, outline: Bool, ray: Vec3, near: F32, hit: Hit, axis: Vec3) -> Hit:
 	Vec3{dp, du, dv} = axis
-	Hit.axes(Projected{cell, direction, (plane - dp : F32), (u_eye + du : F32), (v_eye + dv : F32), color, visibility, id, bounds}, Face.axes(direction, ray), near, hit)
+	Hit.axes(Projected{cell, direction, (plane - dp : F32), (u_eye + du : F32), (v_eye + dv : F32), color, visibility, id, bounds, width, height, outline}, Face.axes(direction, ray), near, hit)
 
 def Shadow.faces(faces: List<&2, V.Face>, +basis: Basis) -> List<&2, Projected>:
 	match faces:
@@ -458,8 +498,8 @@ def Shadow.hit(faces: List<&2, Projected>, +delta: Vec3, +ray: Vec3, +near: F32,
 	match faces:
 		case Nil{}:
 			hit
-		case Projected{cell, +direction, plane, u_eye, v_eye, color, visibility, id, bounds} <> rest:
-			Shadow.hit(rest, delta, ray, near, Shadow.face_hit(cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, ray, near, hit, Face.axes(direction, delta)))
+		case Projected{cell, +direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline} <> rest:
+			Shadow.hit(rest, delta, ray, near, Shadow.face_hit(cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline, ray, near, hit, Face.axes(direction, delta)))
 
 def Shadow.depth_pixel(hit: Hit) -> ShadowDepth:
 	match hit:
@@ -490,15 +530,24 @@ def Shadow.tiles(tiles: Tiles, +basis: Basis, +depth: Nat) -> ShadowDepth:
 		case Split{tl, tr, bl, br} 0n:
 			Depth{1.0e30}
 
+def Shadow.configured(depth: Nat, image: ShadowDepth) -> ShadowDepth:
+	match depth:
+		case 7n: image
+		case +n: Resolution{U32.pow(2,n),image}
+
 def ShadowMap.build(surface: V.Surface) -> ShadowMap:
 	V.Surface{+faces} = surface
-	+basis = Shadow.basis(Shadow.extent(faces, 1))
-	+tile_depth = Nat.min(4n, Shadow.depth())
-	ShadowMap{basis, Shadow.tiles(Tiles.build(tile_depth, Shadow.faces(faces, basis), 0, 0, 512), basis, Shadow.depth()),
-		L.Ramp.build(M.LinearRgb{0.10, 0.12, 0.15}, V.PosZ{}), L.Ramp.build(M.LinearRgb{0.055, 0.065, 0.08}, V.PosZ{})}
+	+extent = Shadow.extent(faces,1)
+	+basis = Shadow.basis(extent)
+	+depth = Bool.pick(Nat,(extent > 32 : U32),9n,Shadow.depth())
+	+tile_depth = Nat.min(4n,depth)
+	ShadowMap{basis,Shadow.configured(depth,Shadow.tiles(Tiles.build(tile_depth,Shadow.faces(faces,basis),0,0,512),basis,depth)),
+		L.Ramp.build(M.LinearRgb{0.10,0.12,0.15},V.PosZ{}),L.Ramp.build(M.LinearRgb{0.055,0.065,0.08},V.PosZ{})}
 
 def Shadow.read(image: ShadowDepth, +x: U32, +y: U32, +size: U32, right: Bool, bottom: Bool) -> F32:
 	match image:
+		case Resolution{width,child}:
+			Shadow.read(child,x,y,size,right,bottom)
 		case Depth{depth}:
 			depth
 		case DepthQuad{tl, tr, bl, br}:
@@ -512,8 +561,8 @@ def Shadow.read(image: ShadowDepth, +x: U32, +y: U32, +size: U32, right: Bool, b
 				case True{} True{}:
 					Shadow.read(br, (x % (size / 2) : U32), (y % (size / 2) : U32), (size / 2 : U32), (x % (size / 2) >= size / 4 : U32), (y % (size / 2) >= size / 4 : U32))
 
-def Shadow.at(depths: ShadowDepth, +x: U32, +y: U32) -> F32:
-	+size = Shadow.width()
+def Shadow.at(+depths: ShadowDepth, +x: U32, +y: U32) -> F32:
+	+size = Shadow.resolution(depths)
 	Shadow.read(depths, x, y, size, (x >= size / 2 : U32), (y >= size / 2 : U32))
 
 def Shadow.sample.inside(inside: Bool, depths: ShadowDepth, x: F32, y: F32, depth: F32) -> U32:
@@ -523,8 +572,8 @@ def Shadow.sample.inside(inside: Bool, depths: ShadowDepth, x: F32, y: F32, dept
 		case True{}:
 			L.Shadow.visible((depth > Shadow.at(depths, F32.to_u32(x), F32.to_u32(y)) : F32))
 
-def Shadow.sample(depths: ShadowDepth, +x: F32, +y: F32, depth: F32) -> U32:
-	+width = U32.to_f32(Shadow.width())
+def Shadow.sample(+depths: ShadowDepth, +x: F32, +y: F32, depth: F32) -> U32:
+	+width = U32.to_f32(Shadow.resolution(depths))
 	Shadow.sample.inside(((x >= 0.0) && (x < width) && (y >= 0.0) && (y < width) : F32), depths, x, y, depth)
 
 # Compare each PCF tap to the receiver's plane at that texel centre. This
@@ -537,7 +586,7 @@ def Shadow.visibility.local(shadow: ShadowMap, point: Vec3, normal: Vec3) -> U32
 	Basis{eye, right, up, forward, scale, near} = basis
 	Vec3{px, py, +depth} = point
 	Vec3{nx, ny, +nz} = normal
-	+width = U32.to_f32(Shadow.width())
+	+width = U32.to_f32(Shadow.resolution(depths))
 	+u = (width * 0.5 + px * scale * width / 512.0 : F32)
 	+v = (width * 0.5 - py * scale * width / 512.0 : F32)
 	+x = F32.floor(u)
@@ -574,31 +623,36 @@ def Lighting.face_point(shadow: ShadowMap, +direction: V.Direction, coordinates:
 	Vec3{plane, u, v} = coordinates
 	L.Color{Shadow.visibility(shadow, Face.point(direction, plane, (u + u_offset : F32), (v + v_offset : F32)), direction)}
 
-def Lighting.face_field(+depth: Nat, +shadow: ShadowMap, +cell: V.Cell, +direction: V.Direction, +x: U32, +y: U32, +size: U32) -> L.ColorField:
+def Lighting.face_field(+depth: Nat, +shadow: ShadowMap, +cell: V.Cell, +direction: V.Direction, +width: F32, +height: F32, +resolution: F32, +x: U32, +y: U32, +size: U32) -> L.ColorField:
 	match depth:
 		case 0n:
-			Lighting.face_point(shadow, direction, Face.coordinates(direction, cell), ((U32.to_f32(x) + 0.5) / 16.0 : F32), ((U32.to_f32(y) + 0.5) / 16.0 : F32))
+			Lighting.face_point(shadow, direction, Face.coordinates(direction, cell), ((U32.to_f32(x) + 0.5) * width / resolution : F32), ((U32.to_f32(y) + 0.5) * height / resolution : F32))
 		case 1n+rest:
 			+h = (size / 2 : U32)
-			L.ColorField.join(Lighting.face_field(rest, shadow, cell, direction, x, y, h),
-				Lighting.face_field(rest, shadow, cell, direction, (x + h : U32), y, h),
-				Lighting.face_field(rest, shadow, cell, direction, x, (y + h : U32), h),
-				Lighting.face_field(rest, shadow, cell, direction, (x + h : U32), (y + h : U32), h))
+			L.ColorField.join(Lighting.face_field(rest, shadow, cell, direction, width, height, resolution, x, y, h),
+				Lighting.face_field(rest, shadow, cell, direction, width, height, resolution, (x + h : U32), y, h),
+				Lighting.face_field(rest, shadow, cell, direction, width, height, resolution, x, (y + h : U32), h),
+				Lighting.face_field(rest, shadow, cell, direction, width, height, resolution, (x + h : U32), (y + h : U32), h))
 
-def Lighting.face_sunny(sunny: Bool, shadow: ShadowMap, cell: V.Cell, direction: V.Direction) -> L.ColorField:
+def Lighting.face_sunny(sunny: Bool, shadow: ShadowMap, cell: V.Cell, direction: V.Direction, +width: F32, +height: F32) -> L.ColorField:
 	match sunny:
 		case False{}:
 			L.Color{9}
 		case True{}:
-			Lighting.face_field(4n, shadow, cell, direction, 0, 0, 16)
+			+depth = U32.to_nat(U32.min(8,U32.max(4,(U32.from_nat(U32.log2(F32.to_u32(F32.max(width,height)))) + 1 : U32))))
+			+resolution = U32.pow(2,depth)
+			Lighting.face_field(depth, shadow, cell, direction, width, height, U32.to_f32(resolution), 0, 0, resolution)
 
 def Lighting.faces(faces: List<&2, V.Face>, +shadow: ShadowMap) -> List<&2, Illuminated>:
 	match faces:
 		case Nil{}:
 			Nil{}
 		case +face <> rest:
-			V.Face{cell, +direction, material} = face
-			Illuminated{face, Lighting.face_sunny((L.Sun.cosine(direction) > 0.0 : F32), shadow, cell, direction)} <> Lighting.faces(rest, shadow)
+			match face:
+				case V.Face{cell, +direction, material}:
+					Illuminated{face, Lighting.face_sunny((L.Sun.cosine(direction) > 0.0 : F32), shadow, cell, direction, U32.to_f32(V.Face.width(face)), U32.to_f32(V.Face.height(face)))} <> Lighting.faces(rest, shadow)
+				case V.Rectangle{cell, +direction, material, width0, height0}:
+					Illuminated{face, Lighting.face_sunny((L.Sun.cosine(direction) > 0.0 : F32), shadow, cell, direction, U32.to_f32(V.Face.width(face)), U32.to_f32(V.Face.height(face)))} <> Lighting.faces(rest, shadow)
 
 def Lighting.ground_field(+depth: Nat, +shadow: ShadowMap, +x: U32, +y: U32, +size: U32) -> L.ColorField:
 	match depth:
@@ -623,10 +677,13 @@ def LightingCache.build(+surface: V.Surface) -> LightingCache:
 	LightingCache.finish(surface, ShadowMap.build(surface))
 
 def Projected.illuminated(face: Illuminated, +basis: Basis, palette: L.Palette, id: U32) -> Maybe<&2, Projected>:
-	Illuminated{V.Face{+cell, +direction, material}, visibility} = face
-	Basis{eye, right, up, forward, focal, near} = basis
-	Projected.coordinates(cell, direction, basis, id, L.Palette.surface(palette, material, direction), visibility,
-		Face.coordinates(direction, cell), Face.axes(direction, eye))
+	match face:
+		case Illuminated{V.Face{+cell,+direction,material},visibility}:
+			Basis{eye,right,up,forward,focal,near} = basis
+			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),visibility,Face.coordinates(direction,cell),Face.axes(direction,eye),1.0,1.0,True{})
+		case Illuminated{V.Rectangle{+cell,+direction,material,width,height},visibility}:
+			Basis{eye,right,up,forward,focal,near} = basis
+			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),visibility,Face.coordinates(direction,cell),Face.axes(direction,eye),U32.to_f32(width),U32.to_f32(height),False{})
 
 def Projected.illuminated_list(faces: List<&2, Illuminated>, +basis: Basis, +palette: L.Palette, +id: U32) -> List<&2, Projected>:
 	match faces:

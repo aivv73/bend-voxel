@@ -225,7 +225,7 @@ def Flight.start(+output: String) -> IO(Unit):
 		UI.Check.mkdir(output)
 		+completed : Chan(Bool) <- Chan.new(Bool, 1)
 		window : Window <- IO.try(Window, Window.open("Bend Voxel Rewrite | native flight input check", 512, 512))
-		UI.Check.frames(2n, window, App.Model.init(5n, 5n), w => m => IO.bind(Window & WindowRef, Unit, UI.Reference.export(w), exported => Flight.ready(output, completed, m, exported)))
+		UI.Check.frames(2n, window, App.Model.cube(5n, 5n), w => m => IO.bind(Window & WindowRef, Unit, UI.Reference.export(w), exported => Flight.ready(output, completed, m, exported)))
 		Chan.close(Bool, completed)
 		finished : Maybe<Bool> <- Chan.recv(Bool, completed)
 		UI.Check.require(Maybe.default(&1, Bool, finished, False{}), "Native flight check did not complete")

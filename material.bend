@@ -5,6 +5,7 @@ type Material is Data:
 	Concrete{}
 	Frame{}
 	Machinery{}
+	Plaster{}
 
 type Oklch is Data:
 	Oklch{lightness: F32, chroma: F32, hue_degrees: F32}
@@ -33,6 +34,8 @@ def Material.id(material: Material) -> U32:
 			3
 		case Machinery{}:
 			4
+		case Plaster{}:
+			5
 
 def Material.read(id: U32) -> Maybe<&2, Material>:
 	match id:
@@ -44,6 +47,8 @@ def Material.read(id: U32) -> Maybe<&2, Material>:
 			Some{Frame{}}
 		case 4:
 			Some{Machinery{}}
+		case 5:
+			Some{Plaster{}}
 		case _:
 			None{}
 
@@ -57,6 +62,8 @@ def Material.oklch(material: Material) -> Oklch:
 			Oklch{0.630974, 0.062930, 239.8232}
 		case Machinery{}:
 			Oklch{0.723628, 0.119039, 64.7019}
+		case Plaster{}:
+			Oklch{0.860000, 0.018000, 85.0000}
 
 def Number.finite(+value: F32) -> Bool:
 	F32.is_eq((value - value : F32), 0.0)
@@ -187,6 +194,8 @@ def Palette.color(palette: Palette, material: Material, light: Light) -> U32:
 			Swatches.color(frame, light)
 		case Machinery{}:
 			Swatches.color(machinery, light)
+		case Plaster{}:
+			Swatches.color(Swatches.build(Plaster{}),light)
 
 def Palette.known(material: Maybe<&2, Material>, palette: Palette, id: U32, light: Light) -> U32:
 	match material:
@@ -197,3 +206,18 @@ def Palette.known(material: Maybe<&2, Material>, palette: Palette, id: U32, ligh
 
 def Palette.surface(palette: Palette, +id: U32, light: Light) -> U32:
 	Palette.known(Material.read(id), palette, id, light)
+
+def foundation() -> U32:
+	Material.id(Foundation{})
+
+def concrete() -> U32:
+	Material.id(Concrete{})
+
+def frame() -> U32:
+	Material.id(Frame{})
+
+def machinery() -> U32:
+	Material.id(Machinery{})
+
+def plaster() -> U32:
+	Material.id(Plaster{})

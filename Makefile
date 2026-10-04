@@ -4,10 +4,10 @@ CUDA_HOME ?= $(if $(wildcard /opt/cuda),/opt/cuda,$(if $(wildcard /usr/local/cud
 export CUDA_HOME
 
 BINARY := build/bend-voxel-rewrite
-SOURCES := main.bend voxel.bend render.bend material.bend lighting.bend dump.bend
+SOURCES := atelier.bend atelier_assets.bend scene_data.bend main.bend voxel.bend render.bend material.bend lighting.bend dump.bend
 UI_TEST_SOURCES := deps/bend-ui-test/uitest.bend deps/bend-ui-test/plan.bend deps/bend-ui-test/uitest.c deps/bend-ui-test/uitest.js
 
-.PHONY: all run proof test geometry materials lighting brush-ui images ui flight-ui benchmark clean
+.PHONY: all run proof test geometry materials lighting brush-ui images ui flight-ui benchmark atelier clean
 
 all: $(BINARY)
 
@@ -16,6 +16,12 @@ build:
 
 $(BINARY): $(SOURCES) | build
 	$(BEND) main.bend -o $@
+
+build/atelier-check: scripts/atelier_evidence.bend $(SOURCES) | build
+	$(BEND) scripts/atelier_evidence.bend -o $@
+
+atelier: build/atelier-check
+	./build/atelier-check --gpu off --threads 1
 
 build/geometry-dump: scripts/geometry_dump.bend voxel.bend material.bend | build
 	$(BEND) scripts/geometry_dump.bend -o $@

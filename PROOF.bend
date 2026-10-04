@@ -23,6 +23,8 @@ def Laws.material_read_id(material):
 			{==}
 		case M.Machinery{}:
 			{==}
+		case M.Plaster{}:
+			{==}
 
 def Laws.material_id_nonzero(material):
 	match material:
@@ -34,6 +36,8 @@ def Laws.material_id_nonzero(material):
 			{==}
 		case M.Machinery{}:
 			{==}
+		case M.Plaster{}:
+			{==}
 
 def Laws.material_palette_lookup(palette, material, light):
 	match material:
@@ -44,6 +48,8 @@ def Laws.material_palette_lookup(palette, material, light):
 		case M.Frame{}:
 			{==}
 		case M.Machinery{}:
+			{==}
+		case M.Plaster{}:
 			{==}
 
 def Laws.erase_idempotent(material, hit):
@@ -83,6 +89,8 @@ def Laws.daylight_palette_lookup(palette, material, direction):
 			{==}
 		case M.Machinery{}:
 			{==}
+		case M.Plaster{}:
+			{==}
 
 def Laws.unlit_color_preserved(color, visible):
 	{==}
@@ -91,4 +99,7 @@ def Laws.occluded_sun_sample():
 	{==}
 
 def Laws.clear_sun_sample():
+	{==}
+
+def Laws.material_plaster_id():
 	{==}

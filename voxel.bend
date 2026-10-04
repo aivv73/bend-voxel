@@ -13,8 +13,12 @@ type PointCm is Data:
 type MetricSphere is Data:
 	MetricSphere{center: PointCm, radius_cm: F32}
 
+type Cuboid is Data:
+	Cuboid{low: Cell, high: Cell, material: U32}
+
 type Body is Type:
 	Body{side: U32, cells: Array<U32>}
+	Cuboids{boxes: List<&2, Cuboid>}
 
 type Snapshot is Data:
 	Leaf{material: U32}
@@ -30,6 +34,7 @@ type Direction is Data:
 
 type Face is Data:
 	Face{cell: Cell, direction: Direction, material: U32}
+	Rectangle{cell: Cell, direction: Direction, material: U32, width: U32, height: U32}
 
 type Surface is Data:
 	Surface{faces: List<&2, Face>}
@@ -65,17 +70,13 @@ def Cell.inside(+side: U32, cell: Cell) -> Bool:
 	Cell{x, y, z} = cell
 	((x < side) && (y < side) && (z < side) : U32)
 
-def Body.write.valid(inside: Bool, body: Body, cell: Cell, material: U32) -> Body:
+def Body.write.valid(inside: Bool, +side: U32, cells: Array<U32>, cell: Cell, material: U32) -> Body:
 	match inside:
-		case False{}:
-			body
-		case True{}:
-			Body{+side, cells} = body
-			Body{side, Array.set(U32, cells, Body.index(side, cell), material)}
+		case False{}: Body{side,cells}
+		case True{}: Body{side,Array.set(U32,cells,Body.index(side,cell),material)}
 
-def Body.write(body: Body, +cell: Cell, material: U32) -> Body:
-	Body{+side, cells} = body
-	Body.write.valid(Cell.inside(side, cell), Body{side, cells}, cell, material)
+def Body.write.dense(+side: U32, cells: Array<U32>, +cell: Cell, material: U32) -> Body:
+	Body.write.valid(Cell.inside(side,cell),side,cells,cell,material)
 
 def Distance.choose(ordered: Bool, a: U32, b: U32) -> U32:
 	match ordered:
@@ -146,18 +147,14 @@ def Body.destroy.tree(cells: Array<U32>, +side: U32, +brush: Brush, +base: U32, 
 			ANode{Body.destroy.tree(left, side, brush, base, half),
 				Body.destroy.tree(right, side, brush, (base + half : U32), half)}
 
-def Body.destroy.valid(valid: Bool, body: Body, brush: Brush) -> Body:
+def Body.destroy.valid(valid: Bool, +side: U32, cells: Array<U32>, brush: Brush) -> Body:
 	match valid:
-		case False{}:
-			body
-		case True{}:
-			Body{+side, cells} = body
-			Body{side, Body.destroy.tree(cells, side, brush, 0, (side * side * side : U32))}
+		case False{}: Body{side,cells}
+		case True{}: Body{side,Body.destroy.tree(cells,side,brush,0,(side * side * side : U32))}
 
-def Body.destroy(body: Body, brush: Brush) -> Body:
-	Body{+side, cells} = body
-	Sphere{+center, +radius} = brush
-	Body.destroy.valid((Cell.inside(side, center) && (radius <= side : U32)), Body{side, cells}, Sphere{center, radius})
+def Body.destroy.dense(+side: U32, cells: Array<U32>, brush: Brush) -> Body:
+	Sphere{+center,+radius} = brush
+	Body.destroy.valid((Cell.inside(side,center) && (radius <= side : U32)),side,cells,Sphere{center,radius})
 
 def Body.cut.tree(cells: Array<U32>, +side: U32, +sphere: MetricSphere, +base: U32, +span: U32) -> Array<U32>:
 	match cells:
@@ -167,16 +164,13 @@ def Body.cut.tree(cells: Array<U32>, +side: U32, +sphere: MetricSphere, +base: U
 			+half = (span / 2 : U32)
 			ANode{Body.cut.tree(left, side, sphere, base, half), Body.cut.tree(right, side, sphere, (base + half : U32), half)}
 
-def Body.cut.valid(valid: Bool, body: Body, sphere: MetricSphere) -> Body:
+def Body.cut.valid(valid: Bool, +side: U32, cells: Array<U32>, sphere: MetricSphere) -> Body:
 	match valid:
-		case False{}:
-			body
-		case True{}:
-			Body{+side, cells} = body
-			Body{side, Body.cut.tree(cells, side, sphere, 0, (side * side * side : U32))}
+		case False{}: Body{side,cells}
+		case True{}: Body{side,Body.cut.tree(cells,side,sphere,0,(side * side * side : U32))}
 
-def Body.cut(body: Body, +sphere: MetricSphere) -> Body:
-	Body.cut.valid(MetricSphere.valid(sphere), body, sphere)
+def Body.cut.dense(side: U32, cells: Array<U32>, +sphere: MetricSphere) -> Body:
+	Body.cut.valid(MetricSphere.valid(sphere),side,cells,sphere)
 
 def Snapshot.join(a: Array<U32> & Snapshot, b: Array<U32> & Snapshot) -> Array<U32> & Snapshot:
 	(left, lcopy) = a
@@ -247,9 +241,35 @@ def Surface.finish(+side: U32, result: Array<U32> & Snapshot) -> Body & Surface:
 	(cells, snapshot) = result
 	(Body{side, cells}, Surface{Surface.scan(U32.to_nat((side * side * side : U32)), snapshot, side, 0, Nil{})})
 
-def Surface.build(body: Body) -> Body & Surface:
-	Body{+side, cells} = body
-	Surface.finish(side, Snapshot.of(cells))
+def Face.width(face: Face) -> U32:
+	match face:
+		case Face{cell,direction,material}: 1
+		case Rectangle{cell,direction,material,width,height}: width
+
+def Face.height(face: Face) -> U32:
+	match face:
+		case Face{cell,direction,material}: 1
+		case Rectangle{cell,direction,material,width,height}: height
+
+def Cuboid.surface(box: Cuboid, tail: List<&2,Face>) -> List<&2,Face>:
+	Cuboid{Cell{+x,+y,+z},Cell{+hx,+hy,+hz},+m} = box
+	+dx = (hx - x : U32)
+	+dy = (hy - y : U32)
+	+dz = (hz - z : U32)
+	Rectangle{Cell{x,y,z},NegX{},m,dy,dz} <>
+	Rectangle{Cell{(hx - 1 : U32),y,z},PosX{},m,dy,dz} <>
+	Rectangle{Cell{x,y,z},NegY{},m,dx,dz} <>
+	Rectangle{Cell{x,(hy - 1 : U32),z},PosY{},m,dx,dz} <>
+	Rectangle{Cell{x,y,z},NegZ{},m,dx,dy} <>
+	Rectangle{Cell{x,y,(hz - 1 : U32)},PosZ{},m,dx,dy} <> tail
+
+def Cuboids.surface(boxes: List<&2,Cuboid>) -> List<&2,Face>:
+	match boxes:
+		case Nil{}: Nil{}
+		case box <> rest: Cuboid.surface(box,Cuboids.surface(rest))
+
+def Surface.build.dense(+side: U32, cells: Array<U32>) -> Body & Surface:
+	Surface.finish(side,Snapshot.of(cells))
 
 def Direction.show(direction: Direction) -> String:
 	match direction:
@@ -280,3 +300,88 @@ def Surface.count.faces(faces: List<&2, Face>, n: U32) -> U32:
 def Surface.count(surface: Surface) -> U32:
 	Surface{faces} = surface
 	Surface.count.faces(faces, 0)
+
+
+def Cuboid.overlaps(box: Cuboid, sphere: MetricSphere) -> Bool:
+	Cuboid{Cell{x,y,z},Cell{hx,hy,hz},m} = box
+	MetricSphere{+point,radius} = sphere
+	PointCm{+cx,+cy,+cz} = point
+	+size = Voxel.size_cm()
+	MetricSphere.distance(sphere,PointCm{
+		F32.clamp(cx,((U32.to_f32(x) + 0.5) * size : F32),((U32.to_f32(hx) - 0.5) * size : F32)),
+		F32.clamp(cy,((U32.to_f32(y) + 0.5) * size : F32),((U32.to_f32(hy) - 0.5) * size : F32)),
+		F32.clamp(cz,((U32.to_f32(z) + 0.5) * size : F32),((U32.to_f32(hz) - 0.5) * size : F32))})
+
+def Cuboid.half(box: Cuboid, axis: U32, upper: Bool) -> Cuboid:
+	match box axis:
+		case Cuboid{Cell{+x,+y,+z},Cell{+hx,+hy,+hz},+m} 0:
+			+mid = (x + (hx - x) / 2 : U32)
+			Bool.pick(Cuboid,upper,Cuboid{Cell{x,y,z},Cell{mid,hy,hz},m},Cuboid{Cell{mid,y,z},Cell{hx,hy,hz},m})
+		case Cuboid{Cell{+x,+y,+z},Cell{+hx,+hy,+hz},+m} 1:
+			+mid = (y + (hy - y) / 2 : U32)
+			Bool.pick(Cuboid,upper,Cuboid{Cell{x,y,z},Cell{hx,mid,hz},m},Cuboid{Cell{x,mid,z},Cell{hx,hy,hz},m})
+		case Cuboid{Cell{+x,+y,+z},Cell{+hx,+hy,+hz},+m} _:
+			+mid = (z + (hz - z) / 2 : U32)
+			Bool.pick(Cuboid,upper,Cuboid{Cell{x,y,z},Cell{hx,hy,mid},m},Cuboid{Cell{x,y,mid},Cell{hx,hy,hz},m})
+
+def Cuboid.axis(box: Cuboid) -> U32:
+	Cuboid{Cell{x,y,z},Cell{hx,hy,hz},m} = box
+	+dx = (hx - x : U32)
+	+dy = (hy - y : U32)
+	+dz = (hz - z : U32)
+	Bool.pick(U32,((dx >= dy) && (dx >= dz) : U32),0,Bool.pick(U32,(dy >= dz : U32),1,2))
+
+def Cuboid.single(box: Cuboid) -> Bool:
+	Cuboid{Cell{x,y,z},Cell{hx,hy,hz},m} = box
+	U32.is_eq((hx - x : U32),1) && U32.is_eq((hy - y : U32),1) && U32.is_eq((hz - z : U32),1)
+
+def Cuboid.cut(+fuel: Nat, overlaps: Bool, single: Bool, +box: Cuboid, +sphere: MetricSphere, tail: List<&2,Cuboid>) -> List<&2,Cuboid>:
+	match fuel overlaps single:
+		case _ False{} _: box <> tail
+		case _ True{} True{}: tail
+		case 0n True{} False{}: box <> tail
+		case 1n+rest True{} False{}:
+			+a = Cuboid.half(box,Cuboid.axis(box),True{})
+			+b = Cuboid.half(box,Cuboid.axis(box),False{})
+			Cuboid.cut(rest,Cuboid.overlaps(a,sphere),Cuboid.single(a),a,sphere,
+				Cuboid.cut(rest,Cuboid.overlaps(b,sphere),Cuboid.single(b),b,sphere,tail))
+
+def Cuboids.cut(boxes: List<&2,Cuboid>, +sphere: MetricSphere) -> List<&2,Cuboid>:
+	match boxes:
+		case Nil{}: Nil{}
+		case +box <> rest:
+			Cuboid.cut(96n,Cuboid.overlaps(box,sphere),Cuboid.single(box),box,sphere,Cuboids.cut(rest,sphere))
+
+def Body.cut.checked(valid: Bool, boxes: List<&2,Cuboid>, sphere: MetricSphere) -> Body:
+	match valid:
+		case False{}: Cuboids{boxes}
+		case True{}: Cuboids{Cuboids.cut(boxes,sphere)}
+
+def Body.cut(body: Body, +sphere: MetricSphere) -> Body:
+	match body:
+		case Body{side,cells}: Body.cut.dense(side,cells,sphere)
+		case Cuboids{boxes}: Body.cut.checked(MetricSphere.valid(sphere),boxes,sphere)
+
+def Cuboids.insert(boxes: List<&2,Cuboid>, cell: Cell, material: U32) -> Body:
+	match cell material:
+		case _ 0: Cuboids{boxes}
+		case Cell{+x,+y,+z} +m:
+			Cuboids{Cuboid{Cell{x,y,z},Cell{(x + 1 : U32),(y + 1 : U32),(z + 1 : U32)},m} <> boxes}
+
+def Body.write(body: Body, +cell: Cell, material: U32) -> Body:
+	match body:
+		case Body{side,cells}: Body.write.dense(side,cells,cell,material)
+		case Cuboids{boxes}:
+			Cuboids.insert(Cuboids.cut(boxes,MetricSphere{PointCm.cell(cell),0.0}),cell,material)
+
+def Body.destroy(body: Body, brush: Brush) -> Body:
+	match body:
+		case Body{side,cells}: Body.destroy.dense(side,cells,brush)
+		case Cuboids{boxes}:
+			Sphere{cell,radius} = brush
+			Body.cut(Cuboids{boxes},MetricSphere{PointCm.cell(cell),(U32.to_f32(radius) * Voxel.size_cm() : F32)})
+
+def Surface.build(body: Body) -> Body & Surface:
+	match body:
+		case Body{side,cells}: Surface.build.dense(side,cells)
+		case Cuboids{+boxes}: (Cuboids{boxes},Surface{Cuboids.surface(boxes)})

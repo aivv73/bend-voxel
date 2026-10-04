@@ -188,7 +188,7 @@ def Variant.args_cut(cut: Bool, args: List<String>) -> List<String>:
 
 def Variant.args(cut: Bool, variant: Variant, path: String) -> List<String>:
 	Variant{gpu, tile, fork} = variant
-	Variant.args_cut(cut, ["--gpu", gpu, "--threads", "1", "--tile-depth", tile, "--fork-depth", fork, "--dump", path])
+	Variant.args_cut(cut, ["--cube", "--gpu", gpu, "--threads", "1", "--tile-depth", tile, "--fork-depth", fork, "--dump", path])
 
 def Check.golden(+cut: Bool, image: Data.Raster, +label: String) -> IO(Unit):
 	do IO<Unit>:

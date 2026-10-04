@@ -13,7 +13,7 @@ def Check.require(ok: Bool, message: String) -> IO(Unit):
 			IO.die(Unit, 1, message)
 
 def Inventory.materials() -> List<&2, M.Material>:
-	[M.Foundation{}, M.Concrete{}, M.Frame{}, M.Machinery{}]
+	[M.Foundation{}, M.Concrete{}, M.Frame{}, M.Machinery{}, M.Plaster{}]
 
 def Inventory.directions() -> List<&2, V.Direction>:
 	[V.NegX{}, V.PosX{}, V.NegY{}, V.PosY{}, V.NegZ{}, V.PosZ{}]
@@ -28,6 +28,8 @@ def Inventory.reference(material: M.Material) -> U32:
 			6721452
 		case M.Machinery{}:
 			14259535
+		case M.Plaster{}:
+			14078148
 
 def Rgb.near(+actual: F32, expected: F32, tolerance: F32) -> Bool:
 	(F32.abs((actual - expected : F32)) < tolerance : F32)
@@ -200,7 +202,7 @@ def Projected.color(value: Maybe<&2, R.Projected>, expected: U32) -> Bool:
 	match value:
 		case None{}:
 			False{}
-		case Some{R.Projected{cell, direction, plane, u, v, color, visibility, id, bounds}}:
+		case Some{R.Projected{cell, direction, plane, u, v, color, visibility, id, bounds,width,height,outline}}:
 			U32.is_eq(L.Ramp.color(color, 9), expected)
 
 def Faces.stable(faces: List<&2, V.Face>, +palette: M.Palette, +basis: R.Basis, +moved: R.Basis, +material: U32) -> Bool:
@@ -208,13 +210,21 @@ def Faces.stable(faces: List<&2, V.Face>, +palette: M.Palette, +basis: R.Basis, 
 		case Nil{}:
 			True{}
 		case +face <> rest:
-			V.Face{+cell, +direction, id} = face
-			+daylight = L.Palette.build()
-			+color = L.Ramp.color(L.Palette.surface(daylight, material, direction), 9)
-			U32.is_eq(id, material) &&
-				Projected.color(R.Projected.of(face, basis, daylight, 0), color) &&
-				Projected.color(R.Projected.of(face, moved, daylight, 0), color) &&
-				Faces.stable(rest, palette, basis, moved, material)
+			match face:
+				case V.Face{+cell,+direction,id}:
+					+daylight = L.Palette.build()
+					+color = L.Ramp.color(L.Palette.surface(daylight, material, direction), 9)
+					U32.is_eq(id, material) &&
+						Projected.color(R.Projected.of(face, basis, daylight, 0), color) &&
+						Projected.color(R.Projected.of(face, moved, daylight, 0), color) &&
+						Faces.stable(rest, palette, basis, moved, material)
+				case V.Rectangle{+cell,+direction,id,width,height}:
+					+daylight = L.Palette.build()
+					+color = L.Ramp.color(L.Palette.surface(daylight, material, direction), 9)
+					U32.is_eq(id, material) &&
+						Projected.color(R.Projected.of(face, basis, daylight, 0), color) &&
+						Projected.color(R.Projected.of(face, moved, daylight, 0), color) &&
+						Faces.stable(rest, palette, basis, moved, material)
 
 def Cells.preserved(fuel: Nat, +snapshot: V.Snapshot, +index: U32, +material: U32) -> Bool:
 	match fuel:
@@ -232,9 +242,9 @@ def Geometry.snapshot(result: Array<U32> & V.Snapshot, +surface: V.Surface, +mat
 		Faces.stable(faces, palette, R.Camera.basis(R.Camera.initial()), R.Camera.basis(R.Camera.look(R.Camera.initial(), 5.0, 7.0)), material)
 
 def Geometry.surface(result: V.Body & V.Surface, material: U32, palette: M.Palette) -> Bool:
-	(body, surface) = result
-	V.Body{side, cells} = body
-	Geometry.snapshot(V.Snapshot.of(cells), surface, material, palette)
+	match result:
+		case (V.Body{side,cells},surface): Geometry.snapshot(V.Snapshot.of(cells),surface,material,palette)
+		case (V.Cuboids{boxes},surface): False{}
 
 def Geometry.identity(+material: U32, palette: M.Palette) -> Bool:
 	Geometry.surface(V.Surface.build(V.Body.write(V.Body.write(V.Body.empty(3n), V.Cell{1, 1, 1}, material), V.Cell{5, 3, 2}, material)), material, palette)
@@ -262,6 +272,8 @@ def Surface.material(faces: List<&2, V.Face>, +material: U32) -> Bool:
 			True{}
 		case V.Face{cell, direction, id} <> rest:
 			U32.is_eq(id, material) && Surface.material(rest, material)
+		case V.Rectangle{cell,direction,id,width,height} <> rest:
+			U32.is_eq(id,material) && Surface.material(rest,material)
 
 def Surface.preserved(surface: V.Surface, material: U32) -> Bool:
 	V.Surface{faces} = surface
@@ -361,7 +373,7 @@ def Run.inventory(valid: Bool, +text: String, +palette: M.Palette, +output: Stri
 		Check.require(U32.is_eq(M.Palette.surface(palette, 0, M.Full{}), 0), "Empty material query must be black")
 		IO.write(text)
 		Evidence.write(output ++ "/swatches.txt", text)
-		IO.print("Runtime numeric evidence passed for 4 materials, 6 directions and 702 gamut/achromatic colors.")
+		IO.print("Runtime numeric evidence passed for 5 materials, 6 directions and 702 gamut/achromatic colors.")
 		Export.known(Inventory.materials(), output, baseline, palette)
 		Export.unknown(7, palette, baseline, output)
 		Export.unknown(4294967295, palette, baseline, output)

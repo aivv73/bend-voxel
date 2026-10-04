@@ -9,6 +9,8 @@ def Dump.faces(faces: List<&2, V.Face>) -> IO(Unit):
 			do IO<Unit>:
 				IO.print("F " ++ V.Cell.show(cell) ++ " " ++ V.Direction.show(direction) ++ " " ++ U32.show(material))
 				Dump.faces(rest)
+		case V.Rectangle{cell,direction,material,width,height} <> rest:
+			IO.die(Unit,1,"The geometry golden requires unit cube faces")
 
 def Dump.cell(material: U32, cell: V.Cell) -> IO(Unit):
 	match material:
@@ -27,13 +29,15 @@ def Dump.cells(cells: Array<U32>, +side: U32, +base: U32, +span: U32) -> IO(Unit
 				Dump.cells(right, side, (base + span / 2 : U32), (span / 2 : U32))
 
 def Dump.result(name: String, result: V.Body & V.Surface) -> IO(Unit):
-	(V.Body{+side, cells}, V.Surface{+faces}) = result
-	do IO<Unit>:
-		IO.print("BEGIN " ++ name)
-		IO.print("COUNT " ++ U32.show(V.Surface.count.faces(faces, 0)))
-		Dump.faces(faces)
-		Dump.cells(cells, side, 0, (side * side * side : U32))
-		IO.print("END")
+	match result:
+		case (V.Cuboids{boxes},surface): IO.die(Unit,1,"The geometry golden requires the cube fixture")
+		case (V.Body{+side,cells},V.Surface{+faces}):
+			do IO<Unit>:
+				IO.print("BEGIN " ++ name)
+				IO.print("COUNT " ++ U32.show(V.Surface.count.faces(faces, 0)))
+				Dump.faces(faces)
+				Dump.cells(cells, side, 0, (side * side * side : U32))
+				IO.print("END")
 
 def Dump.body(name: String, body: V.Body) -> IO(Unit):
 	Dump.result(name, V.Surface.build(body))

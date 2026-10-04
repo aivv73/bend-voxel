@@ -155,6 +155,8 @@ def Palette.color(palette: Palette, material: M.Material, direction: V.Direction
 			Sides.surface(frame, direction)
 		case M.Machinery{}:
 			Sides.surface(machinery, direction)
+		case M.Plaster{}:
+			Sides.surface(Sides.build(M.Plaster{}),direction)
 
 def Palette.known(material: Maybe<&2, M.Material>, palette: Palette, direction: V.Direction) -> Ramp:
 	match material:

@@ -1,4 +1,5 @@
 import Base
+import ./atelier.bend as A
 import ./voxel.bend as V
 import ./render.bend as R
 import ./dump.bend as D
@@ -71,13 +72,20 @@ def Controls.fly(controls: Controls, camera: R.Camera, elapsed_ms: Nat) -> R.Cam
 	Controls{w, s, a, d, q, e, looking, grab} = controls
 	R.Camera.fly(camera, Controls.axis(w, s), Controls.axis(d, a), Controls.axis(e, q), elapsed_ms)
 
-def Model.finish(+tile_depth: Nat, fork_depth: Nat, result: V.Body & V.Surface) -> Model:
+def Model.finish(+camera: R.Camera, +tile_depth: Nat, fork_depth: Nat, result: V.Body & V.Surface) -> Model:
 	(body, +surface) = result
-	+camera = R.Camera.initial()
 	Model{body, surface, R.RenderScene.build(surface, camera, tile_depth), camera, Controls.initial(), Pointer{256, 256}, None{}, False{}, tile_depth, fork_depth}
 
 def Model.init(+tile_depth: Nat, fork_depth: Nat) -> Model:
-	Model.finish(tile_depth, fork_depth, V.Surface.build(V.Body.solid(3n)))
+	Model.finish(R.Camera.atelier(), tile_depth, fork_depth, V.Surface.build(A.body()))
+
+def Model.cube(+tile_depth: Nat, fork_depth: Nat) -> Model:
+	Model.finish(R.Camera.initial(), tile_depth, fork_depth, V.Surface.build(V.Body.solid(3n)))
+
+def Body.restored(body: V.Body) -> V.Body:
+	match body:
+		case V.Body{side,cells}: V.Body.solid(3n)
+		case V.Cuboids{boxes}: A.body()
 
 def Model.erased(model: Model, sphere: V.MetricSphere) -> Model:
 	Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
@@ -85,7 +93,7 @@ def Model.erased(model: Model, sphere: V.MetricSphere) -> Model:
 
 def Model.restored(model: Model) -> Model:
 	Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
-	Model{V.Body.solid(3n), surface, scene, camera, controls, pointer, previous, True{}, tile_depth, fork_depth}
+	Model{Body.restored(body), surface, scene, camera, controls, pointer, previous, True{}, tile_depth, fork_depth}
 
 def Model.rebuilt(+camera: R.Camera, controls: Controls, pointer: Pointer, previous: Maybe<&2, Nat>, +tile_depth: Nat, fork_depth: Nat, result: V.Body & V.Surface) -> Model:
 	(body, +surface) = result
@@ -190,6 +198,13 @@ def Model.look(model: Model, dx: F32, dy: F32) -> Model:
 	Model{body, surface, scene, camera, +controls, pointer, previous, dirty, tile_depth, fork_depth} = model
 	Model.look.active(Controls.capture(controls), Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}, dx, dy)
 
+def Model.demo_cut(model: Model) -> Model:
+	match model:
+		case Model{V.Body{side,cells},surface,scene,camera,controls,pointer,previous,dirty,tile_depth,fork_depth}:
+			Model.destroy(Model{V.Body{side,cells},surface,scene,camera,controls,pointer,previous,dirty,tile_depth,fork_depth},V.Cell{6,6,6})
+		case Model{V.Cuboids{boxes},surface,scene,camera,controls,pointer,previous,dirty,tile_depth,fork_depth}:
+			Model.click(Model{V.Cuboids{boxes},surface,scene,camera,controls,pointer,previous,dirty,tile_depth,fork_depth},226,224)
+
 def Model.event(event: Event, model: Model) -> Maybe<Model>:
 	match event:
 		case Close{}:
@@ -197,7 +212,7 @@ def Model.event(event: Event, model: Model) -> Maybe<Model>:
 		case Key{27, True{}}:
 			None{}
 		case Key{32, True{}}:
-			Some{Model.erased(model, V.MetricSphere.demo())}
+			Some{Model.demo_cut(model)}
 		case Key{114, True{}}:
 			Some{Model.restored(model)}
 		case Key{82, True{}}:
@@ -350,7 +365,7 @@ def Model.initial(cut: Bool, tile_depth: Nat, fork_depth: Nat) -> Model:
 		case False{}:
 			Model.init(tile_depth, fork_depth)
 		case True{}:
-			Model.destroy(Model.init(tile_depth, fork_depth), V.Cell{6, 6, 6})
+			Model.click(Model.init(tile_depth, fork_depth),226,224)
 
 def Run.dump(path: String, drawn: Model & Image) -> IO(Unit):
 	(model, image) = drawn
@@ -359,7 +374,7 @@ def Run.dump(path: String, drawn: Model & Image) -> IO(Unit):
 def Bench.edit(frame: U32, model: Model) -> Model:
 	match frame:
 		case 8:
-			Model.destroy(model, V.Cell{6, 6, 6})
+			Model.demo_cut(model)
 		case 16:
 			Model.reset(model)
 		case _:
@@ -404,6 +419,12 @@ def Bench.run(+frames: Nat, model: Model) -> IO(Unit):
 		Bench.close(finished)
 		IO.print("frames=" ++ Nat.show(frames) ++ " elapsed_ms=" ++ Nat.show(Nat.sub(finish, start)))
 
+def Model.selected(cube: Bool, cut: Bool, tile_depth: Nat, fork_depth: Nat) -> Model:
+	match cube cut:
+		case False{} _: Model.initial(cut,tile_depth,fork_depth)
+		case True{} False{}: Model.cube(tile_depth,fork_depth)
+		case True{} True{}: Model.destroy(Model.cube(tile_depth,fork_depth),V.Cell{6,6,6})
+
 def Run.mode(mode: Mode, model: Model) -> IO(Unit):
 	match mode:
 		case Dump{path}:
@@ -415,11 +436,14 @@ def Run.mode(mode: Mode, model: Model) -> IO(Unit):
 		case Interactive{}:
 			Interactive.run(model)
 
-def Run.options(options: Options) -> IO(Unit):
+def Run.options(options: Options, cube: Bool) -> IO(Unit):
 	Options{mode, cut, tile_depth, fork_depth} = options
-	Run.mode(mode, Model.initial(cut, tile_depth, fork_depth))
+	Run.mode(mode, Model.selected(cube, cut, tile_depth, fork_depth))
+
+def Run.args(+args: List<&2,String>) -> IO(Unit):
+	Run.options(Options.parse(args),Options.has(args,"--cube"))
 
 def main() -> IO(Unit):
 	do IO<Unit>:
 		args : List<String> <- IO.args()
-		Run.options(Options.parse(Options.args(args)))
+		Run.args(Options.args(args))

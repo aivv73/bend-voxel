@@ -144,6 +144,7 @@ def Fields.ground_same(a: R.GroundLighting, b: R.GroundLighting) -> Bool:
 
 type Receiver is Data:
 	FaceReceiver{cell: V.Cell, direction: V.Direction}
+	RectangleReceiver{cell: V.Cell, direction: V.Direction, width: U32, height: U32}
 	GroundReceiver{}
 
 def Receiver.face(direction: V.Direction, coordinates: R.Vec3, +u: F32, +v: F32) -> R.Vec3:
@@ -154,12 +155,16 @@ def Receiver.point(receiver: Receiver, +u: F32, +v: F32) -> R.Vec3:
 	match receiver:
 		case FaceReceiver{cell, +direction}:
 			Receiver.face(direction, R.Face.coordinates(direction, cell), u, v)
+		case RectangleReceiver{cell,+direction,width,height}:
+			Receiver.face(direction,R.Face.coordinates(direction,cell),(u * U32.to_f32(width) : F32),(v * U32.to_f32(height) : F32))
 		case GroundReceiver{}:
 			R.Vec3{(u * 40.0 - 16.0 : F32), (v * 40.0 - 16.0 : F32), (0.0 - 0.5 : F32)}
 
 def Receiver.direction(receiver: Receiver) -> V.Direction:
 	match receiver:
 		case FaceReceiver{cell, direction}:
+			direction
+		case RectangleReceiver{cell,direction,width,height}:
 			direction
 		case GroundReceiver{}:
 			V.PosZ{}
@@ -189,6 +194,10 @@ def Fields.faces(faces: List<&2, R.Illuminated>, +shadow: R.ShadowMap) -> Bool:
 			True{}
 		case R.Illuminated{V.Face{cell, direction, material}, field} <> rest:
 			Fields.rows(16n, field, FaceReceiver{cell, direction}, shadow, 16, 0) && Fields.faces(rest, shadow)
+		case R.Illuminated{V.Rectangle{cell,direction,material,+width,+height},field} <> rest:
+			+depth = U32.to_nat(U32.min(8,U32.max(4,(U32.from_nat(U32.log2(U32.max(width,height))) + 1 : U32))))
+			+size = U32.pow(2,depth)
+			Fields.rows(U32.to_nat(size),field,RectangleReceiver{cell,direction,width,height},shadow,size,0) && Fields.faces(rest,shadow)
 
 def Fields.cache(cache: R.LightingCache) -> Bool:
 	R.LightingCache{+sun, faces, R.GroundLighting{field, ground, grid}} = cache
@@ -226,8 +235,9 @@ def Run.snapshot(result: Array<U32> & V.Snapshot, +side: U32, +surface: V.Surfac
 		IO.print(name ++ ": all " ++ U32.show((R.Shadow.width() * R.Shadow.width() : U32)) ++ " sun texels match occupied cells; camera cache preserved")
 
 def Run.body(result: V.Body & V.Surface, name: String, output: String) -> IO(Unit):
-	(V.Body{+side, cells}, surface) = result
-	Run.snapshot(V.Snapshot.of(cells), side, surface, name, output)
+	match result:
+		case (V.Body{+side,cells},surface): Run.snapshot(V.Snapshot.of(cells),side,surface,name,output)
+		case (V.Cuboids{boxes},surface): IO.die(Unit,1,"The occupied-cell oracle requires the cube fixture")
 
 # A convex solid cannot shadow its own sun-facing planes. Cover their whole
 # extent, including near the edges where filtered depth taps cross faces.

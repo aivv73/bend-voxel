@@ -233,7 +233,7 @@ def Check.options(+args: List<&2, String>, options: Slice.Options) -> IO(Unit):
 		Check.mkdir(output)
 		+completed : Chan(Bool) <- Chan.new(Bool, 1)
 		window : Window <- IO.try(Window, Window.open("Bend Voxel Rewrite | Space destroy | click carve | R reset | Esc exit", 512, 512))
-		Check.frames(2n, window, Slice.Model.init(tile_depth, fork_depth), w => m => Check.begin(output, String.eq(method, "window"), completed, w, m))
+		Check.frames(2n, window, Slice.Model.cube(tile_depth, fork_depth), w => m => Check.begin(output, String.eq(method, "window"), completed, w, m))
 		Chan.close(Bool, completed)
 		finished : Maybe<Bool> <- Chan.recv(Bool, completed)
 		Check.require(Maybe.default(&1, Bool, finished, False{}), "Native check did not complete")

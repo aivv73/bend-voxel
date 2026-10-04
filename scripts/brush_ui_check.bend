@@ -26,9 +26,12 @@ def Snapshot.built(surface: V.Surface, +scene: R.RenderScene, +camera: R.Camera,
 	(cells, materials) = result
 	(App.Model{V.Body{8, cells}, surface, scene, camera, controls, pointer, time, dirty, td, fd}, Snapshot{materials, scene, camera, pointer, App.Controls.capture(controls)})
 
-def Snapshot.take(model: App.Model) -> App.Model & Snapshot:
-	App.Model{V.Body{side, cells}, surface, scene, camera, controls, pointer, time, dirty, td, fd} = model
-	Snapshot.built(surface, scene, camera, controls, pointer, time, dirty, td, fd, V.Snapshot.of(cells))
+def Snapshot.take(model: App.Model) -> IO(App.Model & Snapshot):
+	match model:
+		case App.Model{V.Body{side,cells},surface,scene,camera,controls,pointer,time,dirty,td,fd}:
+			IO.pure(App.Model & Snapshot,Snapshot.built(surface,scene,camera,controls,pointer,time,dirty,td,fd,V.Snapshot.of(cells)))
+		case App.Model{V.Cuboids{boxes},surface,scene,camera,controls,pointer,time,dirty,td,fd}:
+			IO.die(App.Model & Snapshot,1,"The brush oracle requires the cube fixture")
 
 def Snapshot.target(snapshot: Snapshot) -> Maybe<&2, V.MetricSphere>:
 	Snapshot{body, scene, camera, pointer, looking} = snapshot
@@ -91,9 +94,9 @@ def Cells.same(a: Array<U32>, b: Array<U32>) -> Bool:
 			False{}
 
 def Body.same(a: V.Body, b: V.Body) -> Bool:
-	V.Body{as, ac} = a
-	V.Body{bs, bc} = b
-	U32.is_eq(as, bs) && Cells.same(ac, bc)
+	match a b:
+		case V.Body{as,ac} V.Body{bs,bc}: U32.is_eq(as,bs) && Cells.same(ac,bc)
+		case _ _: False{}
 
 def Sphere.equal(a: Maybe<&2, V.MetricSphere>, b: Maybe<&2, V.MetricSphere>) -> Bool:
 	match a b:
@@ -207,7 +210,7 @@ def Check.loop(fuel: Nat, stage: Stage, session: Session, window: Window, model:
 				Window.close(window)
 				IO.die(Unit, 1, "Brush UI frame budget exhausted")
 		case 1n+rest:
-			UI.Check.frames(3n, window, model, w => m => Check.run(stage, session, w, Snapshot.take(m), s => c => ww => mm => Check.loop(rest, s, c, ww, mm)))
+			UI.Check.frames(3n, window, model, w => m => IO.bind(App.Model & Snapshot,Unit,Snapshot.take(m),snapshot => Check.run(stage,session,w,snapshot,s => c => ww => mm => Check.loop(rest,s,c,ww,mm))))
 
 def Check.ready(output: String, completed: Chan(Bool), taken: App.Model & Snapshot, exported: Window & WindowRef) -> IO(Unit):
 	(model, Snapshot{body, scene, camera, pointer, looking}) = taken
@@ -223,7 +226,7 @@ def Check.start(+output: String) -> IO(Unit):
 		UI.Check.mkdir(output)
 		+completed : Chan(Bool) <- Chan.new(Bool, 1)
 		window : Window <- IO.try(Window, Window.open("Bend Voxel Rewrite | native metric brush check", 512, 512))
-		UI.Check.frames(2n, window, App.Model.init(5n, 5n), w => m => IO.bind(Window & WindowRef, Unit, UI.Reference.export(w), exported => Check.ready(output, completed, Snapshot.take(m), exported)))
+		UI.Check.frames(2n, window, App.Model.cube(5n, 5n), w => m => IO.bind(Window & WindowRef, Unit, UI.Reference.export(w), exported => IO.bind(App.Model & Snapshot,Unit,Snapshot.take(m),snapshot => Check.ready(output,completed,snapshot,exported))))
 		Chan.close(Bool, completed)
 		finished : Maybe<Bool> <- Chan.recv(Bool, completed)
 		UI.Check.require(Maybe.default(&1, Bool, finished, False{}), "Native brush check did not complete")

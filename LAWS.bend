@@ -70,3 +70,6 @@ law occluded_sun_sample:
 
 law clear_sun_sample:
 	{L.Shadow.visible(False{}) == 1 : U32}
+
+law material_plaster_id:
+	{M.Material.id(M.Plaster{}) == 5 : U32}

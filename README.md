@@ -1,8 +1,8 @@
 # Bend voxel rewrite
 
-Run one editable 8³ voxel body in a native window. Destroy part of the body and inspect the newly exposed surfaces.
+Run the editable Light Atelier sculpture court in a native window. The default scene contains Suzanne, Oculus, Twist, a backdrop, and a slatted canopy. Use `--cube` to open the original 8³ body.
 
-![Voxel body after destruction](docs/slice.png)
+![Light Atelier sculpture court](docs/atelier.png)
 
 ## Run the slice
 
@@ -18,14 +18,14 @@ Use these controls:
 - Hold **W/S** to fly along the view direction, and **A/D** to strafe.
 - Hold **Q/E** to descend or ascend along the world's vertical axis.
 - Hold the right mouse button and move the mouse to look around.
-- Press **Space** to remove a sphere near the visible front corner.
+- Press **Space** to carve the Oculus edge in the opening view, or the front corner with `--cube`.
 - Move the mouse over the body to preview a yellow sphere and its selected cells. Click to carve at the continuous surface point; while holding RMB, the brush targets the screen centre.
-- Press **R** to restore the solid body while keeping your camera position and view.
+- Press **R** to restore the scene while keeping your camera position and view.
 - Press **Escape**, or close the window, to exit.
 
-The perspective camera can fly through the body and inspect its six sides. Movement uses elapsed time and normalizes combined directions. Each voxel is 10cm wide. The spherical brush has a 20cm radius and removes occupied cells whose centres are inside or on its boundary. Space uses the fixed centre (65,65,65)cm; repeating that cut leaves the body unchanged. Hovering over the background clears the preview.
+The perspective camera can fly through the scene. Movement uses elapsed time and normalizes combined directions. Each voxel is 10cm wide. The spherical brush has a 20cm radius and removes occupied cells whose centres are inside or on its boundary. With `--cube`, Space uses the fixed centre (65,65,65)cm; repeating that cut leaves the body unchanged. Hovering over the background clears the preview.
 
-The default body keeps material ID 1 and displays green foundation. The palette also provides tan concrete at ID 2, blue frame at ID 3, and orange machinery at ID 4. Colors come from the [stable OKLCH material palette](https://github.com/aivv73/bend-voxel/commit/02bbd4a6ab4ca746333473f6ca8b7ace9513ae61). Daylight follows the [reference lighting change](https://github.com/aivv73/bend-voxel/commit/cf188d2afeaf47836ffe023907f81efafc40878c): warm directional sunlight, cool sky ambient light, and soft sun shadows on voxel surfaces and the ground. Shading runs in linear RGB before sRGB encoding. The sun-depth cache survives camera movement and rebuilds after edits. Night mode and the camera work light are omitted. Carving preserves each surviving cell's material, and appearance depends on material, face direction, and sun visibility. Unsupported positive material IDs remain occupied and display diagnostic magenta.
+The scene uses green foundation at material ID 1, tan concrete at ID 2, blue frame at ID 3, orange machinery at ID 4, and pale plaster at ID 5. Colors come from the [stable OKLCH material palette](https://github.com/aivv73/bend-voxel/commit/02bbd4a6ab4ca746333473f6ca8b7ace9513ae61). Daylight follows the [reference lighting change](https://github.com/aivv73/bend-voxel/commit/cf188d2afeaf47836ffe023907f81efafc40878c): warm directional sunlight, cool sky ambient light, and soft sun shadows on voxel surfaces and the ground. Shading runs in linear RGB before sRGB encoding. The sun-depth cache survives camera movement and rebuilds after edits. Night mode and the camera work light are omitted. Carving preserves each surviving cell's material, and appearance depends on material, face direction, and sun visibility. Unsupported positive material IDs remain occupied and display diagnostic magenta.
 
 Engine callers can fill or paint the existing body with named materials:
 
