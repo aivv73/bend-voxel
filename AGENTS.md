@@ -1,5 +1,19 @@
 # Project instructions
 
+## Tests
+
+Do not add traditional unit, integration, or mock-based tests.
+
+Correctness should instead be established through:
+- invariants and properties defined in `LAWS.bend`;
+- executable verification of those laws where possible;
+- real-runtime validation;
+- live UI tests and deterministic replay/evidence checks.
+
+Prefer proving or validating a general property over adding example-based test cases.
+
+Do not replace real execution with mocks or synthetic test-only implementations.
+
 ## Bend
 
 Follow these rules:

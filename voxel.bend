@@ -1,10 +1,17 @@
 import Base
+import ./material.bend as M
 
 type Cell is Data:
 	Cell{x: U32, y: U32, z: U32}
 
 type Brush is Data:
 	Sphere{center: Cell, radius: U32}
+
+type PointCm is Data:
+	PointCm{x: F32, y: F32, z: F32}
+
+type MetricSphere is Data:
+	MetricSphere{center: PointCm, radius_cm: F32}
 
 type Body is Type:
 	Body{side: U32, cells: Array<U32>}
@@ -41,7 +48,7 @@ def Body.filled(+depth: Nat, material: U32) -> Body:
 	Body{U32.pow(2, depth), Array.new(U32, Nat.mul(3n, depth), material)}
 
 def Body.solid(depth: Nat) -> Body:
-	Body.filled(depth, 1)
+	Body.filled(depth, M.Material.id(M.Foundation{}))
 
 def Body.empty(depth: Nat) -> Body:
 	Body.filled(depth, 0)
@@ -88,6 +95,45 @@ def Brush.hits(brush: Brush, cell: Cell) -> Bool:
 	+dz = Distance.axis(z, cz)
 	(((dx <= r) && (dy <= r) && (dz <= r)) && (dx * dx + dy * dy + dz * dz <= r * r) : U32)
 
+def Voxel.size_cm() -> F32:
+	10.0
+
+def PointCm.cell(cell: Cell) -> PointCm:
+	Cell{x, y, z} = cell
+	+size = Voxel.size_cm()
+	PointCm{(size * U32.to_f32(x) + size * 0.5 : F32), (size * U32.to_f32(y) + size * 0.5 : F32), (size * U32.to_f32(z) + size * 0.5 : F32)}
+
+def MetricSphere.brush(center: PointCm) -> MetricSphere:
+	MetricSphere{center, 20.0}
+
+def MetricSphere.demo() -> MetricSphere:
+	MetricSphere.brush(PointCm{65.0, 65.0, 65.0})
+
+def Number.finite(+value: F32) -> Bool:
+	F32.is_eq((value - value : F32), 0.0)
+
+def MetricSphere.valid(sphere: MetricSphere) -> Bool:
+	MetricSphere{PointCm{x, y, z}, +radius} = sphere
+	Number.finite(x) && Number.finite(y) && Number.finite(z) && Number.finite(radius) && (radius >= 0.0 : F32) && Number.finite((radius * radius : F32))
+
+def MetricSphere.distance(sphere: MetricSphere, point: PointCm) -> Bool:
+	MetricSphere{PointCm{cx, cy, cz}, +radius} = sphere
+	PointCm{x, y, z} = point
+	+dx = (x - cx : F32)
+	+dy = (y - cy : F32)
+	+dz = (z - cz : F32)
+	(dx * dx + dy * dy + dz * dz <= radius * radius : F32)
+
+def MetricSphere.contains.valid(valid: Bool, sphere: MetricSphere, cell: Cell) -> Bool:
+	match valid:
+		case False{}:
+			False{}
+		case True{}:
+			MetricSphere.distance(sphere, PointCm.cell(cell))
+
+def MetricSphere.contains(+sphere: MetricSphere, cell: Cell) -> Bool:
+	MetricSphere.contains.valid(MetricSphere.valid(sphere), sphere, cell)
+
 def Body.destroy.leaf(hit: Bool, material: U32) -> Array<U32>:
 	ALeaf{Cell.erase(material, hit)}
 
@@ -112,6 +158,25 @@ def Body.destroy(body: Body, brush: Brush) -> Body:
 	Body{+side, cells} = body
 	Sphere{+center, +radius} = brush
 	Body.destroy.valid((Cell.inside(side, center) && (radius <= side : U32)), Body{side, cells}, Sphere{center, radius})
+
+def Body.cut.tree(cells: Array<U32>, +side: U32, +sphere: MetricSphere, +base: U32, +span: U32) -> Array<U32>:
+	match cells:
+		case ALeaf{material}:
+			ALeaf{Cell.erase(material, MetricSphere.contains(sphere, Cell.at(side, base)))}
+		case ANode{left, right}:
+			+half = (span / 2 : U32)
+			ANode{Body.cut.tree(left, side, sphere, base, half), Body.cut.tree(right, side, sphere, (base + half : U32), half)}
+
+def Body.cut.valid(valid: Bool, body: Body, sphere: MetricSphere) -> Body:
+	match valid:
+		case False{}:
+			body
+		case True{}:
+			Body{+side, cells} = body
+			Body{side, Body.cut.tree(cells, side, sphere, 0, (side * side * side : U32))}
+
+def Body.cut(body: Body, +sphere: MetricSphere) -> Body:
+	Body.cut.valid(MetricSphere.valid(sphere), body, sphere)
 
 def Snapshot.join(a: Array<U32> & Snapshot, b: Array<U32> & Snapshot) -> Array<U32> & Snapshot:
 	(left, lcopy) = a

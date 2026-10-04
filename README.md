@@ -15,12 +15,27 @@ Use Bend 2.0.34 or newer. Native GPU builds require the compiler and SDK for the
 
 Use these controls:
 
+- Hold **W/S** to fly along the view direction, and **A/D** to strafe.
+- Hold **Q/E** to descend or ascend along the world's vertical axis.
+- Hold the right mouse button and move the mouse to look around.
 - Press **Space** to remove a sphere near the visible front corner.
-- Click a visible voxel with the primary mouse button to apply the same sphere brush at that voxel.
-- Press **R** to restore the solid body.
+- Move the mouse over the body to preview a yellow sphere and its selected cells. Click to carve at the continuous surface point; while holding RMB, the brush targets the screen centre.
+- Press **R** to restore the solid body while keeping your camera position and view.
 - Press **Escape**, or close the window, to exit.
 
-The image uses a fixed isometric camera. The brush removes cells within a radius of three cells. Repeating the same cut leaves the body unchanged.
+The perspective camera can fly through the body and inspect its six sides. Movement uses elapsed time and normalizes combined directions. Each voxel is 10cm wide. The spherical brush has a 20cm radius and removes occupied cells whose centres are inside or on its boundary. Space uses the fixed centre (65,65,65)cm; repeating that cut leaves the body unchanged. Hovering over the background clears the preview.
+
+The default body keeps material ID 1 and displays green foundation. The palette also provides tan concrete at ID 2, blue frame at ID 3, and orange machinery at ID 4. Colors come from the [stable OKLCH material palette](https://github.com/aivv73/bend-voxel/commit/02bbd4a6ab4ca746333473f6ca8b7ace9513ae61). Daylight follows the [reference lighting change](https://github.com/aivv73/bend-voxel/commit/cf188d2afeaf47836ffe023907f81efafc40878c): warm directional sunlight, cool sky ambient light, and soft sun shadows on voxel surfaces and the ground. Shading runs in linear RGB before sRGB encoding. The sun-depth cache survives camera movement and rebuilds after edits. Night mode and the camera work light are omitted. Carving preserves each surviving cell's material, and appearance depends on material, face direction, and sun visibility. Unsupported positive material IDs remain occupied and display diagnostic magenta.
+
+Engine callers can fill or paint the existing body with named materials:
+
+```bend
+	import ./material.bend as M
+	import ./voxel.bend as V
+
+	body = V.Body.filled(3n, M.Material.id(M.Concrete{}))
+	body = V.Body.write(body, V.Cell{2, 3, 4}, M.Material.id(M.Machinery{}))
+```
 
 To run on the CPU, disable GPU dispatch through Bend's runtime option:
 
@@ -48,16 +63,16 @@ Run the formal laws, geometry reference cases, and complete CPU/GPU image compar
 	make test
 ```
 
-The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. The image checker, process regressions, parser tests, and SHA-256 tests are also written in Bend. Run them with `make images`, or run only the parser and hash tests with `make image-unit`. Run the checker process regressions separately with `make image-regression`. Image checks force both `--gpu off` and `--gpu on` across four tile and fork configurations. `make benchmark-unit` checks benchmark parsing, ordering, report generation, and numeric behavior without opening windows.
+Validation uses formal laws, actual engine geometry, real renderer exports, and native UI evidence. First-party validation includes no traditional test suites. The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. `make lighting` compares every sun-depth texel against an occupied-cell ray reference, checks daylight ramps and self-shadow prevention, validates every compressed illumination sample, verifies camera cache reuse, and compares opposite-view CPU/GPU exports. `make materials` checks the palette's runtime properties and exports all four materials on CPU and GPU under `build/materials`. `make images` forces both `--gpu off` and `--gpu on` across four tile and fork configurations. Native UI checks cover flight, brush targeting, capture, and lifecycle behavior.
 
 To compare images on a machine without a GPU, run the CPU cases:
 
 ```sh
-	make build/image-checker image-unit
+	make build/image-checker
 	./build/image-checker --gpu off -- --cpu-only
 ```
 
-The checker reserves a fresh directory under `build/image-check` for each renderer dispatch and reads its new `render.ppm`. A zero-exit renderer that writes no file fails. Every complete 512x512 export must match the fixed full-scene or cut-scene RGB SHA-256 golden. Exact CPU variant and CPU/GPU comparisons run separately from the golden check. The sample pixels and 18,520-pixel destruction delta remain required. Read [the golden update procedure](docs/verification.md#update-the-image-goldens) before changing expected hashes.
+The checker reserves a fresh directory under `build/image-check` for each renderer dispatch and reads its new `render.ppm`. A zero-exit renderer that writes no file fails. Every complete 512x512 export must match the fixed full-scene or cut-scene RGB SHA-256 golden. Exact CPU variant and CPU/GPU comparisons run separately from the golden check. The sample pixels and 9,779-pixel destruction delta remain required. Read [the golden update procedure](docs/verification.md#update-the-image-goldens) before changing expected hashes.
 
 The checker resolves the repository from its executable path, so absolute or relative invocations also work from another directory. If you invoke a bare executable name through `PATH`, supply `--root /path/to/repository`. Use `--binary path/to/renderer` to select another renderer. Relative renderer paths resolve under that root.
 
@@ -74,15 +89,15 @@ The native window check uses `Window.export_ref` and `Window.capture` from [the 
 
 The GPU target saves native PPM screenshots in `.audit/screenshots/ui`. The CPU command saves them in `.audit/screenshots/cpu`.
 
-The native check runs the slice's real view, event reducer, and `App.step`. `Window.capture` reads the owned window's client pixels after earlier output completes. Keep the client fully on-screen and unobscured during the test. `scripts/ui_capture.bend` converts its RGB array to an `Image`; Bend checks the pixels and exports screenshots. The checker passes `WindowRef` directly to `UITest.key`, `UITest.click`, `UITest.request_close`, and `UITest.alive`. The library owns native event delivery and expiry checks. A close request goes through the app reducer, which closes the owned window. The check requires Linux/X11 and `libX11`. Unsupported backends report an error.
+The native check uses the slice's `Interactive.step`, which handles pointer capture and delegates the real view and event reducer to `App.step`. `Window.capture` reads the owned window's client pixels after earlier output completes. Keep the client fully on-screen and unobscured during the test. `scripts/ui_capture.bend` converts its RGB array to an `Image`; Bend checks the pixels and exports screenshots. The checker passes `WindowRef` directly to `UITest.key`, `UITest.click`, `UITest.request_close`, and `UITest.alive`. The library owns native event delivery and expiry checks. A close request goes through the app reducer, which closes the owned window. The check requires Linux/X11 and `libX11`. Unsupported backends report an error.
 
-`make ui` also runs the pure capture-conversion tests. Run them without opening a window with `make ui-unit UI_BEND='bun ../bend/bend2/main.ts'`.
+To verify actual held flight keys and captured mouse motion, put `xdotool` on `PATH` and run `make flight-ui UI_BEND='bun ../bend/bend2/main.ts'`. This separate Bend check uses the same `Interactive.step` and saves native captures in `.audit/screenshots/flight-ui`. `make brush-ui` with the same compiler checks actual mouse hover, background clearing, complete removal sets for free and captured clicks, and same-hover resets. It saves captures in `.audit/screenshots/brush-ui`. Run native tests sequentially.
 
 The library's native effects use Bend runtime internals. To rebuild with a different compiler, run `make -B ui UI_BEND='bun ../bend/bend2/main.ts'`. After checking out a different project revision, run `git submodule update --init --recursive` to select its pinned library version. Read [the verification notes](docs/verification.md) for the tested revisions and the scope of formal proofs and runtime checks.
 
 ## Export an image
 
-Write the same rendered `Image` to a deterministic PPM file:
+Write the geometry view to a deterministic PPM file. These exports omit the interactive hover preview:
 
 ```sh
 	./build/bend-voxel-rewrite --gpu on --dump build/full.ppm
@@ -112,11 +127,11 @@ The benchmark resolves its repository from the canonical executable or script pa
 To choose a work decomposition, set both depths:
 
 ```sh
-	./build/bend-voxel-rewrite --gpu on --tile-depth 5 --fork-depth 5 --bench 120
+	./build/bend-voxel-rewrite --gpu on --tile-depth 6 --fork-depth 6 --bench 120
 ```
 
-The default tile and fork depths are both five. Native measurements selected that configuration for the available GPU lane.
+The default tile and fork depths are both six. Native daylight measurements selected that configuration for the available CPU and GPU lanes.
 
-`--tile-depth` chooses the tile tree depth within the 512-pixel image. `--fork-depth` chooses how many tile tree levels may fork. Both accept values from zero to nine. Leaves run sequentially. These settings change scheduling and candidate lists while preserving the pixels.
+`--tile-depth` chooses the tile tree depth within the 512-pixel image. `--fork-depth` chooses how many tile tree levels may fork. Both default to six and accept values from zero to nine. Leaves run sequentially. These settings change scheduling and candidate lists while preserving the pixels.
 
 Read [the design notes](docs/design.md) for the data flow, boundaries, and examples considered.

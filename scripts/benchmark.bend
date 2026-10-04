@@ -19,7 +19,7 @@ type Row is Data:
 	Row{config: Config, reversed: List<&2, Num.Binary64>}
 
 type Identity is Data:
-	Identity{timestamp: String, binary: String, main: String, voxel: String, render: String, dump: String}
+	Identity{timestamp: String, binary: String, main: String, voxel: String, render: String, material: String, lighting: String, dump: String}
 
 type Metric is Data:
 	Seeking{}
@@ -531,12 +531,12 @@ def Report.rows(rows: List<&2, Row>) -> Result<&2, &2, String, String>:
 
 def Report.json(options: Options, identity: Identity, rows: List<&2, Row>) -> Result<&2, &2, String, String>:
 	Options{frames, repeats, threads, root, binary_path, output, help} = options
-	Identity{timestamp, binary, main, voxel, render, dump} = identity
+	Identity{timestamp, binary, main, voxel, render, material, lighting, dump} = identity
 	do Result<&2, &2, String, String>:
 		results : String <- Report.rows(rows)
 		return Report.parts(["{\n  \"generated_at\": ", JSON.quote(timestamp), ",\n  \"binary_sha256\": ", JSON.quote(binary),
 			",\n  \"source_sha256\": {\n    \"main.bend\": ", JSON.quote(main), ",\n    \"voxel.bend\": ", JSON.quote(voxel),
-			",\n    \"render.bend\": ", JSON.quote(render), ",\n    \"dump.bend\": ", JSON.quote(dump),
+			",\n    \"render.bend\": ", JSON.quote(render), ",\n    \"material.bend\": ", JSON.quote(material), ",\n    \"lighting.bend\": ", JSON.quote(lighting), ",\n    \"dump.bend\": ", JSON.quote(dump),
 			"\n  },\n  \"frames\": ", U32.show(frames), ",\n  \"warmup_frames\": 8,\n  \"repeats\": ", U32.show(repeats),
 			",\n  \"workload\": \"native Window.frame with cached scene and scripted destruction/reset\",\n  \"results\": [\n", results, "\n  ]\n}\n"], "")
 
@@ -571,8 +571,10 @@ def Run.identity(+root: String, binary: String) -> IO(Identity):
 		main_hash : String <- Host.Host.hash(Host.Path.join(root, "main.bend"))
 		voxel_hash : String <- Host.Host.hash(Host.Path.join(root, "voxel.bend"))
 		render_hash : String <- Host.Host.hash(Host.Path.join(root, "render.bend"))
+		material_hash : String <- Host.Host.hash(Host.Path.join(root, "material.bend"))
+		lighting_hash : String <- Host.Host.hash(Host.Path.join(root, "lighting.bend"))
 		dump_hash : String <- Host.Host.hash(Host.Path.join(root, "dump.bend"))
-		return Identity{timestamp, binary_hash, main_hash, voxel_hash, render_hash, dump_hash}
+		return Identity{timestamp, binary_hash, main_hash, voxel_hash, render_hash, material_hash, lighting_hash, dump_hash}
 
 def Run.output(+root: String, +output: String) -> String:
 	Bool.pick(String, String.is_empty(output), Host.Path.join(root, "build/benchmark.json"), output)

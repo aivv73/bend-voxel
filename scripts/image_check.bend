@@ -137,8 +137,8 @@ def Scene.boolean(cut: Bool) -> String:
 
 def Scene.expected_hash(cut: Bool) -> String:
 	Bool.pick(String, cut,
-		"4071d9e26a5a50cf429d4f65c6392fa679d784c2b7671933d4a9f4209e11b49d",
-		"a259f628eaeb04b707de9e5dc960eca4d80007fba2530beb96786cbca7b14a9b")
+		"b71120b74f4927f200cf6c17c53c854aa3d1496c2639261b99f519127d2f90ff",
+		"6c334099f03c762754a41c34e4e46f6e3662d407c3d27281bdc772911813755a")
 
 def Variant.label(cut: Bool, variant: Variant) -> String:
 	Variant{gpu, tile, fork} = variant
@@ -247,10 +247,10 @@ def Run.images(+options: Options) -> IO(Unit):
 		+full : Data.Raster <- Run.variants(variants, options, False{}, None{})
 		+cut : Data.Raster <- Run.variants(variants, options, True{}, None{})
 		Check.pixel(Data.Image.pixel(full, 0, 0), (16 * 65536 + 24 * 256 + 32 : U32), "(0,0)")
-		Check.pixel(Data.Image.pixel(full, 256, 256), (229 * 65536 + 188 * 256 + 122 : U32), "(256,256)")
-		Check.pixel(Data.Image.pixel(full, 256, 300), (160 * 65536 + 114 * 256 + 72 : U32), "(256,300)")
+		Check.pixel(Data.Image.pixel(full, 256, 256), (57 * 65536 + 151 * 256 + 128 : U32), "(256,256)")
+		Check.pixel(Data.Image.pixel(full, 256, 300), (57 * 65536 + 151 * 256 + 128 : U32), "(256,300)")
 		+changed : U32 <- Check.result(U32, Data.Image.changed(full, cut), "Destruction comparison")
-		Check.require(U32.is_eq(changed, 18520), "Destruction changed " ++ U32.show(changed) ++ " pixels; expected 18520")
+		Check.require(U32.is_eq(changed, 9779), "Destruction changed " ++ U32.show(changed) ++ " pixels; expected 9779")
 		full_hash : String <- Check.result(String, Data.Image.hash(full), "Full RGB SHA-256")
 		IO.print("full RGB sha256=" ++ full_hash)
 		cut_hash : String <- Check.result(String, Data.Image.hash(cut), "Cut RGB SHA-256")

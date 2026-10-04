@@ -375,16 +375,16 @@ def Check.option(input: Bool, binary: Bool, path: String) -> IO(Unit):
 		case False{} True{}:
 			Check.binary(path)
 		case _ _:
-			IO.die(Unit, 1, "Usage: reference-check [--input dump | --binary geometry-tests]")
+			IO.die(Unit, 1, "Usage: reference-check [--input dump | --binary geometry-dump]")
 
 def Check.args(args: List<String>) -> IO(Unit):
 	match args:
 		case Nil{}:
-			Check.binary("./build/geometry-tests")
+			Check.binary("./build/geometry-dump")
 		case Con{+flag, Con{path, Nil{}}}:
 			Check.option(String.eq(flag, "--input"), String.eq(flag, "--binary"), path)
 		case _:
-			IO.die(Unit, 1, "Usage: reference-check [--input dump | --binary geometry-tests]")
+			IO.die(Unit, 1, "Usage: reference-check [--input dump | --binary geometry-dump]")
 
 def Check.start(args: List<String>) -> IO(Unit):
 	match args:

@@ -1,5 +1,5 @@
 import Base
-import ./voxel.bend as V
+import ../voxel.bend as V
 
 def Dump.faces(faces: List<&2, V.Face>) -> IO(Unit):
 	match faces:

@@ -11,42 +11,184 @@ type Mode is Data:
 type Options is Data:
 	Options{mode: Mode, cut: Bool, tile_depth: Nat, fork_depth: Nat}
 
+type Controls is Data:
+	Controls{w: Bool, s: Bool, a: Bool, d: Bool, q: Bool, e: Bool, looking: Bool, grab: Maybe<&2, Bool>}
+
+type Pointer is Data:
+	Pointer{x: U32, y: U32}
+
 type Model is Type:
-	Model{body: V.Body, surface: V.Surface, scene: R.RenderScene, tile_depth: Nat, fork_depth: Nat}
+	Model{body: V.Body, surface: V.Surface, scene: R.RenderScene, camera: R.Camera, controls: Controls, pointer: Pointer, previous: Maybe<&2, Nat>, dirty: Bool, tile_depth: Nat, fork_depth: Nat}
+
+def Controls.initial() -> Controls:
+	Controls{False{}, False{}, False{}, False{}, False{}, False{}, False{}, None{}}
+
+def Controls.key(code: U32, down: Bool, controls: Controls) -> Controls:
+	match code controls:
+		case 119 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{down, s, a, d, q, e, looking, grab}
+		case 87 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{down, s, a, d, q, e, looking, grab}
+		case 115 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, down, a, d, q, e, looking, grab}
+		case 83 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, down, a, d, q, e, looking, grab}
+		case 97 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, s, down, d, q, e, looking, grab}
+		case 65 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, s, down, d, q, e, looking, grab}
+		case 100 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, s, a, down, q, e, looking, grab}
+		case 68 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, s, a, down, q, e, looking, grab}
+		case 113 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, s, a, d, down, e, looking, grab}
+		case 81 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, s, a, d, down, e, looking, grab}
+		case 101 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, s, a, d, q, down, looking, grab}
+		case 69 Controls{w, s, a, d, q, e, looking, grab}:
+			Controls{w, s, a, d, q, down, looking, grab}
+		case _ _:
+			controls
+
+def Controls.look(controls: Controls, +looking: Bool) -> Controls:
+	Controls{w, s, a, d, q, e, old, grab} = controls
+	Controls{w, s, a, d, q, e, looking, Some{looking}}
+
+def Controls.request(controls: Controls) -> Controls & Maybe<&2, Bool>:
+	Controls{w, s, a, d, q, e, looking, grab} = controls
+	(Controls{w, s, a, d, q, e, looking, None{}}, grab)
+
+def Controls.capture(controls: Controls) -> Bool:
+	Controls{w, s, a, d, q, e, looking, grab} = controls
+	looking
+
+def Controls.axis(positive: Bool, negative: Bool) -> F32:
+	(U32.to_f32(Bool.to_u32(positive)) - U32.to_f32(Bool.to_u32(negative)) : F32)
+
+def Controls.fly(controls: Controls, camera: R.Camera, elapsed_ms: Nat) -> R.Camera:
+	Controls{w, s, a, d, q, e, looking, grab} = controls
+	R.Camera.fly(camera, Controls.axis(w, s), Controls.axis(d, a), Controls.axis(e, q), elapsed_ms)
 
 def Model.finish(+tile_depth: Nat, fork_depth: Nat, result: V.Body & V.Surface) -> Model:
 	(body, +surface) = result
-	Model{body, surface, R.RenderScene.build(surface, tile_depth), tile_depth, fork_depth}
+	+camera = R.Camera.initial()
+	Model{body, surface, R.RenderScene.build(surface, camera, tile_depth), camera, Controls.initial(), Pointer{256, 256}, None{}, False{}, tile_depth, fork_depth}
 
 def Model.init(+tile_depth: Nat, fork_depth: Nat) -> Model:
 	Model.finish(tile_depth, fork_depth, V.Surface.build(V.Body.solid(3n)))
 
+def Model.erased(model: Model, sphere: V.MetricSphere) -> Model:
+	Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model{V.Body.cut(body, sphere), surface, scene, camera, controls, pointer, previous, True{}, tile_depth, fork_depth}
+
+def Model.restored(model: Model) -> Model:
+	Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model{V.Body.solid(3n), surface, scene, camera, controls, pointer, previous, True{}, tile_depth, fork_depth}
+
+def Model.rebuilt(+camera: R.Camera, controls: Controls, pointer: Pointer, previous: Maybe<&2, Nat>, +tile_depth: Nat, fork_depth: Nat, result: V.Body & V.Surface) -> Model:
+	(body, +surface) = result
+	Model{body, surface, R.RenderScene.build(surface, camera, tile_depth), camera, controls, pointer, previous, False{}, tile_depth, fork_depth}
+
+def Model.refreshed(changed: Bool, model: Model) -> Model:
+	match changed model:
+		case False{} _:
+			model
+		case True{} Model{body, +surface, scene, +camera, controls, pointer, previous, dirty, +tile_depth, fork_depth}:
+			Model{body, surface, R.RenderScene.reproject(surface, camera, tile_depth, scene), camera, controls, pointer, previous, dirty, tile_depth, fork_depth}
+
+def Model.refresh(changed: Bool, model: Model) -> Model:
+	match model:
+		case Model{body, surface, scene, camera, controls, pointer, previous, True{}, tile_depth, fork_depth}:
+			Model.rebuilt(camera, controls, pointer, previous, tile_depth, fork_depth, V.Surface.build(body))
+		case Model{body, surface, scene, camera, controls, pointer, previous, False{}, tile_depth, fork_depth}:
+			Model.refreshed(changed, Model{body, surface, scene, camera, controls, pointer, previous, False{}, tile_depth, fork_depth})
+
 def Model.destroy(model: Model, cell: V.Cell) -> Model:
-	Model{body, surface, scene, +tile_depth, fork_depth} = model
-	Model.finish(tile_depth, fork_depth, V.Surface.build(V.Body.destroy(body, V.Sphere{cell, 3})))
+	Model.refresh(False{}, Model.erased(model, V.MetricSphere.brush(V.PointCm.cell(cell))))
+
+def Model.cut(model: Model, sphere: V.MetricSphere) -> Model:
+	Model.refresh(False{}, Model.erased(model, sphere))
 
 def Model.reset(model: Model) -> Model:
-	Model{body, surface, scene, tile_depth, fork_depth} = model
-	Model.init(tile_depth, fork_depth)
+	Model.refresh(False{}, Model.restored(model))
 
-def Model.drawn(body: V.Body, surface: V.Surface, tile_depth: Nat, fork_depth: Nat, rendered: Image & R.RenderScene) -> Model & Image:
+def Model.drawn(body: V.Body, surface: V.Surface, camera: R.Camera, controls: Controls, pointer: Pointer, previous: Maybe<&2, Nat>, dirty: Bool, tile_depth: Nat, fork_depth: Nat, rendered: Image & R.RenderScene) -> Model & Image:
 	(image, scene) = rendered
-	(Model{body, surface, scene, tile_depth, fork_depth}, image)
+	(Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}, image)
 
 def Model.view(model: Model) -> Model & Image:
-	Model{body, surface, scene, tile_depth, +fork_depth} = model
-	Model.drawn(body, surface, tile_depth, fork_depth, R.RenderScene.image(scene, fork_depth))
+	Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, +fork_depth} = model
+	Model.drawn(body, surface, camera, controls, pointer, previous, dirty, tile_depth, fork_depth, R.RenderScene.image(scene, fork_depth))
 
-def Model.clicked(hit: Maybe<&2, V.Cell>, model: Model) -> Model:
+def Pointer.target(looking: Bool, pointer: Pointer) -> Pointer:
+	match looking:
+		case True{}:
+			Pointer{256, 256}
+		case False{}:
+			pointer
+
+def Pointer.sphere(pointer: Pointer, scene: R.RenderScene) -> Maybe<&2, V.MetricSphere>:
+	Pointer{x, y} = pointer
+	R.RenderScene.target(scene, x, y)
+
+def Model.preview(model: Model) -> Model & Image:
+	Model{body, surface, +scene, camera, +controls, +pointer, previous, dirty, tile_depth, +fork_depth} = model
+	Model.drawn(body, surface, camera, controls, pointer, previous, dirty, tile_depth, fork_depth,
+		R.RenderScene.preview(scene, Pointer.sphere(Pointer.target(Controls.capture(controls), pointer), scene), fork_depth))
+
+def Model.clicked(hit: Maybe<&2, V.MetricSphere>, model: Model) -> Model:
 	match hit:
 		case None{}:
 			model
-		case Some{cell}:
-			Model.destroy(model, cell)
+		case Some{sphere}:
+			Model.erased(model, sphere)
+
+def Model.pointed(looking: Bool, model: Model, x: U32, y: U32) -> Model:
+	match looking model:
+		case True{} _:
+			model
+		case False{} Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}:
+			Model{body, surface, scene, camera, controls, Pointer{x, y}, previous, dirty, tile_depth, fork_depth}
+
+def Model.point(model: Model, x: U32, y: U32) -> Model:
+	Model{body, surface, scene, camera, +controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model.pointed(Controls.capture(controls), Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}, x, y)
+
+def Model.click.pending(model: Model, +x: U32, +y: U32) -> Model:
+	Model{body, surface, +scene, camera, +controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model.clicked(Pointer.sphere(Pointer.target(Controls.capture(controls), Pointer{x, y}), scene),
+		Model.point(Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}, x, y))
 
 def Model.click(model: Model, x: U32, y: U32) -> Model:
-	Model{body, surface, +scene, tile_depth, fork_depth} = model
-	Model.clicked(R.RenderScene.pick(scene, x, y), Model{body, surface, scene, tile_depth, fork_depth})
+	Model.refresh(False{}, Model.click.pending(model, x, y))
+
+def Model.key(model: Model, code: U32, down: Bool) -> Model:
+	Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model{body, surface, scene, camera, Controls.key(code, down, controls), pointer, previous, dirty, tile_depth, fork_depth}
+
+def Model.capture(model: Model, looking: Bool) -> Model:
+	Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model{body, surface, scene, camera, Controls.look(controls, looking), pointer, previous, dirty, tile_depth, fork_depth}
+
+def Model.button(down: Bool, model: Model, x: U32, y: U32) -> Model:
+	match down:
+		case True{}:
+			Model.capture(Model.point(model, x, y), True{})
+		case False{}:
+			Model.point(Model.capture(model, False{}), x, y)
+
+def Model.look.active(active: Bool, model: Model, dx: F32, dy: F32) -> Model:
+	match active model:
+		case False{} _:
+			model
+		case True{} Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}:
+			Model{body, surface, scene, R.Camera.look(camera, dx, dy), controls, pointer, previous, dirty, tile_depth, fork_depth}
+
+def Model.look(model: Model, dx: F32, dy: F32) -> Model:
+	Model{body, surface, scene, camera, +controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model.look.active(Controls.capture(controls), Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}, dx, dy)
 
 def Model.event(event: Event, model: Model) -> Maybe<Model>:
 	match event:
@@ -55,13 +197,21 @@ def Model.event(event: Event, model: Model) -> Maybe<Model>:
 		case Key{27, True{}}:
 			None{}
 		case Key{32, True{}}:
-			Some{Model.destroy(model, V.Cell{6, 6, 6})}
+			Some{Model.erased(model, V.MetricSphere.demo())}
 		case Key{114, True{}}:
-			Some{Model.reset(model)}
+			Some{Model.restored(model)}
 		case Key{82, True{}}:
-			Some{Model.reset(model)}
+			Some{Model.restored(model)}
+		case Key{code, down}:
+			Some{Model.key(model, code, down)}
+		case Mouse{x, y, 1, down}:
+			Some{Model.button(down, model, x, y)}
+		case Move{x, y}:
+			Some{Model.point(model, x, y)}
+		case Look{dx, dy}:
+			Some{Model.look(model, dx, dy)}
 		case Mouse{x, y, 0, True{}}:
-			Some{Model.click(model, x, y)}
+			Some{Model.click.pending(model, x, y)}
 		case _:
 			Some{model}
 
@@ -72,17 +222,70 @@ def Model.events(events: List<Event>, model: Model) -> Maybe<Model>:
 		case Con{event, rest}:
 			Maybe.bind(&1, Model, Model, Model.event(event, model), m => Model.events(rest, m))
 
-def Model.next(next: Maybe<Model>) -> IO(Maybe<Model>):
+def Model.flown(old_camera: R.Camera, model: Model, +camera: R.Camera) -> Model:
+	Model{body, surface, scene, old, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model.refresh(Bool.not(R.Camera.equal(old_camera, camera)), Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth})
+
+def Model.flight(old_camera: R.Camera, elapsed_ms: Nat, model: Model) -> Model:
+	Model{body, surface, scene, +camera, +controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model.flown(old_camera, Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}, Controls.fly(controls, camera, elapsed_ms))
+
+def Model.advanced(old_camera: R.Camera, elapsed_ms: Nat, next: Maybe<Model>) -> Maybe<Model>:
 	match next:
 		case None{}:
-			IO.pure(Maybe<Model>, None{})
+			None{}
 		case Some{model}:
-			do IO<Maybe<Model>>:
-				barrier : Nat <- IO.now()
-				return Some{model}
+			Some{Model.flight(old_camera, elapsed_ms, model)}
+
+def Model.advance(events: List<Event>, elapsed_ms: Nat, model: Model) -> Maybe<Model>:
+	Model{body, surface, scene, +camera, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model.advanced(camera, elapsed_ms, Model.events(events, Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}))
+
+def Clock.elapsed(previous: Maybe<&2, Nat>, now: Nat) -> Nat:
+	match previous:
+		case None{}:
+			0n
+		case Some{before}:
+			Nat.min(Nat.sub(now, before), 100n)
+
+def Model.at(events: List<Event>, +now: Nat, model: Model) -> Maybe<Model>:
+	Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Model.advance(events, Clock.elapsed(previous, now), Model{body, surface, scene, camera, controls, pointer, Some{now}, dirty, tile_depth, fork_depth})
 
 def Model.tick(events: List<Event>, model: Model) -> IO(Maybe<Model>):
-	Model.next(Model.events(events, model))
+	do IO<Maybe<Model>>:
+		now : Nat <- IO.now()
+		return Model.at(events, now, model)
+
+def Interactive.request(request: Maybe<&2, Bool>, window: Window, model: Model, rest: Window -> Model -> IO(Unit)) -> IO(Unit):
+	match request:
+		case None{}:
+			App.step(Model, App{Model.preview, Model.tick}, window, model, rest)
+		case Some{looking}:
+			do IO<Unit>:
+				window : Window <- Window.grab(window, looking)
+				App.step(Model, App{Model.preview, Model.tick}, window, model, rest)
+
+def Interactive.controls(window: Window, model: Model, rest: Window -> Model -> IO(Unit), requested: Controls & Maybe<&2, Bool>) -> IO(Unit):
+	Model{body, surface, scene, camera, old_controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	(controls, request) = requested
+	Interactive.request(request, window, Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}, rest)
+
+def Interactive.step(window: Window, model: Model, rest: Window -> Model -> IO(Unit)) -> IO(Unit):
+	Model{body, surface, scene, camera, +controls, pointer, previous, dirty, tile_depth, fork_depth} = model
+	Interactive.controls(window, Model{body, surface, scene, camera, controls, pointer, previous, dirty, tile_depth, fork_depth}, rest, Controls.request(controls))
+
+def Interactive.loop(fuel: Nat, window: Window, model: Model) -> IO(Unit):
+	match fuel:
+		case 0n:
+			Window.close(window)
+		case 1n+remaining:
+			Interactive.step(window, model, w => m => Interactive.loop(remaining, w, m))
+
+def Interactive.run(model: Model) -> IO(Unit):
+	do IO<Unit>:
+		window : Window <- IO.try(Window, Window.open("Bend Voxel Rewrite | WASD Q/E fly | RMB look | Space cut | click carve | R reset | Esc exit", 512, 512))
+		Interactive.loop(4294967295n, window, model)
 
 def Options.args(args: List<String>) -> List<&2, String>:
 	match args:
@@ -140,7 +343,7 @@ def Options.depth(value: Maybe<&2, String>, +fallback: U32) -> Nat:
 
 def Options.parse(+args: List<&2, String>) -> Options:
 	Options{Options.mode(Options.flag(args, "--dump", False{}), Options.flag(args, "--bench", False{})), Options.has(args, "--cut"),
-		Options.depth(Options.flag(args, "--tile-depth", False{}), 5), Options.depth(Options.flag(args, "--fork-depth", False{}), 5)}
+		Options.depth(Options.flag(args, "--tile-depth", False{}), 6), Options.depth(Options.flag(args, "--fork-depth", False{}), 6)}
 
 def Model.initial(cut: Bool, tile_depth: Nat, fork_depth: Nat) -> Model:
 	match cut:
@@ -210,7 +413,7 @@ def Run.mode(mode: Mode, model: Model) -> IO(Unit):
 		case Benchmark{frames}:
 			Bench.run(frames, model)
 		case Interactive{}:
-			App.run(~Model, ~App{Model.view, Model.tick}, "Bend Voxel Rewrite | Space destroy | click carve | R reset | Esc exit", 512, 512, model)
+			Interactive.run(model)
 
 def Run.options(options: Options) -> IO(Unit):
 	Options{mode, cut, tile_depth, fork_depth} = options

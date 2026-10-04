@@ -10,6 +10,7 @@ type Stage is Data:
 	Repeated{}
 	Reset{}
 	Background{}
+	Hovered{}
 	Clicked{}
 	ClickReset{}
 
@@ -83,7 +84,7 @@ def Check.frames(fuel: Nat, window: Window, model: Slice.Model, next: Window -> 
 		case 0n:
 			next(window, model)
 		case 1n+rest:
-			App.step(Slice.Model, App{Slice.Model.view, Slice.Model.tick}, window, model, w => m => Check.frames(rest, w, m, next))
+			Slice.Interactive.step(window, model, w => m => Check.frames(rest, w, m, next))
 
 def Check.unclosed(window: Window, model: Slice.Model) -> IO(Unit):
 	do IO<Unit>:
@@ -93,7 +94,7 @@ def Check.unclosed(window: Window, model: Slice.Model) -> IO(Unit):
 def Check.finish(+ref: WindowRef, close_window: Bool, completed: Chan(Bool), window: Window, model: Slice.Model) -> IO(Unit):
 	do IO<Unit>:
 		Reference.close(ref, close_window)
-		App.step(Slice.Model, App{Slice.Model.view, Slice.Model.tick}, window, model, Check.unclosed)
+		Slice.Interactive.step(window, model, Check.unclosed)
 		alive : Bool <- IO.try(Bool, UITest.alive(ref))
 		Check.require(Bool.not(alive), "Exported window is still alive after app close")
 		sent : Bool <- Chan.send(Bool, completed, True{})
@@ -105,12 +106,12 @@ def Check.image(stage: Stage, session: Session, window: Window, model: Slice.Mod
 		case First{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
 				D.Dump.ppm(output ++ "/before.ppm", image)
-				Check.require(U32.is_eq(Pixels.at(9n, 0, 0, 512, image), 1054752) && U32.is_eq(Pixels.at(9n, 256, 256, 512, image), 15055994) && U32.is_eq(Pixels.at(9n, 256, 300, 512, image), 10515016), "Initial native pixels differ: " ++ U32.show(Pixels.at(9n, 0, 0, 512, image)) ++ "," ++ U32.show(Pixels.at(9n, 256, 256, 512, image)) ++ "," ++ U32.show(Pixels.at(9n, 256, 300, 512, image)))
+				Check.require(U32.is_eq(Pixels.at(9n, 0, 0, 512, image), 1054752) && U32.is_eq(Pixels.at(9n, 256, 256, 512, image), 3774336) && U32.is_eq(Pixels.at(9n, 256, 300, 512, image), 3774336), "Initial native pixels differ: " ++ U32.show(Pixels.at(9n, 0, 0, 512, image)) ++ "," ++ U32.show(Pixels.at(9n, 256, 256, 512, image)) ++ "," ++ U32.show(Pixels.at(9n, 256, 300, 512, image)))
 				IO.try(Unit, UITest.key(ref, 32))
 				return Some{Progress{window, model, Session{output, ref, image, cut, close_window, completed}, Destroyed{}, 1n}}
 		case Destroyed{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
-				Check.require(U32.is_eq(Pixels.delta(9n, before, image), 18520), "Space must change exactly 18520 native pixels")
+				Check.require(U32.is_eq(Pixels.delta(9n, before, image), 9779), "Space must change exactly 9779 native pixels")
 				D.Dump.ppm(output ++ "/destroyed.ppm", image)
 				IO.try(Unit, UITest.key(ref, 32))
 				return Some{Progress{window, model, Session{output, ref, before, image, close_window, completed}, Repeated{}, 1n}}
@@ -130,8 +131,13 @@ def Check.image(stage: Stage, session: Session, window: Window, model: Slice.Mod
 			do IO<Maybe<Progress>>:
 				Check.require(U32.is_eq(Pixels.delta(9n, before, image), 0), "Background click changed native pixels")
 				D.Dump.ppm(output ++ "/background-click.ppm", image)
+				return Some{Progress{window, Slice.Model.point(model, 256, 200), Session{output, ref, before, cut, close_window, completed}, Hovered{}, 1n}}
+		case Hovered{} Session{+output, +ref, +before, +cut, +close_window, completed}:
+			do IO<Maybe<Progress>>:
+				Check.require(U32.is_eq(Pixels.at(9n, 256, 200, 512, image), 16776960), "Hovered selected cell is not yellow")
+				D.Dump.ppm(output ++ "/hovered.ppm", image)
 				IO.try(Unit, UITest.click(ref, 256, 200))
-				return Some{Progress{window, model, Session{output, ref, before, cut, close_window, completed}, Clicked{}, 1n}}
+				return Some{Progress{window, model, Session{output, ref, image, cut, close_window, completed}, Clicked{}, 1n}}
 		case Clicked{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
 				Check.require((Pixels.delta(9n, before, image) > 100 : U32) && (Pixels.delta(9n, cut, image) > 0 : U32), "Primary click did not carve the picked voxel")
@@ -197,7 +203,7 @@ def Check.loop(fuel: Nat, progress: Progress) -> IO(Unit):
 				IO.die(Unit, 1, "Native UI check exhausted its frame budget")
 		case 1n+rest:
 			Progress{window, model, session, stage, wait} = progress
-			App.step(Slice.Model, App{Slice.Model.view, Slice.Model.tick}, window, model,
+			Slice.Interactive.step(window, model,
 				w => m => IO.bind(Maybe<Progress>, Unit, Check.wait(wait, stage, session, w, m), result => Check.advance(p => Check.loop(rest, p), result)))
 
 def Check.ready(output: String, close_window: Bool, completed: Chan(Bool), model: Slice.Model, exported: Window & WindowRef) -> IO(Unit):
@@ -205,7 +211,8 @@ def Check.ready(output: String, close_window: Bool, completed: Chan(Bool), model
 	do IO<Unit>:
 		Reference.report(ref)
 		renamed : Window <- Window.set_title(window, "Bend Voxel Rewrite | testing exported window")
-		Check.loop(24n, Progress{renamed, model, Session{output, ref, Pix{0}, Pix{0}, close_window, completed}, First{}, 0n})
+		IO.try(Unit, UITest.click(ref, 20, 20))
+		Check.loop(32n, Progress{renamed, model, Session{output, ref, Pix{0}, Pix{0}, close_window, completed}, First{}, 1n})
 
 def Check.begin(output: String, close_window: Bool, completed: Chan(Bool), window: Window, model: Slice.Model) -> IO(Unit):
 	IO.bind(Window & WindowRef, Unit, Reference.export(window), exported => Check.ready(output, close_window, completed, model, exported))
@@ -227,9 +234,9 @@ def Check.options(+args: List<&2, String>, options: Slice.Options) -> IO(Unit):
 		+completed : Chan(Bool) <- Chan.new(Bool, 1)
 		window : Window <- IO.try(Window, Window.open("Bend Voxel Rewrite | Space destroy | click carve | R reset | Esc exit", 512, 512))
 		Check.frames(2n, window, Slice.Model.init(tile_depth, fork_depth), w => m => Check.begin(output, String.eq(method, "window"), completed, w, m))
+		Chan.close(Bool, completed)
 		finished : Maybe<Bool> <- Chan.recv(Bool, completed)
 		Check.require(Maybe.default(&1, Bool, finished, False{}), "Native check did not complete")
-		Chan.close(Bool, completed)
 
 def Check.start(+args: List<&2, String>) -> IO(Unit):
 	Check.options(args, Slice.Options.parse(args))
