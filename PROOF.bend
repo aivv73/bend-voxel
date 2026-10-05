@@ -1,4 +1,5 @@
 import Base
+import ./dda.bend as X
 import ./voxel.bend as V
 import ./lighting.bend as L
 import ./LAWS.bend as Laws
@@ -170,3 +171,80 @@ def Laws.pending_scan_preserves_hit(faces, ray, near, old):
 
 def Laws.final_lighting_preserves_hit(faces, ray, near, hit):
 	Laws.pending_scan_preserves_hit(faces, ray, near, R.Existing{hit})
+
+def Laws.dda_uniform_material(material,axis,leftward,cell,span):
+	{==}
+
+def Laws.dda_cached_daylight_preserved(sides,direction):
+	match sides direction:
+		case L.Sides{nx,px,ny,py,nz,pz} V.NegX{}: {==}
+		case L.Sides{nx,px,ny,py,nz,pz} V.PosX{}: {==}
+		case L.Sides{nx,px,ny,py,nz,pz} V.NegY{}: {==}
+		case L.Sides{nx,px,ny,py,nz,pz} V.PosY{}: {==}
+		case L.Sides{nx,px,ny,py,nz,pz} V.NegZ{}: {==}
+		case L.Sides{nx,px,ny,py,nz,pz} V.PosZ{}: {==}
+
+def Laws.dda_outside_is_empty(cells,side,cell):
+	{==}
+
+def Laws.dda_disjoint_paint_preserves_grid(fuel,covers,box,region,axis,tree):
+	match fuel:
+		case 0n: {==}
+		case 1n+rest: {==}
+
+def Laws.dda_face_flip_involution(direction):
+	match direction:
+		case V.NegX{}: {==}
+		case V.PosX{}: {==}
+		case V.NegY{}: {==}
+		case V.PosY{}: {==}
+		case V.NegZ{}: {==}
+		case V.PosZ{}: {==}
+
+def Laws.dda_stationary_axis_never_crosses(positive,origin,delta,cell):
+	{==}
+
+def Laws.dda_uncrossed_coordinate_preserved(positive,cell):
+	match positive:
+		case True{}: {==}
+		case False{}: {==}
+
+def Laws.dda_traversal_is_bounded(inside,material,previous,grid,eye,ray,crossing):
+	{==}
+
+def Laws.dda_region_material_preserved(tree,axis,leftward,cell,span,low):
+	match tree axis leftward cell span low:
+		case X.Solid{material} _ _ _ V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}: {==}
+		case X.Branch{left,right} X.SplitX{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} low:
+			Laws.dda_region_material_preserved(left,X.SplitY{},(y < sy / 2 : U32),V.Cell{x,y,z},V.Cell{(sx / 2 : U32),sy,sz},low)
+		case X.Branch{left,right} X.SplitX{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
+			Laws.dda_region_material_preserved(right,X.SplitY{},(y < sy / 2 : U32),V.Cell{(x - sx / 2 : U32),y,z},V.Cell{(sx / 2 : U32),sy,sz},V.Cell{(lx + sx / 2 : U32),ly,lz})
+		case X.Branch{left,right} X.SplitY{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} low:
+			Laws.dda_region_material_preserved(left,X.SplitZ{},(z < sz / 2 : U32),V.Cell{x,y,z},V.Cell{sx,(sy / 2 : U32),sz},low)
+		case X.Branch{left,right} X.SplitY{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
+			Laws.dda_region_material_preserved(right,X.SplitZ{},(z < sz / 2 : U32),V.Cell{x,(y - sy / 2 : U32),z},V.Cell{sx,(sy / 2 : U32),sz},V.Cell{lx,(ly + sy / 2 : U32),lz})
+		case X.Branch{left,right} X.SplitZ{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} low:
+			Laws.dda_region_material_preserved(left,X.SplitX{},(x < sx / 2 : U32),V.Cell{x,y,z},V.Cell{sx,sy,(sz / 2 : U32)},low)
+		case X.Branch{left,right} X.SplitZ{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
+			Laws.dda_region_material_preserved(right,X.SplitX{},(x < sx / 2 : U32),V.Cell{x,y,(z - sz / 2 : U32)},V.Cell{sx,sy,(sz / 2 : U32)},V.Cell{lx,ly,(lz + sz / 2 : U32)})
+
+def Laws.dda_region_outside_is_empty(cells,side,cell):
+	{==}
+
+def Laws.dda_stationary_region_axis_preserved(positive,origin,delta,cell,time,low,high):
+	{==}
+
+def Laws.dda_region_traversal_is_bounded(inside,previous,grid,eye,ray,crossing,region):
+	{==}
+
+def Laws.dda_zero_plane_events_are_accepted(positive,origin,delta,cell,time):
+	{==}
+
+def Laws.dda_count_down_stops_at_accepted_plane(fuel,at_limit,positive,origin,delta,cell,time,count,limit):
+	{==}
+
+def Laws.dda_count_up_rejects_first_late_plane(fuel,at_limit,positive,origin,delta,cell,time,count,limit):
+	{==}
+
+def Laws.dda_count_up_stops_at_accepted_limit(fuel,positive,origin,delta,cell,time,limit):
+	{==}

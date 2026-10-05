@@ -152,3 +152,18 @@ For native frame attribution and steady cached FPS, build the phase driver:
 `--frames` reports initialization stages, cached rendering, hover preview, flight, cut, and reset. It separates model updates, rendering, presentation, and image disposal. Initialization is reconstructed for attribution, so use its stage times as diagnostics. `--bench` measures cached frames in a native window after eight warm-up frames, with initialization excluded. It keeps the camera fixed and performs no edits. The production renderer's `--bench` includes cut and reset. Both consume and dispose of every rendered image.
 
 Read [the design notes](docs/design.md) for the data flow, boundaries, and examples considered.
+
+## Compare a minimal DDA renderer
+
+Build the independent voxel-traversal renderer and compare every image ray with the existing renderer:
+
+```sh
+	make dda
+	./build/dda-compare --gpu off --threads 1 -- --verify
+	./build/dda-compare --gpu off --threads 1 -- --verify-steps
+	./build/dda-compare --gpu off -- --renderer dda --dump build/dda.ppm
+	make build/dda-benchmark
+	./build/dda-benchmark --gpu off --threads 12 -- --frames 12 --repeats 5 --label cpu-12 --output build/dda-comparison.tsv
+```
+
+The comparison includes the production renderer and a version of the existing face renderer with shadows omitted to match minimal DDA shading. Read [the DDA comparison](docs/dda-comparison.md) for scope, validation, images, and measurements. The default DDA crosses compressed uniform regions. [DDA region traversal](docs/dda-optimization.md) compares the upstream world representations and explains the optimization. [The region DDA profile](docs/dda-profile.md) records cumulative CPU costs, actual work counters, and one rejected search optimization. [Corrected event counting](docs/dda-estimate.md) replaces that baseline's binary search with a bounded estimate and exact plane correction, with repeated CPU12 gains and separate GPU measurements. Add `--steps` to the benchmark to include the unit-step reference.
