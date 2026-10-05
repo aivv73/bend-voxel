@@ -111,7 +111,7 @@ def Check.image(stage: Stage, session: Session, window: Window, model: Slice.Mod
 				return Some{Progress{window, model, Session{output, ref, image, cut, close_window, completed}, Destroyed{}, 1n}}
 		case Destroyed{} Session{+output, +ref, +before, +cut, +close_window, completed}:
 			do IO<Maybe<Progress>>:
-				Check.require(U32.is_eq(Pixels.delta(9n, before, image), 9779), "Space must change exactly 9779 native pixels")
+				Check.require(U32.is_eq(Pixels.delta(9n, before, image), 9826), "Space must change exactly 9826 native pixels")
 				D.Dump.ppm(output ++ "/destroyed.ppm", image)
 				IO.try(Unit, UITest.key(ref, 32))
 				return Some{Progress{window, model, Session{output, ref, before, image, close_window, completed}, Repeated{}, 1n}}

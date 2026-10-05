@@ -1,5 +1,6 @@
 BEND ?= bend
 UI_BEND ?= $(BEND)
+RUN_ARGS ?= --gpu off
 CUDA_HOME ?= $(if $(wildcard /opt/cuda),/opt/cuda,$(if $(wildcard /usr/local/cuda),/usr/local/cuda,))
 export CUDA_HOME
 
@@ -35,6 +36,9 @@ build/image-checker: scripts/image_check.bend scripts/image_data.bend scripts/sh
 build/benchmark: scripts/benchmark.bend scripts/benchmark_host.bend scripts/benchmark_number.bend scripts/sha256.bend | build
 	$(BEND) scripts/benchmark.bend -o $@
 
+build/frame-profile: scripts/frame_profile.bend $(SOURCES) | build
+	$(BEND) scripts/frame_profile.bend -o $@
+
 build/material-check: scripts/material_check.bend $(SOURCES) | build
 	$(BEND) scripts/material_check.bend -o $@
 
@@ -69,7 +73,7 @@ brush-ui: build/brush-ui-check
 	./build/brush-ui-check --gpu on -- --output .audit/screenshots/brush-ui
 
 run: $(BINARY)
-	./$(BINARY)
+	./$(BINARY) $(RUN_ARGS)
 
 proof:
 	$(BEND) PROOF.bend

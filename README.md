@@ -13,6 +13,13 @@ Use Bend 2.0.34 or newer. Native GPU builds require the compiler and SDK for the
 	make run
 ```
 
+`make run` uses CPU rendering with Bend's default worker count, the logical CPU count. The native Atelier workload ran faster on CPU than GPU on the development machine. Override the execution lane and worker count through `RUN_ARGS`:
+
+```sh
+	make run RUN_ARGS='--gpu on'
+	make run RUN_ARGS='--gpu off --threads 4'
+```
+
 Use these controls:
 
 - Hold **W/S** to fly along the view direction, and **A/D** to strafe.
@@ -133,5 +140,15 @@ To choose a work decomposition, set both depths:
 The default tile and fork depths are both six. Native daylight measurements selected that configuration for the available CPU and GPU lanes.
 
 `--tile-depth` chooses the tile tree depth within the 512-pixel image. `--fork-depth` chooses how many tile tree levels may fork. Both default to six and accept values from zero to nine. Leaves run sequentially. These settings change scheduling and candidate lists while preserving the pixels.
+
+For native frame attribution and steady cached FPS, build the phase driver:
+
+```sh
+	make build/frame-profile
+	./build/frame-profile --gpu off -- --frames 12
+	./build/frame-profile --gpu off -- --bench 24
+```
+
+`--frames` reports initialization stages, cached rendering, hover preview, flight, cut, and reset. It separates model updates, rendering, presentation, and image disposal. Initialization is reconstructed for attribution, so use its stage times as diagnostics. `--bench` measures cached frames in a native window after eight warm-up frames, with initialization excluded. It keeps the camera fixed and performs no edits. The production renderer's `--bench` includes cut and reset. Both consume and dispose of every rendered image.
 
 Read [the design notes](docs/design.md) for the data flow, boundaries, and examples considered.

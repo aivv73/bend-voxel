@@ -28,6 +28,10 @@ type RenderScene is Data:
 type Hit is Data:
 	Hit{depth: F32, color: U32, id: U32, cell: Maybe<&2, V.Cell>, direction: V.Direction}
 
+type PendingHit is Data:
+	Existing{hit: Hit}
+	Selected{depth: F32, id: U32, cell: V.Cell, direction: V.Direction, ramp: L.Ramp, visibility: L.ColorField, u: F32, v: F32, edge: Bool}
+
 type ShadowDepth is Data:
 	Resolution{width: U32, image: ShadowDepth}
 	Depth{depth: F32}
@@ -284,7 +288,7 @@ def Projected.of(+face: V.Face, +basis: Basis, palette: L.Palette, id: U32) -> M
 	match face:
 		case V.Face{+cell,+direction,material}:
 			Basis{eye,right,up,forward,focal,near} = basis
-			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),L.Color{9},Face.coordinates(direction,cell),Face.axes(direction,eye),1.0,1.0,True{})
+			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),L.Color{9},Face.coordinates(direction,cell),Face.axes(direction,eye),U32.to_f32(1),U32.to_f32(1),False{})
 		case V.Rectangle{+cell,+direction,material,width,height}:
 			Basis{eye,right,up,forward,focal,near} = basis
 			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),L.Color{9},Face.coordinates(direction,cell),Face.axes(direction,eye),U32.to_f32(width),U32.to_f32(height),False{})
@@ -374,6 +378,61 @@ def Face.sample_cell(direction: V.Direction, cell: V.Cell, u: F32, v: F32, width
 	+dv = F32.to_u32(F32.min(F32.floor(v), (height - 1.0 : F32)))
 	Face.offset(direction, x,y,z,du,dv)
 
+def PendingHit.finish(pending: PendingHit) -> Hit:
+	match pending:
+		case Existing{hit}:
+			hit
+		case Selected{depth, id, cell, direction, ramp, visibility, u, v, edge}:
+			Hit{depth, Edge.color(edge, L.Ramp.color(ramp, L.ColorField.sample(visibility, u, v))), id, Some{cell}, direction}
+
+def PendingHit.accept(closer: Bool, cell: V.Cell, depth: F32, color: L.Ramp, visibility: L.ColorField, u: F32, v: F32, edge: Bool, id: U32, direction: V.Direction, old: PendingHit) -> PendingHit:
+	match closer:
+		case True{}:
+			Selected{depth, id, cell, direction, color, visibility, u, v, edge}
+		case False{}:
+			old
+
+def PendingHit.closer(old: PendingHit, depth: F32, id: U32) -> Bool:
+	match old:
+		case Existing{Hit{previous, old_color, old_id, old_cell, old_direction}}:
+			Hit.closer(old_cell, depth, previous, id, old_id)
+		case Selected{previous, old_id, cell, direction, ramp, visibility, u, v, edge}:
+			Hit.closer(Some{cell}, depth, previous, id, old_id)
+
+def PendingHit.covered(covered: Bool, +u: F32, +v: F32, cell: V.Cell, +depth: F32, color: L.Ramp, visibility: L.ColorField, +id: U32, direction: V.Direction, outline: Bool, +old: PendingHit) -> PendingHit:
+	match covered:
+		case False{}:
+			old
+		case True{}:
+			PendingHit.accept(PendingHit.closer(old, depth, id), cell, depth,
+				color, visibility, u, v, outline && ((u < 0.0225) || (v < 0.0225) || (u > 0.9775) || (v > 0.9775) : F32), id, direction, old)
+
+def PendingHit.intersection(nonparallel: Bool, +denom: F32, plane: F32, u_eye: F32, v_eye: F32, du: F32, dv: F32, +near: F32, +cell: V.Cell, color: L.Ramp, visibility: L.ColorField, id: U32, +direction: V.Direction, +width: F32, +height: F32, outline: Bool, old: PendingHit) -> PendingHit:
+	match nonparallel:
+		case False{}:
+			old
+		case True{}:
+			+t = (plane / denom : F32)
+			+u = ((u_eye + t * du) / width : F32)
+			+v = ((v_eye + t * dv) / height : F32)
+			PendingHit.covered((F32.is_eq((t - t : F32), 0.0) && ((t >= near) && (u >= 0.0) && (u <= 1.0) && (v >= 0.0) && (v <= 1.0) : F32)), u, v, Face.sample_cell(direction, cell, (u * width : F32), (v * height : F32), width, height), t, color, visibility, id, direction, outline, old)
+
+def PendingHit.axes(face: Projected, axis: Vec3, near: F32, old: PendingHit) -> PendingHit:
+	Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline} = face
+	Vec3{+denom, du, dv} = axis
+	PendingHit.intersection(F32.is_ne(denom, 0.0), denom, plane, u_eye, v_eye, du, dv, near, cell, color, visibility, id, direction, width, height, outline, old)
+
+def PendingHit.face(+face: Projected, ray: Vec3, near: F32, old: PendingHit) -> PendingHit:
+	Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline} = face
+	PendingHit.axes(face, Face.axes(direction, ray), near, old)
+
+def PendingHit.scan(faces: List<&2, Projected>, +ray: Vec3, +near: F32, hit: PendingHit) -> PendingHit:
+	match faces:
+		case Nil{}:
+			hit
+		case Con{face, rest}:
+			PendingHit.scan(rest, ray, near, PendingHit.face(face, ray, near, hit))
+
 def Hit.intersection(nonparallel: Bool, +denom: F32, plane: F32, u_eye: F32, v_eye: F32, du: F32, dv: F32, +near: F32, +cell: V.Cell, color: L.Ramp, visibility: L.ColorField, id: U32, +direction: V.Direction, +width: F32, +height: F32, outline: Bool, old: Hit) -> Hit:
 	match nonparallel:
 		case False{}:
@@ -403,12 +462,15 @@ def Background.color(floor: Bool, +x: U32, +y: U32) -> U32:
 def Hit.background(+x: U32, +y: U32) -> Hit:
 	Hit{0.0, Background.color(False{}, x, y), 4294967295, None{}, V.PosZ{}}
 
-def Pixel.hit(faces: List<&2, Projected>, +ray: Vec3, +near: F32, hit: Hit) -> Hit:
+def Pixel.eager(faces: List<&2, Projected>, +ray: Vec3, +near: F32, hit: Hit) -> Hit:
 	match faces:
 		case Nil{}:
 			hit
 		case Con{face, rest}:
-			Pixel.hit(rest, ray, near, Hit.face(face, ray, near, hit))
+			Pixel.eager(rest, ray, near, Hit.face(face, ray, near, hit))
+
+def Pixel.hit(faces: List<&2, Projected>, +ray: Vec3, +near: F32, hit: Hit) -> Hit:
+	PendingHit.finish(PendingHit.scan(faces, ray, near, Existing{hit}))
 
 def Pixel.image(hit: Hit) -> Image:
 	Hit{depth, color, id, cell, direction} = hit
@@ -680,7 +742,7 @@ def Projected.illuminated(face: Illuminated, +basis: Basis, palette: L.Palette, 
 	match face:
 		case Illuminated{V.Face{+cell,+direction,material},visibility}:
 			Basis{eye,right,up,forward,focal,near} = basis
-			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),visibility,Face.coordinates(direction,cell),Face.axes(direction,eye),1.0,1.0,True{})
+			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),visibility,Face.coordinates(direction,cell),Face.axes(direction,eye),U32.to_f32(1),U32.to_f32(1),False{})
 		case Illuminated{V.Rectangle{+cell,+direction,material,width,height},visibility}:
 			Basis{eye,right,up,forward,focal,near} = basis
 			Projected.coordinates(cell,direction,basis,id,L.Palette.surface(palette,material,direction),visibility,Face.coordinates(direction,cell),Face.axes(direction,eye),U32.to_f32(width),U32.to_f32(height),False{})
