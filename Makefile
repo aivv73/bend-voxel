@@ -8,7 +8,7 @@ BINARY := build/bend-voxel-rewrite
 SOURCES := atelier.bend atelier_assets.bend scene_data.bend main.bend voxel.bend render.bend material.bend lighting.bend dump.bend
 UI_TEST_SOURCES := deps/bend-ui-test/uitest.bend deps/bend-ui-test/plan.bend deps/bend-ui-test/uitest.c deps/bend-ui-test/uitest.js
 
-.PHONY: all run proof test geometry materials lighting brush-ui images ui flight-ui benchmark atelier clean
+.PHONY: all run proof test geometry materials lighting brush-ui images ui flight-ui benchmark atelier dda clean
 
 all: $(BINARY)
 
@@ -38,6 +38,24 @@ build/benchmark: scripts/benchmark.bend scripts/benchmark_host.bend scripts/benc
 
 build/frame-profile: scripts/frame_profile.bend $(SOURCES) | build
 	$(BEND) scripts/frame_profile.bend -o $@
+
+build/dda-compare: scripts/dda_compare.bend dda.bend $(SOURCES) | build
+	$(BEND) scripts/dda_compare.bend -o $@
+
+build/dda-benchmark: scripts/dda_benchmark.bend scripts/dda_compare.bend dda.bend scripts/benchmark.bend scripts/benchmark_number.bend scripts/benchmark_host.bend scripts/sha256.bend $(SOURCES) | build
+	$(BEND) scripts/dda_benchmark.bend -o $@
+
+build/dda-profile: scripts/dda_profile.bend dump.bend | build
+	$(BEND) scripts/dda_profile.bend -o $@
+
+build/dda-estimate-profile: scripts/dda_estimate_profile.bend scripts/dda_profile.bend dump.bend | build
+	$(BEND) scripts/dda_estimate_profile.bend -o $@
+
+build/dda-ab: scripts/dda_ab.bend scripts/benchmark.bend scripts/benchmark_number.bend scripts/benchmark_host.bend scripts/sha256.bend | build
+	$(BEND) scripts/dda_ab.bend -o $@
+
+dda: build/dda-compare
+	./build/dda-compare --gpu off --threads 1 -- --cube --verify
 
 build/material-check: scripts/material_check.bend $(SOURCES) | build
 	$(BEND) scripts/material_check.bend -o $@
