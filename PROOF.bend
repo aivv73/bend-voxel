@@ -1,88 +1,172 @@
 import Base
+import ./voxel.bend as V
+import ./lighting.bend as L
 import ./LAWS.bend as Laws
-import ./src/megascene_scale.bend as Scale
+import ./material.bend as M
+import ./render.bend as R
 
-def Laws.calibration_five_percent_inclusive(): {==}
-def Laws.calibration_above_five_percent(): {==}
-def Laws.qualification_edit_minimum(): {==}
-def Laws.qualification_edit_below_minimum(): {==}
+def Laws.material_foundation_id():
+	{==}
 
-def Laws.stress_first_measured_edit(): {==}
-def Laws.stress_warmup_has_no_edit(): {==}
-def Laws.stress_six_edit_limit(): {==}
-def Laws.stress_disabled_edits(frame,warmup): {==}
-def Laws.stress_nearest_rank_p95(): {==}
+def Laws.material_concrete_id():
+	{==}
 
-def Laws.operational_u32_limit(): {==}
-def Laws.operational_u32_overflow(): {==}
-def Laws.operational_negative_rejected(): {==}
-def Laws.configuration_wrapped_seed_rejected(): {==}
-def Laws.operational_u64_limit(): {==}
+def Laws.material_frame_id():
+	{==}
 
-def Laws.canonical_json_newline(): {==}
-def Laws.canonical_json_non_bmp(): {==}
-def Laws.canonical_schedule_field_order(): {==}
+def Laws.material_machinery_id():
+	{==}
 
-def Laws.checkpoint_coincident_order(a,b): {==}
-def Laws.runtime_signed_zero_word(): {==}
-def Laws.runtime_null_action_word(): {==}
+def Laws.material_read_id(material):
+	match material:
+		case M.Foundation{}:
+			{==}
+		case M.Concrete{}:
+			{==}
+		case M.Frame{}:
+			{==}
+		case M.Machinery{}:
+			{==}
+		case M.Plaster{}:
+			{==}
 
-def Laws.palette_length():
-  {==}
+def Laws.material_id_nonzero(material):
+	match material:
+		case M.Foundation{}:
+			{==}
+		case M.Concrete{}:
+			{==}
+		case M.Frame{}:
+			{==}
+		case M.Machinery{}:
+			{==}
+		case M.Plaster{}:
+			{==}
 
-# These are checked equalities, not IO tests. Runtime geometry checks remain
-# in make test because their implementations currently rely on @unsafe.
-def Laws.material_ids(): {==}
-def Laws.foundation_anchor(): {==}
-def Laws.editable_materials(): {==}
+def Laws.material_palette_lookup(palette, material, light):
+	match material:
+		case M.Foundation{}:
+			{==}
+		case M.Concrete{}:
+			{==}
+		case M.Frame{}:
+			{==}
+		case M.Machinery{}:
+			{==}
+		case M.Plaster{}:
+			{==}
 
-def Laws.append_empty(A,xs):
-  match xs:
-    case Nil{}: {==}
-    case h <> t:
-      %Laws.append_empty(A,t) : {h <> List.append(&2,A,t,Nil{}) == h <> _ : List<&2,A>}
-      {==}
-def Laws.append_associative(A,xs,ys,zs):
-  match xs:
-    case Nil{}: {==}
-    case h <> t:
-      %Laws.append_associative(A,t,ys,zs) :
-        {h <> List.append(&2,A,List.append(&2,A,t,ys),zs) == h <> _ : List<&2,A>}
-      {==}
-def Laws.append_length(A,xs,ys):
-  match xs:
-    case Nil{}: {==}
-    case h <> t:
-      %Laws.append_length(A,t,ys) :
-        {1n+List.length(&2,A,List.append(&2,A,t,ys)) == 1n+_ : Nat}
-      {==}
-def Laws.word_same(c,value):
-  match c:
-    case True{}: {==}
-    case False{}: {==}
-def Laws.pick_same(c,value):
-  match c:
-    case True{}: {==}
-    case False{}: {==}
-def Laws.gamut_fuel(lightness,hue,lo,hi): {==}
-def Laws.resolution_rejected(width,height): {==}
-def Laws.resolution_preserved(width,height): {==}
-def Laws.resolution_default(): {==}
-def Laws.resolution_pixel_limit(): {==}
-def Laws.resolution_malformed(): {==}
-def Laws.palette_material_order(): {==}
+def Laws.erase_idempotent(material, hit):
+	match hit:
+		case True{}:
+			{==}
+		case False{}:
+			{==}
 
-def Laws.district_rejected(q,seed,control): {==}
-def Laws.district_preserved(q,seed,control): {==}
-def Laws.scale_half_double(a):
-  match a:
-    case Scale.ScaleZero{}: {==}
-    case Scale.ScaleBit{b,t}: {==}
-def Laws.scale_sqrt_fuel(target,lo,hi): {==}
-def Laws.history_no_prior_visits(count,stride,offset,neighborhood,index): {==}
-def Laws.admission_add_limit(): {==}
-def Laws.admission_add_overflow(): {==}
-def Laws.admission_mul_limit(): {==}
-def Laws.admission_mul_overflow(): {==}
-def Laws.admission_mul_zero(value): {==}
-def Laws.scale_midpoint_lower_tie(): {==}
+def Laws.erase_miss_preserves_material(material):
+	{==}
+
+def Laws.erase_hit_removes_material(material):
+	{==}
+
+def Laws.occupied_neighbor_hides_face(solid):
+	match solid:
+		case True{}:
+			{==}
+		case False{}:
+			{==}
+
+def Laws.empty_cell_has_no_face(neighbor):
+	{==}
+
+def Laws.isolated_solid_has_face():
+	{==}
+
+
+def Laws.daylight_palette_lookup(palette, material, direction):
+	match material:
+		case M.Foundation{}:
+			{==}
+		case M.Concrete{}:
+			{==}
+		case M.Frame{}:
+			{==}
+		case M.Machinery{}:
+			{==}
+		case M.Plaster{}:
+			{==}
+
+def Laws.unlit_color_preserved(color, visible):
+	{==}
+
+def Laws.occluded_sun_sample():
+	{==}
+
+def Laws.clear_sun_sample():
+	{==}
+
+def Laws.material_plaster_id():
+	{==}
+
+def Laws.unit_face_projection_matches_rectangle(cell, direction, material, basis, palette, id):
+	match basis:
+		case R.Basis{eye, right, up, forward, focal, near}:
+			{==}
+
+def Laws.illuminated_unit_face_projection_matches_rectangle(cell, direction, material, basis, palette, id, visibility):
+	match basis:
+		case R.Basis{eye, right, up, forward, focal, near}:
+			{==}
+
+def Laws.pending_existing_preserved(hit):
+	{==}
+
+def Laws.pending_accept_preserves_hit(closer, cell, depth, color, visibility, u, v, edge, id, direction, old):
+	match closer:
+		case False{}: {==}
+		case True{}: {==}
+
+def Laws.pending_covered_preserves_hit(covered, u, v, cell, depth, color, visibility, id, direction, outline, old):
+	match covered:
+		case False{}: {==}
+		case True{}:
+			match old:
+				case R.Existing{R.Hit{previous, old_color, old_id, old_cell, old_direction}}:
+					Laws.pending_accept_preserves_hit(R.Hit.closer(old_cell, depth, previous, id, old_id), cell, depth, color, visibility, u, v, outline && ((u < 0.0225) || (v < 0.0225) || (u > 0.9775) || (v > 0.9775) : F32), id, direction, R.Existing{R.Hit{previous, old_color, old_id, old_cell, old_direction}})
+				case R.Selected{previous, old_id, old_cell, old_direction, ramp, field, old_u, old_v, edge}:
+					Laws.pending_accept_preserves_hit(R.Hit.closer(Some{old_cell}, depth, previous, id, old_id), cell, depth, color, visibility, u, v, outline && ((u < 0.0225) || (v < 0.0225) || (u > 0.9775) || (v > 0.9775) : F32), id, direction, R.Selected{previous, old_id, old_cell, old_direction, ramp, field, old_u, old_v, edge})
+
+def Laws.pending_intersection_preserves_hit(nonparallel, denom, plane, u_eye, v_eye, du, dv, near, cell, color, visibility, id, direction, width, height, outline, old):
+	match nonparallel:
+		case False{}: {==}
+		case True{}:
+			+t = (plane / denom : F32)
+			+u = ((u_eye + t * du) / width : F32)
+			+v = ((v_eye + t * dv) / height : F32)
+			Laws.pending_covered_preserves_hit((F32.is_eq((t - t : F32), 0.0) && ((t >= near) && (u >= 0.0) && (u <= 1.0) && (v >= 0.0) && (v <= 1.0) : F32)), u, v, R.Face.sample_cell(direction, cell, (u * width : F32), (v * height : F32), width, height), t, color, visibility, id, direction, outline, old)
+
+def Laws.pending_axes_preserves_hit(face, axis, near, old):
+	R.Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline} = face
+	R.Vec3{denom, du, dv} = axis
+	Laws.pending_intersection_preserves_hit(F32.is_ne(denom, 0.0), denom, plane, u_eye, v_eye, du, dv, near, cell, color, visibility, id, direction, width, height, outline, old)
+
+def Laws.pending_face_preserves_hit(face, ray, near, old):
+	R.Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline} = face
+	Laws.pending_axes_preserves_hit(R.Projected{cell, direction, plane, u_eye, v_eye, color, visibility, id, bounds, width, height, outline}, R.Face.axes(direction, ray), near, old)
+
+def Laws.pending_scan_preserves_hit(faces, ray, near, old):
+	match faces:
+		case Nil{}: {==}
+		case Con{face, rest}:
+			Equal.trans(R.Hit,
+				R.PendingHit.finish(R.PendingHit.scan(rest, ray, near, R.PendingHit.face(face, ray, near, old))),
+				R.Pixel.eager(rest, ray, near, R.PendingHit.finish(R.PendingHit.face(face, ray, near, old))),
+				R.Pixel.eager(rest, ray, near, R.Hit.face(face, ray, near, R.PendingHit.finish(old))),
+				Laws.pending_scan_preserves_hit(rest, ray, near, R.PendingHit.face(face, ray, near, old)),
+				Equal.cong(R.Hit, R.Hit, hit => R.Pixel.eager(rest, ray, near, hit),
+					R.PendingHit.finish(R.PendingHit.face(face, ray, near, old)),
+					R.Hit.face(face, ray, near, R.PendingHit.finish(old)),
+					Laws.pending_face_preserves_hit(face, ray, near, old)))
+
+def Laws.final_lighting_preserves_hit(faces, ray, near, hit):
+	Laws.pending_scan_preserves_hit(faces, ray, near, R.Existing{hit})
