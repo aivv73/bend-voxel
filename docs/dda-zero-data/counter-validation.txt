@@ -1,0 +1,1 @@
+All 28 counter fields scale by five real frames; instrumented image equals baseline; baseline C rejected before output.

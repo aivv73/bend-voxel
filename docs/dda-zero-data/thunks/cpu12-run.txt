@@ -1,0 +1,31 @@
+renderer=dda init_ms=258
+frames=4 elapsed_ms=420
+
+renderer=dda init_ms=278
+frames=4 elapsed_ms=1527
+
+renderer=dda init_ms=252
+frames=4 elapsed_ms=1557
+
+renderer=dda init_ms=258
+frames=4 elapsed_ms=428
+
+renderer=dda init_ms=263
+frames=4 elapsed_ms=418
+
+renderer=dda init_ms=256
+frames=4 elapsed_ms=1549
+
+renderer=dda init_ms=257
+frames=4 elapsed_ms=1530
+
+renderer=dda init_ms=258
+frames=4 elapsed_ms=423
+
+renderer=dda init_ms=263
+frames=4 elapsed_ms=427
+
+renderer=dda init_ms=259
+frames=4 elapsed_ms=1565
+
+Saved .audit/dda-zero/thunk-guard-cpu12.tsv

@@ -1,0 +1,763 @@
+diff -ru .audit/dda-indexed/baseline/LAWS.bend .audit/dda-indexed/work/LAWS.bend
+--- .audit/dda-indexed/baseline/LAWS.bend	2026-10-08 09:10:10.442478072 +0400
++++ .audit/dda-indexed/work/LAWS.bend	2026-10-08 09:57:58.661894679 +0400
+@@ -189,7 +189,7 @@
+ 	{X.Sides.color(X.Sides.cached(sides),direction) == L.Ramp.color(L.Sides.surface(sides,direction),9) : U32}
+ 
+ law dda_outside_is_empty:
+-	for cells: X.Tree
++	for cells: X.Index
+ 	for side: U32
+ 	for cell: V.Cell
+ 	{X.Grid.read.valid(False{},cells,side,cell) == 0 : U32}
+@@ -239,7 +239,7 @@
+ 	{X.Region.material(X.Tree.region(tree,axis,leftward,cell,span,low)) == X.Tree.read(tree,axis,leftward,cell,span) : U32}
+ 
+ law dda_region_outside_is_empty:
+-	for cells: X.Tree
++	for cells: X.Index
+ 	for side: U32
+ 	for cell: V.Cell
+ 	{X.Region.material(X.Grid.region.valid(False{},cells,side,cell)) == 0 : U32}
+@@ -346,3 +346,169 @@
+ 	for time: F32
+ 	for +limit: U32
+ 	{X.Axis.correct(1n+fuel,True{},True{},True{},positive,origin,delta,cell,time,limit,limit) == limit : U32}
++
++law indexed_page_row_order:
++	for +r00: X.Row
++	for +r01: X.Row
++	for +r02: X.Row
++	for +r03: X.Row
++	for +r04: X.Row
++	for +r05: X.Row
++	for +r06: X.Row
++	for +r07: X.Row
++	for +r08: X.Row
++	for +r09: X.Row
++	for +r10: X.Row
++	for +r11: X.Row
++	for +r12: X.Row
++	for +r13: X.Row
++	for +r14: X.Row
++	for +r15: X.Row
++	for +r16: X.Row
++	for +r17: X.Row
++	for +r18: X.Row
++	for +r19: X.Row
++	for +r20: X.Row
++	for +r21: X.Row
++	for +r22: X.Row
++	for +r23: X.Row
++	for +r24: X.Row
++	for +r25: X.Row
++	for +r26: X.Row
++	for +r27: X.Row
++	for +r28: X.Row
++	for +r29: X.Row
++	for +r30: X.Row
++	for +slot: Nat
++	{X.Page.row(slot,X.Pack.page([r00,r01,r03,r07,r15,r16,r08,r17,r18,r04,r09,r19,r20,r10,r21,r22,r02,r05,r11,r23,r24,r12,r25,r26,r06,r13,r27,r28,r14,r29,r30])) == Maybe.default(&2,X.Row,List.get(&2,X.Row,[r00,r01,r02,r03,r04,r05,r06,r07,r08,r09,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19,r20,r21,r22,r23,r24,r25,r26,r27,r28,r29,r30],slot),X.RowPad{}) : X.Row}
++
++law indexed_terminal_has_31_slots:
++	for row: X.Row
++	{List.length(&2,X.Row,X.Pack.terminal(4n,row)) == 31n : Nat}
++
++law indexed_padding_is_canonical:
++	for +depth: Nat
++	{X.Pack.terminal(depth,X.RowPad{}) == X.Pack.pads(depth) : List<&2,X.Row>}
++
++law indexed_solid_packing_preserves_counter_and_pages:
++	for +material: U32
++	for +depth: Nat
++	for +slots: Nat
++	for +next: Nat
++	for +pages: List<&2,X.Table>
++	{X.Pack.node(X.Solid{material},depth,slots,next,pages) == (X.Pack.terminal(slots,X.RowSolid{material}),(next,pages)) : List<&2,X.Row> & (Nat & List<&2,X.Table>)}
++
++law indexed_child_slot_is_valid:
++	for +slot: Nat
++	for +leftward: Bool
++	for valid: {Nat.is_lt(slot,15n) == True{} : Bool}
++	{Nat.is_lt(X.Slot.child(slot,leftward),31n) == True{} : Bool}
++
++law indexed_directory_single_page:
++	for +fuel: Nat
++	for +page: X.Table
++	for +rest: List<&2,X.Table>
++	{X.Pack.directory(fuel,1n,page <> rest) == (rest,page) : List<&2,X.Table> & X.Table}
++
++law indexed_directory_two_pages:
++	for +fuel: Nat
++	for +left: X.Table
++	for +right: X.Table
++	for +rest: List<&2,X.Table>
++	{X.Pack.directory(1n+fuel,2n,left <> right <> rest) == (rest,X.Directory{1n,left,right}) : List<&2,X.Table> & X.Table}
++
++law indexed_directory_route:
++	for +cut: Nat
++	for +left: X.Table
++	for +right: X.Table
++	for +less: Bool
++	for +id: Nat
++	for +space: X.Space
++	{X.Table.seek(X.Directory{cut,left,right},less,id,space) == Bool.pick(X.PageResult,less,X.Table.seek(left,X.Table.less(left,id),id,space),X.Table.seek(right,X.Table.less(right,Nat.sub(id,cut)),Nat.sub(id,cut),space)) : X.PageResult}
++
++law indexed_solid_finishes_without_padding:
++	for fuel: Nat
++	for +material: U32
++	for page: X.Table
++	for slot: Nat
++	for +space: X.Space
++	{X.Page.walk(1n+fuel,X.RowSolid{material},page,slot,space) == X.Finished{X.Space.region(material,space)} : X.PageResult}
++
++law indexed_link_preserves_space:
++	for fuel: Nat
++	for +target: Nat
++	for page: X.Table
++	for slot: Nat
++	for +space: X.Space
++	{X.Page.walk(1n+fuel,X.RowLink{target},page,slot,space) == X.Resume{target,space} : X.PageResult}
++
++law indexed_link_decreases_fuel:
++	for +fuel: Nat
++	for +target: Nat
++	for +space: X.Space
++	for +table: X.Table
++	{X.Index.region(1n+fuel,X.Resume{target,space},table) == X.Index.region(fuel,X.Table.seek(table,X.Table.less(table,target),target,space),table) : X.Region}
++
++law indexed_split_preserves_full_region:
++	for +left: X.Tree
++	for +right: X.Tree
++	for +axis: X.Split
++	for +leftward: Bool
++	for +cell: V.Cell
++	for +span: V.Cell
++	for +low: V.Cell
++	{X.Tree.region(X.Branch{left,right},axis,leftward,cell,span,low) == X.Tree.space(Bool.pick(X.Tree,leftward,left,right),X.Space.step(X.Space{axis,leftward,cell,span,low})) : X.Region}
++
++law indexed_uniform_inside_and_outside_full_region:
++	for +inside: Bool
++	for +material: U32
++	for +side: U32
++	for +cell: V.Cell
++	{X.Grid.region.valid(inside,X.Index{0n,1n,X.Pack.page(X.Pack.terminal(4n,X.RowSolid{material}))},side,cell) == X.Tree.region.valid(inside,X.Solid{material},side,cell) : X.Region}
++
++law indexed_uniform_grid_full_region:
++	for +material: U32
++	for +side: U32
++	for +cell: V.Cell
++	{X.Grid.region(X.Grid.pack(side,X.Solid{material}),cell) == X.Tree.region.valid(V.Cell.inside(side,cell),X.Solid{material},side,cell) : X.Region}
++
++law indexed_single_split_page_full_region:
++	for +a: U32
++	for +b: U32
++	for +axis: X.Split
++	for +leftward: Bool
++	for +cell: V.Cell
++	for +span: V.Cell
++	for +low: V.Cell
++	{X.Page.walk(5n,X.RowSplit{},X.Pack.page(X.RowSplit{} <> List.append(&2,X.Row,X.Pack.terminal(3n,X.RowSolid{a}),X.Pack.terminal(3n,X.RowSolid{b}))),0n,X.Space{axis,leftward,cell,span,low}) == X.Finished{X.Tree.region(X.Branch{X.Solid{a},X.Solid{b}},axis,leftward,cell,span,low)} : X.PageResult}
++
++law indexed_single_split_inside_and_outside_full_region:
++	for +inside: Bool
++	for +a: U32
++	for +b: U32
++	for +side: U32
++	for +cell: V.Cell
++	{X.Grid.region.valid(inside,X.Index{1n,1n,X.Pack.page(X.RowSplit{} <> List.append(&2,X.Row,X.Pack.terminal(3n,X.RowSolid{a}),X.Pack.terminal(3n,X.RowSolid{b})))},side,cell) == X.Tree.region.valid(inside,X.Branch{X.Solid{a},X.Solid{b}},side,cell) : X.Region}
++
++law indexed_single_split_grid_full_region:
++	for +a: U32
++	for +b: U32
++	for +side: U32
++	for +cell: V.Cell
++	{X.Grid.region(X.Grid.pack(side,X.Branch{X.Solid{a},X.Solid{b}}),cell) == X.Tree.region.valid(V.Cell.inside(side,cell),X.Branch{X.Solid{a},X.Solid{b}},side,cell) : X.Region}
++
++law indexed_outside_full_sentinel:
++	for cells: X.Index
++	for side: U32
++	for cell: V.Cell
++	{X.Grid.region.valid(False{},cells,side,cell) == X.Region{0,V.Cell{0,0,0},V.Cell{0,0,0}} : X.Region}
++
++law indexed_height_bounds_left:
++	for +left: X.Tree
++	for +right: X.Tree
++	{Nat.is_ge(X.Tree.height(X.Branch{left,right}),1n+X.Tree.height(left)) == True{} : Bool}
++
++law indexed_height_bounds_right:
++	for +left: X.Tree
++	for +right: X.Tree
++	{Nat.is_ge(X.Tree.height(X.Branch{left,right}),1n+X.Tree.height(right)) == True{} : Bool}
+diff -ru .audit/dda-indexed/baseline/PROOF.bend .audit/dda-indexed/work/PROOF.bend
+--- .audit/dda-indexed/baseline/PROOF.bend	2026-10-08 09:10:10.442478072 +0400
++++ .audit/dda-indexed/work/PROOF.bend	2026-10-08 09:59:32.936692845 +0400
+@@ -262,3 +262,178 @@
+ 
+ def Laws.dda_count_up_stops_at_accepted_limit(fuel,positive,origin,delta,cell,time,limit):
+ 	{==}
++
++def Laws.indexed_page_row_order(r00,r01,r02,r03,r04,r05,r06,r07,r08,r09,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19,r20,r21,r22,r23,r24,r25,r26,r27,r28,r29,r30,slot):
++	match slot:
++		case 0n: {==}
++		case 1n: {==}
++		case 2n: {==}
++		case 3n: {==}
++		case 4n: {==}
++		case 5n: {==}
++		case 6n: {==}
++		case 7n: {==}
++		case 8n: {==}
++		case 9n: {==}
++		case 10n: {==}
++		case 11n: {==}
++		case 12n: {==}
++		case 13n: {==}
++		case 14n: {==}
++		case 15n: {==}
++		case 16n: {==}
++		case 17n: {==}
++		case 18n: {==}
++		case 19n: {==}
++		case 20n: {==}
++		case 21n: {==}
++		case 22n: {==}
++		case 23n: {==}
++		case 24n: {==}
++		case 25n: {==}
++		case 26n: {==}
++		case 27n: {==}
++		case 28n: {==}
++		case 29n: {==}
++		case 30n: {==}
++		case 31n+rest: {==}
++
++def Laws.indexed_terminal_has_31_slots(row):
++	{==}
++
++def Laws.indexed_padding_is_canonical(depth):
++	match depth:
++		case 0n: {==}
++		case 1n+rest: {==}
++
++def Laws.indexed_solid_packing_preserves_counter_and_pages(material,depth,slots,next,pages):
++	{==}
++
++def True_only(value: Bool) -> Type:
++	match value:
++		case False{}: Empty
++		case True{}: Unit
++
++def False_is_not_true(e: {False{} == True{} : Bool}) -> Empty:
++	%Equal.sym(Bool,False{},True{},e) : True_only(_)
++	Unit{}
++
++def Laws.indexed_child_slot_is_valid(slot,leftward,valid):
++	match slot leftward:
++		case 0n True{}: {==}
++		case 0n False{}: {==}
++		case 1n True{}: {==}
++		case 1n False{}: {==}
++		case 2n True{}: {==}
++		case 2n False{}: {==}
++		case 3n True{}: {==}
++		case 3n False{}: {==}
++		case 4n True{}: {==}
++		case 4n False{}: {==}
++		case 5n True{}: {==}
++		case 5n False{}: {==}
++		case 6n True{}: {==}
++		case 6n False{}: {==}
++		case 7n True{}: {==}
++		case 7n False{}: {==}
++		case 8n True{}: {==}
++		case 8n False{}: {==}
++		case 9n True{}: {==}
++		case 9n False{}: {==}
++		case 10n True{}: {==}
++		case 10n False{}: {==}
++		case 11n True{}: {==}
++		case 11n False{}: {==}
++		case 12n True{}: {==}
++		case 12n False{}: {==}
++		case 13n True{}: {==}
++		case 13n False{}: {==}
++		case 14n True{}: {==}
++		case 14n False{}: {==}
++		case 15n _:
++			Empty.absurd({Nat.is_lt(X.Slot.child(slot,leftward),31n) == True{} : Bool},False_is_not_true(valid))
++		case 16n+rest _:
++			Empty.absurd({Nat.is_lt(X.Slot.child(slot,leftward),31n) == True{} : Bool},False_is_not_true(valid))
++
++def Laws.indexed_directory_single_page(fuel,page,rest):
++	match fuel:
++		case 0n: {==}
++		case 1n+more: {==}
++
++def Laws.indexed_directory_two_pages(fuel,left,right,rest):
++	match fuel:
++		case 0n: {==}
++		case 1n+more: {==}
++
++def Laws.indexed_directory_route(cut,left,right,less,id,space):
++	match less:
++		case False{}: {==}
++		case True{}: {==}
++
++def Laws.indexed_solid_finishes_without_padding(fuel,material,page,slot,space):
++	{==}
++
++def Laws.indexed_link_preserves_space(fuel,target,page,slot,space):
++	{==}
++
++def Laws.indexed_link_decreases_fuel(fuel,target,space,table):
++	{==}
++
++def Laws.indexed_split_preserves_full_region(left,right,axis,leftward,cell,span,low):
++	match axis leftward cell span low:
++		case X.SplitX{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitX{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitY{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitY{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitZ{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitZ{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++
++def Laws.indexed_uniform_inside_and_outside_full_region(inside,material,side,cell):
++	match inside cell:
++		case False{} _: {==}
++		case True{} V.Cell{x,y,z}: {==}
++
++def Laws.indexed_uniform_grid_full_region(material,side,cell):
++	Laws.indexed_uniform_inside_and_outside_full_region(V.Cell.inside(side,cell),material,side,cell)
++
++def Laws.indexed_single_split_page_full_region(a,b,axis,leftward,cell,span,low):
++	match axis leftward cell span low:
++		case X.SplitX{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitX{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitY{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitY{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitZ{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++		case X.SplitZ{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			{==}
++
++def Laws.indexed_single_split_inside_and_outside_full_region(inside,a,b,side,cell):
++	match inside cell:
++		case False{} _: {==}
++		case True{} V.Cell{x,y,z}:
++			Equal.cong(X.PageResult,X.Region,result => X.Index.region(2n,result,X.Pack.page(X.RowSplit{} <> List.append(&2,X.Row,X.Pack.terminal(3n,X.RowSolid{a}),X.Pack.terminal(3n,X.RowSolid{b})))),
++				X.Page.walk(5n,X.RowSplit{},X.Pack.page(X.RowSplit{} <> List.append(&2,X.Row,X.Pack.terminal(3n,X.RowSolid{a}),X.Pack.terminal(3n,X.RowSolid{b}))),0n,X.Space{X.SplitX{},(x < side / 2 : U32),cell,V.Cell{side,side,side},V.Cell{0,0,0}}),
++				X.Finished{X.Tree.region(X.Branch{X.Solid{a},X.Solid{b}},X.SplitX{},(x < side / 2 : U32),cell,V.Cell{side,side,side},V.Cell{0,0,0})},
++				Laws.indexed_single_split_page_full_region(a,b,X.SplitX{},(x < side / 2 : U32),cell,V.Cell{side,side,side},V.Cell{0,0,0}))
++
++def Laws.indexed_single_split_grid_full_region(a,b,side,cell):
++	Laws.indexed_single_split_inside_and_outside_full_region(V.Cell.inside(side,cell),a,b,side,cell)
++
++def Laws.indexed_outside_full_sentinel(cells,side,cell):
++	{==}
++
++def Laws.indexed_height_bounds_left(left,right):
++	Nat.max_ge_l(X.Tree.height(left),X.Tree.height(right))
++
++def Laws.indexed_height_bounds_right(left,right):
++	Nat.max_ge_r(X.Tree.height(left),X.Tree.height(right))
+diff -ru .audit/dda-indexed/baseline/dda.bend .audit/dda-indexed/work/dda.bend
+--- .audit/dda-indexed/baseline/dda.bend	2026-10-08 09:10:10.442478072 +0400
++++ .audit/dda-indexed/work/dda.bend	2026-10-08 09:57:58.646893437 +0400
+@@ -9,7 +9,37 @@
+ 	Branch{left: Tree, right: Tree}
+ 
+ type Grid is Data:
+-	Grid{side: U32, cells: Tree}
++	Grid{side: U32, cells: Index}
++
++type Row is Data:
++	RowSolid{material: U32}
++	RowSplit{}
++	RowLink{page: Nat}
++	RowPad{}
++
++type Table is Data:
++	Directory{cut: Nat, left: Table, right: Table}
++	Page{
++		r00: Row, r01: Row, r02: Row, r03: Row,
++		r04: Row, r05: Row, r06: Row, r07: Row,
++		r08: Row, r09: Row, r10: Row, r11: Row,
++		r12: Row, r13: Row, r14: Row, r15: Row,
++		r16: Row, r17: Row, r18: Row, r19: Row,
++		r20: Row, r21: Row, r22: Row, r23: Row,
++		r24: Row, r25: Row, r26: Row, r27: Row,
++		r28: Row, r29: Row, r30: Row
++	}
++
++type Index is Data:
++	Index{height: Nat, page_count: Nat, table: Table}
++
++type Space is Data:
++	Space{axis: Split, leftward: Bool, cell: V.Cell, span: V.Cell, low: V.Cell}
++
++type PageResult is Data:
++	Finished{region: Region}
++	Resume{page: Nat, space: Space}
++	Invalid{}
+ 
+ type Region is Data:
+ 	Region{material: U32, low: V.Cell, high: V.Cell}
+@@ -135,9 +165,91 @@
+ 			Tree.join(Tree.dense(rest,snapshot,side,V.Cuboid.half(region,axis,True{}),((axis + 1) % 3 : U32)),
+ 				Tree.dense(rest,snapshot,side,V.Cuboid.half(region,axis,False{}),((axis + 1) % 3 : U32)))
+ 
++def Tree.height(tree: Tree) -> Nat:
++	match tree:
++		case Solid{material}: 0n
++		case Branch{left,right}: 1n+Nat.max(Tree.height(left),Tree.height(right))
++
++def Pack.page_depth() -> Nat:
++	4n
++
++def Pack.depth() -> Nat:
++	Nat.min(4n,Nat.max(1n,Pack.page_depth()))
++
++def Pack.pads(depth: Nat) -> List<&2,Row>:
++	match depth:
++		case 0n: [RowPad{}]
++		case 1n+rest:
++			+children = Pack.pads(rest)
++			RowPad{} <> List.append(&2,Row,children,children)
++
++def Pack.terminal(depth: Nat, row: Row) -> List<&2,Row>:
++	match depth:
++		case 0n: [row]
++		case 1n+rest:
++			+children = Pack.pads(rest)
++			row <> List.append(&2,Row,children,children)
++
++def Table.pad() -> Table:
++	Page{RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{},RowPad{}}
++
++def Pack.page(rows: List<&2,Row>) -> Table:
++	match rows:
++		case r00 <> r01 <> r03 <> r07 <> r15 <> r16 <> r08 <> r17 <> r18 <> r04 <> r09 <> r19 <> r20 <> r10 <> r21 <> r22 <> r02 <> r05 <> r11 <> r23 <> r24 <> r12 <> r25 <> r26 <> r06 <> r13 <> r27 <> r28 <> r14 <> r29 <> r30 <> Nil{}:
++			Page{r00,r01,r02,r03,r04,r05,r06,r07,r08,r09,r10,r11,r12,r13,r14,r15,r16,r17,r18,r19,r20,r21,r22,r23,r24,r25,r26,r27,r28,r29,r30}
++		case _: Table.pad()
++
++def Pack.bind(packed: List<&2,Row> & (Nat & List<&2,Table>), next: List<&2,Row> -> Nat -> List<&2,Table> -> List<&2,Row> & (Nat & List<&2,Table>)) -> List<&2,Row> & (Nat & List<&2,Table>):
++	(rows,(id,pages)) = packed
++	next(rows,id,pages)
++
++def Pack.node(tree: Tree, +depth: Nat, +slots: Nat, next: Nat, pages: List<&2,Table>) -> List<&2,Row> & (Nat & List<&2,Table>):
++	match tree depth slots:
++		case Solid{material} _ _:
++			(Pack.terminal(slots,RowSolid{material}),(next,pages))
++		case Branch{left,right} 1n+rest 1n+room:
++			Pack.bind(Pack.node(left,rest,room,next,pages),a => next => pages =>
++				Pack.bind(Pack.node(right,rest,room,next,pages),b => next => pages =>
++					(RowSplit{} <> List.append(&2,Row,a,b),(next,pages))))
++		case Branch{left,right} _ _:
++			+rest = Nat.sub(Pack.depth(),1n)
++			Pack.bind(Pack.node(left,rest,3n,next,pages),a => next => pages =>
++				Pack.bind(Pack.node(right,rest,3n,next,pages),b => +next => pages =>
++					page = Pack.page(RowSplit{} <> List.append(&2,Row,a,b))
++					(Pack.terminal(slots,RowLink{next}),(1n+next,page <> pages))))
++
++def Pack.directory.bind(packed: List<&2,Table> & Table, next: List<&2,Table> -> Table -> List<&2,Table> & Table) -> List<&2,Table> & Table:
++	(pages,table) = packed
++	next(pages,table)
++
++def Pack.directory(+fuel: Nat, +count: Nat, pages: List<&2,Table>) -> List<&2,Table> & Table:
++	match fuel count pages:
++		case _ 0n _: (Nil{},Table.pad())
++		case _ 1n page <> rest: (rest,page)
++		case _ 1n Nil{}: (Nil{},Table.pad())
++		case 0n 2n+more _: (pages,Table.pad())
++		case 1n+rest 2n+more _:
++			+half = Nat.div(count,2n)
++			Pack.directory.bind(Pack.directory(rest,half,pages),pages => left =>
++				Pack.directory.bind(Pack.directory(rest,Nat.sub(count,half),pages),pages => right =>
++					(pages,Directory{half,left,right})))
++
++def Grid.pack.table(side: U32, height: Nat, count: Nat, packed: List<&2,Table> & Table) -> Grid:
++	(unused,table) = packed
++	Grid{side,Index{height,count,table}}
++
++def Grid.pack.rows(side: U32, height: Nat, packed: List<&2,Row> & (Nat & List<&2,Table>)) -> Grid:
++	(rows,(+count,pages)) = packed
++	root = Pack.page(rows)
++	Grid.pack.table(side,height,count,Pack.directory(count,count,root <> List.reverse(&2,Table,pages)))
++
++def Grid.pack(+side: U32, +tree: Tree) -> Grid:
++	+height = Tree.height(tree)
++	Grid.pack.rows(side,height,Pack.node(tree,Pack.depth(),4n,1n,Nil{}))
++
+ def Grid.dense(+side: U32, snapshot: Array<U32> & V.Snapshot) -> V.Body & Grid:
+ 	(cells,copy) = snapshot
+-	(V.Body{side,cells},Grid{side,Tree.dense(Nat.mul(3n,U32.log2(side)),copy,side,V.Cuboid{V.Cell{0,0,0},V.Cell{side,side,side},0},0)})
++	(V.Body{side,cells},Grid.pack(side,Tree.dense(Nat.mul(3n,U32.log2(side)),copy,side,V.Cuboid{V.Cell{0,0,0},V.Cell{side,side,side},0},0)))
+ 
+ def Grid.build(body: V.Body) -> V.Body & Grid:
+ 	match body:
+@@ -146,7 +258,7 @@
+ 		case V.Cuboids{+boxes}:
+ 			+depth = Nat.add(1n,U32.log2((Grid.extent(boxes,1) - 1 : U32)))
+ 			+side = U32.pow(2,depth)
+-			(V.Cuboids{boxes},Grid{side,Grid.paint(List.reverse(&2,V.Cuboid,boxes),depth,side,Solid{0})})
++			(V.Cuboids{boxes},Grid.pack(side,Grid.paint(List.reverse(&2,V.Cuboid,boxes),depth,side,Solid{0})))
+ 
+ def Tree.read(tree: Tree, axis: Split, leftward: Bool, cell: V.Cell, span: V.Cell) -> U32:
+ 	match tree axis leftward cell span:
+@@ -164,17 +276,6 @@
+ 		case Branch{left,right} SplitZ{} False{} V.Cell{+x,y,z} V.Cell{+sx,sy,+sz}:
+ 			Tree.read(right,SplitX{},(x < sx / 2 : U32),V.Cell{x,y,(z - sz / 2 : U32)},V.Cell{sx,sy,(sz / 2 : U32)})
+ 
+-def Grid.read.valid(inside: Bool, cells: Tree, +side: U32, cell: V.Cell) -> U32:
+-	match inside:
+-		case False{}: 0
+-		case True{}:
+-			V.Cell{+x,y,z} = cell
+-			Tree.read(cells,SplitX{},(x < side / 2 : U32),cell,V.Cell{side,side,side})
+-
+-def Grid.read(grid: Grid, +cell: V.Cell) -> U32:
+-	Grid{+side,cells} = grid
+-	Grid.read.valid(V.Cell.inside(side,cell),cells,side,cell)
+-
+ def Region.material(region: Region) -> U32:
+ 	Region{material,low,high} = region
+ 	material
+@@ -196,17 +297,224 @@
+ 		case Branch{left,right} SplitZ{} False{} V.Cell{+x,y,z} V.Cell{+sx,sy,+sz} V.Cell{lx,ly,lz}:
+ 			Tree.region(right,SplitX{},(x < sx / 2 : U32),V.Cell{x,y,(z - sz / 2 : U32)},V.Cell{sx,sy,(sz / 2 : U32)},V.Cell{lx,ly,(lz + sz / 2 : U32)})
+ 
+-def Grid.region.valid(inside: Bool, cells: Tree, +side: U32, cell: V.Cell) -> Region:
++def Tree.region.valid(inside: Bool, tree: Tree, +side: U32, +cell: V.Cell) -> Region:
+ 	match inside:
+ 		case False{}: Region{0,V.Cell{0,0,0},V.Cell{0,0,0}}
+ 		case True{}:
+ 			V.Cell{+x,y,z} = cell
+-			Tree.region(cells,SplitX{},(x < side / 2 : U32),cell,V.Cell{side,side,side},V.Cell{0,0,0})
++			Tree.region(tree,SplitX{},(x < side / 2 : U32),cell,V.Cell{side,side,side},V.Cell{0,0,0})
++
++def Slot.child(slot: Nat, leftward: Bool) -> Nat:
++	match leftward:
++		case True{}: 1n+Nat.double(slot)
++		case False{}: 2n+Nat.double(slot)
++
++def Space.leftward(+space: Space) -> Bool:
++	Space{axis,leftward,cell,span,low} = space
++	leftward
++
++def Space.region(material: U32, space: Space) -> Region:
++	Space{axis,leftward,cell,V.Cell{sx,sy,sz},V.Cell{+lx,+ly,+lz}} = space
++	Region{material,V.Cell{lx,ly,lz},V.Cell{(lx + sx : U32),(ly + sy : U32),(lz + sz : U32)}}
++
++def Space.step(space: Space) -> Space:
++	match space:
++		case Space{SplitX{},True{},V.Cell{x,+y,z},V.Cell{sx,+sy,sz},low}:
++			Space{SplitY{},(y < sy / 2 : U32),V.Cell{x,y,z},V.Cell{(sx / 2 : U32),sy,sz},low}
++		case Space{SplitX{},False{},V.Cell{x,+y,z},V.Cell{+sx,+sy,sz},V.Cell{lx,ly,lz}}:
++			Space{SplitY{},(y < sy / 2 : U32),V.Cell{(x - sx / 2 : U32),y,z},V.Cell{(sx / 2 : U32),sy,sz},V.Cell{(lx + sx / 2 : U32),ly,lz}}
++		case Space{SplitY{},True{},V.Cell{x,y,+z},V.Cell{sx,sy,+sz},low}:
++			Space{SplitZ{},(z < sz / 2 : U32),V.Cell{x,y,z},V.Cell{sx,(sy / 2 : U32),sz},low}
++		case Space{SplitY{},False{},V.Cell{x,y,+z},V.Cell{sx,+sy,+sz},V.Cell{lx,ly,lz}}:
++			Space{SplitZ{},(z < sz / 2 : U32),V.Cell{x,(y - sy / 2 : U32),z},V.Cell{sx,(sy / 2 : U32),sz},V.Cell{lx,(ly + sy / 2 : U32),lz}}
++		case Space{SplitZ{},True{},V.Cell{+x,y,z},V.Cell{+sx,sy,sz},low}:
++			Space{SplitX{},(x < sx / 2 : U32),V.Cell{x,y,z},V.Cell{sx,sy,(sz / 2 : U32)},low}
++		case Space{SplitZ{},False{},V.Cell{+x,y,z},V.Cell{+sx,sy,+sz},V.Cell{lx,ly,lz}}:
++			Space{SplitX{},(x < sx / 2 : U32),V.Cell{x,y,(z - sz / 2 : U32)},V.Cell{sx,sy,(sz / 2 : U32)},V.Cell{lx,ly,(lz + sz / 2 : U32)}}
++
++def Tree.space(tree: Tree, space: Space) -> Region:
++	Space{axis,leftward,cell,span,low} = space
++	Tree.region(tree,axis,leftward,cell,span,low)
+ 
+-def Grid.region(grid: Grid, +cell: V.Cell) -> Region:
++def Page.row(slot: Nat, +page: Table) -> Row:
++	match slot:
++		case 0n:
++			match page:
++				case Page{row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 1n:
++			match page:
++				case Page{_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 2n:
++			match page:
++				case Page{_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 3n:
++			match page:
++				case Page{_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 4n:
++			match page:
++				case Page{_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 5n:
++			match page:
++				case Page{_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 6n:
++			match page:
++				case Page{_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 7n:
++			match page:
++				case Page{_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 8n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 9n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 10n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 11n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 12n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 13n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 14n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 15n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 16n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 17n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 18n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 19n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 20n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 21n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 22n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 23n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 24n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 25n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_,_}: row
++				case _: RowPad{}
++		case 26n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_,_}: row
++				case _: RowPad{}
++		case 27n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_,_}: row
++				case _: RowPad{}
++		case 28n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_,_}: row
++				case _: RowPad{}
++		case 29n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row,_}: row
++				case _: RowPad{}
++		case 30n:
++			match page:
++				case Page{_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,row}: row
++				case _: RowPad{}
++		case _: RowPad{}
++
++def Page.walk(fuel: Nat, row: Row, +page: Table, +slot: Nat, +space: Space) -> PageResult:
++	match fuel row:
++		case 0n _: Invalid{}
++		case 1n+rest RowSolid{material}: Finished{Space.region(material,space)}
++		case 1n+rest RowLink{target}: Resume{target,space}
++		case 1n+rest RowSplit{}:
++			+next = Slot.child(slot,Space.leftward(space))
++			Page.walk(rest,Page.row(next,page),page,next,Space.step(space))
++		case 1n+rest RowPad{}: Invalid{}
++
++def Table.less(+table: Table, id: Nat) -> Bool:
++	match table:
++		case Directory{cut,_,_}: Nat.is_lt(id,cut)
++		case _: False{}
++
++def Table.seek(+table: Table, less: Bool, +id: Nat, +space: Space) -> PageResult:
++	match table less:
++		case Directory{cut,+left,right} True{}:
++			Table.seek(left,Table.less(left,id),id,space)
++		case Directory{+cut,left,+right} False{}:
++			+next = Nat.sub(id,cut)
++			Table.seek(right,Table.less(right,next),next,space)
++		case page _: Page.walk(1n+Pack.depth(),Page.row(0n,page),page,0n,space)
++
++def Index.region(fuel: Nat, result: PageResult, +table: Table) -> Region:
++	match fuel result:
++		case 0n _: Region{0,V.Cell{0,0,0},V.Cell{0,0,0}}
++		case 1n+rest Finished{region}: region
++		case 1n+rest Resume{+next,state}:
++			Index.region(rest,Table.seek(table,Table.less(table,next),next,state),table)
++		case 1n+rest Invalid{}: Region{0,V.Cell{0,0,0},V.Cell{0,0,0}}
++
++def Grid.region.valid(inside: Bool, +cells: Index, +side: U32, +cell: V.Cell) -> Region:
++	match inside:
++		case False{}: Region{0,V.Cell{0,0,0},V.Cell{0,0,0}}
++		case True{}:
++			Index{height,count,+table} = cells
++			V.Cell{+x,y,z} = cell
++			Index.region(1n+height,Table.seek(table,Table.less(table,0n),0n,Space{SplitX{},(x < side / 2 : U32),cell,V.Cell{side,side,side},V.Cell{0,0,0}}),table)
++
++def Grid.region(+grid: Grid, +cell: V.Cell) -> Region:
+ 	Grid{+side,cells} = grid
+ 	Grid.region.valid(V.Cell.inside(side,cell),cells,side,cell)
+ 
++def Grid.read.valid(inside: Bool, +cells: Index, +side: U32, +cell: V.Cell) -> U32:
++	Region.material(Grid.region.valid(inside,cells,side,cell))
++
++def Grid.read(+grid: Grid, +cell: V.Cell) -> U32:
++	Grid{+side,cells} = grid
++	Grid.read.valid(V.Cell.inside(side,cell),cells,side,cell)
++
+ def Slab.axis(moving: Bool, +origin: F32, +delta: F32, +side: F32) -> Slab:
+ 	match moving:
+ 		case False{}:

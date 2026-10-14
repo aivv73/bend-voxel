@@ -1,0 +1,24 @@
+Recommend [Candidate 3](/home/aivv/Документы/projects/bend-voxel-main/.audit/dda-zero/design-3/package.md) as the base. It ties Candidate 2 architecturally; its explicit lambda annotations and stronger rejection gates make implementation easier to assess.
+
+Scores assess the proposed designs, not completed verification.
+
+| Rubric criterion | Candidate 1 | Candidate 2 | Candidate 3 |
+|---|---:|---:|---:|
+| Valid Bend shape and quantities | 2 | 2 | 2 |
+| Public signatures and semantic contracts preserved | 2 | 2 | 2 |
+| No hot-function count destructuring or eager zero-path F32 work | 2 | 2 | 2 |
+| Local ownership, small call hierarchy, no caller flags | 1 | 2 | 2 |
+| Compiler, proof, renderer, CPU/GPU rejection gates | 2 | 2 | 2 |
+| **Total** | **9** | **10** | **10** |
+
+All three sketches preserve the nonzero arithmetic expressions and F32 order. [Base’s selector](/home/aivv/.bend/bend2/base.bend:504) accepts affine function types. The guide supports parameter matches, parenthesized lambda bodies, and single-use closures.
+
+Candidate 1 adds two importable signatures and a possible call cost. Its wrappers perform useful adaptation, but helpers admit inconsistent Bool/count pairs. Candidates 2 and 3 avoid that interface growth while potentially paying for captures, environment allocation, disposal, selection, and application. Eager closure construction still occurs before selection. Neither approach has measured superiority.
+
+Laziness Protocol and Minimize Reader Load favor keeping selection inside the existing functions. Type System Discipline favors affine invocation and avoiding independently supplied flags.
+
+Remaining objections apply to every candidate. Checker acceptance, zero-law normalization, emitted branch placement, scalar-count preservation, exact renderer parity, and complete-frame performance remain unverified. Candidate 3’s smaller interface does not establish cheaper execution.
+
+Suggested grafts are Candidate 1’s explicit comparison of helper-call costs against closure costs, and its full-call-path inspection requirement. Keep its helper shape as a separately evaluated fallback. Retain Candidate 3’s byte-identical-output rejection gate and baseline-retention rule.
+
+Inspection only. Read all three complete packages, grounding, rubric, architecture guidance, Base, and `bend guide`. No writes, delegation, compilation, proof checking, benchmarks, GPU jobs, or replay.

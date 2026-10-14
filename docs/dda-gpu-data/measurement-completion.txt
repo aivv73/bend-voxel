@@ -1,0 +1,4 @@
+Strict-runner admitted processes=200, all exit0 with stdout and empty stderr
+aa-gpu7:10 completed legacy-control processes, frames=8
+noop-gpu7:10 completed legacy-control processes, frames=8
+noop-cpu12:10 completed legacy-control processes, frames=16

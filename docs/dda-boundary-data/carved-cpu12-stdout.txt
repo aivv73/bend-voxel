@@ -1,0 +1,31 @@
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1088
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1105
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1111
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1122
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1102
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1114
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1105
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1123
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1117
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1127
+
+Saved .audit/dda-boundary/carved-cpu12.tsv

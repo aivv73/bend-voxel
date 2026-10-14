@@ -1,0 +1,1 @@
+Existing Axis.next guard: seven exact ray scans, CPU12/GPU6 seven images and CPU1/GPU7 opening parity pass.

@@ -1,0 +1,31 @@
+renderer=dda init_ms=293
+frames=8 elapsed_ms=4261
+
+renderer=dda init_ms=293
+frames=8 elapsed_ms=4335
+
+renderer=dda init_ms=294
+frames=8 elapsed_ms=4239
+
+renderer=dda init_ms=301
+frames=8 elapsed_ms=4386
+
+renderer=dda init_ms=292
+frames=8 elapsed_ms=4415
+
+renderer=dda init_ms=296
+frames=8 elapsed_ms=4376
+
+renderer=dda init_ms=294
+frames=8 elapsed_ms=4300
+
+renderer=dda init_ms=295
+frames=8 elapsed_ms=4334
+
+renderer=dda init_ms=294
+frames=8 elapsed_ms=4423
+
+renderer=dda init_ms=304
+frames=8 elapsed_ms=4280
+
+Saved .audit/dda-boundary/gpu6.tsv

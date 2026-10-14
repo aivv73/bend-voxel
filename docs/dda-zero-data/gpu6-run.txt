@@ -1,0 +1,31 @@
+renderer=dda init_ms=294
+frames=8 elapsed_ms=3956
+
+renderer=dda init_ms=293
+frames=8 elapsed_ms=4066
+
+renderer=dda init_ms=292
+frames=8 elapsed_ms=4056
+
+renderer=dda init_ms=292
+frames=8 elapsed_ms=4064
+
+renderer=dda init_ms=297
+frames=8 elapsed_ms=4056
+
+renderer=dda init_ms=296
+frames=8 elapsed_ms=4059
+
+renderer=dda init_ms=293
+frames=8 elapsed_ms=4061
+
+renderer=dda init_ms=294
+frames=8 elapsed_ms=4064
+
+renderer=dda init_ms=293
+frames=8 elapsed_ms=4076
+
+renderer=dda init_ms=294
+frames=8 elapsed_ms=4022
+
+Saved .audit/dda-zero/next-guard-gpu6.tsv

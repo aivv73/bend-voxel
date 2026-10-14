@@ -1,0 +1,42 @@
+2026-10-06T17:26:09+00:00
+ 21:26:09 up  4:28,  1 user,  load average: 1.29, 1.01, 1.11
+12
+    PID %CPU %MEM COMMAND
+   2610  9.8  0.5 niri
+   5499  9.6  0.9 vesktop
+   5731  9.0  1.7 vesktop
+   3832  6.4  0.9 helium
+   8525  6.0  3.5 Telegram
+   3784  5.7  1.5 helium
+  10264  3.7  1.5 helium
+  34558  3.4  0.8 t3code
+   7212  3.1  0.9 steam
+  34501  2.8  0.9 t3code
+   2791  2.1  0.2 ThroneCore
+   7579  1.9  2.4 steamwebhelper
+  34567  1.7  0.9 t3code
+   7477  1.7  1.6 steamwebhelper
+   3837  1.7  0.4 Xwayland
+name, utilization.gpu [%], memory.used [MiB], temperature.gpu, power.draw [W]
+NVIDIA GeForce GTX 1660, 0 %, 669 MiB, 41, 9.24 W
+2026-10-06T17:27:25+00:00
+ 21:27:25 up  4:29,  1 user,  load average: 7.53, 3.06, 1.82
+12
+    PID %CPU %MEM COMMAND
+  54744  100  0.0 ps
+   2610  9.8  0.5 niri
+   5499  9.6  0.9 vesktop
+   5731  9.0  1.7 vesktop
+   3832  6.3  0.9 helium
+   8525  6.0  3.5 Telegram
+   3784  5.7  1.5 helium
+  10264  3.7  1.5 helium
+  34558  3.4  0.8 t3code
+   7212  3.1  0.9 steam
+  34501  2.8  0.9 t3code
+   2791  2.1  0.2 ThroneCore
+   7579  1.9  2.4 steamwebhelper
+  34567  1.7  0.8 t3code
+   7477  1.7  1.6 steamwebhelper
+name, utilization.gpu [%], memory.used [MiB], temperature.gpu, power.draw [W]
+NVIDIA GeForce GTX 1660, 4 %, 675 MiB, 39, 9.67 W

@@ -1,4 +1,5 @@
 import Base
+import 0xfdc8da256837fef81553ec8530fb7431/capture.bend as NativeCapture
 
 def Capture.pixel(read: Array<U32> & U32) -> Array<U32> & Image:
 	(pixels, color) = read
@@ -42,6 +43,6 @@ def Capture.dimensions(valid: Bool, pixels: Array<U32>) -> Result<&2, &2, String
 		case True{}:
 			Capture.capacity(Array.size(U32, pixels))
 
-def Capture.image(capture: Capture) -> Result<&2, &2, String, Image>:
-	Capture{width, height, pixels} = capture
+def Capture.image(capture: NativeCapture.Capture) -> Result<&2, &2, String, Image>:
+	NativeCapture.Capture{width, height, pixels} = capture
 	Capture.dimensions(U32.is_eq(width, 512) && U32.is_eq(height, 512), pixels)

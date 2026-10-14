@@ -1,0 +1,31 @@
+renderer=dda init_ms=290
+frames=16 elapsed_ms=8157
+
+renderer=dda init_ms=292
+frames=16 elapsed_ms=8230
+
+renderer=dda init_ms=294
+frames=16 elapsed_ms=8001
+
+renderer=dda init_ms=291
+frames=16 elapsed_ms=8204
+
+renderer=dda init_ms=290
+frames=16 elapsed_ms=8241
+
+renderer=dda init_ms=290
+frames=16 elapsed_ms=8178
+
+renderer=dda init_ms=291
+frames=16 elapsed_ms=8321
+
+renderer=dda init_ms=293
+frames=16 elapsed_ms=8349
+
+renderer=dda init_ms=290
+frames=16 elapsed_ms=8509
+
+renderer=dda init_ms=292
+frames=16 elapsed_ms=8230
+
+Saved .audit/dda-boundary/gpu7-repeat.tsv

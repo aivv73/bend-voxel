@@ -1,0 +1,18 @@
+empty nodes=1 links=0 mismatches=0
+uniform nodes=1 links=0 mismatches=0
+dense nodes=1023 links=272 mismatches=0
+overlapping cuboids nodes=289 links=44 mismatches=0
+dyadic depth 0 nodes=1 links=0 mismatches=0
+dyadic depth 1 nodes=3 links=0 mismatches=0
+dyadic depth 2 nodes=5 links=0 mismatches=0
+dyadic depth 3 nodes=7 links=0 mismatches=0
+dyadic depth 4 nodes=9 links=0 mismatches=0
+dyadic depth 5 nodes=11 links=1 mismatches=0
+dyadic depth 6 nodes=13 links=1 mismatches=0
+dyadic depth 7 nodes=15 links=1 mismatches=0
+dyadic depth 8 nodes=17 links=1 mismatches=0
+dyadic depth 9 nodes=19 links=2 mismatches=0
+dyadic depth 10 nodes=21 links=2 mismatches=0
+dyadic depth 11 nodes=23 links=2 mismatches=0
+dyadic depth 12 nodes=25 links=2 mismatches=0
+Atelier nodes=1397085 links=99793 mismatches=0

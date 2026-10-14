@@ -1,0 +1,1 @@
+Installed benchmark rejects all eight missing valued flags with argv/status/stdout/stderr recorded; normal three-renderer run succeeds

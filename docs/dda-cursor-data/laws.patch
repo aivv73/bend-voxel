@@ -1,0 +1,23 @@
+--- LAWS.bend
++++ LAWS.bend
+@@ -305,3 +305,20 @@
+ 	for time: F32
+ 	for +limit: U32
+ 	{X.Axis.correct(1n+fuel,True{},True{},True{},positive,origin,delta,cell,time,limit,limit) == limit : U32}
++
++law dda_cache_seed_preserves_region:
++	for fuel: Nat
++	for +tree: X.Tree
++	for +axis: X.Split
++	for leftward: Bool
++	for +cell: V.Cell
++	for +span: V.Cell
++	for +low: V.Cell
++	{X.Seed.region(X.Cache.seed(fuel,tree,axis,leftward,cell,span,low)) == X.Tree.region(tree,axis,leftward,cell,span,low) : X.Region}
++
++law dda_cache_grid_seed_preserves_region:
++	for inside: Bool
++	for +cells: X.Tree
++	for +side: U32
++	for +cell: V.Cell
++	{X.Seed.region(X.Grid.seed.valid(inside,cells,side,cell)) == X.Grid.region.valid(inside,cells,side,cell) : X.Region}

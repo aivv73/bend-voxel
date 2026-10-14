@@ -1,0 +1,31 @@
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1870
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1904
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1814
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1837
+
+renderer=dda init_ms=1
+frames=64 elapsed_ms=2017
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1790
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1839
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1913
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1675
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1845
+
+Saved .audit/dda-floor/carved-cpu12.tsv

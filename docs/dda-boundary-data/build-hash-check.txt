@@ -1,0 +1,6 @@
+.audit/dda-boundary/baseline-renderer: OK
+.audit/dda-boundary/baseline-renderer.gpu: OK
+.audit/dda-boundary/candidate-renderer: OK
+.audit/dda-boundary/candidate-renderer.gpu: OK
+.audit/dda-boundary/baseline.c: OK
+.audit/dda-boundary/candidate.c: OK

@@ -1,0 +1,116 @@
+--- a/dda.bend
++++ b/dda.bend
+@@ -297,12 +297,18 @@
+ 	+crosses = U32.is_ne(count,0) && F32.is_eq(Axis.next(True{},positive,origin,delta,previous),time)
+ 	Advance{next,Bool.pick(U32,crosses,previous,next),crosses}
+ 
+-def Axis.advance(moving: Bool, +positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, low: U32, high: U32) -> Advance:
++def Axis.advance.count(reuse: Bool, +positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, +limit: U32) -> U32:
++	match reuse:
++		case True{}: limit
++		case False{}: Axis.count(positive,origin,delta,cell,time,limit)
++
++def Axis.advance(moving: Bool, +positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, boundary_time: F32, +low: U32, +high: U32) -> Advance:
+ 	match moving:
+ 		case False{}: Advance{cell,cell,False{}}
+ 		case True{}:
+-			+count = Bool.pick(U32,positive,(high - cell : U32),(cell - low + 1 : U32))
+-			Axis.advanced(positive,origin,delta,cell,time,Axis.count(positive,origin,delta,cell,time,count))
++			+limit = Bool.pick(U32,positive,(high - cell : U32),(cell - low + 1 : U32))
++			reuse = ((low <= cell) && (cell < high) && (high <= 16777216) : U32) && F32.is_eq(time,boundary_time)
++			Axis.advanced(positive,origin,delta,cell,time,Axis.advance.count(reuse,positive,origin,delta,cell,time,limit))
+ 
+ def Crossing.advanced(time: F32, ray: R.Vec3, x: Advance, y: Advance, z: Advance) -> Crossing:
+ 	R.Vec3{dx,dy,dz} = ray
+@@ -325,8 +331,8 @@
+ 	+ty = Axis.next(F32.is_ne(dy,0.0),py,oy,dy,Bool.pick(U32,py,(hy - 1 : U32),ly))
+ 	+tz = Axis.next(F32.is_ne(dz,0.0),pz,oz,dz,Bool.pick(U32,pz,(hz - 1 : U32),lz))
+ 	+time = F32.min(tx,F32.min(ty,tz))
+-	Crossing.advanced(time,ray,Axis.advance(F32.is_ne(dx,0.0),px,ox,dx,x,time,lx,hx),
+-		Axis.advance(F32.is_ne(dy,0.0),py,oy,dy,y,time,ly,hy),Axis.advance(F32.is_ne(dz,0.0),pz,oz,dz,z,time,lz,hz))
++	Crossing.advanced(time,ray,Axis.advance(F32.is_ne(dx,0.0),px,ox,dx,x,time,tx,lx,hx),
++		Axis.advance(F32.is_ne(dy,0.0),py,oy,dy,y,time,ty,ly,hy),Axis.advance(F32.is_ne(dz,0.0),pz,oz,dz,z,time,tz,lz,hz))
+ 
+ # A ray crosses at most 3 * side grid planes.
+ # Equal crossing times advance every tied axis, with X/Y/Z face priority.
+--- a/LAWS.bend
++++ b/LAWS.bend
+@@ -250,9 +250,50 @@
+ 	for delta: F32
+ 	for +cell: U32
+ 	for time: F32
++	for boundary_time: F32
+ 	for low: U32
+ 	for high: U32
+-	{X.Axis.advance(False{},positive,origin,delta,cell,time,low,high) == X.Advance{cell,cell,False{}} : X.Advance}
++	{X.Axis.advance(False{},positive,origin,delta,cell,time,boundary_time,low,high) == X.Advance{cell,cell,False{}} : X.Advance}
++
++law dda_boundary_reuse_returns_limit:
++	for positive: Bool
++	for origin: F32
++	for delta: F32
++	for cell: U32
++	for time: F32
++	for +limit: U32
++	{X.Axis.advance.count(True{},positive,origin,delta,cell,time,limit) == limit : U32}
++
++law dda_boundary_fallback_uses_actual_count:
++	for +positive: Bool
++	for +origin: F32
++	for +delta: F32
++	for +cell: U32
++	for +time: F32
++	for +limit: U32
++	{X.Axis.advance.count(False{},positive,origin,delta,cell,time,limit) == X.Axis.count(positive,origin,delta,cell,time,limit) : U32}
++
++law dda_boundary_reuse_preserves_reconstruction_given_count_equality:
++	for +positive: Bool
++	for +origin: F32
++	for +delta: F32
++	for +cell: U32
++	for +time: F32
++	for +limit: U32
++	for count_equality: {X.Axis.count(positive,origin,delta,cell,time,limit) == limit : U32}
++	{X.Axis.advanced(positive,origin,delta,cell,time,X.Axis.advance.count(True{},positive,origin,delta,cell,time,limit)) == X.Axis.advanced(positive,origin,delta,cell,time,X.Axis.count(positive,origin,delta,cell,time,limit)) : X.Advance}
++
++law dda_boundary_rejected_domain_uses_actual_count:
++	for +positive: Bool
++	for +origin: F32
++	for +delta: F32
++	for +cell: U32
++	for +time: F32
++	for +boundary_time: F32
++	for +low: U32
++	for +high: U32
++	for rejected: {((low <= cell) && (cell < high) && (high <= 16777216) : U32) == False{} : Bool}
++	{X.Axis.advance(True{},positive,origin,delta,cell,time,boundary_time,low,high) == X.Axis.advanced(positive,origin,delta,cell,time,X.Axis.count(positive,origin,delta,cell,time,Bool.pick(U32,positive,(high - cell : U32),(cell - low + 1 : U32)))) : X.Advance}
+ 
+ law dda_region_traversal_is_bounded:
+ 	for inside: Bool
+--- a/PROOF.bend
++++ b/PROOF.bend
+@@ -231,9 +231,23 @@
+ def Laws.dda_region_outside_is_empty(cells,side,cell):
+ 	{==}
+ 
+-def Laws.dda_stationary_region_axis_preserved(positive,origin,delta,cell,time,low,high):
++def Laws.dda_stationary_region_axis_preserved(positive,origin,delta,cell,time,boundary_time,low,high):
+ 	{==}
+ 
++def Laws.dda_boundary_reuse_returns_limit(positive,origin,delta,cell,time,limit):
++	{==}
++
++def Laws.dda_boundary_fallback_uses_actual_count(positive,origin,delta,cell,time,limit):
++	{==}
++
++def Laws.dda_boundary_reuse_preserves_reconstruction_given_count_equality(positive,origin,delta,cell,time,limit,count_equality):
++	%count_equality : {X.Axis.advanced(positive,origin,delta,cell,time,_) == X.Axis.advanced(positive,origin,delta,cell,time,X.Axis.count(positive,origin,delta,cell,time,limit)) : X.Advance}
++	{==}
++
++def Laws.dda_boundary_rejected_domain_uses_actual_count(positive,origin,delta,cell,time,boundary_time,low,high,rejected):
++	Equal.cong(Bool,X.Advance,reuse => X.Axis.advanced(positive,origin,delta,cell,time,X.Axis.advance.count(reuse && F32.is_eq(time,boundary_time),positive,origin,delta,cell,time,Bool.pick(U32,positive,(high - cell : U32),(cell - low + 1 : U32)))),
++		((low <= cell) && (cell < high) && (high <= 16777216) : U32),False{},rejected)
++
+ def Laws.dda_region_traversal_is_bounded(inside,previous,grid,eye,ray,crossing,region):
+ 	{==}
+ 

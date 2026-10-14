@@ -1,0 +1,19 @@
+--- .audit/dda-zero/baseline/LAWS.bend	2026-10-06 19:44:37.936407662 +0400
++++ docs/dda-zero-data/candidate-laws.bend	2026-10-06 21:29:05.927288333 +0400
+@@ -214,6 +214,16 @@
+ 	for cell: U32
+ 	{X.Axis.next(False{},positive,origin,delta,cell) == 1.0e30 : F32}
+ 
++law dda_zero_plane_guard_preserves_crossing:
++	for +moving: Bool
++	for +positive: Bool
++	for +origin: F32
++	for +delta: F32
++	for +cell: U32
++	for +time: F32
++	{(moving && F32.is_eq(X.Axis.next(moving,positive,origin,delta,cell),time)) ==
++	(moving && F32.is_eq(X.Axis.next(True{},positive,origin,delta,cell),time)) : Bool}
++
+ law dda_uncrossed_coordinate_preserved:
+ 	for positive: Bool
+ 	for +cell: U32

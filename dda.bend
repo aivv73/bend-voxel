@@ -287,7 +287,7 @@ def Axis.correct(fuel: Nat, +up: Bool, before: Bool, at_limit: Bool, +positive: 
 def Axis.count(+positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, +limit: U32) -> U32:
 	+point = (origin + time * delta : F32)
 	+events = Bool.pick(F32,positive,(point - U32.to_f32(cell) : F32),(U32.to_f32(cell) + 1.0 - point : F32))
-	+estimate = U32.min(limit,F32.to_u32(F32.floor(F32.clamp(events,0.0,U32.to_f32(limit)))))
+	+estimate = U32.min(limit,F32.to_u32(F32.clamp(events,0.0,U32.to_f32(limit))))
 	+before = Axis.before(positive,origin,delta,cell,time,estimate)
 	Axis.correct(Nat.add(1n,U32.to_nat(limit)),before,before,U32.is_eq(estimate,limit),positive,origin,delta,cell,time,estimate,limit)
 
@@ -297,12 +297,18 @@ def Axis.advanced(+positive: Bool, origin: F32, delta: F32, +cell: U32, +time: F
 	+crosses = U32.is_ne(count,0) && F32.is_eq(Axis.next(True{},positive,origin,delta,previous),time)
 	Advance{next,Bool.pick(U32,crosses,previous,next),crosses}
 
-def Axis.advance(moving: Bool, +positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, low: U32, high: U32) -> Advance:
+def Axis.advance.count(reuse: Bool, +positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, +limit: U32) -> U32:
+	match reuse:
+		case True{}: limit
+		case False{}: Axis.count(positive,origin,delta,cell,time,limit)
+
+def Axis.advance(moving: Bool, +positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, boundary_time: F32, +low: U32, +high: U32) -> Advance:
 	match moving:
 		case False{}: Advance{cell,cell,False{}}
 		case True{}:
-			+count = Bool.pick(U32,positive,(high - cell : U32),(cell - low + 1 : U32))
-			Axis.advanced(positive,origin,delta,cell,time,Axis.count(positive,origin,delta,cell,time,count))
+			+limit = Bool.pick(U32,positive,(high - cell : U32),(cell - low + 1 : U32))
+			reuse = ((low <= cell) && (cell < high) && (high <= 16777216) : U32) && F32.is_eq(time,boundary_time)
+			Axis.advanced(positive,origin,delta,cell,time,Axis.advance.count(reuse,positive,origin,delta,cell,time,limit))
 
 def Crossing.advanced(time: F32, ray: R.Vec3, x: Advance, y: Advance, z: Advance) -> Crossing:
 	R.Vec3{dx,dy,dz} = ray
@@ -325,8 +331,8 @@ def Crossing.region(eye: R.Vec3, +ray: R.Vec3, cell: V.Cell, region: Region) -> 
 	+ty = Axis.next(F32.is_ne(dy,0.0),py,oy,dy,Bool.pick(U32,py,(hy - 1 : U32),ly))
 	+tz = Axis.next(F32.is_ne(dz,0.0),pz,oz,dz,Bool.pick(U32,pz,(hz - 1 : U32),lz))
 	+time = F32.min(tx,F32.min(ty,tz))
-	Crossing.advanced(time,ray,Axis.advance(F32.is_ne(dx,0.0),px,ox,dx,x,time,lx,hx),
-		Axis.advance(F32.is_ne(dy,0.0),py,oy,dy,y,time,ly,hy),Axis.advance(F32.is_ne(dz,0.0),pz,oz,dz,z,time,lz,hz))
+	Crossing.advanced(time,ray,Axis.advance(F32.is_ne(dx,0.0),px,ox,dx,x,time,tx,lx,hx),
+		Axis.advance(F32.is_ne(dy,0.0),py,oy,dy,y,time,ty,ly,hy),Axis.advance(F32.is_ne(dz,0.0),pz,oz,dz,z,time,tz,lz,hz))
 
 # A ray crosses at most 3 * side grid planes.
 # Equal crossing times advance every tied axis, with X/Y/Z face priority.
@@ -446,5 +452,232 @@ def Frame.fork(+depth: Nat, +skip: Bool, +grid: Grid, +basis: R.Basis, +palette:
 			a b c d = Frame.fork(rest,skip,grid,basis,palette,ground,x,y,h) Frame.fork(rest,skip,grid,basis,palette,ground,(x + h : U32),y,h) Frame.fork(rest,skip,grid,basis,palette,ground,x,(y + h : U32),h) Frame.fork(rest,skip,grid,basis,palette,ground,(x + h : U32),(y + h : U32),h)
 			Qua{a,b,c,d}
 
-def Frame.image(+grid: Grid, +basis: R.Basis, +palette: Palette, +ground: R.GroundLighting, fork: Nat) -> Grid & Image:
-	(grid,Frame.fork!(fork,True{},grid,basis,palette,ground,0,0,512))
+type ForkDepth is Data:
+	F0{}
+	F1{}
+	F2{}
+	F3{}
+	F4{}
+	F5{}
+	F6{}
+	F7{}
+	F8{}
+	F9{}
+
+type Assignment is Data:
+	Contiguous{}
+	Interleaved{}
+
+type Schedule is Data:
+	Schedule{fork: ForkDepth, assignment: Assignment}
+
+type Dimensions is Data:
+	Dimensions{q: U32, s: U32, leaf_depth: Nat}
+
+type Point is Data:
+	Point{x: U32, y: U32}
+
+type Owner is Data:
+	Owner{qx: U32, qy: U32}
+
+type Local is Data:
+	Local{ix: U32, iy: U32}
+
+type Address is Data:
+	Address{owner: Owner, local: Local}
+
+type Four is Data:
+	Four{tl: Image, tr: Image, bl: Image, br: Image}
+
+def ForkDepth.nat(depth: ForkDepth) -> Nat:
+	match depth:
+		case F0{}: 0n
+		case F1{}: 1n
+		case F2{}: 2n
+		case F3{}: 3n
+		case F4{}: 4n
+		case F5{}: 5n
+		case F6{}: 6n
+		case F7{}: 7n
+		case F8{}: 8n
+		case F9{}: 9n
+
+def ForkDepth.read(text: String) -> Maybe<&2,ForkDepth>:
+	match text:
+		case "0": Some{F0{}}
+		case "1": Some{F1{}}
+		case "2": Some{F2{}}
+		case "3": Some{F3{}}
+		case "4": Some{F4{}}
+		case "5": Some{F5{}}
+		case "6": Some{F6{}}
+		case "7": Some{F7{}}
+		case "8": Some{F8{}}
+		case "9": Some{F9{}}
+		case _: None{}
+
+def Schedule.dimensions(schedule: Schedule) -> Dimensions:
+	Schedule{fork,assignment} = schedule
+	+f = ForkDepth.nat(fork)
+	+l = Nat.sub(9n,f)
+	Dimensions{(1 << f : U32),(1 << l : U32),l}
+
+def Dimensions.valid(dimensions: Dimensions) -> Bool:
+	Dimensions{+q,+s,leaf_depth} = dimensions
+	(q > 0 : U32) && (s > 0 : U32) && U32.is_eq((q * s : U32),512)
+
+def Schedule.valid(schedule: Schedule) -> Bool:
+	Dimensions.valid(Schedule.dimensions(schedule))
+
+def Point.bounded(point: Point) -> Bool:
+	Point{x,y} = point
+	(x < 512 : U32) && (y < 512 : U32)
+
+def Point.x(point: Point) -> U32:
+	Point{x,y} = point
+	x
+
+def Point.y(point: Point) -> U32:
+	Point{x,y} = point
+	y
+
+def Address.within(dimensions: Dimensions, address: Address) -> Bool:
+	Dimensions{+q,+s,leaf_depth} = dimensions
+	Address{Owner{qx,qy},Local{ix,iy}} = address
+	(qx < q : U32) && (qy < q : U32) && (ix < s : U32) && (iy < s : U32)
+
+def Address.bounded(schedule: Schedule, address: Address) -> Bool:
+	Address.within(Schedule.dimensions(schedule),address)
+
+def Assign.contiguous(owner: U32, local: U32, side: U32) -> U32:
+	(owner * side + local : U32)
+
+def Assign.interleaved(owner: U32, local: U32, jobs: U32) -> U32:
+	(local * jobs + owner : U32)
+
+def Assign.locate(assignment: Assignment, dimensions: Dimensions, address: Address) -> Point:
+	match assignment:
+		case Contiguous{}:
+			Dimensions{q,+s,leaf_depth} = dimensions
+			Address{Owner{qx,qy},Local{ix,iy}} = address
+			Point{Assign.contiguous(qx,ix,s),Assign.contiguous(qy,iy,s)}
+		case Interleaved{}:
+			Dimensions{+q,s,leaf_depth} = dimensions
+			Address{Owner{qx,qy},Local{ix,iy}} = address
+			Point{Assign.interleaved(qx,ix,q),Assign.interleaved(qy,iy,q)}
+
+def Assign.pixel(+schedule: Schedule, address: Address) -> Point:
+	Schedule{fork,assignment} = schedule
+	Assign.locate(assignment,Schedule.dimensions(schedule),address)
+
+def Assign.owner(assignment: Assignment, dimensions: Dimensions, point: Point) -> Address:
+	match assignment:
+		case Contiguous{}:
+			Dimensions{q,+s,leaf_depth} = dimensions
+			Point{+x,+y} = point
+			Address{Owner{(x / s : U32),(y / s : U32)},Local{(x % s : U32),(y % s : U32)}}
+		case Interleaved{}:
+			Dimensions{+q,s,leaf_depth} = dimensions
+			Point{+x,+y} = point
+			Address{Owner{(x % q : U32),(y % q : U32)},Local{(x / q : U32),(y / q : U32)}}
+
+def Assign.inverse(+schedule: Schedule, point: Point) -> Address:
+	Schedule{fork,assignment} = schedule
+	Assign.owner(assignment,Schedule.dimensions(schedule),point)
+
+def Native.open(image: Image) -> Four:
+	match image:
+		case Pix{+color}: Four{Pix{color},Pix{color},Pix{color},Pix{color}}
+		case Qua{a,b,c,d}: Four{a,b,c,d}
+
+def Native.weave.opened(+local: Nat, a: Four, b: Four, c: Four, d: Four) -> Image:
+	match local a b c d:
+		case 0n Four{aa,ab,ac,ad} Four{ba,bb,bc,bd} Four{ca,cb,cc,cd} Four{da,db,dc,dd}:
+			Qua{Qua{aa,ba,ca,da},Qua{ab,bb,cb,db},Qua{ac,bc,cc,dc},Qua{ad,bd,cd,dd}}
+		case 1n+rest Four{aa,ab,ac,ad} Four{ba,bb,bc,bd} Four{ca,cb,cc,cd} Four{da,db,dc,dd}:
+			Qua{Native.weave.opened(rest,Native.open(aa),Native.open(ba),Native.open(ca),Native.open(da)),
+				Native.weave.opened(rest,Native.open(ab),Native.open(bb),Native.open(cb),Native.open(db)),
+				Native.weave.opened(rest,Native.open(ac),Native.open(bc),Native.open(cc),Native.open(dc)),
+				Native.weave.opened(rest,Native.open(ad),Native.open(bd),Native.open(cd),Native.open(dd))}
+
+def Native.weave(local: Nat, images: Four) -> Image:
+	match local:
+		case 0n:
+			Four{a,b,c,d} = images
+			Qua{a,b,c,d}
+		case 1n+rest:
+			Four{a,b,c,d} = images
+			Native.weave.opened(rest,Native.open(a),Native.open(b),Native.open(c),Native.open(d))
+
+def Native.transpose(a: Four, b: Four, c: Four, d: Four) -> Four:
+	Four{aa,ab,ac,ad} = a
+	Four{ba,bb,bc,bd} = b
+	Four{ca,cb,cc,cd} = c
+	Four{da,db,dc,dd} = d
+	Four{Qua{aa,ba,ca,da},Qua{ab,bb,cb,db},Qua{ac,bc,cc,dc},Qua{ad,bd,cd,dd}}
+
+def Native.unweave(+local: Nat, image: Image) -> Four:
+	match local image:
+		case 0n _: Native.open(image)
+		case 1n+rest Pix{+color}:
+			Native.transpose(Native.unweave(rest,Pix{color}),Native.unweave(rest,Pix{color}),Native.unweave(rest,Pix{color}),Native.unweave(rest,Pix{color}))
+		case 1n+rest Qua{a,b,c,d}:
+			Native.transpose(Native.unweave(rest,a),Native.unweave(rest,b),Native.unweave(rest,c),Native.unweave(rest,d))
+
+def Native.full(+depth: Nat, image: Image) -> Bool:
+	match depth image:
+		case 0n Pix{color}: True{}
+		case 1n+rest Qua{a,b,c,d}:
+			Native.full(rest,a) && Native.full(rest,b) && Native.full(rest,c) && Native.full(rest,d)
+		case _ _: False{}
+
+def Native.is_pixel(image: Image) -> Bool:
+	match image:
+		case Pix{color}: True{}
+		case Qua{a,b,c,d}: False{}
+
+def Native.at(+depth: Nat, image: Image, +point: Point) -> Image:
+	match depth image:
+		case _ Pix{color}: Pix{color}
+		case 0n Qua{a,b,c,d}: Qua{a,b,c,d}
+		case 1n+rest Qua{a,b,c,d}:
+			Point{x,y} = point
+			+mask = (1 << rest : U32)
+			Native.at(rest,Bool.pick(Image,U32.is_zero((y .&. mask : U32)),
+				Bool.pick(Image,U32.is_zero((x .&. mask : U32)),a,b),
+				Bool.pick(Image,U32.is_zero((x .&. mask : U32)),c,d)),point)
+
+def Frame.local(+depth: Nat, +skip: Bool, +grid: Grid, +basis: R.Basis, +palette: Palette, +ground: R.GroundLighting,
+	+q: U32, +qx: U32, +qy: U32, +ix: U32, +iy: U32, +side: U32) -> Image:
+	match depth:
+		case 0n:
+			Frame.seq(0n,skip,grid,basis,palette,ground,Assign.interleaved(qx,ix,q),Assign.interleaved(qy,iy,q),1)
+		case 1n+rest:
+			+h = (side / 2 : U32)
+			Qua{Frame.local(rest,skip,grid,basis,palette,ground,q,qx,qy,ix,iy,h),
+				Frame.local(rest,skip,grid,basis,palette,ground,q,qx,qy,(ix + h : U32),iy,h),
+				Frame.local(rest,skip,grid,basis,palette,ground,q,qx,qy,ix,(iy + h : U32),h),
+				Frame.local(rest,skip,grid,basis,palette,ground,q,qx,qy,(ix + h : U32),(iy + h : U32),h)}
+
+def Frame.owners(+remaining: Nat, +local: Nat, +skip: Bool, +grid: Grid, +basis: R.Basis, +palette: Palette, +ground: R.GroundLighting,
+	+q: U32, +s: U32, +qx: U32, +qy: U32, +owner_side: U32) -> Image:
+	match remaining:
+		case 0n: Frame.local(local,skip,grid,basis,palette,ground,q,qx,qy,0,0,s)
+		case 1n+rest:
+			+h = (owner_side / 2 : U32)
+			a b c d = Frame.owners(rest,local,skip,grid,basis,palette,ground,q,s,qx,qy,h) Frame.owners(rest,local,skip,grid,basis,palette,ground,q,s,(qx + h : U32),qy,h) Frame.owners(rest,local,skip,grid,basis,palette,ground,q,s,qx,(qy + h : U32),h) Frame.owners(rest,local,skip,grid,basis,palette,ground,q,s,(qx + h : U32),(qy + h : U32),h)
+			Native.weave(local,Four{a,b,c,d})
+
+def Frame.interleaved(dimensions: Dimensions, fork: ForkDepth, skip: Bool, grid: Grid, basis: R.Basis, palette: Palette, ground: R.GroundLighting) -> Image:
+	Dimensions{+q,s,local} = dimensions
+	Frame.owners(ForkDepth.nat(fork),local,skip,grid,basis,palette,ground,q,s,0,0,q)
+
+def Frame.selected(schedule: Schedule, skip: Bool, grid: Grid, basis: R.Basis, palette: Palette, ground: R.GroundLighting) -> Image:
+	Schedule{+fork,assignment} = schedule
+	match assignment:
+		case Contiguous{}: Frame.fork(ForkDepth.nat(fork),skip,grid,basis,palette,ground,0,0,512)
+		case Interleaved{}:
+			Frame.interleaved(Schedule.dimensions(Schedule{fork,Interleaved{}}),fork,skip,grid,basis,palette,ground)
+
+def Frame.image(+grid: Grid, +basis: R.Basis, +palette: Palette, +ground: R.GroundLighting, schedule: Schedule) -> Grid & Image:
+	(grid,Frame.selected!(schedule,True{},grid,basis,palette,ground))

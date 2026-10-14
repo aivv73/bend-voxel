@@ -1,0 +1,10 @@
+Independent evidence and trail review
+Reviewer: gpt-6.1-sol
+Configured project model overrides require this model for judgment roles; review does not provide different-model-family diversity.
+
+Final reviewer response:
+Attention flags: none.
+
+The appended exception resolves the delivery manifest correctly, and canonical and archived trails match. The disclosed limitation remains: child proof/build execution was reviewed through parent summaries and retained artifacts, without full child timelines.
+
+Earlier findings were corrected before delivery: ambiguous abbreviated evidence paths, one documentation build-manifest path exception, and an overwritten CPU1 image export. CPU1 was rerun to a distinct output after release measurements drained. The reviewer checked raw CPU12, CPU1, GPU6 and GPU7 samples, paired results, profile percentages, work counters, generated ownership code, source/build/image identities, proof scope, and current-task parent T3 activity. No workloads were executed by the reviewer.

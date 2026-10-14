@@ -1,0 +1,19 @@
+All report links resolve
+dda.bend: OK
+LAWS.bend: OK
+PROOF.bend: OK
+build/dda-compare: OK
+build/dda-compare.gpu: OK
+.audit/dda-indexed/candidate-renderer: OK
+.audit/dda-indexed/candidate-renderer.gpu: OK
+.audit/dda-indexed/candidate.c: OK
+docs/dda-indexed-data/LAWS.bend: OK
+docs/dda-indexed-data/PROOF.bend: OK
+docs/dda-indexed-data/baseline-dda.bend: OK
+docs/dda-indexed-data/candidate-dda.bend: OK
+docs/dda-indexed-data/page-count.bend: OK
+docs/dda-indexed-data/topology-property.bend: OK
+docs/dda-indexed-data/tree-size.bend: OK
+docs/dda-indexed-data/world-property.bend: OK
+.audit/dda-indexed/published-topology: OK
+.audit/dda-indexed/published-world: OK

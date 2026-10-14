@@ -1,0 +1,915 @@
+
+.audit/dda-indexed/candidate-renderer:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000125dc0 <spin_32>:
+  125dc0:	b8 03 00 00 00       	mov    $0x3,%eax
+  125dc5:	48 83 fa 1e          	cmp    $0x1e,%rdx
+  125dc9:	0f 87 8a 0d 00 00    	ja     126b59 <spin_32+0xd99>
+  125dcf:	4c 8d 05 ba 0d 01 00 	lea    0x10dba(%rip),%r8        # 136b90 <_IO_stdin_used+0xb90>
+  125dd6:	49 63 14 90          	movslq (%r8,%rdx,4),%rdx
+  125dda:	4c 01 c2             	add    %r8,%rdx
+  125ddd:	ff e2                	jmp    *%rdx
+  125ddf:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  125de6:	ff ff 00 
+  125de9:	48 21 ca             	and    %rcx,%rdx
+  125dec:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  125df3:	37 00 00 
+  125df6:	4c 39 c2             	cmp    %r8,%rdx
+  125df9:	0f 85 5a 0d 00 00    	jne    126b59 <spin_32+0xd99>
+  125dff:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  125e06:	00 00 00 
+  125e09:	48 21 ca             	and    %rcx,%rdx
+  125e0c:	48 85 c9             	test   %rcx,%rcx
+  125e0f:	79 28                	jns    125e39 <spin_32+0x79>
+  125e11:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  125e15:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  125e18:	41 89 c8             	mov    %ecx,%r8d
+  125e1b:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  125e22:	41 83 f8 01          	cmp    $0x1,%r8d
+  125e26:	75 03                	jne    125e2b <spin_32+0x6b>
+  125e28:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  125e2b:	48 c1 e0 20          	shl    $0x20,%rax
+  125e2f:	48 09 c8             	or     %rcx,%rax
+  125e32:	48 c1 e8 18          	shr    $0x18,%rax
+  125e36:	48 89 c2             	mov    %rax,%rdx
+  125e39:	8b 04 d7             	mov    (%rdi,%rdx,8),%eax
+  125e3c:	48 8b 4c d7 08       	mov    0x8(%rdi,%rdx,8),%rcx
+  125e41:	48 89 06             	mov    %rax,(%rsi)
+  125e44:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  125e48:	c3                   	ret
+  125e49:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  125e50:	ff ff 00 
+  125e53:	48 21 ca             	and    %rcx,%rdx
+  125e56:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  125e5d:	37 00 00 
+  125e60:	4c 39 c2             	cmp    %r8,%rdx
+  125e63:	0f 85 f0 0c 00 00    	jne    126b59 <spin_32+0xd99>
+  125e69:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  125e70:	00 00 00 
+  125e73:	48 21 ca             	and    %rcx,%rdx
+  125e76:	48 85 c9             	test   %rcx,%rcx
+  125e79:	79 28                	jns    125ea3 <spin_32+0xe3>
+  125e7b:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  125e7f:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  125e82:	41 89 c8             	mov    %ecx,%r8d
+  125e85:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  125e8c:	41 83 f8 01          	cmp    $0x1,%r8d
+  125e90:	75 03                	jne    125e95 <spin_32+0xd5>
+  125e92:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  125e95:	48 c1 e0 20          	shl    $0x20,%rax
+  125e99:	48 09 c8             	or     %rcx,%rax
+  125e9c:	48 c1 e8 18          	shr    $0x18,%rax
+  125ea0:	48 89 c2             	mov    %rax,%rdx
+  125ea3:	8b 84 d7 b0 01 00 00 	mov    0x1b0(%rdi,%rdx,8),%eax
+  125eaa:	48 8b 8c d7 b8 01 00 	mov    0x1b8(%rdi,%rdx,8),%rcx
+  125eb1:	00 
+  125eb2:	48 89 06             	mov    %rax,(%rsi)
+  125eb5:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  125eb9:	c3                   	ret
+  125eba:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  125ec1:	ff ff 00 
+  125ec4:	48 21 ca             	and    %rcx,%rdx
+  125ec7:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  125ece:	37 00 00 
+  125ed1:	4c 39 c2             	cmp    %r8,%rdx
+  125ed4:	0f 85 7f 0c 00 00    	jne    126b59 <spin_32+0xd99>
+  125eda:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  125ee1:	00 00 00 
+  125ee4:	48 21 ca             	and    %rcx,%rdx
+  125ee7:	48 85 c9             	test   %rcx,%rcx
+  125eea:	79 28                	jns    125f14 <spin_32+0x154>
+  125eec:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  125ef0:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  125ef3:	41 89 c8             	mov    %ecx,%r8d
+  125ef6:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  125efd:	41 83 f8 01          	cmp    $0x1,%r8d
+  125f01:	75 03                	jne    125f06 <spin_32+0x146>
+  125f03:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  125f06:	48 c1 e0 20          	shl    $0x20,%rax
+  125f0a:	48 09 c8             	or     %rcx,%rax
+  125f0d:	48 c1 e8 18          	shr    $0x18,%rax
+  125f11:	48 89 c2             	mov    %rax,%rdx
+  125f14:	8b 84 d7 00 01 00 00 	mov    0x100(%rdi,%rdx,8),%eax
+  125f1b:	48 8b 8c d7 08 01 00 	mov    0x108(%rdi,%rdx,8),%rcx
+  125f22:	00 
+  125f23:	48 89 06             	mov    %rax,(%rsi)
+  125f26:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  125f2a:	c3                   	ret
+  125f2b:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  125f32:	ff ff 00 
+  125f35:	48 21 ca             	and    %rcx,%rdx
+  125f38:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  125f3f:	37 00 00 
+  125f42:	4c 39 c2             	cmp    %r8,%rdx
+  125f45:	0f 85 0e 0c 00 00    	jne    126b59 <spin_32+0xd99>
+  125f4b:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  125f52:	00 00 00 
+  125f55:	48 21 ca             	and    %rcx,%rdx
+  125f58:	48 85 c9             	test   %rcx,%rcx
+  125f5b:	79 28                	jns    125f85 <spin_32+0x1c5>
+  125f5d:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  125f61:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  125f64:	41 89 c8             	mov    %ecx,%r8d
+  125f67:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  125f6e:	41 83 f8 01          	cmp    $0x1,%r8d
+  125f72:	75 03                	jne    125f77 <spin_32+0x1b7>
+  125f74:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  125f77:	48 c1 e0 20          	shl    $0x20,%rax
+  125f7b:	48 09 c8             	or     %rcx,%rax
+  125f7e:	48 c1 e8 18          	shr    $0x18,%rax
+  125f82:	48 89 c2             	mov    %rax,%rdx
+  125f85:	8b 84 d7 e0 00 00 00 	mov    0xe0(%rdi,%rdx,8),%eax
+  125f8c:	48 8b 8c d7 e8 00 00 	mov    0xe8(%rdi,%rdx,8),%rcx
+  125f93:	00 
+  125f94:	48 89 06             	mov    %rax,(%rsi)
+  125f97:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  125f9b:	c3                   	ret
+  125f9c:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  125fa3:	ff ff 00 
+  125fa6:	48 21 ca             	and    %rcx,%rdx
+  125fa9:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  125fb0:	37 00 00 
+  125fb3:	4c 39 c2             	cmp    %r8,%rdx
+  125fb6:	0f 85 9d 0b 00 00    	jne    126b59 <spin_32+0xd99>
+  125fbc:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  125fc3:	00 00 00 
+  125fc6:	48 21 ca             	and    %rcx,%rdx
+  125fc9:	48 85 c9             	test   %rcx,%rcx
+  125fcc:	79 28                	jns    125ff6 <spin_32+0x236>
+  125fce:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  125fd2:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  125fd5:	41 89 c8             	mov    %ecx,%r8d
+  125fd8:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  125fdf:	41 83 f8 01          	cmp    $0x1,%r8d
+  125fe3:	75 03                	jne    125fe8 <spin_32+0x228>
+  125fe5:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  125fe8:	48 c1 e0 20          	shl    $0x20,%rax
+  125fec:	48 09 c8             	or     %rcx,%rax
+  125fef:	48 c1 e8 18          	shr    $0x18,%rax
+  125ff3:	48 89 c2             	mov    %rax,%rdx
+  125ff6:	8b 84 d7 b0 00 00 00 	mov    0xb0(%rdi,%rdx,8),%eax
+  125ffd:	48 8b 8c d7 b8 00 00 	mov    0xb8(%rdi,%rdx,8),%rcx
+  126004:	00 
+  126005:	48 89 06             	mov    %rax,(%rsi)
+  126008:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  12600c:	c3                   	ret
+  12600d:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  126014:	ff ff 00 
+  126017:	48 21 ca             	and    %rcx,%rdx
+  12601a:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126021:	37 00 00 
+  126024:	4c 39 c2             	cmp    %r8,%rdx
+  126027:	0f 85 2c 0b 00 00    	jne    126b59 <spin_32+0xd99>
+  12602d:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126034:	00 00 00 
+  126037:	48 21 ca             	and    %rcx,%rdx
+  12603a:	48 85 c9             	test   %rcx,%rcx
+  12603d:	79 28                	jns    126067 <spin_32+0x2a7>
+  12603f:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126043:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126046:	41 89 c8             	mov    %ecx,%r8d
+  126049:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  126050:	41 83 f8 01          	cmp    $0x1,%r8d
+  126054:	75 03                	jne    126059 <spin_32+0x299>
+  126056:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126059:	48 c1 e0 20          	shl    $0x20,%rax
+  12605d:	48 09 c8             	or     %rcx,%rax
+  126060:	48 c1 e8 18          	shr    $0x18,%rax
+  126064:	48 89 c2             	mov    %rax,%rdx
+  126067:	8b 44 d7 40          	mov    0x40(%rdi,%rdx,8),%eax
+  12606b:	48 8b 4c d7 48       	mov    0x48(%rdi,%rdx,8),%rcx
+  126070:	48 89 06             	mov    %rax,(%rsi)
+  126073:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126077:	c3                   	ret
+  126078:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  12607f:	ff ff 00 
+  126082:	48 21 ca             	and    %rcx,%rdx
+  126085:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12608c:	37 00 00 
+  12608f:	4c 39 c2             	cmp    %r8,%rdx
+  126092:	0f 85 c1 0a 00 00    	jne    126b59 <spin_32+0xd99>
+  126098:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  12609f:	00 00 00 
+  1260a2:	48 21 ca             	and    %rcx,%rdx
+  1260a5:	48 85 c9             	test   %rcx,%rcx
+  1260a8:	79 28                	jns    1260d2 <spin_32+0x312>
+  1260aa:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  1260ae:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  1260b1:	41 89 c8             	mov    %ecx,%r8d
+  1260b4:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  1260bb:	41 83 f8 01          	cmp    $0x1,%r8d
+  1260bf:	75 03                	jne    1260c4 <spin_32+0x304>
+  1260c1:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1260c4:	48 c1 e0 20          	shl    $0x20,%rax
+  1260c8:	48 09 c8             	or     %rcx,%rax
+  1260cb:	48 c1 e8 18          	shr    $0x18,%rax
+  1260cf:	48 89 c2             	mov    %rax,%rdx
+  1260d2:	8b 84 d7 c0 00 00 00 	mov    0xc0(%rdi,%rdx,8),%eax
+  1260d9:	48 8b 8c d7 c8 00 00 	mov    0xc8(%rdi,%rdx,8),%rcx
+  1260e0:	00 
+  1260e1:	48 89 06             	mov    %rax,(%rsi)
+  1260e4:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1260e8:	c3                   	ret
+  1260e9:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1260f0:	ff ff 00 
+  1260f3:	48 21 ca             	and    %rcx,%rdx
+  1260f6:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  1260fd:	37 00 00 
+  126100:	4c 39 c2             	cmp    %r8,%rdx
+  126103:	0f 85 50 0a 00 00    	jne    126b59 <spin_32+0xd99>
+  126109:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126110:	00 00 00 
+  126113:	48 21 ca             	and    %rcx,%rdx
+  126116:	48 85 c9             	test   %rcx,%rcx
+  126119:	79 28                	jns    126143 <spin_32+0x383>
+  12611b:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  12611f:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126122:	41 89 c8             	mov    %ecx,%r8d
+  126125:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12612c:	41 83 f8 01          	cmp    $0x1,%r8d
+  126130:	75 03                	jne    126135 <spin_32+0x375>
+  126132:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126135:	48 c1 e0 20          	shl    $0x20,%rax
+  126139:	48 09 c8             	or     %rcx,%rax
+  12613c:	48 c1 e8 18          	shr    $0x18,%rax
+  126140:	48 89 c2             	mov    %rax,%rdx
+  126143:	8b 84 d7 90 00 00 00 	mov    0x90(%rdi,%rdx,8),%eax
+  12614a:	48 8b 8c d7 98 00 00 	mov    0x98(%rdi,%rdx,8),%rcx
+  126151:	00 
+  126152:	48 89 06             	mov    %rax,(%rsi)
+  126155:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126159:	c3                   	ret
+  12615a:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  126161:	ff ff 00 
+  126164:	48 21 ca             	and    %rcx,%rdx
+  126167:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12616e:	37 00 00 
+  126171:	4c 39 c2             	cmp    %r8,%rdx
+  126174:	0f 85 df 09 00 00    	jne    126b59 <spin_32+0xd99>
+  12617a:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126181:	00 00 00 
+  126184:	48 21 ca             	and    %rcx,%rdx
+  126187:	48 85 c9             	test   %rcx,%rcx
+  12618a:	79 28                	jns    1261b4 <spin_32+0x3f4>
+  12618c:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126190:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126193:	41 89 c8             	mov    %ecx,%r8d
+  126196:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12619d:	41 83 f8 01          	cmp    $0x1,%r8d
+  1261a1:	75 03                	jne    1261a6 <spin_32+0x3e6>
+  1261a3:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1261a6:	48 c1 e0 20          	shl    $0x20,%rax
+  1261aa:	48 09 c8             	or     %rcx,%rax
+  1261ad:	48 c1 e8 18          	shr    $0x18,%rax
+  1261b1:	48 89 c2             	mov    %rax,%rdx
+  1261b4:	8b 84 d7 90 01 00 00 	mov    0x190(%rdi,%rdx,8),%eax
+  1261bb:	48 8b 8c d7 98 01 00 	mov    0x198(%rdi,%rdx,8),%rcx
+  1261c2:	00 
+  1261c3:	48 89 06             	mov    %rax,(%rsi)
+  1261c6:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1261ca:	c3                   	ret
+  1261cb:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1261d2:	ff ff 00 
+  1261d5:	48 21 ca             	and    %rcx,%rdx
+  1261d8:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  1261df:	37 00 00 
+  1261e2:	4c 39 c2             	cmp    %r8,%rdx
+  1261e5:	0f 85 6e 09 00 00    	jne    126b59 <spin_32+0xd99>
+  1261eb:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1261f2:	00 00 00 
+  1261f5:	48 21 ca             	and    %rcx,%rdx
+  1261f8:	48 85 c9             	test   %rcx,%rcx
+  1261fb:	79 28                	jns    126225 <spin_32+0x465>
+  1261fd:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126201:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126204:	41 89 c8             	mov    %ecx,%r8d
+  126207:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12620e:	41 83 f8 01          	cmp    $0x1,%r8d
+  126212:	75 03                	jne    126217 <spin_32+0x457>
+  126214:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126217:	48 c1 e0 20          	shl    $0x20,%rax
+  12621b:	48 09 c8             	or     %rcx,%rax
+  12621e:	48 c1 e8 18          	shr    $0x18,%rax
+  126222:	48 89 c2             	mov    %rax,%rdx
+  126225:	8b 84 d7 80 01 00 00 	mov    0x180(%rdi,%rdx,8),%eax
+  12622c:	48 8b 8c d7 88 01 00 	mov    0x188(%rdi,%rdx,8),%rcx
+  126233:	00 
+  126234:	48 89 06             	mov    %rax,(%rsi)
+  126237:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  12623b:	c3                   	ret
+  12623c:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  126243:	ff ff 00 
+  126246:	48 21 ca             	and    %rcx,%rdx
+  126249:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126250:	37 00 00 
+  126253:	4c 39 c2             	cmp    %r8,%rdx
+  126256:	0f 85 fd 08 00 00    	jne    126b59 <spin_32+0xd99>
+  12625c:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126263:	00 00 00 
+  126266:	48 21 ca             	and    %rcx,%rdx
+  126269:	48 85 c9             	test   %rcx,%rcx
+  12626c:	79 28                	jns    126296 <spin_32+0x4d6>
+  12626e:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126272:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126275:	41 89 c8             	mov    %ecx,%r8d
+  126278:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12627f:	41 83 f8 01          	cmp    $0x1,%r8d
+  126283:	75 03                	jne    126288 <spin_32+0x4c8>
+  126285:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126288:	48 c1 e0 20          	shl    $0x20,%rax
+  12628c:	48 09 c8             	or     %rcx,%rax
+  12628f:	48 c1 e8 18          	shr    $0x18,%rax
+  126293:	48 89 c2             	mov    %rax,%rdx
+  126296:	8b 44 d7 20          	mov    0x20(%rdi,%rdx,8),%eax
+  12629a:	48 8b 4c d7 28       	mov    0x28(%rdi,%rdx,8),%rcx
+  12629f:	48 89 06             	mov    %rax,(%rsi)
+  1262a2:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1262a6:	c3                   	ret
+  1262a7:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1262ae:	ff ff 00 
+  1262b1:	48 21 ca             	and    %rcx,%rdx
+  1262b4:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  1262bb:	37 00 00 
+  1262be:	4c 39 c2             	cmp    %r8,%rdx
+  1262c1:	0f 85 92 08 00 00    	jne    126b59 <spin_32+0xd99>
+  1262c7:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1262ce:	00 00 00 
+  1262d1:	48 21 ca             	and    %rcx,%rdx
+  1262d4:	48 85 c9             	test   %rcx,%rcx
+  1262d7:	79 28                	jns    126301 <spin_32+0x541>
+  1262d9:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  1262dd:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  1262e0:	41 89 c8             	mov    %ecx,%r8d
+  1262e3:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  1262ea:	41 83 f8 01          	cmp    $0x1,%r8d
+  1262ee:	75 03                	jne    1262f3 <spin_32+0x533>
+  1262f0:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1262f3:	48 c1 e0 20          	shl    $0x20,%rax
+  1262f7:	48 09 c8             	or     %rcx,%rax
+  1262fa:	48 c1 e8 18          	shr    $0x18,%rax
+  1262fe:	48 89 c2             	mov    %rax,%rdx
+  126301:	8b 84 d7 f0 00 00 00 	mov    0xf0(%rdi,%rdx,8),%eax
+  126308:	48 8b 8c d7 f8 00 00 	mov    0xf8(%rdi,%rdx,8),%rcx
+  12630f:	00 
+  126310:	48 89 06             	mov    %rax,(%rsi)
+  126313:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126317:	c3                   	ret
+  126318:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  12631f:	ff ff 00 
+  126322:	48 21 ca             	and    %rcx,%rdx
+  126325:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12632c:	37 00 00 
+  12632f:	4c 39 c2             	cmp    %r8,%rdx
+  126332:	0f 85 21 08 00 00    	jne    126b59 <spin_32+0xd99>
+  126338:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  12633f:	00 00 00 
+  126342:	48 21 ca             	and    %rcx,%rdx
+  126345:	48 85 c9             	test   %rcx,%rcx
+  126348:	79 28                	jns    126372 <spin_32+0x5b2>
+  12634a:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  12634e:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126351:	41 89 c8             	mov    %ecx,%r8d
+  126354:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12635b:	41 83 f8 01          	cmp    $0x1,%r8d
+  12635f:	75 03                	jne    126364 <spin_32+0x5a4>
+  126361:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126364:	48 c1 e0 20          	shl    $0x20,%rax
+  126368:	48 09 c8             	or     %rcx,%rax
+  12636b:	48 c1 e8 18          	shr    $0x18,%rax
+  12636f:	48 89 c2             	mov    %rax,%rdx
+  126372:	8b 44 d7 30          	mov    0x30(%rdi,%rdx,8),%eax
+  126376:	48 8b 4c d7 38       	mov    0x38(%rdi,%rdx,8),%rcx
+  12637b:	48 89 06             	mov    %rax,(%rsi)
+  12637e:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126382:	c3                   	ret
+  126383:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  12638a:	ff ff 00 
+  12638d:	48 21 ca             	and    %rcx,%rdx
+  126390:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126397:	37 00 00 
+  12639a:	4c 39 c2             	cmp    %r8,%rdx
+  12639d:	0f 85 b6 07 00 00    	jne    126b59 <spin_32+0xd99>
+  1263a3:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1263aa:	00 00 00 
+  1263ad:	48 21 ca             	and    %rcx,%rdx
+  1263b0:	48 85 c9             	test   %rcx,%rcx
+  1263b3:	79 28                	jns    1263dd <spin_32+0x61d>
+  1263b5:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  1263b9:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  1263bc:	41 89 c8             	mov    %ecx,%r8d
+  1263bf:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  1263c6:	41 83 f8 01          	cmp    $0x1,%r8d
+  1263ca:	75 03                	jne    1263cf <spin_32+0x60f>
+  1263cc:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1263cf:	48 c1 e0 20          	shl    $0x20,%rax
+  1263d3:	48 09 c8             	or     %rcx,%rax
+  1263d6:	48 c1 e8 18          	shr    $0x18,%rax
+  1263da:	48 89 c2             	mov    %rax,%rdx
+  1263dd:	8b 44 d7 70          	mov    0x70(%rdi,%rdx,8),%eax
+  1263e1:	48 8b 4c d7 78       	mov    0x78(%rdi,%rdx,8),%rcx
+  1263e6:	48 89 06             	mov    %rax,(%rsi)
+  1263e9:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1263ed:	c3                   	ret
+  1263ee:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1263f5:	ff ff 00 
+  1263f8:	48 21 ca             	and    %rcx,%rdx
+  1263fb:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126402:	37 00 00 
+  126405:	4c 39 c2             	cmp    %r8,%rdx
+  126408:	0f 85 4b 07 00 00    	jne    126b59 <spin_32+0xd99>
+  12640e:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126415:	00 00 00 
+  126418:	48 21 ca             	and    %rcx,%rdx
+  12641b:	48 85 c9             	test   %rcx,%rcx
+  12641e:	79 28                	jns    126448 <spin_32+0x688>
+  126420:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126424:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126427:	41 89 c8             	mov    %ecx,%r8d
+  12642a:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  126431:	41 83 f8 01          	cmp    $0x1,%r8d
+  126435:	75 03                	jne    12643a <spin_32+0x67a>
+  126437:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  12643a:	48 c1 e0 20          	shl    $0x20,%rax
+  12643e:	48 09 c8             	or     %rcx,%rax
+  126441:	48 c1 e8 18          	shr    $0x18,%rax
+  126445:	48 89 c2             	mov    %rax,%rdx
+  126448:	8b 44 d7 10          	mov    0x10(%rdi,%rdx,8),%eax
+  12644c:	48 8b 4c d7 18       	mov    0x18(%rdi,%rdx,8),%rcx
+  126451:	48 89 06             	mov    %rax,(%rsi)
+  126454:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126458:	c3                   	ret
+  126459:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  126460:	ff ff 00 
+  126463:	48 21 ca             	and    %rcx,%rdx
+  126466:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12646d:	37 00 00 
+  126470:	4c 39 c2             	cmp    %r8,%rdx
+  126473:	0f 85 e0 06 00 00    	jne    126b59 <spin_32+0xd99>
+  126479:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126480:	00 00 00 
+  126483:	48 21 ca             	and    %rcx,%rdx
+  126486:	48 85 c9             	test   %rcx,%rcx
+  126489:	79 28                	jns    1264b3 <spin_32+0x6f3>
+  12648b:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  12648f:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126492:	41 89 c8             	mov    %ecx,%r8d
+  126495:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12649c:	41 83 f8 01          	cmp    $0x1,%r8d
+  1264a0:	75 03                	jne    1264a5 <spin_32+0x6e5>
+  1264a2:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1264a5:	48 c1 e0 20          	shl    $0x20,%rax
+  1264a9:	48 09 c8             	or     %rcx,%rax
+  1264ac:	48 c1 e8 18          	shr    $0x18,%rax
+  1264b0:	48 89 c2             	mov    %rax,%rdx
+  1264b3:	8b 84 d7 10 01 00 00 	mov    0x110(%rdi,%rdx,8),%eax
+  1264ba:	48 8b 8c d7 18 01 00 	mov    0x118(%rdi,%rdx,8),%rcx
+  1264c1:	00 
+  1264c2:	48 89 06             	mov    %rax,(%rsi)
+  1264c5:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1264c9:	c3                   	ret
+  1264ca:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1264d1:	ff ff 00 
+  1264d4:	48 21 ca             	and    %rcx,%rdx
+  1264d7:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  1264de:	37 00 00 
+  1264e1:	4c 39 c2             	cmp    %r8,%rdx
+  1264e4:	0f 85 6f 06 00 00    	jne    126b59 <spin_32+0xd99>
+  1264ea:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1264f1:	00 00 00 
+  1264f4:	48 21 ca             	and    %rcx,%rdx
+  1264f7:	48 85 c9             	test   %rcx,%rcx
+  1264fa:	79 28                	jns    126524 <spin_32+0x764>
+  1264fc:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126500:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126503:	41 89 c8             	mov    %ecx,%r8d
+  126506:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12650d:	41 83 f8 01          	cmp    $0x1,%r8d
+  126511:	75 03                	jne    126516 <spin_32+0x756>
+  126513:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126516:	48 c1 e0 20          	shl    $0x20,%rax
+  12651a:	48 09 c8             	or     %rcx,%rax
+  12651d:	48 c1 e8 18          	shr    $0x18,%rax
+  126521:	48 89 c2             	mov    %rax,%rdx
+  126524:	8b 84 d7 40 01 00 00 	mov    0x140(%rdi,%rdx,8),%eax
+  12652b:	48 8b 8c d7 48 01 00 	mov    0x148(%rdi,%rdx,8),%rcx
+  126532:	00 
+  126533:	48 89 06             	mov    %rax,(%rsi)
+  126536:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  12653a:	c3                   	ret
+  12653b:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  126542:	ff ff 00 
+  126545:	48 21 ca             	and    %rcx,%rdx
+  126548:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12654f:	37 00 00 
+  126552:	4c 39 c2             	cmp    %r8,%rdx
+  126555:	0f 85 fe 05 00 00    	jne    126b59 <spin_32+0xd99>
+  12655b:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126562:	00 00 00 
+  126565:	48 21 ca             	and    %rcx,%rdx
+  126568:	48 85 c9             	test   %rcx,%rcx
+  12656b:	79 28                	jns    126595 <spin_32+0x7d5>
+  12656d:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126571:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126574:	41 89 c8             	mov    %ecx,%r8d
+  126577:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12657e:	41 83 f8 01          	cmp    $0x1,%r8d
+  126582:	75 03                	jne    126587 <spin_32+0x7c7>
+  126584:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126587:	48 c1 e0 20          	shl    $0x20,%rax
+  12658b:	48 09 c8             	or     %rcx,%rax
+  12658e:	48 c1 e8 18          	shr    $0x18,%rax
+  126592:	48 89 c2             	mov    %rax,%rdx
+  126595:	8b 44 d7 50          	mov    0x50(%rdi,%rdx,8),%eax
+  126599:	48 8b 4c d7 58       	mov    0x58(%rdi,%rdx,8),%rcx
+  12659e:	48 89 06             	mov    %rax,(%rsi)
+  1265a1:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1265a5:	c3                   	ret
+  1265a6:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1265ad:	ff ff 00 
+  1265b0:	48 21 ca             	and    %rcx,%rdx
+  1265b3:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  1265ba:	37 00 00 
+  1265bd:	4c 39 c2             	cmp    %r8,%rdx
+  1265c0:	0f 85 93 05 00 00    	jne    126b59 <spin_32+0xd99>
+  1265c6:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1265cd:	00 00 00 
+  1265d0:	48 21 ca             	and    %rcx,%rdx
+  1265d3:	48 85 c9             	test   %rcx,%rcx
+  1265d6:	79 28                	jns    126600 <spin_32+0x840>
+  1265d8:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  1265dc:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  1265df:	41 89 c8             	mov    %ecx,%r8d
+  1265e2:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  1265e9:	41 83 f8 01          	cmp    $0x1,%r8d
+  1265ed:	75 03                	jne    1265f2 <spin_32+0x832>
+  1265ef:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1265f2:	48 c1 e0 20          	shl    $0x20,%rax
+  1265f6:	48 09 c8             	or     %rcx,%rax
+  1265f9:	48 c1 e8 18          	shr    $0x18,%rax
+  1265fd:	48 89 c2             	mov    %rax,%rdx
+  126600:	8b 84 d7 50 01 00 00 	mov    0x150(%rdi,%rdx,8),%eax
+  126607:	48 8b 8c d7 58 01 00 	mov    0x158(%rdi,%rdx,8),%rcx
+  12660e:	00 
+  12660f:	48 89 06             	mov    %rax,(%rsi)
+  126612:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126616:	c3                   	ret
+  126617:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  12661e:	ff ff 00 
+  126621:	48 21 ca             	and    %rcx,%rdx
+  126624:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12662b:	37 00 00 
+  12662e:	4c 39 c2             	cmp    %r8,%rdx
+  126631:	0f 85 22 05 00 00    	jne    126b59 <spin_32+0xd99>
+  126637:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  12663e:	00 00 00 
+  126641:	48 21 ca             	and    %rcx,%rdx
+  126644:	48 85 c9             	test   %rcx,%rcx
+  126647:	79 28                	jns    126671 <spin_32+0x8b1>
+  126649:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  12664d:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126650:	41 89 c8             	mov    %ecx,%r8d
+  126653:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12665a:	41 83 f8 01          	cmp    $0x1,%r8d
+  12665e:	75 03                	jne    126663 <spin_32+0x8a3>
+  126660:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126663:	48 c1 e0 20          	shl    $0x20,%rax
+  126667:	48 09 c8             	or     %rcx,%rax
+  12666a:	48 c1 e8 18          	shr    $0x18,%rax
+  12666e:	48 89 c2             	mov    %rax,%rdx
+  126671:	8b 84 d7 d0 00 00 00 	mov    0xd0(%rdi,%rdx,8),%eax
+  126678:	48 8b 8c d7 d8 00 00 	mov    0xd8(%rdi,%rdx,8),%rcx
+  12667f:	00 
+  126680:	48 89 06             	mov    %rax,(%rsi)
+  126683:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126687:	c3                   	ret
+  126688:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  12668f:	ff ff 00 
+  126692:	48 21 ca             	and    %rcx,%rdx
+  126695:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12669c:	37 00 00 
+  12669f:	4c 39 c2             	cmp    %r8,%rdx
+  1266a2:	0f 85 b1 04 00 00    	jne    126b59 <spin_32+0xd99>
+  1266a8:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1266af:	00 00 00 
+  1266b2:	48 21 ca             	and    %rcx,%rdx
+  1266b5:	48 85 c9             	test   %rcx,%rcx
+  1266b8:	79 28                	jns    1266e2 <spin_32+0x922>
+  1266ba:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  1266be:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  1266c1:	41 89 c8             	mov    %ecx,%r8d
+  1266c4:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  1266cb:	41 83 f8 01          	cmp    $0x1,%r8d
+  1266cf:	75 03                	jne    1266d4 <spin_32+0x914>
+  1266d1:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1266d4:	48 c1 e0 20          	shl    $0x20,%rax
+  1266d8:	48 09 c8             	or     %rcx,%rax
+  1266db:	48 c1 e8 18          	shr    $0x18,%rax
+  1266df:	48 89 c2             	mov    %rax,%rdx
+  1266e2:	8b 44 d7 60          	mov    0x60(%rdi,%rdx,8),%eax
+  1266e6:	48 8b 4c d7 68       	mov    0x68(%rdi,%rdx,8),%rcx
+  1266eb:	48 89 06             	mov    %rax,(%rsi)
+  1266ee:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1266f2:	c3                   	ret
+  1266f3:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1266fa:	ff ff 00 
+  1266fd:	48 21 ca             	and    %rcx,%rdx
+  126700:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126707:	37 00 00 
+  12670a:	4c 39 c2             	cmp    %r8,%rdx
+  12670d:	0f 85 46 04 00 00    	jne    126b59 <spin_32+0xd99>
+  126713:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  12671a:	00 00 00 
+  12671d:	48 21 ca             	and    %rcx,%rdx
+  126720:	48 85 c9             	test   %rcx,%rcx
+  126723:	79 28                	jns    12674d <spin_32+0x98d>
+  126725:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126729:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  12672c:	41 89 c8             	mov    %ecx,%r8d
+  12672f:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  126736:	41 83 f8 01          	cmp    $0x1,%r8d
+  12673a:	75 03                	jne    12673f <spin_32+0x97f>
+  12673c:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  12673f:	48 c1 e0 20          	shl    $0x20,%rax
+  126743:	48 09 c8             	or     %rcx,%rax
+  126746:	48 c1 e8 18          	shr    $0x18,%rax
+  12674a:	48 89 c2             	mov    %rax,%rdx
+  12674d:	8b 84 d7 20 01 00 00 	mov    0x120(%rdi,%rdx,8),%eax
+  126754:	48 8b 8c d7 28 01 00 	mov    0x128(%rdi,%rdx,8),%rcx
+  12675b:	00 
+  12675c:	48 89 06             	mov    %rax,(%rsi)
+  12675f:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126763:	c3                   	ret
+  126764:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  12676b:	ff ff 00 
+  12676e:	48 21 ca             	and    %rcx,%rdx
+  126771:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126778:	37 00 00 
+  12677b:	4c 39 c2             	cmp    %r8,%rdx
+  12677e:	0f 85 d5 03 00 00    	jne    126b59 <spin_32+0xd99>
+  126784:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  12678b:	00 00 00 
+  12678e:	48 21 ca             	and    %rcx,%rdx
+  126791:	48 85 c9             	test   %rcx,%rcx
+  126794:	79 28                	jns    1267be <spin_32+0x9fe>
+  126796:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  12679a:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  12679d:	41 89 c8             	mov    %ecx,%r8d
+  1267a0:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  1267a7:	41 83 f8 01          	cmp    $0x1,%r8d
+  1267ab:	75 03                	jne    1267b0 <spin_32+0x9f0>
+  1267ad:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1267b0:	48 c1 e0 20          	shl    $0x20,%rax
+  1267b4:	48 09 c8             	or     %rcx,%rax
+  1267b7:	48 c1 e8 18          	shr    $0x18,%rax
+  1267bb:	48 89 c2             	mov    %rax,%rdx
+  1267be:	8b 84 d7 a0 00 00 00 	mov    0xa0(%rdi,%rdx,8),%eax
+  1267c5:	48 8b 8c d7 a8 00 00 	mov    0xa8(%rdi,%rdx,8),%rcx
+  1267cc:	00 
+  1267cd:	48 89 06             	mov    %rax,(%rsi)
+  1267d0:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1267d4:	c3                   	ret
+  1267d5:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1267dc:	ff ff 00 
+  1267df:	48 21 ca             	and    %rcx,%rdx
+  1267e2:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  1267e9:	37 00 00 
+  1267ec:	4c 39 c2             	cmp    %r8,%rdx
+  1267ef:	0f 85 64 03 00 00    	jne    126b59 <spin_32+0xd99>
+  1267f5:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1267fc:	00 00 00 
+  1267ff:	48 21 ca             	and    %rcx,%rdx
+  126802:	48 85 c9             	test   %rcx,%rcx
+  126805:	79 28                	jns    12682f <spin_32+0xa6f>
+  126807:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  12680b:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  12680e:	41 89 c8             	mov    %ecx,%r8d
+  126811:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  126818:	41 83 f8 01          	cmp    $0x1,%r8d
+  12681c:	75 03                	jne    126821 <spin_32+0xa61>
+  12681e:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126821:	48 c1 e0 20          	shl    $0x20,%rax
+  126825:	48 09 c8             	or     %rcx,%rax
+  126828:	48 c1 e8 18          	shr    $0x18,%rax
+  12682c:	48 89 c2             	mov    %rax,%rdx
+  12682f:	8b 84 d7 80 00 00 00 	mov    0x80(%rdi,%rdx,8),%eax
+  126836:	48 8b 8c d7 88 00 00 	mov    0x88(%rdi,%rdx,8),%rcx
+  12683d:	00 
+  12683e:	48 89 06             	mov    %rax,(%rsi)
+  126841:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126845:	c3                   	ret
+  126846:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  12684d:	ff ff 00 
+  126850:	48 21 ca             	and    %rcx,%rdx
+  126853:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12685a:	37 00 00 
+  12685d:	4c 39 c2             	cmp    %r8,%rdx
+  126860:	0f 85 f3 02 00 00    	jne    126b59 <spin_32+0xd99>
+  126866:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  12686d:	00 00 00 
+  126870:	48 21 ca             	and    %rcx,%rdx
+  126873:	48 85 c9             	test   %rcx,%rcx
+  126876:	79 28                	jns    1268a0 <spin_32+0xae0>
+  126878:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  12687c:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  12687f:	41 89 c8             	mov    %ecx,%r8d
+  126882:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  126889:	41 83 f8 01          	cmp    $0x1,%r8d
+  12688d:	75 03                	jne    126892 <spin_32+0xad2>
+  12688f:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126892:	48 c1 e0 20          	shl    $0x20,%rax
+  126896:	48 09 c8             	or     %rcx,%rax
+  126899:	48 c1 e8 18          	shr    $0x18,%rax
+  12689d:	48 89 c2             	mov    %rax,%rdx
+  1268a0:	8b 84 d7 e0 01 00 00 	mov    0x1e0(%rdi,%rdx,8),%eax
+  1268a7:	48 8b 8c d7 e8 01 00 	mov    0x1e8(%rdi,%rdx,8),%rcx
+  1268ae:	00 
+  1268af:	48 89 06             	mov    %rax,(%rsi)
+  1268b2:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  1268b6:	c3                   	ret
+  1268b7:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1268be:	ff ff 00 
+  1268c1:	48 21 ca             	and    %rcx,%rdx
+  1268c4:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  1268cb:	37 00 00 
+  1268ce:	4c 39 c2             	cmp    %r8,%rdx
+  1268d1:	0f 85 82 02 00 00    	jne    126b59 <spin_32+0xd99>
+  1268d7:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1268de:	00 00 00 
+  1268e1:	48 21 ca             	and    %rcx,%rdx
+  1268e4:	48 85 c9             	test   %rcx,%rcx
+  1268e7:	79 28                	jns    126911 <spin_32+0xb51>
+  1268e9:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  1268ed:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  1268f0:	41 89 c8             	mov    %ecx,%r8d
+  1268f3:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  1268fa:	41 83 f8 01          	cmp    $0x1,%r8d
+  1268fe:	75 03                	jne    126903 <spin_32+0xb43>
+  126900:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126903:	48 c1 e0 20          	shl    $0x20,%rax
+  126907:	48 09 c8             	or     %rcx,%rax
+  12690a:	48 c1 e8 18          	shr    $0x18,%rax
+  12690e:	48 89 c2             	mov    %rax,%rdx
+  126911:	8b 84 d7 60 01 00 00 	mov    0x160(%rdi,%rdx,8),%eax
+  126918:	48 8b 8c d7 68 01 00 	mov    0x168(%rdi,%rdx,8),%rcx
+  12691f:	00 
+  126920:	48 89 06             	mov    %rax,(%rsi)
+  126923:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126927:	c3                   	ret
+  126928:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  12692f:	ff ff 00 
+  126932:	48 21 ca             	and    %rcx,%rdx
+  126935:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  12693c:	37 00 00 
+  12693f:	4c 39 c2             	cmp    %r8,%rdx
+  126942:	0f 85 11 02 00 00    	jne    126b59 <spin_32+0xd99>
+  126948:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  12694f:	00 00 00 
+  126952:	48 21 ca             	and    %rcx,%rdx
+  126955:	48 85 c9             	test   %rcx,%rcx
+  126958:	79 28                	jns    126982 <spin_32+0xbc2>
+  12695a:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  12695e:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126961:	41 89 c8             	mov    %ecx,%r8d
+  126964:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  12696b:	41 83 f8 01          	cmp    $0x1,%r8d
+  12696f:	75 03                	jne    126974 <spin_32+0xbb4>
+  126971:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126974:	48 c1 e0 20          	shl    $0x20,%rax
+  126978:	48 09 c8             	or     %rcx,%rax
+  12697b:	48 c1 e8 18          	shr    $0x18,%rax
+  12697f:	48 89 c2             	mov    %rax,%rdx
+  126982:	8b 84 d7 30 01 00 00 	mov    0x130(%rdi,%rdx,8),%eax
+  126989:	48 8b 8c d7 38 01 00 	mov    0x138(%rdi,%rdx,8),%rcx
+  126990:	00 
+  126991:	48 89 06             	mov    %rax,(%rsi)
+  126994:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126998:	c3                   	ret
+  126999:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  1269a0:	ff ff 00 
+  1269a3:	48 21 ca             	and    %rcx,%rdx
+  1269a6:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  1269ad:	37 00 00 
+  1269b0:	4c 39 c2             	cmp    %r8,%rdx
+  1269b3:	0f 85 a0 01 00 00    	jne    126b59 <spin_32+0xd99>
+  1269b9:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  1269c0:	00 00 00 
+  1269c3:	48 21 ca             	and    %rcx,%rdx
+  1269c6:	48 85 c9             	test   %rcx,%rcx
+  1269c9:	79 28                	jns    1269f3 <spin_32+0xc33>
+  1269cb:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  1269cf:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  1269d2:	41 89 c8             	mov    %ecx,%r8d
+  1269d5:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  1269dc:	41 83 f8 01          	cmp    $0x1,%r8d
+  1269e0:	75 03                	jne    1269e5 <spin_32+0xc25>
+  1269e2:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  1269e5:	48 c1 e0 20          	shl    $0x20,%rax
+  1269e9:	48 09 c8             	or     %rcx,%rax
+  1269ec:	48 c1 e8 18          	shr    $0x18,%rax
+  1269f0:	48 89 c2             	mov    %rax,%rdx
+  1269f3:	8b 84 d7 70 01 00 00 	mov    0x170(%rdi,%rdx,8),%eax
+  1269fa:	48 8b 8c d7 78 01 00 	mov    0x178(%rdi,%rdx,8),%rcx
+  126a01:	00 
+  126a02:	48 89 06             	mov    %rax,(%rsi)
+  126a05:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126a09:	c3                   	ret
+  126a0a:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  126a11:	ff ff 00 
+  126a14:	48 21 ca             	and    %rcx,%rdx
+  126a17:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126a1e:	37 00 00 
+  126a21:	4c 39 c2             	cmp    %r8,%rdx
+  126a24:	0f 85 2f 01 00 00    	jne    126b59 <spin_32+0xd99>
+  126a2a:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126a31:	00 00 00 
+  126a34:	48 21 ca             	and    %rcx,%rdx
+  126a37:	48 85 c9             	test   %rcx,%rcx
+  126a3a:	79 28                	jns    126a64 <spin_32+0xca4>
+  126a3c:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126a40:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126a43:	41 89 c8             	mov    %ecx,%r8d
+  126a46:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  126a4d:	41 83 f8 01          	cmp    $0x1,%r8d
+  126a51:	75 03                	jne    126a56 <spin_32+0xc96>
+  126a53:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126a56:	48 c1 e0 20          	shl    $0x20,%rax
+  126a5a:	48 09 c8             	or     %rcx,%rax
+  126a5d:	48 c1 e8 18          	shr    $0x18,%rax
+  126a61:	48 89 c2             	mov    %rax,%rdx
+  126a64:	8b 84 d7 c0 01 00 00 	mov    0x1c0(%rdi,%rdx,8),%eax
+  126a6b:	48 8b 8c d7 c8 01 00 	mov    0x1c8(%rdi,%rdx,8),%rcx
+  126a72:	00 
+  126a73:	48 89 06             	mov    %rax,(%rsi)
+  126a76:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126a7a:	c3                   	ret
+  126a7b:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  126a82:	ff ff 00 
+  126a85:	48 21 ca             	and    %rcx,%rdx
+  126a88:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126a8f:	37 00 00 
+  126a92:	4c 39 c2             	cmp    %r8,%rdx
+  126a95:	0f 85 be 00 00 00    	jne    126b59 <spin_32+0xd99>
+  126a9b:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126aa2:	00 00 00 
+  126aa5:	48 21 ca             	and    %rcx,%rdx
+  126aa8:	48 85 c9             	test   %rcx,%rcx
+  126aab:	79 28                	jns    126ad5 <spin_32+0xd15>
+  126aad:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126ab1:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126ab4:	41 89 c8             	mov    %ecx,%r8d
+  126ab7:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  126abe:	41 83 f8 01          	cmp    $0x1,%r8d
+  126ac2:	75 03                	jne    126ac7 <spin_32+0xd07>
+  126ac4:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126ac7:	48 c1 e0 20          	shl    $0x20,%rax
+  126acb:	48 09 c8             	or     %rcx,%rax
+  126ace:	48 c1 e8 18          	shr    $0x18,%rax
+  126ad2:	48 89 c2             	mov    %rax,%rdx
+  126ad5:	8b 84 d7 d0 01 00 00 	mov    0x1d0(%rdi,%rdx,8),%eax
+  126adc:	48 8b 8c d7 d8 01 00 	mov    0x1d8(%rdi,%rdx,8),%rcx
+  126ae3:	00 
+  126ae4:	48 89 06             	mov    %rax,(%rsi)
+  126ae7:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126aeb:	c3                   	ret
+  126aec:	48 ba 00 00 00 00 00 	movabs $0xffff0000000000,%rdx
+  126af3:	ff ff 00 
+  126af6:	48 21 ca             	and    %rcx,%rdx
+  126af9:	49 b8 00 00 00 00 00 	movabs $0x370000000000,%r8
+  126b00:	37 00 00 
+  126b03:	4c 39 c2             	cmp    %r8,%rdx
+  126b06:	75 51                	jne    126b59 <spin_32+0xd99>
+  126b08:	48 ba ff ff ff ff ff 	movabs $0xffffffffff,%rdx
+  126b0f:	00 00 00 
+  126b12:	48 21 ca             	and    %rcx,%rdx
+  126b15:	48 85 c9             	test   %rcx,%rcx
+  126b18:	79 28                	jns    126b42 <spin_32+0xd82>
+  126b1a:	8b 44 d7 04          	mov    0x4(%rdi,%rdx,8),%eax
+  126b1e:	8b 0c d7             	mov    (%rdi,%rdx,8),%ecx
+  126b21:	41 89 c8             	mov    %ecx,%r8d
+  126b24:	41 81 e0 ff ff ff 00 	and    $0xffffff,%r8d
+  126b2b:	41 83 f8 01          	cmp    $0x1,%r8d
+  126b2f:	75 03                	jne    126b34 <spin_32+0xd74>
+  126b31:	8b 14 d7             	mov    (%rdi,%rdx,8),%edx
+  126b34:	48 c1 e0 20          	shl    $0x20,%rax
+  126b38:	48 09 c8             	or     %rcx,%rax
+  126b3b:	48 c1 e8 18          	shr    $0x18,%rax
+  126b3f:	48 89 c2             	mov    %rax,%rdx
+  126b42:	8b 84 d7 a0 01 00 00 	mov    0x1a0(%rdi,%rdx,8),%eax
+  126b49:	48 8b 8c d7 a8 01 00 	mov    0x1a8(%rdi,%rdx,8),%rcx
+  126b50:	00 
+  126b51:	48 89 06             	mov    %rax,(%rsi)
+  126b54:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126b58:	c3                   	ret
+  126b59:	31 c9                	xor    %ecx,%ecx
+  126b5b:	48 89 06             	mov    %rax,(%rsi)
+  126b5e:	48 89 4e 08          	mov    %rcx,0x8(%rsi)
+  126b62:	c3                   	ret
+
+Disassembly of section .fini:

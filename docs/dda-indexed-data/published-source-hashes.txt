@@ -1,0 +1,10 @@
+029cf181119c20349a9d2f11d3bceb7865c1405f71331ca691f02d5802bdaa73  docs/dda-indexed-data/LAWS.bend
+b905feca198b55bd73f5d99a9c2e0ba346268ba47f9d23dd5f818beb03983914  docs/dda-indexed-data/PROOF.bend
+aa7af8b8cdf7fd8f3c8fe267af2db818cf49c310a025bcf5ea1394567c791ee7  docs/dda-indexed-data/baseline-dda.bend
+cd1554ba205f9d49875278a50426ce7e9aa93652834c08b654438dc5cf805390  docs/dda-indexed-data/candidate-dda.bend
+052469ff1655fa70713b954466467f2f09dba73918fa5b145a5b26f57ebe76c3  docs/dda-indexed-data/page-count.bend
+7d0754bb84a8a97391ff1af938b5003708abadfa0513d58b984a60b487fa7808  docs/dda-indexed-data/topology-property.bend
+ab6d73edc846d0af6ea8fecbdb81f6df0ba4baee267b00018b96c0a4cdeda874  docs/dda-indexed-data/tree-size.bend
+4dc3bd03793cb0c87b5dd068b6bd9a2b9190cc7c28117dd3e34d9ca147a6cbca  docs/dda-indexed-data/world-property.bend
+d220e5bbfef01df9de427eb1d070f4058172bc82ab13d82c049835228c2440d6  .audit/dda-indexed/published-topology
+befab87b7b5cabe817dee8e19949b3f04742e86263dd3ff07670ec8a68deff21  .audit/dda-indexed/published-world

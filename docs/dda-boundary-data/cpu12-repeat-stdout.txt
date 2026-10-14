@@ -1,0 +1,31 @@
+renderer=dda init_ms=257
+frames=64 elapsed_ms=6802
+
+renderer=dda init_ms=255
+frames=64 elapsed_ms=6579
+
+renderer=dda init_ms=255
+frames=64 elapsed_ms=6599
+
+renderer=dda init_ms=255
+frames=64 elapsed_ms=6804
+
+renderer=dda init_ms=260
+frames=64 elapsed_ms=6789
+
+renderer=dda init_ms=257
+frames=64 elapsed_ms=6787
+
+renderer=dda init_ms=257
+frames=64 elapsed_ms=6545
+
+renderer=dda init_ms=256
+frames=64 elapsed_ms=6821
+
+renderer=dda init_ms=258
+frames=64 elapsed_ms=6759
+
+renderer=dda init_ms=258
+frames=64 elapsed_ms=6568
+
+Saved .audit/dda-boundary/cpu12-repeat.tsv

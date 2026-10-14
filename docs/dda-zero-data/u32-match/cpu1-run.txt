@@ -1,0 +1,31 @@
+renderer=dda init_ms=265
+frames=4 elapsed_ms=2955
+
+renderer=dda init_ms=302
+frames=4 elapsed_ms=2949
+
+renderer=dda init_ms=272
+frames=4 elapsed_ms=2908
+
+renderer=dda init_ms=266
+frames=4 elapsed_ms=2978
+
+renderer=dda init_ms=266
+frames=4 elapsed_ms=2943
+
+renderer=dda init_ms=278
+frames=4 elapsed_ms=2924
+
+renderer=dda init_ms=266
+frames=4 elapsed_ms=2930
+
+renderer=dda init_ms=264
+frames=4 elapsed_ms=2925
+
+renderer=dda init_ms=290
+frames=4 elapsed_ms=2883
+
+renderer=dda init_ms=259
+frames=4 elapsed_ms=2883
+
+Saved .audit/dda-zero/cpu1.tsv

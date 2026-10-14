@@ -1,0 +1,14 @@
+Rejection and baseline retention are supported. Direct byte/hash comparisons, raw timing logs, exact scan records, and image bytes agree with the report. The new trail rows 32–33 resolve the profile provenance and failed cell-proof gap.
+
+Two low-severity fixes remain:
+
+- [Report line 56](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-zero.md:56) generalizes frame counts across all results. Scope those counts to the last prototype. Archived thunk CPU12 runs measured **4** frames, predicate-only CPU12 **32**, and initial literal GPU batches **2**.
+- [Trail row 15](/home/aivv/Документы/projects/bend-voxel-main/.audit/dda-zero/decisions.tsv:15) points to the removed `bool-guard/dda.bend`. Append a correction linking the preserved computed-match rejection and parent activity position 357. The current wildcard source contains the later numeric fallback, so redirecting the source pointer there would misidentify the attempted guard.
+
+Prove It Works guided checks against the actual artifacts. No commands compiled, proved, benchmarked, rendered, or replayed anything.
+
+**Attention.**
+
+reviewed by gpt-6.1-sol, xhigh, independent same-model review
+
+The two documentation/trail fixes remain. Existing limitations are stated accurately: desktop timing variation, no GPU instruction-cost attribution, and Boolean crossing-expression proof rather than full trace equivalence.

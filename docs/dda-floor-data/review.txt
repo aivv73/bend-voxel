@@ -1,0 +1,23 @@
+**ISSUES. One documentation correction. The implementation can be retained.**
+
+The engine diff is exactly the authorized deletion at [dda.bend:290](/home/aivv/Документы/projects/bend-voxel-main/dda.bend:290). Root, audit, and curated candidate sources match. The clamp, integer minimum, and exact plane correction remain intact.
+
+The deletion is mathematically sound for nonnegative values within the checked conversion range. Truncation toward zero equals floor there. The [native conversion](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor-data/conversion-runtime.txt:3) checks that range before casting. Baseline release assembly calls `floorf`; candidate assembly retains integer truncation without that call. Existing proofs remain unchanged and pass. They do not prove the new arithmetic equivalence, which the report correctly distinguishes from finite execution evidence.
+
+The verifier’s coverage claims match its loops. Boundary samples check all limits `0..512` plus 14 edge limits. The exhaustive interval includes both endpoints of `[256,512]` and every sign mirror, with seven selected limits. The reported comparison counts are correct and include repetitions. Native and JS outputs report zero mismatches. See [property.bend:127](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor-data/property.bend:127) and [native results:9](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor-data/property-native.txt:9).
+
+Verification evidence is adequate for this change. Seven scans cover 1,835,008 rays and compare presence, exact numerical F32 depth, cell, face direction, and material. I checked the archived image bytes and hash manifests. All seven baseline/unit/CPU12/GPU6 image groups match. Additional opening images and recorded live-window comparisons agree. No traditional tests or mocks were introduced.
+
+The measurement driver validates successful process exit and requested frame completion. Its timed interval includes rendering, presentation, and disposal after four warmups, excluding scene construction. Every TSV sample reconstructs exactly from its process output and alternating AB/BA order.
+
+CPU risk deserves continued emphasis. CPU12 is slower in all five initial pairs and three repeat pairs. Median paired increases are **3.53125 ms** and **3.375 ms**, even though the repeat’s separate candidate median is lower. CPU6 is slower in four of five pairs. Overlapping ranges do not erase this unfavorable paired pattern. The report already acknowledges the risk at [dda-floor.md:39](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor.md:39). Shared desktop load prevents attributing these observations to a measured hardware cause. I would retain the simplification with this explicit risk; the evidence does not support CPU neutrality or improvement.
+
+The GPU claim is appropriately narrow. Fork seven improves in all ten paired processes across two batches. The longer repeat has non-overlapping ranges. Fork six remains inconclusive. Separate stage profiles identify rendering as the dominant stage, but do not establish instruction-level causation. Retention therefore has supporting timing evidence for the measured configuration and desktop session, rather than a general GPU performance guarantee.
+
+Source and build provenance checks pass. All recorded source, build, final, and image hashes match actual artifacts. The installed binary and GPU companion match the frozen candidate. Parent activity item 217 records the all-source comparison before installation. The decision trail follows authorization, freezing, verification, measurements, and adoption. Reproduction commands use the existing drivers correctly. The transcript confirms the absence of Git metadata and local delivery.
+
+Prove It Works led me to inspect actual bytes and hashes. Explain the Number led me to reconstruct paired samples and separate timing observations from unmeasured causes.
+
+Attention:
+
+- **Correct the chronology sentence at [dda-floor.md:21](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor.md:21).** It says profiling finished before release timings began. Parent activity item 212 records GPU stage profiling at approximately 15:10 UTC, after the GPU repeat ended at 15:08:45 UTC, recorded at [load-gpu7-repeat.txt:17](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor-data/load-gpu7-repeat.txt:17). Replace that sentence with a statement that release measurements did not overlap builds, proof checks, property sweeps, profiling, or geometry/image verification. This is a documentation error, not evidence of contaminated timings.

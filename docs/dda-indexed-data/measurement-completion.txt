@@ -1,0 +1,8 @@
+aa-control: 10 completed processes, 32 measured frames each
+cpu12: 10 completed processes, 32 measured frames each
+cpu6: 10 completed processes, 16 measured frames each
+cpu1: 10 completed processes, 8 measured frames each
+gpu6: 10 completed processes, 8 measured frames each
+gpu7: 10 completed processes, 8 measured frames each
+opening-cpu12-64: 10 completed processes, 64 measured frames each
+carved-cpu12: 10 completed processes, 64 measured frames each

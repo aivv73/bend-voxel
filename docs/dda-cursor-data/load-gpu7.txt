@@ -1,0 +1,12 @@
+ 19:23:20 up  2:25,  1 user,  load average: 8.62, 7.60, 7.67
+COMMAND         %CPU
+dota2            373
+ps               100
+vesktop         14.5
+niri            14.0
+vesktop         10.8
+Telegram        10.2
+helium           7.2
+helium           7.0
+t3code           6.6
+NVIDIA GeForce GTX 1660, 37 %, 4297 MiB

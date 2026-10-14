@@ -1,0 +1,14 @@
+Conversion property: to_u32(floor(events)) equals to_u32(events)
+Estimate property: both expressions retain F32.clamp(events,0,F32(limit)) and U32.min(limit,...)
+Every boundary/exponent sample checks all 513 limits 0..512 and the 14 Limits.edges values
+Integer centers 0..512 and power centers 2^0..2^32 use 9 consecutive F32 bit patterns at center +/-4; zero uses bits 0..8
+Every bit pattern also checks its sign-bit mirror; windows may extend outside [0,512]
+All 256 exponent fields check mantissas k*2^19 for k=0..15 and 2^23-1
+Extra windows cover F32(limit) for all edge limits and the subnormal/normal boundary, infinity, quiet-NaN boundary, and largest NaN payload
+Counts include repeated patterns across families; this does not exhaust all F32 bit patterns or all U32 limits
+boundary/exponent samples=18856 raw_checks=18856 estimate_checks=9937112 raw_mismatches=0 estimate_mismatches=0
+Exhaustive binade: every F32 bit pattern from 0x43800000 through 0x44000000 inclusive, values [256,512], and its sign mirror
+Each exhaustive binade sample checks limits [0,1,255,256,257,511,512]; other limits are covered by the boundary/exponent sweep
+exhaustive binade samples=16777218 raw_checks=16777218 estimate_checks=117440526 raw_mismatches=0 estimate_mismatches=0
+PASS: zero mismatches in the declared finite sweep; this is not a universal proof
+bend 2.0.35 is available: run bend update

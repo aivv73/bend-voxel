@@ -1,0 +1,2 @@
+renderer=dda init_ms=296
+render_ms=516 present_ms=123 dispose_ms=3

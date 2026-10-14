@@ -1,0 +1,161 @@
+INLINE Term spin_73(Env e, THR Term* o, Term r0, u32 r1, Term r2, u32 r3, u32 r4, u32 r5, u32 r6, u32 r7, u32 r8, u32 r9, u32 r10, u32 r11, u32 r12, u32 r13, Term r14) {
+  u32 wpoll = 0;
+  u32 _v_35 = 0;
+  u32 _v_36 = 0;
+  u32 _v_37 = 0;
+  u32 _v_38 = 0;
+  u32 _v_39 = 0;
+  u32 _v_40 = 0;
+  u32 _v_41 = 0;
+  Term _fuel_0 = r0;
+  u32 _result_0 = r1;
+  Term _result_1 = r2;
+  u32 _result_2 = r3;
+  u32 _result_3 = r4;
+  u32 _result_4 = r5;
+  u32 _result_5 = r6;
+  u32 _result_6 = r7;
+  u32 _result_7 = r8;
+  u32 _result_8 = r9;
+  u32 _result_9 = r10;
+  u32 _result_10 = r11;
+  u32 _result_11 = r12;
+  u32 _result_12 = r13;
+  Term _table_0 = r14;
+  WL_SPIN
+    if (_fuel_0 == 0) {
+      _v_35 = 0ull;
+      _v_36 = 0ull;
+      _v_37 = 0ull;
+      _v_38 = 0ull;
+      _v_39 = 0ull;
+      _v_40 = 0ull;
+      _v_41 = 0ull;
+    } else {
+      Term _rest_0 = (_fuel_0 - 1);
+      if (_result_0 == 0) {
+        _v_35 = _result_1;
+        _v_36 = _result_2;
+        _v_37 = _result_3;
+        _v_38 = _result_4;
+        _v_39 = _result_5;
+        _v_40 = _result_6;
+        _v_41 = _result_7;
+      } else if (_result_0 == 1) {
+        u32 _v_42 = 0;
+        Term _v_43 = 0;
+        u32 _v_44 = 0;
+        u32 _v_45 = 0;
+        u32 _v_46 = 0;
+        u32 _v_47 = 0;
+        u32 _v_48 = 0;
+        u32 _v_49 = 0;
+        u32 _v_50 = 0;
+        u32 _v_51 = 0;
+        u32 _v_52 = 0;
+        u32 _v_53 = 0;
+        u32 _v_54 = 0;
+        u32 _v_55 = 0;
+        u32 _v_56 = 0;
+        Term _o_2[1];
+        if (spin_55(e, _o_2, _table_0, _result_1) == 0) {
+          return 0;
+        }
+        _v_56 = _o_2[0];
+        _v_55 = _v_56;
+        u32 _v_57 = 0;
+        Term _v_58 = 0;
+        u32 _v_59 = 0;
+        u32 _v_60 = 0;
+        u32 _v_61 = 0;
+        u32 _v_62 = 0;
+        u32 _v_63 = 0;
+        u32 _v_64 = 0;
+        u32 _v_65 = 0;
+        u32 _v_66 = 0;
+        u32 _v_67 = 0;
+        u32 _v_68 = 0;
+        u32 _v_69 = 0;
+        Term _o_3[13];
+        if (spin_57(e, _o_3, _table_0, _v_55, _result_1, _result_2, _result_3, _result_4, _result_5, _result_6, _result_7, _result_8, _result_9, _result_10, _result_11, _result_12) == 0) {
+          return 0;
+        }
+        _v_57 = _o_3[0];
+        _v_58 = _o_3[1];
+        _v_59 = _o_3[2];
+        _v_60 = _o_3[3];
+        _v_61 = _o_3[4];
+        _v_62 = _o_3[5];
+        _v_63 = _o_3[6];
+        _v_64 = _o_3[7];
+        _v_65 = _o_3[8];
+        _v_66 = _o_3[9];
+        _v_67 = _o_3[10];
+        _v_68 = _o_3[11];
+        _v_69 = _o_3[12];
+        _v_42 = _v_57;
+        _v_43 = _v_58;
+        _v_44 = _v_59;
+        _v_45 = _v_60;
+        _v_46 = _v_61;
+        _v_47 = _v_62;
+        _v_48 = _v_63;
+        _v_49 = _v_64;
+        _v_50 = _v_65;
+        _v_51 = _v_66;
+        _v_52 = _v_67;
+        _v_53 = _v_68;
+        _v_54 = _v_69;
+        r0 = _rest_0;
+        r1 = _v_42;
+        r2 = _v_43;
+        r3 = _v_44;
+        r4 = _v_45;
+        r5 = _v_46;
+        r6 = _v_47;
+        r7 = _v_48;
+        r8 = _v_49;
+        r9 = _v_50;
+        r10 = _v_51;
+        r11 = _v_52;
+        r12 = _v_53;
+        r13 = _v_54;
+        r14 = _table_0;
+        _fuel_0 = r0;
+        _result_0 = r1;
+        _result_1 = r2;
+        _result_2 = r3;
+        _result_3 = r4;
+        _result_4 = r5;
+        _result_5 = r6;
+        _result_6 = r7;
+        _result_7 = r8;
+        _result_8 = r9;
+        _result_9 = r10;
+        _result_10 = r11;
+        _result_11 = r12;
+        _result_12 = r13;
+        _table_0 = r14;
+        WL_AGAIN(spin_73);
+      } else {
+        _v_35 = 0ull;
+        _v_36 = 0ull;
+        _v_37 = 0ull;
+        _v_38 = 0ull;
+        _v_39 = 0ull;
+        _v_40 = 0ull;
+        _v_41 = 0ull;
+      }
+    }
+  break;
+  }
+  o[0] = _v_35;
+  o[1] = _v_36;
+  o[2] = _v_37;
+  o[3] = _v_38;
+  o[4] = _v_39;
+  o[5] = _v_40;
+  o[6] = _v_41;
+  return 1;
+}
+

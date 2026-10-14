@@ -1,0 +1,6 @@
+cc807b8e413da618ff19d74c7585ce12d7ccc0403b65468547108f763fc8f4eb  .audit/dda-gpu/candidate-renderer
+cf99ba61764ae6c292fef0d68aa88422d26d9f9a0b4e5f6f3cdcc9c08e19c1bf  .audit/dda-gpu/candidate-renderer.gpu
+1b11001b948e7a86a00aaebae45d0153b65347b86d95e348f21efb265a36d2dc  .audit/dda-gpu/reporting-control
+ade9dc12332ef024e112706294c39c37576cd10dba0c72509598d9f32a69c377  .audit/dda-gpu/reporting-control.gpu
+dc8b9b9756e6c04837379752eca1b399c93bb413032a3168632cb23857f18bc6  .audit/dda-gpu/dda-sweep
+83c2e5b015f268a84c22d4dd592bb2a87f3f96c3e2561df5d46aba67b7df5f9b  .audit/dda-gpu/candidate.c

@@ -1,0 +1,3 @@
+role	execution_request	host_threads_request	scene_label	effective_options	median_ms	min_ms	max_ms	all_pairs_ms
+accepted	cpu	12	opening	dda_options_v1 scene=atelier view=opening cut=intact renderer=dda assignment=contiguous depth=6 tile=not_applicable warm=4 measured=32 width=512 height=512 logical_jobs=4096 pixels_per_job=64 action=bench frame_invoked=true	103.40625	103.3125	103.75	103.53125 103.40625 103.75 103.34375 103.3125 
+candidate	cpu	12	opening	dda_options_v1 scene=atelier view=opening cut=intact renderer=dda assignment=interleaved depth=6 tile=not_applicable warm=4 measured=32 width=512 height=512 logical_jobs=4096 pixels_per_job=64 action=bench frame_invoked=true	111.90625	111.09375	114.84375	114.84375 111.09375 111.09375 111.90625 113.34375 

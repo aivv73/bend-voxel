@@ -1,0 +1,1 @@
+Helper counts equal all 29 literal-guard counters; five window frames scale exactly; instrumented pixels match baseline; unguarded compiler input rejected.

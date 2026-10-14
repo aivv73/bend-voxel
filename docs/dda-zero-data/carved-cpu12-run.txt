@@ -1,0 +1,31 @@
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1068
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1071
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1079
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1071
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1077
+
+renderer=dda init_ms=1
+frames=64 elapsed_ms=1070
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1120
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1070
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1073
+
+renderer=dda init_ms=0
+frames=64 elapsed_ms=1072
+
+Saved .audit/dda-zero/next-guard-carved-cpu12.tsv

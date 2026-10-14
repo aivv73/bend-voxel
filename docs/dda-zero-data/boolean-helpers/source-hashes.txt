@@ -1,0 +1,3 @@
+6e73a244aea2922624dfd872ebd914c2b39b74bbc1f427719014c4937b8fb45e  .audit/dda-zero/boolean-gate/dda.bend
+7e11742d656fcecd4da536fb6e3bb5fce6ec0ffc1ebdc36815f1b98062301f19  .audit/dda-zero/boolean-gate/LAWS.bend
+3dfd9fad1c39efe25a453617d34e48950133f624c780914978bb04f15a834bd7  .audit/dda-zero/boolean-gate/PROOF.bend

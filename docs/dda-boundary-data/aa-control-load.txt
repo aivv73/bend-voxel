@@ -1,0 +1,17 @@
+ 06:38:37 up 18 min,  1 user,  load average: 2.44, 1.99, 1.00
+    PID %CPU %MEM COMMAND
+   7554 74.1  0.8 updatedb
+   4501 23.0  0.9 t3code
+   4439 19.9  0.9 t3code
+   2735 10.1  0.5 niri
+   4393  6.8  0.7 t3code
+   4510  4.8  0.9 t3code
+   2940  3.0  0.2 ThroneCore
+   5830  2.6  1.4 codex
+   2799  2.0  0.3 Throne
+   2801  1.6  0.9 noctalia
+    278  0.5  0.0 nvidia-modeset/kthread_q
+    750  0.5  0.0 bpftune
+   4551  0.3  0.0 t3-resource-mon
+   6476  0.3  1.0 codex
+ 06:39:21 up 19 min,  1 user,  load average: 6.82, 3.19, 1.46

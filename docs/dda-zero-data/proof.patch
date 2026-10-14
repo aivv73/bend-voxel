@@ -1,0 +1,14 @@
+--- .audit/dda-zero/baseline/PROOF.bend	2026-10-06 19:44:37.936407662 +0400
++++ docs/dda-zero-data/candidate-proof.bend	2026-10-06 21:29:05.929288493 +0400
+@@ -204,6 +204,11 @@
+ def Laws.dda_stationary_axis_never_crosses(positive,origin,delta,cell):
+ 	{==}
+ 
++def Laws.dda_zero_plane_guard_preserves_crossing(moving,positive,origin,delta,cell,time):
++	match moving:
++		case False{}: {==}
++		case True{}: {==}
++
+ def Laws.dda_uncrossed_coordinate_preserved(positive,cell):
+ 	match positive:
+ 		case True{}: {==}

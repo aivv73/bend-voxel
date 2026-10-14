@@ -1,0 +1,31 @@
+renderer=dda init_ms=255
+frames=32 elapsed_ms=3687
+
+renderer=dda init_ms=262
+frames=32 elapsed_ms=3625
+
+renderer=dda init_ms=260
+frames=32 elapsed_ms=3666
+
+renderer=dda init_ms=264
+frames=32 elapsed_ms=3648
+
+renderer=dda init_ms=262
+frames=32 elapsed_ms=4148
+
+renderer=dda init_ms=263
+frames=32 elapsed_ms=3773
+
+renderer=dda init_ms=270
+frames=32 elapsed_ms=3702
+
+renderer=dda init_ms=274
+frames=32 elapsed_ms=3515
+
+renderer=dda init_ms=264
+frames=32 elapsed_ms=3592
+
+renderer=dda init_ms=265
+frames=32 elapsed_ms=3545
+
+Saved .audit/dda-zero/predicate-cpu12.tsv

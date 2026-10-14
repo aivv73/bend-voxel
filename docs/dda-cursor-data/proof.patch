@@ -1,0 +1,29 @@
+--- PROOF.bend
++++ PROOF.bend
+@@ -248,3 +248,26 @@
+ 
+ def Laws.dda_count_up_stops_at_accepted_limit(fuel,positive,origin,delta,cell,time,limit):
+ 	{==}
++
++def Laws.dda_cache_seed_preserves_region(fuel,tree,axis,leftward,cell,span,low):
++	match fuel tree axis leftward cell span low:
++		case 0n _ _ _ _ _ _: {==}
++		case 1n+rest X.Solid{material} _ _ _ V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}: {==}
++		case 1n+rest X.Branch{left,right} X.SplitX{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} low:
++			Laws.dda_cache_seed_preserves_region(rest,left,X.SplitY{},(y < sy / 2 : U32),V.Cell{x,y,z},V.Cell{(sx / 2 : U32),sy,sz},low)
++		case 1n+rest X.Branch{left,right} X.SplitX{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			Laws.dda_cache_seed_preserves_region(rest,right,X.SplitY{},(y < sy / 2 : U32),V.Cell{(x - sx / 2 : U32),y,z},V.Cell{(sx / 2 : U32),sy,sz},V.Cell{(lx + sx / 2 : U32),ly,lz})
++		case 1n+rest X.Branch{left,right} X.SplitY{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} low:
++			Laws.dda_cache_seed_preserves_region(rest,left,X.SplitZ{},(z < sz / 2 : U32),V.Cell{x,y,z},V.Cell{sx,(sy / 2 : U32),sz},low)
++		case 1n+rest X.Branch{left,right} X.SplitY{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			Laws.dda_cache_seed_preserves_region(rest,right,X.SplitZ{},(z < sz / 2 : U32),V.Cell{x,(y - sy / 2 : U32),z},V.Cell{sx,(sy / 2 : U32),sz},V.Cell{lx,(ly + sy / 2 : U32),lz})
++		case 1n+rest X.Branch{left,right} X.SplitZ{} True{} V.Cell{x,y,z} V.Cell{sx,sy,sz} low:
++			Laws.dda_cache_seed_preserves_region(rest,left,X.SplitX{},(x < sx / 2 : U32),V.Cell{x,y,z},V.Cell{sx,sy,(sz / 2 : U32)},low)
++		case 1n+rest X.Branch{left,right} X.SplitZ{} False{} V.Cell{x,y,z} V.Cell{sx,sy,sz} V.Cell{lx,ly,lz}:
++			Laws.dda_cache_seed_preserves_region(rest,right,X.SplitX{},(x < sx / 2 : U32),V.Cell{x,y,(z - sz / 2 : U32)},V.Cell{sx,sy,(sz / 2 : U32)},V.Cell{lx,ly,(lz + sz / 2 : U32)})
++
++def Laws.dda_cache_grid_seed_preserves_region(inside,cells,side,cell):
++	match inside cell:
++		case False{} _: {==}
++		case True{} V.Cell{x,y,z}:
++			Laws.dda_cache_seed_preserves_region(X.Cache.depth(),cells,X.SplitX{},(x < side / 2 : U32),V.Cell{x,y,z},V.Cell{side,side,side},V.Cell{0,0,0})
