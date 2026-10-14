@@ -1,0 +1,2 @@
+ordinary exit=0
+kernel exit=0

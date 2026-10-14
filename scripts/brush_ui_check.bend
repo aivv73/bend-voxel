@@ -1,4 +1,5 @@
 import Base
+import 0x8cc463a65f479c5af6b3080035eb0836/winref.bend as W
 import ../main.bend as App
 import ../render.bend as R
 import ../voxel.bend as V
@@ -20,7 +21,7 @@ type Stage is Data:
 	BackgroundReset{}
 
 type Session is Data:
-	Session{output: String, ref: WindowRef, original: V.Snapshot, expected: Maybe<&2, V.MetricSphere>, before: Image, background: Image, completed: Chan(Bool)}
+	Session{output: String, ref: W.WindowRef, original: V.Snapshot, expected: Maybe<&2, V.MetricSphere>, before: Image, background: Image, completed: Chan(Bool)}
 
 def Snapshot.built(surface: V.Surface, +scene: R.RenderScene, +camera: R.Camera, +controls: App.Controls, +pointer: App.Pointer, time: Maybe<&2, Nat>, dirty: Bool, td: Nat, fd: Nat, result: Array<U32> & V.Snapshot) -> App.Model & Snapshot:
 	(cells, materials) = result
@@ -114,8 +115,8 @@ def Sphere.cut(sphere: Maybe<&2, V.MetricSphere>, body: V.Body) -> V.Body:
 		case Some{s}:
 			V.Body.cut(body, s)
 
-def Native.move(ref: WindowRef, x: U32, y: U32) -> IO(Unit):
-	X11WindowRef{display, id} = ref
+def Native.move(ref: W.WindowRef, x: U32, y: U32) -> IO(Unit):
+	W.X11WindowRef{display, id} = ref
 	Flight.Native.display(display, ["mousemove", "--sync", "--window", U32.show(id), U32.show(x), U32.show(y)])
 
 def Check.preview(snapshot: Snapshot, image: Image, rendered: Image & R.RenderScene) -> IO(Unit):
@@ -126,14 +127,14 @@ def Check.capture_view(+snapshot: Snapshot, +image: Image) -> IO(Unit):
 	Snapshot{body, +scene, camera, pointer, looking} = snapshot
 	Check.preview(snapshot, image, R.RenderScene.preview(scene, Snapshot.target(snapshot), 5n))
 
-def Check.finish(+ref: WindowRef, completed: Chan(Bool), window: Window, model: App.Model) -> IO(Unit):
+def Check.finish(+ref: W.WindowRef, completed: Chan(Bool), window: Window, model: App.Model) -> IO(Unit):
 	do IO<Unit>:
 		IO.try(Unit, UITest.request_close(ref))
 		App.Interactive.step(window, model, UI.Check.unclosed)
 		alive : Bool <- IO.try(Bool, UITest.alive(ref))
 		UI.Check.require(Bool.not(alive), "Brush window survived Close")
-		sent : Bool <- Chan.send(Bool, completed, True{})
-		UI.Check.require(sent, "Brush completion channel closed early")
+		sent : Result<&1, &1, Bool, Unit> <- Chan.send(Bool, completed, True{})
+		UI.Check.require(UI.Check.sent(sent), "Brush completion channel closed early")
 		IO.print("PASS native hover, yellow preview, background clearing, complete free/centre click sets, retarget, resets and Close")
 
 def Check.stage(shown: Window & Image, stage: Stage, session: Session, +snapshot: Snapshot, model: App.Model, next: Stage -> Session -> Window -> App.Model -> IO(Unit)) -> IO(Unit):
@@ -212,7 +213,7 @@ def Check.loop(fuel: Nat, stage: Stage, session: Session, window: Window, model:
 		case 1n+rest:
 			UI.Check.frames(3n, window, model, w => m => IO.bind(App.Model & Snapshot,Unit,Snapshot.take(m),snapshot => Check.run(stage,session,w,snapshot,s => c => ww => mm => Check.loop(rest,s,c,ww,mm))))
 
-def Check.ready(output: String, completed: Chan(Bool), taken: App.Model & Snapshot, exported: Window & WindowRef) -> IO(Unit):
+def Check.ready(output: String, completed: Chan(Bool), taken: App.Model & Snapshot, exported: Window & W.WindowRef) -> IO(Unit):
 	(model, Snapshot{body, scene, camera, pointer, looking}) = taken
 	(window, +ref) = exported
 	do IO<Unit>:
@@ -226,7 +227,7 @@ def Check.start(+output: String) -> IO(Unit):
 		UI.Check.mkdir(output)
 		+completed : Chan(Bool) <- Chan.new(Bool, 1)
 		window : Window <- IO.try(Window, Window.open("Bend Voxel Rewrite | native metric brush check", 512, 512))
-		UI.Check.frames(2n, window, App.Model.cube(5n, 5n), w => m => IO.bind(Window & WindowRef, Unit, UI.Reference.export(w), exported => IO.bind(App.Model & Snapshot,Unit,Snapshot.take(m),snapshot => Check.ready(output,completed,snapshot,exported))))
+		UI.Check.frames(2n, window, App.Model.cube(5n, 5n), w => m => IO.bind(Window & W.WindowRef, Unit, UI.Reference.export(w), exported => IO.bind(App.Model & Snapshot,Unit,Snapshot.take(m),snapshot => Check.ready(output,completed,snapshot,exported))))
 		Chan.close(Bool, completed)
 		finished : Maybe<Bool> <- Chan.recv(Bool, completed)
 		UI.Check.require(Maybe.default(&1, Bool, finished, False{}), "Native brush check did not complete")

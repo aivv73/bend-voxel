@@ -1,0 +1,11 @@
+--- .audit/dda-zero/baseline/dda.bend	2026-10-06 19:44:37.936407662 +0400
++++ docs/dda-zero-data/candidate-dda.bend	2026-10-06 21:29:05.925288173 +0400
+@@ -294,7 +294,7 @@
+ def Axis.advanced(+positive: Bool, origin: F32, delta: F32, +cell: U32, +time: F32, +count: U32) -> Advance:
+ 	+next = Bool.pick(U32,positive,(cell + count : U32),(cell - count : U32))
+ 	+previous = Bool.pick(U32,positive,(next - 1 : U32),(next + 1 : U32))
+-	+crosses = U32.is_ne(count,0) && F32.is_eq(Axis.next(True{},positive,origin,delta,previous),time)
++	+crosses = U32.is_ne(count,0) && F32.is_eq(Axis.next(U32.is_ne(count,0),positive,origin,delta,previous),time)
+ 	Advance{next,Bool.pick(U32,crosses,previous,next),crosses}
+ 
+ def Axis.advance(moving: Bool, +positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, low: U32, high: U32) -> Advance:

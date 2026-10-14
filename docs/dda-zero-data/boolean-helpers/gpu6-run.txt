@@ -1,0 +1,31 @@
+renderer=dda init_ms=298
+frames=8 elapsed_ms=4006
+
+renderer=dda init_ms=296
+frames=8 elapsed_ms=4254
+
+renderer=dda init_ms=290
+frames=8 elapsed_ms=4203
+
+renderer=dda init_ms=292
+frames=8 elapsed_ms=4019
+
+renderer=dda init_ms=290
+frames=8 elapsed_ms=3970
+
+renderer=dda init_ms=293
+frames=8 elapsed_ms=4266
+
+renderer=dda init_ms=290
+frames=8 elapsed_ms=4175
+
+renderer=dda init_ms=299
+frames=8 elapsed_ms=4041
+
+renderer=dda init_ms=295
+frames=8 elapsed_ms=4121
+
+renderer=dda init_ms=293
+frames=8 elapsed_ms=4188
+
+Saved .audit/dda-zero/boolean-gate-gpu6.tsv

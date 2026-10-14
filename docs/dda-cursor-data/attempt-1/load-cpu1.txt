@@ -1,0 +1,12 @@
+ 18:53:13 up  1:55,  1 user,  load average: 7.01, 9.05, 7.18
+COMMAND         %CPU
+dota2            350
+ps               100
+Telegram        13.7
+niri            12.5
+vesktop         10.0
+vesktop          9.5
+helium           9.1
+helium           8.8
+utilization.gpu [%], memory.used [MiB]
+38 %, 4303 MiB

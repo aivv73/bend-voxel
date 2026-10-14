@@ -1,0 +1,1 @@
+All report links resolve; archived source/proof/adapter snapshots equal checked copies; source and build hashes verify.

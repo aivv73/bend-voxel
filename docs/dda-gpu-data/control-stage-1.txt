@@ -1,0 +1,4 @@
+dda_runtime_v1 cpu_threads=1
+dda_options_v1 scene=atelier view=opening cut=intact renderer=dda assignment=contiguous depth=9 tile=not_applicable warm=4 measured=1 width=512 height=512 logical_jobs=262144 pixels_per_job=1 action=profile frame_invoked=true
+renderer=dda init_ms=292
+render_ms=480 present_ms=136 dispose_ms=2

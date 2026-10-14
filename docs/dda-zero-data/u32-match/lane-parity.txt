@@ -1,0 +1,1 @@
+CPU1 opening, GPU6 seven scenes, GPU7 opening: byte equality passed against frozen baseline and unit DDA references.

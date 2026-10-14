@@ -1,0 +1,3 @@
+a12e245df287436955edecaa2f78b6f2ce0692b71f954d567b784b3dd44198e9  .audit/dda-cursor/candidate-renderer
+ec80acee14a97e1c8076f87dcb6e1e8da2acbd37e64d25530d8e4165a17926f0  .audit/dda-cursor/candidate-renderer.gpu
+5b05543b615cd745c2000e1103eb40b2746d5713b52462291be8534b3a9e9a9b  .audit/dda-cursor/candidate.c

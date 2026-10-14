@@ -1,0 +1,16 @@
+**PASS.** The original chronology objection is resolved.
+
+The [corrected chronology](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor.md:21) states that release measurements did not overlap profiling and that GPU profiling followed the timing matrix. This matches the [repeat’s end at 15:08:45 UTC](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor-data/load-gpu7-repeat.txt:17) and parent activity 212 recording profiling at 15:10:30 UTC.
+
+The archived CPU12 samples reproduce median paired increases of **3.53125 ms** and **3.375 ms**, with **8/10 pairs slower**. The [revised CPU paragraph](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-floor.md:39) accurately states these results, rejects CPU neutrality or speedup claims, and retains the regression risk without asserting a hardware cause.
+
+Both GPU7 batches still favor the candidate in 5/5 pairs. Only the repeat has non-overlapping ranges, as the report correctly states.
+
+The [review entry](/home/aivv/Документы/projects/bend-voxel-main/.audit/dda-floor/decisions.tsv:14) records both corrections. The canonical and published trail copies are byte-identical.
+
+Prove It Works guided checking the current artifacts. Explain the Number guided checking paired differences rather than separate medians.
+
+Attention:
+
+- No unresolved objection or new evidence gap found within this confirmation scope.
+- The disclosed parallel-CPU regression risk remains relevant to retention.

@@ -10,7 +10,7 @@ type Words16 is Data:
 		w12: U32, w13: U32, w14: U32, w15: U32}
 
 type Context is Data:
-	Ready{hash: H8, words: Words16, partial: U32, used: U32, low: U32, high: U32}
+	SHA256Ready{hash: H8, words: Words16, partial: U32, used: U32, low: U32, high: U32}
 	Invalid{error: String}
 
 def Words16.zero() -> Words16:
@@ -78,28 +78,28 @@ def SHA256.compress(+hash: H8, words: Words16) -> H8:
 	SHA256.rounds(SHA256.constants(), hash, hash, words, 0)
 
 def SHA256.init() -> Context:
-	Ready{H8{1779033703, 3144134277, 1013904242, 2773480762,
+	SHA256Ready{H8{1779033703, 3144134277, 1013904242, 2773480762,
 		1359893119, 2600822924, 528734635, 1541459225}, Words16.zero(), 0, 0, 0, 0}
 
 def SHA256.block(full: Bool, hash: H8, words: Words16, used: U32, low: U32, high: U32) -> Context:
 	match full:
 		case True{}:
-			Ready{SHA256.compress(hash, words), Words16.zero(), 0, 0, low, high}
+			SHA256Ready{SHA256.compress(hash, words), Words16.zero(), 0, 0, low, high}
 		case False{}:
-			Ready{hash, words, 0, used, low, high}
+			SHA256Ready{hash, words, 0, used, low, high}
 
 def SHA256.word(complete: Bool, hash: H8, words: Words16, partial: U32, +used: U32, low: U32, high: U32) -> Context:
 	match complete:
 		case True{}:
 			SHA256.block(U32.is_eq(used, 64), hash, Words16.append(words, partial), used, low, high)
 		case False{}:
-			Ready{hash, words, partial, used, low, high}
+			SHA256Ready{hash, words, partial, used, low, high}
 
 def SHA256.absorb(context: Context, byte: U32) -> Context:
 	match context:
 		case Invalid{error}:
 			Invalid{error}
-		case Ready{hash, words, partial, used, low, high}:
+		case SHA256Ready{hash, words, partial, used, low, high}:
 			+next = (used + 1 : U32)
 			SHA256.word(U32.is_zero((next .&. 3 : U32)), hash, words,
 				(partial << 8n .|. byte : U32), next, low, high)
@@ -108,9 +108,9 @@ def SHA256.update.valid(valid: Bool, context: Context, byte: U32) -> Context:
 	match valid context:
 		case False{} _:
 			Invalid{"SHA-256 requires bytes in 0..255 and fewer than 2^64 input bits"}
-		case True{} Ready{hash, words, partial, used, low, high}:
+		case True{} SHA256Ready{hash, words, partial, used, low, high}:
 			+next = (low + 1 : U32)
-			SHA256.absorb(Ready{hash, words, partial, used, next,
+			SHA256.absorb(SHA256Ready{hash, words, partial, used, next,
 				(high + Bool.to_u32(U32.is_zero(next)) : U32)}, byte)
 		case True{} Invalid{error}:
 			Invalid{error}
@@ -119,11 +119,11 @@ def SHA256.update(context: Context, +byte: U32) -> Context:
 	match context:
 		case Invalid{error}:
 			Invalid{error}
-		case Ready{hash, words, partial, used, +low, +high}:
+		case SHA256Ready{hash, words, partial, used, +low, +high}:
 			# Byte counts stop at 2^61-1 so their bit length fits the FIPS 64-bit field.
 			valid = U32.is_le(byte, 255) && U32.is_lt(high, 536870912) &&
 				Bool.not(U32.is_eq(high, 536870911) && U32.is_eq(low, 4294967295))
-			SHA256.update.valid(valid, Ready{hash, words, partial, used, low, high}, byte)
+			SHA256.update.valid(valid, SHA256Ready{hash, words, partial, used, low, high}, byte)
 
 def SHA256.pad(zeros: Nat, context: Context) -> Context:
 	match zeros:
@@ -153,7 +153,7 @@ def SHA256.finish.block(context: Context) -> Result<&2, &2, String, String>:
 	match context:
 		case Invalid{error}:
 			Fail{error}
-		case Ready{hash, words, partial, used, +low, high}:
+		case SHA256Ready{hash, words, partial, used, +low, high}:
 			upper = (high << 3n .|. low >> 29n : U32)
 			lower = (low << 3n : U32)
 			Done{H8.hex(SHA256.compress(hash, Words16.append(Words16.append(words, upper), lower)))}
@@ -162,10 +162,10 @@ def SHA256.finish(context: Context) -> Result<&2, &2, String, String>:
 	match context:
 		case Invalid{error}:
 			Fail{error}
-		case Ready{hash, words, partial, +used, low, high}:
+		case SHA256Ready{hash, words, partial, +used, low, high}:
 			zeros = ((55 - used) .&. 63 : U32)
 			SHA256.finish.block(SHA256.pad(U32.to_nat(zeros),
-				SHA256.absorb(Ready{hash, words, partial, used, low, high}, 128)))
+				SHA256.absorb(SHA256Ready{hash, words, partial, used, low, high}, 128)))
 
 def SHA256.bytes(bytes: List<&2, U32>, context: Context) -> Context:
 	match bytes:

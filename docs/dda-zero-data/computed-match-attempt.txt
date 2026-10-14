@@ -1,0 +1,25 @@
+Parent activity position 357, updated 2026-10-06T16:21:28.178Z
+/home/aivv/Документы/projects/bend-voxel-main/.audit/dda-zero/bool-guard/dda.bend
+@@ -270,6 +270,6 @@
+ def Axis.before(positive: Bool, origin: F32, delta: F32, +cell: U32, time: F32, +count: U32) -> Bool:
+-	match count:
+-		case 0: True{}
+-		case n:
+-			+plane = Bool.pick(U32,positive,(cell + n : U32),(cell + 1 - n : U32))
++	match U32.is_zero(count):
++		case True{}: True{}
++		case False{}:
++			+plane = Bool.pick(U32,positive,(cell + count : U32),(cell + 1 - count : U32))
+ 			((U32.to_f32(plane) - origin) / delta <= time : F32)
+@@ -297,6 +297,6 @@
+ def Axis.advanced(+positive: Bool, origin: F32, delta: F32, +cell: U32, +time: F32, +count: U32) -> Advance:
+-	match count:
+-		case 0: Advance{cell,cell,False{}}
+-		case n:
+-			+next = Bool.pick(U32,positive,(cell + n : U32),(cell - n : U32))
++	match U32.is_zero(count):
++		case True{}: Advance{cell,cell,False{}}
++		case False{}:
++			+next = Bool.pick(U32,positive,(cell + count : U32),(cell - count : U32))
+ 			+previous = Bool.pick(U32,positive,(next - 1 : U32),(next + 1 : U32))
+

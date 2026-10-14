@@ -1,0 +1,7 @@
+opening	rays=262144 exact_surface_mismatches=0
+cut	rays=262144 exact_surface_mismatches=0
+cube	rays=262144 exact_surface_mismatches=0
+carved	rays=262144 exact_surface_mismatches=0
+inside	rays=262144 exact_surface_mismatches=0
+axis	rays=262144 exact_surface_mismatches=0
+opposite	rays=262144 exact_surface_mismatches=0

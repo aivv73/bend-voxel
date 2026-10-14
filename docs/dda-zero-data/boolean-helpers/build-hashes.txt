@@ -1,0 +1,14 @@
+8dfc8740d026fbdf0a0b893422bd2113268a89e8a120a9e56caa047584583dfa  .audit/dda-zero/baseline.c
+1a75350498f6455ae66fc884286e150635f04f9b8478eb3000efcc7ed6907580  .audit/dda-zero/boolean-gate.c
+2c1be5a91385dcbf0ae673fff633a925c351f33c995a4ac083a162a423fd777f  .audit/dda-zero/baseline-renderer
+e78ab3e54ee2739010f29728641f039cc424bf57e16000708afb51482af764ba  .audit/dda-zero/baseline-renderer.gpu
+0c826a923f3efebc6bf1fc295cf4842b34a814fbfa9286a1c963d140f7922da7  .audit/dda-zero/boolean-gate-renderer
+483e3ba1417a51699b3fb7ea3914c03061b692a56df39f94e95f1997fb964c60  .audit/dda-zero/boolean-gate-renderer.gpu
+5baff2a1b22f5c0a644b35152f64dd50dc9edf45c98d247d8ef8b57079085e2a  .audit/dda-zero/ab
+9837a0df7503cb1dd62f92f3f43f559ee5fb8f9f56c8e52e92b107fb07a091e5  .audit/dda-zero/thunk-guard.c
+8c8d7824dae4cc2c2b746c57b7ee8769c130aed5e331866deebc79f8fe27fe7c  .audit/dda-zero/thunk-guard-renderer
+9ce023f05d592cb7a427b54cc1abc4faede40d664b2e614e593b97347f0ce6d7  .audit/dda-zero/thunk-guard-renderer.gpu
+c7ba3b426d1966af7dd496558ab1664dadba4adb8f0edf1e1dadb03de4a264c5  scripts/dda_zero_profile.bend
+29b70a3ff773b2983c5128442f98b3fa1bc4bdb9936aef91b988e0aba1c9290c  .audit/dda-zero/boolean-gate-counts.c
+411151f7a1b10c230734e8c1a7ad155ab6210e54ec0dd2c4e41360c5ce1a8825  .audit/dda-zero/boolean-gate-counts
+617dae0ab56860dd69e5d340eb3a62ed20df417eeffdc168402df28ac1cdb6a0  .audit/dda-zero/boolean-gate-profile

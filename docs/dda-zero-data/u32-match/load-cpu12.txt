@@ -1,0 +1,11 @@
+ 20:02:12 up  3:04,  1 user,  load average: 2.46, 2.74, 2.60
+COMMAND         %CPU
+bash            50.0
+niri            12.9
+vesktop         12.3
+vesktop         10.3
+Telegram         8.6
+t3code           7.9
+helium           7.8
+helium           7.5
+19 %, 836 MiB

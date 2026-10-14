@@ -1,0 +1,11 @@
+family=small samples=166320 reuse=22825 fallback=128375 stopped=15120 coverage_mask=24563 mismatch_samples=0 count_mismatches=0 depth_bit_mismatches=0 cell_field_mismatches=0 previous_field_mismatches=0 crossing_flag_mismatches=0 direction_mismatches=0 unbounded_samples=0
+first_mismatch=none
+family=precision samples=84672 reuse=5736 fallback=57768 stopped=21168 coverage_mask=31911 mismatch_samples=0 count_mismatches=0 depth_bit_mismatches=0 cell_field_mismatches=0 previous_field_mismatches=0 crossing_flag_mismatches=0 direction_mismatches=0 unbounded_samples=0
+first_mismatch=none
+family=malformed samples=9702 reuse=0 fallback=8820 stopped=882 coverage_mask=6696 mismatch_samples=0 count_mismatches=0 depth_bit_mismatches=0 cell_field_mismatches=0 previous_field_mismatches=0 crossing_flag_mismatches=0 direction_mismatches=0 unbounded_samples=0
+first_mismatch=none
+family=regions samples=5777 reuse=9911 fallback=3087 stopped=4333 coverage_mask=16255 mismatch_samples=0 count_mismatches=0 depth_bit_mismatches=0 cell_field_mismatches=0 previous_field_mismatches=0 crossing_flag_mismatches=0 direction_mismatches=0 unbounded_samples=0
+first_mismatch=none
+family=axis_total samples=260694 reuse=28561 fallback=194963 stopped=37170 coverage_mask=32767 mismatch_samples=0 count_mismatches=0 depth_bit_mismatches=0 cell_field_mismatches=0 previous_field_mismatches=0 crossing_flag_mismatches=0 direction_mismatches=0 unbounded_samples=0
+first_mismatch=none
+exact_boundary_properties_passed

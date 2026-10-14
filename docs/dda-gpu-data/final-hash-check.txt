@@ -1,0 +1,12 @@
+dda.bend: OK
+LAWS.bend: OK
+PROOF.bend: OK
+scripts/dda_compare.bend: OK
+scripts/dda_config.bend: OK
+scripts/dda_sweep.bend: OK
+scripts/dda_benchmark.bend: OK
+Makefile: OK
+build/dda-compare: OK
+build/dda-compare.gpu: OK
+build/dda-sweep: OK
+build/dda-benchmark: OK

@@ -1,0 +1,4 @@
+benchmark triggers dda-compare rebuild
+benchmark_number triggers dda-compare rebuild
+benchmark_host triggers dda-compare rebuild
+sha256 triggers dda-compare rebuild

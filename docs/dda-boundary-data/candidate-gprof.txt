@@ -1,0 +1,1460 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls  ms/call  ms/call  name    
+ 47.37      4.15     4.15 45897396     0.00     0.00  spin_105
+ 24.09      6.26     2.11 128255004     0.00     0.00  spin_63
+ 13.70      7.46     1.20 42751668     0.00     0.00  spin_102
+  3.42      7.76     0.30  3145728     0.00     0.00  spin_144
+  2.40      7.97     0.21  4703319     0.00     0.00  term_drop
+  1.48      8.10     0.13  3145728     0.00     0.00  WL_FID____DDA_FRAME_SEQ
+  1.48      8.23     0.13  3145728     0.00     0.00  spin_184
+  1.14      8.33     0.10  1048572     0.00     0.00  WL_FID____DDA_FRAME_SEQ_K431
+  1.03      8.42     0.09       12     7.50     7.50  window_sq
+  0.68      8.48     0.06  3145728     0.00     0.00  WL_FID____RENDER_PIXEL_PRESENT
+  0.46      8.52     0.04  9437184     0.00     0.00  spin_185
+  0.46      8.56     0.04  2636692     0.00     0.00  spin_164
+  0.46      8.60     0.04  1320380     0.00     0.00  WL_FID____DDA_TREE_PAINT
+  0.46      8.64     0.04  1048572     0.00     0.00  WL_FID____DDA_FRAME_SEQ_K432
+  0.34      8.67     0.03  1318346     0.00     0.00  WL_FID____DDA_TREE_PAINT_K519
+  0.34      8.70     0.03  1048572     0.00     0.00  WL_FID____DDA_FRAME_SEQ_K433
+  0.11      8.71     0.01  1318346     0.00     0.00  WL_FID____DDA_TREE_PAINT_K520
+  0.11      8.72     0.01  1161055     0.00     0.00  span_fade
+  0.11      8.73     0.01  1048572     0.00     0.00  WL_FID____DDA_FRAME_SEQ_K434
+  0.11      8.74     0.01      918     0.01     0.01  heap_alloc_miss
+  0.11      8.75     0.01                             _init
+  0.11      8.76     0.01                             pool_work
+  0.00      8.76     0.00  1318346     0.00     0.00  spin_221
+  0.00      8.76     0.00  1292791     0.00     0.00  rfc_wrap
+  0.00      8.76     0.00   215040     0.00     0.01  monk_step
+  0.00      8.76     0.00   200700     0.00     0.00  WL_FID_IMAGE_FREE
+  0.00      8.76     0.00    65532     0.00     0.00  WL_FID_IMAGE_FREE_J72
+  0.00      8.76     0.00    61440     0.00     0.00  WL_FID_IMAGE_FREE_K72
+  0.00      8.76     0.00    61440     0.00     0.00  WL_FID_IMAGE_FREE_K73
+  0.00      8.76     0.00    61440     0.00     0.00  WL_FID_IMAGE_FREE_K74
+  0.00      8.76     0.00    61440     0.00     0.00  WL_FID_IMAGE_FREE_K75
+  0.00      8.76     0.00    20547     0.00     0.00  WL_FID_ENTER
+  0.00      8.76     0.00    16507     0.00     0.00  WL_FID_EXIT
+  0.00      8.76     0.00     4147     0.00     0.42  work_loop
+  0.00      8.76     0.00     4080     0.00     0.00  task_deal
+  0.00      8.76     0.00     2035     0.00     0.00  WL_FID____DDA_GRID_PAINT
+  0.00      8.76     0.00     2034     0.00     0.00  WL_FID____ATELIER_CUBOIDS_K362
+  0.00      8.76     0.00     2034     0.00     0.00  WL_FID____DDA_GRID_PAINT_K672
+  0.00      8.76     0.00     2001     0.00     0.00  WL_FID____ATELIER_TRANSLATE_K357
+  0.00      8.76     0.00      300     0.00     0.00  spin_87
+  0.00      8.76     0.00      238     0.00     0.00  heap_hand
+  0.00      8.76     0.00      202     0.00     0.00  WL_FID_CLO_APPLY
+  0.00      8.76     0.00       72     0.00     0.00  WL_FID_STRING_CMP_K691
+  0.00      8.76     0.00       59     0.00     0.00  WL_FID_STRING_CMP
+  0.00      8.76     0.00       59     0.00     0.00  WL_FID_STRING_EQ
+  0.00      8.76     0.00       59     0.00     0.00  WL_FID_STRING_EQ_K950
+  0.00      8.76     0.00       59     0.00     0.00  WL_FID_STRING_ORDER
+  0.00      8.76     0.00       59     0.00     0.00  WL_FID_STRING_ORDER_K849
+  0.00      8.76     0.00       50     0.00     0.00  WL_FID_IO_BIND
+  0.00      8.76     0.00       50     0.00     0.00  WL_FID_IO_BIND_C1073
+  0.00      8.76     0.00       50     0.00     0.00  WL_FID_IO_BIND_K1074
+  0.00      8.76     0.00       41     0.00     0.00  WL_FID_STRING_APPEND_K761
+  0.00      8.76     0.00       37     0.00     0.00  WL_FID____MAIN_OPTIONS_FLAG
+  0.00      8.76     0.00       30     0.00     0.00  WL_FID_IO_PURE
+  0.00      8.76     0.00       30     0.00     0.00  WL_FID____MAIN_OPTIONS_FLAG_K955
+  0.00      8.76     0.00       30     0.00     0.00  WL_FID____MAIN_OPTIONS_HAS
+  0.00      8.76     0.00       30     0.00     0.00  spin_5
+  0.00      8.76     0.00       30     0.00     0.00  spin_85
+  0.00      8.76     0.00       25     0.00     0.00  WL_FID____MAIN_OPTIONS_HAS_K958
+  0.00      8.76     0.00       25     0.00     0.00  WL_FID____MAIN_OPTIONS_HAS_K959
+  0.00      8.76     0.00       24     0.00     0.00  pool_turn
+  0.00      8.76     0.00       23     0.00     1.21  corpus_eval
+  0.00      8.76     0.00       21     0.00     4.29  io_exec
+  0.00      8.76     0.00       14     0.00     0.00  WL_FID_FRAMES
+  0.00      8.76     0.00       13     0.00     0.00  io_sync
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAMES_C409
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAMES_C417
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAMES_K408
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAME_DRAWN_C410
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAME_DRAWN_C411
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAME_DRAWN_C413
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAME_DRAWN_C414
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAME_DRAWN_C415
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAME_DRAWN_C416
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_FRAME_DRAWN_K412
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_IMAGE_DROP
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_SCENE_DRAW
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_SCENE_DRAW_K763
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID_WINDOW_FRAME
+  0.00      8.76     0.00       12     0.00     0.00  WL_FID____DDA_FRAME_FORK
+  0.00      8.76     0.00       12     0.00     0.00  cube_run
+  0.00      8.76     0.00       12     0.00     0.00  pool_open
+  0.00      8.76     0.00       12     0.00     7.50  window_frame
+  0.00      8.76     0.00       12     0.00     7.50  window_frame_run
+  0.00      8.76     0.00        9     0.00     0.00  WL_FID_U32_POW_K674
+  0.00      8.76     0.00        7     0.00     0.00  io_mem
+  0.00      8.76     0.00        6     0.00     0.00  WL_FID_STRING_APPEND
+  0.00      8.76     0.00        6     0.00     0.00  WL_FID____ATELIER_ASSEMBLIES_K542
+  0.00      8.76     0.00        6     0.00     0.00  WL_FID____ATELIER_CUBOIDS
+  0.00      8.76     0.00        6     0.00     0.00  spare_free
+  0.00      8.76     0.00        5     0.00     0.00  WL_FID____MAIN_OPTIONS_ARGS_K961
+  0.00      8.76     0.00        5     0.00     0.00  io_str
+  0.00      8.76     0.00        5     0.00     0.00  spin_76
+  0.00      8.76     0.00        5     0.00     0.00  spin_84
+  0.00      8.76     0.00        4     0.00     0.00  WL_FID_IO_NOW
+  0.00      8.76     0.00        4     0.00     0.00  WL_FID____MAIN_OPTIONS_NUMBER
+  0.00      8.76     0.00        4     0.00     0.00  io_now_run
+  0.00      8.76     0.00        4     0.00     0.00  io_out
+  0.00      8.76     0.00        3     0.00     0.00  WL_FID_NAT_SHOW
+  0.00      8.76     0.00        3     0.00     0.00  WL_FID_NAT_SHOW_FIN
+  0.00      8.76     0.00        3     0.00     0.00  WL_FID_U32_READ
+  0.00      8.76     0.00        3     0.00     0.00  WL_FID_U32_READ_GO
+  0.00      8.76     0.00        3     0.00     0.00  WL_FID____ATELIER_TRANSLATE
+  0.00      8.76     0.00        3     0.00     0.00  WL_FID____MAIN_OPTIONS_NUMBER_K948
+  0.00      8.76     0.00        3     0.00     0.00  io_cbuf
+  0.00      8.76     0.00        2     0.00     0.00  WL_FID_FRAMES_C407
+  0.00      8.76     0.00        2     0.00     0.00  WL_FID_IO_PRINT
+  0.00      8.76     0.00        2     0.00     0.00  WL_FID_REQUIRE_C512
+  0.00      8.76     0.00        2     0.00     0.00  WL_FID____MAIN_OPTIONS_DEPTH
+  0.00      8.76     0.00        2     0.00     0.00  WL_FID____MAIN_OPTIONS_DEPTH_K857
+  0.00      8.76     0.00        2     0.00     0.00  io_print_run
+  0.00      8.76     0.00        2     0.00     0.00  pool_stack
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_BODY
+  0.00      8.76     0.00        1     0.00     0.01  WL_FID_IO_ARGS
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_IO_EMIT
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_IO_PASS_C466
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_IO_TRY_C553
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_IO_TRY_C554
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1076
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1077
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1086
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1087
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1090
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1091
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1119
+  0.00      8.76     0.00        1     0.00     0.01  WL_FID_MAIN_C1120
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1122
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1123
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1124
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1125
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1126
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1131
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1132
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1169
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1170
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1172
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1173
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1174
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1175
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1177
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1178
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1179
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1180
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1181
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_C1182
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1078
+  0.00      8.76     0.00        1     0.00     0.01  WL_FID_MAIN_K1079
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1080
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1081
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1082
+  0.00      8.76     0.00        1     0.00     0.01  WL_FID_MAIN_K1083
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1084
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1085
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1088
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1089
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1092
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1093
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1094
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1095
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1096
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1097
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1098
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1099
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1100
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1121
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1127
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1128
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1129
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1130
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1133
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1134
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1135
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1171
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1176
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1183
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1184
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1185
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1186
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_MAIN_K1187
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_SCENE_BUILD
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_SCENE_BUILD_K775
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_U32_POW
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_WINDOW_CLOSE
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID_WINDOW_OPEN
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID____ATELIER_ASSEMBLIES
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID____ATELIER_BODY
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID____ATELIER_BODY_K695
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID____ATELIER_BODY_K696
+  0.00      8.76     0.00        1     0.00     0.01  WL_FID____ATELIER_GENERATE
+  0.00      8.76     0.00        1     0.00     0.01  WL_FID____ATELIER_GENERATE_K538
+  0.00      8.76     0.00        1     0.00     0.02  WL_FID____ATELIER_GENERATE_K539
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID____ATELIER_GENERATE_K540
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID____DDA_GRID_BUILD
+  0.00      8.76     0.00        1     0.00     0.12  WL_FID____DDA_GRID_BUILD_K837
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID____DDA_GRID_BUILD_K838
+  0.00      8.76     0.00        1     0.00     0.00  WL_FID____MAIN_OPTIONS_ARGS
+  0.00      8.76     0.00        1     0.00     0.00  ctr_take
+  0.00      8.76     0.00        1     0.00     0.00  io_args_run
+  0.00      8.76     0.00        1     0.00   117.85  io_loop
+  0.00      8.76     0.00        1     0.00     0.00  io_spawn
+  0.00      8.76     0.00        1     0.00   116.63  io_step
+  0.00      8.76     0.00        1     0.00     0.01  spin_223
+  0.00      8.76     0.00        1     0.00     0.01  spin_224
+  0.00      8.76     0.00        1     0.00     0.02  spin_225
+  0.00      8.76     0.00        1     0.00     0.00  spin_226
+  0.00      8.76     0.00        1     0.00     0.00  spin_227
+  0.00      8.76     0.00        1     0.00     0.00  spin_228
+  0.00      8.76     0.00        1     0.00     0.00  spin_238
+  0.00      8.76     0.00        1     0.00     0.00  spin_251
+  0.00      8.76     0.00        1     0.00     0.00  window_close_run
+  0.00      8.76     0.00        1     0.00     0.00  window_open_run
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+Copyright (C) 2012-2026 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.11% of 8.76 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     98.5    0.01    8.62                 pool_work [1]
+                0.11    6.61 2621440/3145728     WL_FID____DDA_FRAME_SEQ [2]
+                0.00    1.69  215040/215040      monk_step [9]
+                0.08    0.00  873810/1048572     WL_FID____DDA_FRAME_SEQ_K431 [16]
+                0.05    0.00 2621440/3145728     WL_FID____RENDER_PIXEL_PRESENT [23]
+                0.03    0.00  873810/1048572     WL_FID____DDA_FRAME_SEQ_K432 [25]
+                0.03    0.00  873810/1048572     WL_FID____DDA_FRAME_SEQ_K433 [26]
+                0.01    0.00  873810/1048572     WL_FID____DDA_FRAME_SEQ_K434 [29]
+                0.00    0.01  196608/200700      WL_FID_IMAGE_FREE [33]
+                0.00    0.00      12/12          WL_FID_FRAME_DRAWN_C413 [38]
+                0.00    0.00      34/50          WL_FID_IO_BIND [37]
+                0.00    0.00      12/12          WL_FID_FRAME_DRAWN_C416 [43]
+                0.00    0.00      10/12          WL_FID_FRAME_DRAWN_C410 [42]
+                0.00    0.00      10/12          WL_FID_FRAMES_C409 [41]
+                0.00    0.00      10/12          WL_FID_SCENE_DRAW [48]
+                0.00    0.00       2/4           WL_FID_IO_NOW [49]
+                0.00    0.00   65532/65532       WL_FID_IMAGE_FREE_J72 [76]
+                0.00    0.00   61440/61440       WL_FID_IMAGE_FREE_K75 [80]
+                0.00    0.00   61440/61440       WL_FID_IMAGE_FREE_K74 [79]
+                0.00    0.00   61440/61440       WL_FID_IMAGE_FREE_K73 [78]
+                0.00    0.00   61440/61440       WL_FID_IMAGE_FREE_K72 [77]
+                0.00    0.00   16450/16507       WL_FID_EXIT [82]
+                0.00    0.00   16400/20547       WL_FID_ENTER [81]
+                0.00    0.00     124/202         WL_FID_CLO_APPLY [87]
+                0.00    0.00      38/50          WL_FID_IO_BIND_K1074 [92]
+                0.00    0.00      26/50          WL_FID_IO_BIND_C1073 [91]
+                0.00    0.00      26/30          WL_FID_IO_PURE [93]
+                0.00    0.00      12/14          WL_FID_FRAMES [100]
+                0.00    0.00      12/12          WL_FID_FRAMES_C417 [102]
+                0.00    0.00      12/12          WL_FID_FRAME_DRAWN_C415 [105]
+                0.00    0.00      12/12          WL_FID_FRAME_DRAWN_C414 [104]
+                0.00    0.00      12/12          WL_FID_FRAME_DRAWN_K412 [106]
+                0.00    0.00      10/12          WL_FID_WINDOW_FRAME [109]
+                0.00    0.00      10/12          WL_FID_FRAMES_K408 [103]
+                0.00    0.00      10/12          WL_FID_SCENE_DRAW_K763 [108]
+                0.00    0.00      10/12          WL_FID____DDA_FRAME_FORK [110]
+                0.00    0.00       2/2           WL_FID_FRAMES_C407 [129]
+                0.00    0.00       1/2           pool_stack [135]
+                0.00    0.00       1/1           WL_FID_MAIN_C1179 [164]
+                0.00    0.00       1/1           WL_FID_MAIN_C1178 [163]
+                0.00    0.00       1/1           WL_FID_MAIN_C1174 [160]
+                0.00    0.00       1/1           WL_FID_MAIN_C1173 [159]
+-----------------------------------------------
+                0.02    1.32  524288/3145728     work_loop [8]
+                0.11    6.61 2621440/3145728     pool_work [1]
+[2]     92.0    0.13    7.93 3145728         WL_FID____DDA_FRAME_SEQ [2]
+                0.13    7.80 3145728/3145728     spin_184 [3]
+-----------------------------------------------
+                0.13    7.80 3145728/3145728     WL_FID____DDA_FRAME_SEQ [2]
+[3]     90.5    0.13    7.80 3145728         spin_184 [3]
+                0.30    7.18 3145728/3145728     spin_144 [4]
+                0.28    0.00 3145728/45897396     spin_105 [5]
+                0.04    0.00 9437184/9437184     spin_185 [24]
+-----------------------------------------------
+                0.30    7.18 3145728/3145728     spin_184 [3]
+[4]     85.3    0.30    7.18 3145728         spin_144 [4]
+                3.87    0.00 42751668/45897396     spin_105 [5]
+                1.20    2.11 42751668/42751668     spin_102 [6]
+-----------------------------------------------
+                0.28    0.00 3145728/45897396     spin_184 [3]
+                3.87    0.00 42751668/45897396     spin_144 [4]
+[5]     47.4    4.15    0.00 45897396         spin_105 [5]
+-----------------------------------------------
+                1.20    2.11 42751668/42751668     spin_144 [4]
+[6]     37.8    1.20    2.11 42751668         spin_102 [6]
+                2.11    0.00 128255004/128255004     spin_63 [7]
+-----------------------------------------------
+                2.11    0.00 128255004/128255004     spin_102 [6]
+[7]     24.1    2.11    0.00 128255004         spin_63 [7]
+-----------------------------------------------
+                0.00    0.03      67/4147        corpus_eval [27]
+                0.00    1.69    4080/4147        monk_step [9]
+[8]     19.7    0.00    1.72    4147         work_loop [8]
+                0.02    1.32  524288/3145728     WL_FID____DDA_FRAME_SEQ [2]
+                0.04    0.20 1320380/1320380     WL_FID____DDA_TREE_PAINT [10]
+                0.03    0.05 1318346/1318346     WL_FID____DDA_TREE_PAINT_K519 [21]
+                0.01    0.01 1318346/1318346     WL_FID____DDA_TREE_PAINT_K520 [28]
+                0.02    0.00  174762/1048572     WL_FID____DDA_FRAME_SEQ_K431 [16]
+                0.01    0.00  524288/3145728     WL_FID____RENDER_PIXEL_PRESENT [23]
+                0.01    0.00  174762/1048572     WL_FID____DDA_FRAME_SEQ_K432 [25]
+                0.01    0.00  174762/1048572     WL_FID____DDA_FRAME_SEQ_K433 [26]
+                0.00    0.00  174762/1048572     WL_FID____DDA_FRAME_SEQ_K434 [29]
+                0.00    0.00    4092/200700      WL_FID_IMAGE_FREE [33]
+                0.00    0.00       1/1           WL_FID____DDA_GRID_BUILD_K837 [35]
+                0.00    0.00    2035/2035        WL_FID____DDA_GRID_PAINT [36]
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE_K539 [39]
+                0.00    0.00      16/50          WL_FID_IO_BIND [37]
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE [44]
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE_K538 [46]
+                0.00    0.00       1/1           WL_FID_MAIN_C1120 [51]
+                0.00    0.00       1/1           WL_FID_MAIN_K1083 [53]
+                0.00    0.00       1/1           WL_FID_MAIN_K1079 [52]
+                0.00    0.00       1/1           WL_FID_IO_ARGS [50]
+                0.00    0.00    2034/2034        WL_FID____ATELIER_CUBOIDS_K362 [54]
+                0.00    0.00    2001/2001        WL_FID____ATELIER_TRANSLATE_K357 [55]
+                0.00    0.00      59/59          WL_FID_STRING_CMP [56]
+                0.00    0.00       2/4           WL_FID_IO_NOW [49]
+                0.00    0.00       2/12          WL_FID_FRAME_DRAWN_C410 [42]
+                0.00    0.00       2/12          WL_FID_FRAMES_C409 [41]
+                0.00    0.00      59/59          WL_FID_STRING_ORDER_K849 [57]
+                0.00    0.00       2/12          WL_FID_SCENE_DRAW [48]
+                0.00    0.00      37/37          WL_FID____MAIN_OPTIONS_FLAG [58]
+                0.00    0.00      30/30          WL_FID____MAIN_OPTIONS_HAS [59]
+                0.00    0.00      72/72          WL_FID_STRING_CMP_K691 [60]
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE_K540 [61]
+                0.00    0.00       3/3           WL_FID_U32_READ [63]
+                0.00    0.00      41/41          WL_FID_STRING_APPEND_K761 [65]
+                0.00    0.00      12/12          WL_FID_FRAME_DRAWN_C411 [67]
+                0.00    0.00       1/1           WL_FID_MAIN_C1180 [68]
+                0.00    0.00       1/1           WL_FID_SCENE_BUILD_K775 [69]
+                0.00    0.00       3/3           WL_FID_NAT_SHOW_FIN [73]
+                0.00    0.00       5/5           WL_FID____MAIN_OPTIONS_ARGS_K961 [74]
+                0.00    0.00       1/1           WL_FID_MAIN_K1078 [75]
+                0.00    0.00    4147/20547       WL_FID_ENTER [81]
+                0.00    0.00    2034/2034        WL_FID____DDA_GRID_PAINT_K672 [84]
+                0.00    0.00      78/202         WL_FID_CLO_APPLY [87]
+                0.00    0.00      59/59          WL_FID_STRING_EQ_K950 [89]
+                0.00    0.00      59/59          WL_FID_STRING_ORDER [90]
+                0.00    0.00      59/59          WL_FID_STRING_EQ [88]
+                0.00    0.00      57/16507       WL_FID_EXIT [82]
+                0.00    0.00      30/30          WL_FID____MAIN_OPTIONS_FLAG_K955 [94]
+                0.00    0.00      25/25          WL_FID____MAIN_OPTIONS_HAS_K959 [98]
+                0.00    0.00      25/25          WL_FID____MAIN_OPTIONS_HAS_K958 [97]
+                0.00    0.00      24/50          WL_FID_IO_BIND_C1073 [91]
+                0.00    0.00      12/50          WL_FID_IO_BIND_K1074 [92]
+                0.00    0.00      12/12          WL_FID_IMAGE_DROP [107]
+                0.00    0.00       9/9           WL_FID_U32_POW_K674 [113]
+                0.00    0.00       6/6           WL_FID_STRING_APPEND [115]
+                0.00    0.00       6/6           WL_FID____ATELIER_CUBOIDS [117]
+                0.00    0.00       6/6           WL_FID____ATELIER_ASSEMBLIES_K542 [116]
+                0.00    0.00       4/30          WL_FID_IO_PURE [93]
+                0.00    0.00       4/4           WL_FID____MAIN_OPTIONS_NUMBER [121]
+                0.00    0.00       3/3           WL_FID_NAT_SHOW [124]
+                0.00    0.00       3/3           WL_FID____MAIN_OPTIONS_NUMBER_K948 [127]
+                0.00    0.00       3/3           WL_FID_U32_READ_GO [125]
+                0.00    0.00       3/3           WL_FID____ATELIER_TRANSLATE [126]
+                0.00    0.00       2/2           WL_FID_IO_PRINT [130]
+                0.00    0.00       2/12          WL_FID_WINDOW_FRAME [109]
+                0.00    0.00       2/12          WL_FID_FRAMES_K408 [103]
+                0.00    0.00       2/12          WL_FID_SCENE_DRAW_K763 [108]
+                0.00    0.00       2/12          WL_FID____DDA_FRAME_FORK [110]
+                0.00    0.00       2/14          WL_FID_FRAMES [100]
+                0.00    0.00       2/2           WL_FID____MAIN_OPTIONS_DEPTH_K857 [133]
+                0.00    0.00       2/2           WL_FID____MAIN_OPTIONS_DEPTH [132]
+                0.00    0.00       2/2           WL_FID_REQUIRE_C512 [131]
+                0.00    0.00       1/1           WL_FID_IO_EMIT [137]
+                0.00    0.00       1/1           WL_FID_MAIN_K1187 [197]
+                0.00    0.00       1/1           WL_FID_MAIN_K1186 [196]
+                0.00    0.00       1/1           WL_FID_MAIN_K1185 [195]
+                0.00    0.00       1/1           WL_FID_MAIN_K1184 [194]
+                0.00    0.00       1/1           WL_FID_MAIN_K1183 [193]
+                0.00    0.00       1/1           WL_FID_MAIN_C1182 [166]
+                0.00    0.00       1/1           WL_FID_WINDOW_CLOSE [200]
+                0.00    0.00       1/1           WL_FID_MAIN_C1181 [165]
+                0.00    0.00       1/1           WL_FID_MAIN_C1177 [162]
+                0.00    0.00       1/1           WL_FID_MAIN_K1176 [192]
+                0.00    0.00       1/1           WL_FID_MAIN_C1175 [161]
+                0.00    0.00       1/1           WL_FID_MAIN_C1172 [158]
+                0.00    0.00       1/1           WL_FID_MAIN_K1171 [191]
+                0.00    0.00       1/1           WL_FID_MAIN_C1170 [157]
+                0.00    0.00       1/1           WL_FID_IO_PASS_C466 [138]
+                0.00    0.00       1/1           WL_FID_IO_TRY_C554 [140]
+                0.00    0.00       1/1           WL_FID_WINDOW_OPEN [201]
+                0.00    0.00       1/1           WL_FID_IO_TRY_C553 [139]
+                0.00    0.00       1/1           WL_FID_MAIN_C1169 [156]
+                0.00    0.00       1/1           WL_FID_MAIN_K1135 [190]
+                0.00    0.00       1/1           WL_FID_MAIN_K1134 [189]
+                0.00    0.00       1/1           WL_FID_MAIN_K1133 [188]
+                0.00    0.00       1/1           WL_FID_MAIN_C1132 [155]
+                0.00    0.00       1/1           WL_FID_MAIN_C1131 [154]
+                0.00    0.00       1/1           WL_FID_MAIN_K1130 [187]
+                0.00    0.00       1/1           WL_FID_MAIN_K1129 [186]
+                0.00    0.00       1/1           WL_FID_MAIN_K1128 [185]
+                0.00    0.00       1/1           WL_FID_MAIN_K1127 [184]
+                0.00    0.00       1/1           WL_FID_MAIN_C1126 [153]
+                0.00    0.00       1/1           WL_FID_MAIN_C1125 [152]
+                0.00    0.00       1/1           WL_FID_MAIN_C1124 [151]
+                0.00    0.00       1/1           WL_FID_MAIN_C1123 [150]
+                0.00    0.00       1/1           WL_FID_MAIN_C1122 [149]
+                0.00    0.00       1/1           WL_FID_MAIN_K1121 [183]
+                0.00    0.00       1/1           WL_FID____DDA_GRID_BUILD_K838 [207]
+                0.00    0.00       1/1           WL_FID_U32_POW [199]
+                0.00    0.00       1/1           WL_FID____DDA_GRID_BUILD [206]
+                0.00    0.00       1/1           WL_FID_SCENE_BUILD [198]
+                0.00    0.00       1/1           WL_FID_MAIN_C1119 [148]
+                0.00    0.00       1/1           WL_FID_MAIN_K1100 [182]
+                0.00    0.00       1/1           WL_FID____ATELIER_BODY_K696 [205]
+                0.00    0.00       1/1           WL_FID____ATELIER_ASSEMBLIES [202]
+                0.00    0.00       1/1           WL_FID____ATELIER_BODY_K695 [204]
+                0.00    0.00       1/1           WL_FID____ATELIER_BODY [203]
+                0.00    0.00       1/1           WL_FID_BODY [136]
+                0.00    0.00       1/1           WL_FID_MAIN_K1099 [181]
+                0.00    0.00       1/1           WL_FID_MAIN_K1098 [180]
+                0.00    0.00       1/1           WL_FID_MAIN_K1097 [179]
+                0.00    0.00       1/1           WL_FID_MAIN_K1096 [178]
+                0.00    0.00       1/1           WL_FID_MAIN_K1095 [177]
+                0.00    0.00       1/1           WL_FID_MAIN_K1094 [176]
+                0.00    0.00       1/1           WL_FID_MAIN_K1093 [175]
+                0.00    0.00       1/1           WL_FID_MAIN_K1092 [174]
+                0.00    0.00       1/1           WL_FID_MAIN_C1091 [147]
+                0.00    0.00       1/1           WL_FID_MAIN_C1090 [146]
+                0.00    0.00       1/1           WL_FID_MAIN_K1089 [173]
+                0.00    0.00       1/1           WL_FID_MAIN_K1088 [172]
+                0.00    0.00       1/1           WL_FID_MAIN_C1087 [145]
+                0.00    0.00       1/1           WL_FID_MAIN_C1086 [144]
+                0.00    0.00       1/1           WL_FID_MAIN_K1085 [171]
+                0.00    0.00       1/1           WL_FID_MAIN_K1084 [170]
+                0.00    0.00       1/1           WL_FID_MAIN_K1082 [169]
+                0.00    0.00       1/1           WL_FID_MAIN_K1081 [168]
+                0.00    0.00       1/1           WL_FID_MAIN_K1080 [167]
+                0.00    0.00       1/1           WL_FID____MAIN_OPTIONS_ARGS [208]
+                0.00    0.00       1/1           WL_FID_MAIN_C1077 [143]
+                0.00    0.00       1/1           WL_FID_MAIN_C1076 [142]
+                0.00    0.00       1/1           WL_FID_MAIN [141]
+-----------------------------------------------
+                0.00    1.69  215040/215040      pool_work [1]
+[9]     19.3    0.00    1.69  215040         monk_step [9]
+                0.00    1.69    4080/4147        work_loop [8]
+                0.00    0.00    4080/4080        task_deal [83]
+-----------------------------------------------
+                0.04    0.20 1320380/1320380     work_loop [8]
+[10]     2.8    0.04    0.20 1320380         WL_FID____DDA_TREE_PAINT [10]
+                0.04    0.12 2636692/2636692     spin_164 [12]
+                0.00    0.03  579768/1161055     span_fade [22]
+                0.01    0.00  330448/4703319     term_drop [11]
+                0.00    0.00    2033/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       1/4703319     io_step [15]
+                0.00    0.00       1/4703319     WL_FID_FRAME_DRAWN_C411 [67]
+                0.00    0.00       1/4703319     WL_FID____MAIN_OPTIONS_FLAG [58]
+                0.00    0.00       1/4703319     WL_FID_MAIN_C1180 [68]
+                0.00    0.00       1/4703319     spin_238 [70]
+                0.00    0.00      59/4703319     WL_FID_STRING_ORDER_K849 [57]
+                0.00    0.00   40036/4703319     spin_221 [32]
+                0.01    0.00  196608/4703319     WL_FID_IMAGE_FREE [33]
+                0.01    0.00  330448/4703319     WL_FID____DDA_TREE_PAINT [10]
+                0.02    0.00  338416/4703319     WL_FID____DDA_TREE_PAINT_K519 [21]
+                0.05    0.00 1161055/4703319     span_fade [22]
+                0.12    0.00 2636692/4703319     spin_164 [12]
+[11]     2.4    0.21    0.00 4703319         term_drop [11]
+                0.00    0.00     215/238         heap_hand [86]
+-----------------------------------------------
+                0.04    0.12 2636692/2636692     WL_FID____DDA_TREE_PAINT [10]
+[12]     1.8    0.04    0.12 2636692         spin_164 [12]
+                0.12    0.00 2636692/4703319     term_drop [11]
+-----------------------------------------------
+                0.00    0.12       1/1           main [14]
+[13]     1.3    0.00    0.12       1         io_loop [13]
+                0.00    0.12       1/1           io_step [15]
+                0.00    0.00       1/23          corpus_eval [27]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+                0.00    0.00       1/2           pool_stack [135]
+                0.00    0.00       1/1           io_spawn [210]
+-----------------------------------------------
+                                                 <spontaneous>
+[14]     1.3    0.00    0.12                 main [14]
+                0.00    0.12       1/1           io_loop [13]
+                0.00    0.00       1/13          io_sync [101]
+-----------------------------------------------
+                0.00    0.12       1/1           io_loop [13]
+[15]     1.3    0.00    0.12       1         io_step [15]
+                0.00    0.09      21/21          io_exec [17]
+                0.00    0.03      22/23          corpus_eval [27]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+                0.00    0.00       1/4703319     term_drop [11]
+-----------------------------------------------
+                0.02    0.00  174762/1048572     work_loop [8]
+                0.08    0.00  873810/1048572     pool_work [1]
+[16]     1.1    0.10    0.00 1048572         WL_FID____DDA_FRAME_SEQ_K431 [16]
+-----------------------------------------------
+                0.00    0.09      21/21          io_step [15]
+[17]     1.0    0.00    0.09      21         io_exec [17]
+                0.00    0.09      12/12          window_frame_run [19]
+                0.00    0.00       1/1           io_args_run [62]
+                0.00    0.00       4/4           io_now_run [122]
+                0.00    0.00       2/2           io_print_run [134]
+                0.00    0.00       1/1           window_close_run [212]
+                0.00    0.00       1/1           window_open_run [213]
+-----------------------------------------------
+                0.00    0.09      12/12          window_frame_run [19]
+[18]     1.0    0.00    0.09      12         window_frame [18]
+                0.09    0.00      12/12          window_sq [20]
+                0.00    0.00       1/1292791     rfc_wrap [34]
+                0.00    0.00      12/13          io_sync [101]
+                0.00    0.00       1/7           io_mem [114]
+-----------------------------------------------
+                0.00    0.09      12/12          io_exec [17]
+[19]     1.0    0.00    0.09      12         window_frame_run [19]
+                0.00    0.09      12/12          window_frame [18]
+-----------------------------------------------
+                             3145716             window_sq [20]
+                0.09    0.00      12/12          window_frame [18]
+[20]     1.0    0.09    0.00      12+3145716 window_sq [20]
+                             3145716             window_sq [20]
+-----------------------------------------------
+                0.03    0.05 1318346/1318346     work_loop [8]
+[21]     0.9    0.03    0.05 1318346         WL_FID____DDA_TREE_PAINT_K519 [21]
+                0.00    0.03  577058/1161055     span_fade [22]
+                0.02    0.00  338416/4703319     term_drop [11]
+-----------------------------------------------
+                0.00    0.00       2/1161055     WL_FID_U32_READ [63]
+                0.00    0.00      25/1161055     WL_FID____MAIN_OPTIONS_HAS [59]
+                0.00    0.00      28/1161055     WL_FID____MAIN_OPTIONS_FLAG [58]
+                0.00    0.00     106/1161055     WL_FID_STRING_CMP [56]
+                0.00    0.00    2034/1161055     WL_FID____DDA_GRID_PAINT [36]
+                0.00    0.00    2034/1161055     WL_FID____DDA_GRID_BUILD_K837 [35]
+                0.00    0.03  577058/1161055     WL_FID____DDA_TREE_PAINT_K519 [21]
+                0.00    0.03  579768/1161055     WL_FID____DDA_TREE_PAINT [10]
+[22]     0.7    0.01    0.05 1161055         span_fade [22]
+                0.05    0.00 1161055/4703319     term_drop [11]
+-----------------------------------------------
+                0.01    0.00  524288/3145728     work_loop [8]
+                0.05    0.00 2621440/3145728     pool_work [1]
+[23]     0.7    0.06    0.00 3145728         WL_FID____RENDER_PIXEL_PRESENT [23]
+-----------------------------------------------
+                0.04    0.00 9437184/9437184     spin_184 [3]
+[24]     0.5    0.04    0.00 9437184         spin_185 [24]
+-----------------------------------------------
+                0.01    0.00  174762/1048572     work_loop [8]
+                0.03    0.00  873810/1048572     pool_work [1]
+[25]     0.5    0.04    0.00 1048572         WL_FID____DDA_FRAME_SEQ_K432 [25]
+-----------------------------------------------
+                0.01    0.00  174762/1048572     work_loop [8]
+                0.03    0.00  873810/1048572     pool_work [1]
+[26]     0.3    0.03    0.00 1048572         WL_FID____DDA_FRAME_SEQ_K433 [26]
+-----------------------------------------------
+                0.00    0.00       1/23          io_loop [13]
+                0.00    0.03      22/23          io_step [15]
+[27]     0.3    0.00    0.03      23         corpus_eval [27]
+                0.00    0.03      67/4147        work_loop [8]
+                0.00    0.00      12/12          pool_open [112]
+                0.00    0.00      12/12          cube_run [111]
+-----------------------------------------------
+                0.01    0.01 1318346/1318346     work_loop [8]
+[28]     0.2    0.01    0.01 1318346         WL_FID____DDA_TREE_PAINT_K520 [28]
+                0.00    0.01 1318346/1318346     spin_221 [32]
+-----------------------------------------------
+                0.00    0.00  174762/1048572     work_loop [8]
+                0.01    0.00  873810/1048572     pool_work [1]
+[29]     0.1    0.01    0.00 1048572         WL_FID____DDA_FRAME_SEQ_K434 [29]
+                0.00    0.00     214/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       1/918         io_loop [13]
+                0.00    0.00       1/918         io_step [15]
+                0.00    0.00       1/918         spin_223 [45]
+                0.00    0.00       1/918         spin_224 [47]
+                0.00    0.00       1/918         WL_FID_SCENE_DRAW [48]
+                0.00    0.00       1/918         WL_FID____DDA_GRID_BUILD_K837 [35]
+                0.00    0.00       1/918         WL_FID_MAIN_K1079 [52]
+                0.00    0.00       1/918         WL_FID_MAIN_K1083 [53]
+                0.00    0.00       1/918         WL_FID_MAIN_C1120 [51]
+                0.00    0.00       1/918         WL_FID_IO_ARGS [50]
+                0.00    0.00       1/918         WL_FID_IO_NOW [49]
+                0.00    0.00       2/918         spin_225 [40]
+                0.00    0.00       2/918         WL_FID_IMAGE_FREE [33]
+                0.00    0.00       2/918         WL_FID_FRAMES_C409 [41]
+                0.00    0.00       2/918         WL_FID_FRAME_DRAWN_C410 [42]
+                0.00    0.00       2/918         WL_FID_FRAME_DRAWN_C416 [43]
+                0.00    0.00       4/918         WL_FID_FRAME_DRAWN_C413 [38]
+                0.00    0.00       4/918         WL_FID_IO_BIND [37]
+                0.00    0.00     214/918         WL_FID____DDA_FRAME_SEQ_K434 [29]
+                0.00    0.00     226/918         rfc_wrap [34]
+                0.00    0.00     449/918         spin_221 [32]
+[30]     0.1    0.01    0.00     918         heap_alloc_miss [30]
+-----------------------------------------------
+                                                 <spontaneous>
+[31]     0.1    0.01    0.00                 _init [31]
+-----------------------------------------------
+                0.00    0.01 1318346/1318346     WL_FID____DDA_TREE_PAINT_K520 [28]
+[32]     0.1    0.00    0.01 1318346         spin_221 [32]
+                0.00    0.00     449/918         heap_alloc_miss [30]
+                0.00    0.00 1276276/1292791     rfc_wrap [34]
+                0.00    0.00   40036/4703319     term_drop [11]
+-----------------------------------------------
+                0.00    0.00    4092/200700      work_loop [8]
+                0.00    0.01  196608/200700      pool_work [1]
+[33]     0.1    0.00    0.01  200700         WL_FID_IMAGE_FREE [33]
+                0.01    0.00  196608/4703319     term_drop [11]
+                0.00    0.00       2/918         heap_alloc_miss [30]
+                0.00    0.00       8/238         heap_hand [86]
+-----------------------------------------------
+                0.00    0.00       1/1292791     window_frame [18]
+                0.00    0.00       1/1292791     WL_FID_MAIN_K1078 [75]
+                0.00    0.00       4/1292791     WL_FID____MAIN_OPTIONS_ARGS_K961 [74]
+                0.00    0.00       5/1292791     WL_FID_NAT_SHOW_FIN [73]
+                0.00    0.00       9/1292791     io_args_run [62]
+                0.00    0.00      11/1292791     spin_226 [72]
+                0.00    0.00      15/1292791     spin_227 [71]
+                0.00    0.00      17/1292791     WL_FID____ATELIER_GENERATE_K540 [61]
+                0.00    0.00      37/1292791     spin_228 [66]
+                0.00    0.00      41/1292791     WL_FID_STRING_APPEND_K761 [65]
+                0.00    0.00      50/1292791     io_str [64]
+                0.00    0.00      57/1292791     WL_FID_STRING_CMP [56]
+                0.00    0.00     135/1292791     WL_FID_STRING_CMP_K691 [60]
+                0.00    0.00    1255/1292791     spin_224 [47]
+                0.00    0.00    1283/1292791     spin_225 [40]
+                0.00    0.00    1461/1292791     spin_223 [45]
+                0.00    0.00    2033/1292791     WL_FID____DDA_TREE_PAINT [10]
+                0.00    0.00    2034/1292791     WL_FID____DDA_GRID_BUILD_K837 [35]
+                0.00    0.00    3999/1292791     WL_FID____ATELIER_TRANSLATE_K357 [55]
+                0.00    0.00    4067/1292791     WL_FID____ATELIER_CUBOIDS_K362 [54]
+                0.00    0.00 1276276/1292791     spin_221 [32]
+[34]     0.0    0.00    0.00 1292791         rfc_wrap [34]
+                0.00    0.00     226/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[35]     0.0    0.00    0.00       1         WL_FID____DDA_GRID_BUILD_K837 [35]
+                0.00    0.00    2034/1161055     span_fade [22]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+                0.00    0.00    2034/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00    2035/2035        work_loop [8]
+[36]     0.0    0.00    0.00    2035         WL_FID____DDA_GRID_PAINT [36]
+                0.00    0.00    2034/1161055     span_fade [22]
+-----------------------------------------------
+                0.00    0.00      16/50          work_loop [8]
+                0.00    0.00      34/50          pool_work [1]
+[37]     0.0    0.00    0.00      50         WL_FID_IO_BIND [37]
+                0.00    0.00       4/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00      12/12          pool_work [1]
+[38]     0.0    0.00    0.00      12         WL_FID_FRAME_DRAWN_C413 [38]
+                0.00    0.00       4/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[39]     0.0    0.00    0.00       1         WL_FID____ATELIER_GENERATE_K539 [39]
+                0.00    0.00       1/1           spin_225 [40]
+-----------------------------------------------
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE_K539 [39]
+[40]     0.0    0.00    0.00       1         spin_225 [40]
+                0.00    0.00       2/918         heap_alloc_miss [30]
+                0.00    0.00    1283/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       2/12          work_loop [8]
+                0.00    0.00      10/12          pool_work [1]
+[41]     0.0    0.00    0.00      12         WL_FID_FRAMES_C409 [41]
+                0.00    0.00       2/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       2/12          work_loop [8]
+                0.00    0.00      10/12          pool_work [1]
+[42]     0.0    0.00    0.00      12         WL_FID_FRAME_DRAWN_C410 [42]
+                0.00    0.00       2/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00      12/12          pool_work [1]
+[43]     0.0    0.00    0.00      12         WL_FID_FRAME_DRAWN_C416 [43]
+                0.00    0.00       2/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[44]     0.0    0.00    0.00       1         WL_FID____ATELIER_GENERATE [44]
+                0.00    0.00       1/1           spin_223 [45]
+-----------------------------------------------
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE [44]
+[45]     0.0    0.00    0.00       1         spin_223 [45]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+                0.00    0.00    1461/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[46]     0.0    0.00    0.00       1         WL_FID____ATELIER_GENERATE_K538 [46]
+                0.00    0.00       1/1           spin_224 [47]
+-----------------------------------------------
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE_K538 [46]
+[47]     0.0    0.00    0.00       1         spin_224 [47]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+                0.00    0.00    1255/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       2/12          work_loop [8]
+                0.00    0.00      10/12          pool_work [1]
+[48]     0.0    0.00    0.00      12         WL_FID_SCENE_DRAW [48]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       2/4           work_loop [8]
+                0.00    0.00       2/4           pool_work [1]
+[49]     0.0    0.00    0.00       4         WL_FID_IO_NOW [49]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[50]     0.0    0.00    0.00       1         WL_FID_IO_ARGS [50]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[51]     0.0    0.00    0.00       1         WL_FID_MAIN_C1120 [51]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[52]     0.0    0.00    0.00       1         WL_FID_MAIN_K1079 [52]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[53]     0.0    0.00    0.00       1         WL_FID_MAIN_K1083 [53]
+                0.00    0.00       1/918         heap_alloc_miss [30]
+-----------------------------------------------
+                0.00    0.00    2034/2034        work_loop [8]
+[54]     0.0    0.00    0.00    2034         WL_FID____ATELIER_CUBOIDS_K362 [54]
+                0.00    0.00    4067/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00    2001/2001        work_loop [8]
+[55]     0.0    0.00    0.00    2001         WL_FID____ATELIER_TRANSLATE_K357 [55]
+                0.00    0.00    3999/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00      59/59          work_loop [8]
+[56]     0.0    0.00    0.00      59         WL_FID_STRING_CMP [56]
+                0.00    0.00     106/1161055     span_fade [22]
+                0.00    0.00      57/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00      59/59          work_loop [8]
+[57]     0.0    0.00    0.00      59         WL_FID_STRING_ORDER_K849 [57]
+                0.00    0.00      59/4703319     term_drop [11]
+-----------------------------------------------
+                0.00    0.00      37/37          work_loop [8]
+[58]     0.0    0.00    0.00      37         WL_FID____MAIN_OPTIONS_FLAG [58]
+                0.00    0.00      28/1161055     span_fade [22]
+                0.00    0.00       1/4703319     term_drop [11]
+-----------------------------------------------
+                0.00    0.00      30/30          work_loop [8]
+[59]     0.0    0.00    0.00      30         WL_FID____MAIN_OPTIONS_HAS [59]
+                0.00    0.00      25/1161055     span_fade [22]
+-----------------------------------------------
+                0.00    0.00      72/72          work_loop [8]
+[60]     0.0    0.00    0.00      72         WL_FID_STRING_CMP_K691 [60]
+                0.00    0.00     135/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[61]     0.0    0.00    0.00       1         WL_FID____ATELIER_GENERATE_K540 [61]
+                0.00    0.00       1/1           spin_228 [66]
+                0.00    0.00      17/1292791     rfc_wrap [34]
+                0.00    0.00       1/1           spin_227 [71]
+                0.00    0.00       1/1           spin_226 [72]
+-----------------------------------------------
+                0.00    0.00       1/1           io_exec [17]
+[62]     0.0    0.00    0.00       1         io_args_run [62]
+                0.00    0.00       5/5           io_str [64]
+                0.00    0.00       9/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       3/3           work_loop [8]
+[63]     0.0    0.00    0.00       3         WL_FID_U32_READ [63]
+                0.00    0.00       2/1161055     span_fade [22]
+-----------------------------------------------
+                0.00    0.00       5/5           io_args_run [62]
+[64]     0.0    0.00    0.00       5         io_str [64]
+                0.00    0.00      50/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00      41/41          work_loop [8]
+[65]     0.0    0.00    0.00      41         WL_FID_STRING_APPEND_K761 [65]
+                0.00    0.00      41/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE_K540 [61]
+[66]     0.0    0.00    0.00       1         spin_228 [66]
+                0.00    0.00      37/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00      12/12          work_loop [8]
+[67]     0.0    0.00    0.00      12         WL_FID_FRAME_DRAWN_C411 [67]
+                0.00    0.00       1/4703319     term_drop [11]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[68]     0.0    0.00    0.00       1         WL_FID_MAIN_C1180 [68]
+                0.00    0.00       1/4703319     term_drop [11]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[69]     0.0    0.00    0.00       1         WL_FID_SCENE_BUILD_K775 [69]
+                0.00    0.00       1/1           spin_238 [70]
+-----------------------------------------------
+                0.00    0.00       1/1           WL_FID_SCENE_BUILD_K775 [69]
+[70]     0.0    0.00    0.00       1         spin_238 [70]
+                0.00    0.00       1/4703319     term_drop [11]
+                0.00    0.00      30/30          spin_5 [95]
+                0.00    0.00       5/5           spin_76 [119]
+                0.00    0.00       5/5           spin_84 [120]
+-----------------------------------------------
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE_K540 [61]
+[71]     0.0    0.00    0.00       1         spin_227 [71]
+                0.00    0.00      15/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       1/1           WL_FID____ATELIER_GENERATE_K540 [61]
+[72]     0.0    0.00    0.00       1         spin_226 [72]
+                0.00    0.00      11/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       3/3           work_loop [8]
+[73]     0.0    0.00    0.00       3         WL_FID_NAT_SHOW_FIN [73]
+                0.00    0.00       5/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       5/5           work_loop [8]
+[74]     0.0    0.00    0.00       5         WL_FID____MAIN_OPTIONS_ARGS_K961 [74]
+                0.00    0.00       4/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[75]     0.0    0.00    0.00       1         WL_FID_MAIN_K1078 [75]
+                0.00    0.00       1/1292791     rfc_wrap [34]
+-----------------------------------------------
+                0.00    0.00   65532/65532       pool_work [1]
+[76]     0.0    0.00    0.00   65532         WL_FID_IMAGE_FREE_J72 [76]
+-----------------------------------------------
+                0.00    0.00   61440/61440       pool_work [1]
+[77]     0.0    0.00    0.00   61440         WL_FID_IMAGE_FREE_K72 [77]
+-----------------------------------------------
+                0.00    0.00   61440/61440       pool_work [1]
+[78]     0.0    0.00    0.00   61440         WL_FID_IMAGE_FREE_K73 [78]
+-----------------------------------------------
+                0.00    0.00   61440/61440       pool_work [1]
+[79]     0.0    0.00    0.00   61440         WL_FID_IMAGE_FREE_K74 [79]
+-----------------------------------------------
+                0.00    0.00   61440/61440       pool_work [1]
+[80]     0.0    0.00    0.00   61440         WL_FID_IMAGE_FREE_K75 [80]
+-----------------------------------------------
+                0.00    0.00    4147/20547       work_loop [8]
+                0.00    0.00   16400/20547       pool_work [1]
+[81]     0.0    0.00    0.00   20547         WL_FID_ENTER [81]
+                0.00    0.00       2/238         heap_hand [86]
+-----------------------------------------------
+                0.00    0.00      57/16507       work_loop [8]
+                0.00    0.00   16450/16507       pool_work [1]
+[82]     0.0    0.00    0.00   16507         WL_FID_EXIT [82]
+-----------------------------------------------
+                0.00    0.00    4080/4080        monk_step [9]
+[83]     0.0    0.00    0.00    4080         task_deal [83]
+-----------------------------------------------
+                0.00    0.00    2034/2034        work_loop [8]
+[84]     0.0    0.00    0.00    2034         WL_FID____DDA_GRID_PAINT_K672 [84]
+-----------------------------------------------
+                0.00    0.00     300/300         spin_85 [96]
+[85]     0.0    0.00    0.00     300         spin_87 [85]
+-----------------------------------------------
+                0.00    0.00       2/238         WL_FID_ENTER [81]
+                0.00    0.00       2/238         WL_FID_FRAMES_C417 [102]
+                0.00    0.00       8/238         WL_FID_IMAGE_FREE [33]
+                0.00    0.00      11/238         WL_FID_CLO_APPLY [87]
+                0.00    0.00     215/238         term_drop [11]
+[86]     0.0    0.00    0.00     238         heap_hand [86]
+-----------------------------------------------
+                0.00    0.00      78/202         work_loop [8]
+                0.00    0.00     124/202         pool_work [1]
+[87]     0.0    0.00    0.00     202         WL_FID_CLO_APPLY [87]
+                0.00    0.00      11/238         heap_hand [86]
+-----------------------------------------------
+                0.00    0.00      59/59          work_loop [8]
+[88]     0.0    0.00    0.00      59         WL_FID_STRING_EQ [88]
+-----------------------------------------------
+                0.00    0.00      59/59          work_loop [8]
+[89]     0.0    0.00    0.00      59         WL_FID_STRING_EQ_K950 [89]
+-----------------------------------------------
+                0.00    0.00      59/59          work_loop [8]
+[90]     0.0    0.00    0.00      59         WL_FID_STRING_ORDER [90]
+-----------------------------------------------
+                0.00    0.00      24/50          work_loop [8]
+                0.00    0.00      26/50          pool_work [1]
+[91]     0.0    0.00    0.00      50         WL_FID_IO_BIND_C1073 [91]
+-----------------------------------------------
+                0.00    0.00      12/50          work_loop [8]
+                0.00    0.00      38/50          pool_work [1]
+[92]     0.0    0.00    0.00      50         WL_FID_IO_BIND_K1074 [92]
+-----------------------------------------------
+                0.00    0.00       4/30          work_loop [8]
+                0.00    0.00      26/30          pool_work [1]
+[93]     0.0    0.00    0.00      30         WL_FID_IO_PURE [93]
+-----------------------------------------------
+                0.00    0.00      30/30          work_loop [8]
+[94]     0.0    0.00    0.00      30         WL_FID____MAIN_OPTIONS_FLAG_K955 [94]
+-----------------------------------------------
+                0.00    0.00      30/30          spin_238 [70]
+[95]     0.0    0.00    0.00      30         spin_5 [95]
+-----------------------------------------------
+                0.00    0.00      30/30          spin_84 [120]
+[96]     0.0    0.00    0.00      30         spin_85 [96]
+                0.00    0.00     300/300         spin_87 [85]
+-----------------------------------------------
+                0.00    0.00      25/25          work_loop [8]
+[97]     0.0    0.00    0.00      25         WL_FID____MAIN_OPTIONS_HAS_K958 [97]
+-----------------------------------------------
+                0.00    0.00      25/25          work_loop [8]
+[98]     0.0    0.00    0.00      25         WL_FID____MAIN_OPTIONS_HAS_K959 [98]
+-----------------------------------------------
+                0.00    0.00      24/24          cube_run [111]
+[99]     0.0    0.00    0.00      24         pool_turn [99]
+-----------------------------------------------
+                0.00    0.00       2/14          work_loop [8]
+                0.00    0.00      12/14          pool_work [1]
+[100]    0.0    0.00    0.00      14         WL_FID_FRAMES [100]
+-----------------------------------------------
+                0.00    0.00       1/13          main [14]
+                0.00    0.00      12/13          window_frame [18]
+[101]    0.0    0.00    0.00      13         io_sync [101]
+-----------------------------------------------
+                0.00    0.00      12/12          pool_work [1]
+[102]    0.0    0.00    0.00      12         WL_FID_FRAMES_C417 [102]
+                0.00    0.00       2/238         heap_hand [86]
+-----------------------------------------------
+                0.00    0.00       2/12          work_loop [8]
+                0.00    0.00      10/12          pool_work [1]
+[103]    0.0    0.00    0.00      12         WL_FID_FRAMES_K408 [103]
+-----------------------------------------------
+                0.00    0.00      12/12          pool_work [1]
+[104]    0.0    0.00    0.00      12         WL_FID_FRAME_DRAWN_C414 [104]
+-----------------------------------------------
+                0.00    0.00      12/12          pool_work [1]
+[105]    0.0    0.00    0.00      12         WL_FID_FRAME_DRAWN_C415 [105]
+-----------------------------------------------
+                0.00    0.00      12/12          pool_work [1]
+[106]    0.0    0.00    0.00      12         WL_FID_FRAME_DRAWN_K412 [106]
+-----------------------------------------------
+                0.00    0.00      12/12          work_loop [8]
+[107]    0.0    0.00    0.00      12         WL_FID_IMAGE_DROP [107]
+-----------------------------------------------
+                0.00    0.00       2/12          work_loop [8]
+                0.00    0.00      10/12          pool_work [1]
+[108]    0.0    0.00    0.00      12         WL_FID_SCENE_DRAW_K763 [108]
+-----------------------------------------------
+                0.00    0.00       2/12          work_loop [8]
+                0.00    0.00      10/12          pool_work [1]
+[109]    0.0    0.00    0.00      12         WL_FID_WINDOW_FRAME [109]
+-----------------------------------------------
+                0.00    0.00       2/12          work_loop [8]
+                0.00    0.00      10/12          pool_work [1]
+[110]    0.0    0.00    0.00      12         WL_FID____DDA_FRAME_FORK [110]
+-----------------------------------------------
+                0.00    0.00      12/12          corpus_eval [27]
+[111]    0.0    0.00    0.00      12         cube_run [111]
+                0.00    0.00      24/24          pool_turn [99]
+-----------------------------------------------
+                0.00    0.00      12/12          corpus_eval [27]
+[112]    0.0    0.00    0.00      12         pool_open [112]
+-----------------------------------------------
+                0.00    0.00       9/9           work_loop [8]
+[113]    0.0    0.00    0.00       9         WL_FID_U32_POW_K674 [113]
+-----------------------------------------------
+                0.00    0.00       1/7           window_frame [18]
+                0.00    0.00       1/7           io_spawn [210]
+                0.00    0.00       2/7           window_open_run [213]
+                0.00    0.00       3/7           io_cbuf [128]
+[114]    0.0    0.00    0.00       7         io_mem [114]
+-----------------------------------------------
+                0.00    0.00       6/6           work_loop [8]
+[115]    0.0    0.00    0.00       6         WL_FID_STRING_APPEND [115]
+-----------------------------------------------
+                0.00    0.00       6/6           work_loop [8]
+[116]    0.0    0.00    0.00       6         WL_FID____ATELIER_ASSEMBLIES_K542 [116]
+-----------------------------------------------
+                0.00    0.00       6/6           work_loop [8]
+[117]    0.0    0.00    0.00       6         WL_FID____ATELIER_CUBOIDS [117]
+-----------------------------------------------
+                0.00    0.00       3/6           WL_FID_SCENE_BUILD [198]
+                0.00    0.00       3/6           spin_251 [211]
+[118]    0.0    0.00    0.00       6         spare_free [118]
+-----------------------------------------------
+                0.00    0.00       5/5           spin_238 [70]
+[119]    0.0    0.00    0.00       5         spin_76 [119]
+-----------------------------------------------
+                0.00    0.00       5/5           spin_238 [70]
+[120]    0.0    0.00    0.00       5         spin_84 [120]
+                0.00    0.00      30/30          spin_85 [96]
+-----------------------------------------------
+                0.00    0.00       4/4           work_loop [8]
+[121]    0.0    0.00    0.00       4         WL_FID____MAIN_OPTIONS_NUMBER [121]
+-----------------------------------------------
+                0.00    0.00       4/4           io_exec [17]
+[122]    0.0    0.00    0.00       4         io_now_run [122]
+-----------------------------------------------
+                0.00    0.00       4/4           io_print_run [134]
+[123]    0.0    0.00    0.00       4         io_out [123]
+-----------------------------------------------
+                0.00    0.00       3/3           work_loop [8]
+[124]    0.0    0.00    0.00       3         WL_FID_NAT_SHOW [124]
+-----------------------------------------------
+                0.00    0.00       3/3           work_loop [8]
+[125]    0.0    0.00    0.00       3         WL_FID_U32_READ_GO [125]
+-----------------------------------------------
+                0.00    0.00       3/3           work_loop [8]
+[126]    0.0    0.00    0.00       3         WL_FID____ATELIER_TRANSLATE [126]
+-----------------------------------------------
+                0.00    0.00       3/3           work_loop [8]
+[127]    0.0    0.00    0.00       3         WL_FID____MAIN_OPTIONS_NUMBER_K948 [127]
+-----------------------------------------------
+                0.00    0.00       1/3           window_open_run [213]
+                0.00    0.00       2/3           io_print_run [134]
+[128]    0.0    0.00    0.00       3         io_cbuf [128]
+                0.00    0.00       3/7           io_mem [114]
+-----------------------------------------------
+                0.00    0.00       2/2           pool_work [1]
+[129]    0.0    0.00    0.00       2         WL_FID_FRAMES_C407 [129]
+-----------------------------------------------
+                0.00    0.00       2/2           work_loop [8]
+[130]    0.0    0.00    0.00       2         WL_FID_IO_PRINT [130]
+-----------------------------------------------
+                0.00    0.00       2/2           work_loop [8]
+[131]    0.0    0.00    0.00       2         WL_FID_REQUIRE_C512 [131]
+-----------------------------------------------
+                0.00    0.00       2/2           work_loop [8]
+[132]    0.0    0.00    0.00       2         WL_FID____MAIN_OPTIONS_DEPTH [132]
+-----------------------------------------------
+                0.00    0.00       2/2           work_loop [8]
+[133]    0.0    0.00    0.00       2         WL_FID____MAIN_OPTIONS_DEPTH_K857 [133]
+-----------------------------------------------
+                0.00    0.00       2/2           io_exec [17]
+[134]    0.0    0.00    0.00       2         io_print_run [134]
+                0.00    0.00       4/4           io_out [123]
+                0.00    0.00       2/3           io_cbuf [128]
+-----------------------------------------------
+                0.00    0.00       1/2           io_loop [13]
+                0.00    0.00       1/2           pool_work [1]
+[135]    0.0    0.00    0.00       2         pool_stack [135]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[136]    0.0    0.00    0.00       1         WL_FID_BODY [136]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[137]    0.0    0.00    0.00       1         WL_FID_IO_EMIT [137]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[138]    0.0    0.00    0.00       1         WL_FID_IO_PASS_C466 [138]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[139]    0.0    0.00    0.00       1         WL_FID_IO_TRY_C553 [139]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[140]    0.0    0.00    0.00       1         WL_FID_IO_TRY_C554 [140]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[141]    0.0    0.00    0.00       1         WL_FID_MAIN [141]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[142]    0.0    0.00    0.00       1         WL_FID_MAIN_C1076 [142]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[143]    0.0    0.00    0.00       1         WL_FID_MAIN_C1077 [143]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[144]    0.0    0.00    0.00       1         WL_FID_MAIN_C1086 [144]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[145]    0.0    0.00    0.00       1         WL_FID_MAIN_C1087 [145]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[146]    0.0    0.00    0.00       1         WL_FID_MAIN_C1090 [146]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[147]    0.0    0.00    0.00       1         WL_FID_MAIN_C1091 [147]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[148]    0.0    0.00    0.00       1         WL_FID_MAIN_C1119 [148]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[149]    0.0    0.00    0.00       1         WL_FID_MAIN_C1122 [149]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[150]    0.0    0.00    0.00       1         WL_FID_MAIN_C1123 [150]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[151]    0.0    0.00    0.00       1         WL_FID_MAIN_C1124 [151]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[152]    0.0    0.00    0.00       1         WL_FID_MAIN_C1125 [152]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[153]    0.0    0.00    0.00       1         WL_FID_MAIN_C1126 [153]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[154]    0.0    0.00    0.00       1         WL_FID_MAIN_C1131 [154]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[155]    0.0    0.00    0.00       1         WL_FID_MAIN_C1132 [155]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[156]    0.0    0.00    0.00       1         WL_FID_MAIN_C1169 [156]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[157]    0.0    0.00    0.00       1         WL_FID_MAIN_C1170 [157]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[158]    0.0    0.00    0.00       1         WL_FID_MAIN_C1172 [158]
+-----------------------------------------------
+                0.00    0.00       1/1           pool_work [1]
+[159]    0.0    0.00    0.00       1         WL_FID_MAIN_C1173 [159]
+-----------------------------------------------
+                0.00    0.00       1/1           pool_work [1]
+[160]    0.0    0.00    0.00       1         WL_FID_MAIN_C1174 [160]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[161]    0.0    0.00    0.00       1         WL_FID_MAIN_C1175 [161]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[162]    0.0    0.00    0.00       1         WL_FID_MAIN_C1177 [162]
+-----------------------------------------------
+                0.00    0.00       1/1           pool_work [1]
+[163]    0.0    0.00    0.00       1         WL_FID_MAIN_C1178 [163]
+-----------------------------------------------
+                0.00    0.00       1/1           pool_work [1]
+[164]    0.0    0.00    0.00       1         WL_FID_MAIN_C1179 [164]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[165]    0.0    0.00    0.00       1         WL_FID_MAIN_C1181 [165]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[166]    0.0    0.00    0.00       1         WL_FID_MAIN_C1182 [166]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[167]    0.0    0.00    0.00       1         WL_FID_MAIN_K1080 [167]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[168]    0.0    0.00    0.00       1         WL_FID_MAIN_K1081 [168]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[169]    0.0    0.00    0.00       1         WL_FID_MAIN_K1082 [169]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[170]    0.0    0.00    0.00       1         WL_FID_MAIN_K1084 [170]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[171]    0.0    0.00    0.00       1         WL_FID_MAIN_K1085 [171]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[172]    0.0    0.00    0.00       1         WL_FID_MAIN_K1088 [172]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[173]    0.0    0.00    0.00       1         WL_FID_MAIN_K1089 [173]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[174]    0.0    0.00    0.00       1         WL_FID_MAIN_K1092 [174]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[175]    0.0    0.00    0.00       1         WL_FID_MAIN_K1093 [175]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[176]    0.0    0.00    0.00       1         WL_FID_MAIN_K1094 [176]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[177]    0.0    0.00    0.00       1         WL_FID_MAIN_K1095 [177]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[178]    0.0    0.00    0.00       1         WL_FID_MAIN_K1096 [178]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[179]    0.0    0.00    0.00       1         WL_FID_MAIN_K1097 [179]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[180]    0.0    0.00    0.00       1         WL_FID_MAIN_K1098 [180]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[181]    0.0    0.00    0.00       1         WL_FID_MAIN_K1099 [181]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[182]    0.0    0.00    0.00       1         WL_FID_MAIN_K1100 [182]
+                0.00    0.00       1/1           spin_251 [211]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[183]    0.0    0.00    0.00       1         WL_FID_MAIN_K1121 [183]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[184]    0.0    0.00    0.00       1         WL_FID_MAIN_K1127 [184]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[185]    0.0    0.00    0.00       1         WL_FID_MAIN_K1128 [185]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[186]    0.0    0.00    0.00       1         WL_FID_MAIN_K1129 [186]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[187]    0.0    0.00    0.00       1         WL_FID_MAIN_K1130 [187]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[188]    0.0    0.00    0.00       1         WL_FID_MAIN_K1133 [188]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[189]    0.0    0.00    0.00       1         WL_FID_MAIN_K1134 [189]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[190]    0.0    0.00    0.00       1         WL_FID_MAIN_K1135 [190]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[191]    0.0    0.00    0.00       1         WL_FID_MAIN_K1171 [191]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[192]    0.0    0.00    0.00       1         WL_FID_MAIN_K1176 [192]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[193]    0.0    0.00    0.00       1         WL_FID_MAIN_K1183 [193]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[194]    0.0    0.00    0.00       1         WL_FID_MAIN_K1184 [194]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[195]    0.0    0.00    0.00       1         WL_FID_MAIN_K1185 [195]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[196]    0.0    0.00    0.00       1         WL_FID_MAIN_K1186 [196]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[197]    0.0    0.00    0.00       1         WL_FID_MAIN_K1187 [197]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[198]    0.0    0.00    0.00       1         WL_FID_SCENE_BUILD [198]
+                0.00    0.00       3/6           spare_free [118]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[199]    0.0    0.00    0.00       1         WL_FID_U32_POW [199]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[200]    0.0    0.00    0.00       1         WL_FID_WINDOW_CLOSE [200]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[201]    0.0    0.00    0.00       1         WL_FID_WINDOW_OPEN [201]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[202]    0.0    0.00    0.00       1         WL_FID____ATELIER_ASSEMBLIES [202]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[203]    0.0    0.00    0.00       1         WL_FID____ATELIER_BODY [203]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[204]    0.0    0.00    0.00       1         WL_FID____ATELIER_BODY_K695 [204]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[205]    0.0    0.00    0.00       1         WL_FID____ATELIER_BODY_K696 [205]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[206]    0.0    0.00    0.00       1         WL_FID____DDA_GRID_BUILD [206]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[207]    0.0    0.00    0.00       1         WL_FID____DDA_GRID_BUILD_K838 [207]
+-----------------------------------------------
+                0.00    0.00       1/1           work_loop [8]
+[208]    0.0    0.00    0.00       1         WL_FID____MAIN_OPTIONS_ARGS [208]
+-----------------------------------------------
+                0.00    0.00       1/1           spin_251 [211]
+[209]    0.0    0.00    0.00       1         ctr_take [209]
+-----------------------------------------------
+                0.00    0.00       1/1           io_loop [13]
+[210]    0.0    0.00    0.00       1         io_spawn [210]
+                0.00    0.00       1/7           io_mem [114]
+-----------------------------------------------
+                0.00    0.00       1/1           WL_FID_MAIN_K1100 [182]
+[211]    0.0    0.00    0.00       1         spin_251 [211]
+                0.00    0.00       3/6           spare_free [118]
+                0.00    0.00       1/1           ctr_take [209]
+-----------------------------------------------
+                0.00    0.00       1/1           io_exec [17]
+[212]    0.0    0.00    0.00       1         window_close_run [212]
+-----------------------------------------------
+                0.00    0.00       1/1           io_exec [17]
+[213]    0.0    0.00    0.00       1         window_open_run [213]
+                0.00    0.00       2/7           io_mem [114]
+                0.00    0.00       1/3           io_cbuf [128]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function is in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+Copyright (C) 2012-2026 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
+Index by function name
+
+ [136] WL_FID_BODY (candidate.c) [173] WL_FID_MAIN_K1089 (candidate.c) [10] WL_FID____DDA_TREE_PAINT (candidate.c)
+  [87] WL_FID_CLO_APPLY (candidate.c) [174] WL_FID_MAIN_K1092 (candidate.c) [21] WL_FID____DDA_TREE_PAINT_K519 (candidate.c)
+  [81] WL_FID_ENTER (candidate.c) [175] WL_FID_MAIN_K1093 (candidate.c) [28] WL_FID____DDA_TREE_PAINT_K520 (candidate.c)
+  [82] WL_FID_EXIT (candidate.c) [176] WL_FID_MAIN_K1094 (candidate.c) [208] WL_FID____MAIN_OPTIONS_ARGS (candidate.c)
+ [100] WL_FID_FRAMES (candidate.c) [177] WL_FID_MAIN_K1095 (candidate.c) [74] WL_FID____MAIN_OPTIONS_ARGS_K961 (candidate.c)
+ [129] WL_FID_FRAMES_C407 (candidate.c) [178] WL_FID_MAIN_K1096 (candidate.c) [132] WL_FID____MAIN_OPTIONS_DEPTH (candidate.c)
+  [41] WL_FID_FRAMES_C409 (candidate.c) [179] WL_FID_MAIN_K1097 (candidate.c) [133] WL_FID____MAIN_OPTIONS_DEPTH_K857 (candidate.c)
+ [102] WL_FID_FRAMES_C417 (candidate.c) [180] WL_FID_MAIN_K1098 (candidate.c) [58] WL_FID____MAIN_OPTIONS_FLAG (candidate.c)
+ [103] WL_FID_FRAMES_K408 (candidate.c) [181] WL_FID_MAIN_K1099 (candidate.c) [94] WL_FID____MAIN_OPTIONS_FLAG_K955 (candidate.c)
+  [42] WL_FID_FRAME_DRAWN_C410 (candidate.c) [182] WL_FID_MAIN_K1100 (candidate.c) [59] WL_FID____MAIN_OPTIONS_HAS (candidate.c)
+  [67] WL_FID_FRAME_DRAWN_C411 (candidate.c) [183] WL_FID_MAIN_K1121 (candidate.c) [97] WL_FID____MAIN_OPTIONS_HAS_K958 (candidate.c)
+  [38] WL_FID_FRAME_DRAWN_C413 (candidate.c) [184] WL_FID_MAIN_K1127 (candidate.c) [98] WL_FID____MAIN_OPTIONS_HAS_K959 (candidate.c)
+ [104] WL_FID_FRAME_DRAWN_C414 (candidate.c) [185] WL_FID_MAIN_K1128 (candidate.c) [121] WL_FID____MAIN_OPTIONS_NUMBER (candidate.c)
+ [105] WL_FID_FRAME_DRAWN_C415 (candidate.c) [186] WL_FID_MAIN_K1129 (candidate.c) [127] WL_FID____MAIN_OPTIONS_NUMBER_K948 (candidate.c)
+  [43] WL_FID_FRAME_DRAWN_C416 (candidate.c) [187] WL_FID_MAIN_K1130 (candidate.c) [23] WL_FID____RENDER_PIXEL_PRESENT (candidate.c)
+ [106] WL_FID_FRAME_DRAWN_K412 (candidate.c) [188] WL_FID_MAIN_K1133 (candidate.c) [31] _init
+ [107] WL_FID_IMAGE_DROP (candidate.c) [189] WL_FID_MAIN_K1134 (candidate.c) [27] corpus_eval (candidate.c)
+  [33] WL_FID_IMAGE_FREE (candidate.c) [190] WL_FID_MAIN_K1135 (candidate.c) [209] ctr_take (candidate.c)
+  [76] WL_FID_IMAGE_FREE_J72 (candidate.c) [191] WL_FID_MAIN_K1171 (candidate.c) [111] cube_run (candidate.c)
+  [77] WL_FID_IMAGE_FREE_K72 (candidate.c) [192] WL_FID_MAIN_K1176 (candidate.c) [30] heap_alloc_miss (candidate.c)
+  [78] WL_FID_IMAGE_FREE_K73 (candidate.c) [193] WL_FID_MAIN_K1183 (candidate.c) [86] heap_hand (candidate.c)
+  [79] WL_FID_IMAGE_FREE_K74 (candidate.c) [194] WL_FID_MAIN_K1184 (candidate.c) [62] io_args_run
+  [80] WL_FID_IMAGE_FREE_K75 (candidate.c) [195] WL_FID_MAIN_K1185 (candidate.c) [128] io_cbuf (candidate.c)
+  [50] WL_FID_IO_ARGS (candidate.c) [196] WL_FID_MAIN_K1186 (candidate.c) [17] io_exec (candidate.c)
+  [37] WL_FID_IO_BIND (candidate.c) [197] WL_FID_MAIN_K1187 (candidate.c) [13] io_loop (candidate.c)
+  [91] WL_FID_IO_BIND_C1073 (candidate.c) [124] WL_FID_NAT_SHOW (candidate.c) [114] io_mem (candidate.c)
+  [92] WL_FID_IO_BIND_K1074 (candidate.c) [73] WL_FID_NAT_SHOW_FIN (candidate.c) [122] io_now_run
+ [137] WL_FID_IO_EMIT (candidate.c) [131] WL_FID_REQUIRE_C512 (candidate.c) [123] io_out (candidate.c)
+  [49] WL_FID_IO_NOW (candidate.c) [198] WL_FID_SCENE_BUILD (candidate.c) [134] io_print_run
+ [138] WL_FID_IO_PASS_C466 (candidate.c) [69] WL_FID_SCENE_BUILD_K775 (candidate.c) [210] io_spawn (candidate.c)
+ [130] WL_FID_IO_PRINT (candidate.c) [48] WL_FID_SCENE_DRAW (candidate.c) [15] io_step (candidate.c)
+  [93] WL_FID_IO_PURE (candidate.c) [108] WL_FID_SCENE_DRAW_K763 (candidate.c) [64] io_str (candidate.c)
+ [139] WL_FID_IO_TRY_C553 (candidate.c) [115] WL_FID_STRING_APPEND (candidate.c) [101] io_sync (candidate.c)
+ [140] WL_FID_IO_TRY_C554 (candidate.c) [65] WL_FID_STRING_APPEND_K761 (candidate.c) [9] monk_step (candidate.c)
+ [141] WL_FID_MAIN (candidate.c) [56] WL_FID_STRING_CMP (candidate.c) [112] pool_open (candidate.c)
+ [142] WL_FID_MAIN_C1076 (candidate.c) [60] WL_FID_STRING_CMP_K691 (candidate.c) [135] pool_stack (candidate.c)
+ [143] WL_FID_MAIN_C1077 (candidate.c) [88] WL_FID_STRING_EQ (candidate.c) [99] pool_turn (candidate.c)
+ [144] WL_FID_MAIN_C1086 (candidate.c) [89] WL_FID_STRING_EQ_K950 (candidate.c) [1] pool_work (candidate.c)
+ [145] WL_FID_MAIN_C1087 (candidate.c) [90] WL_FID_STRING_ORDER (candidate.c) [34] rfc_wrap (candidate.c)
+ [146] WL_FID_MAIN_C1090 (candidate.c) [57] WL_FID_STRING_ORDER_K849 (candidate.c) [22] span_fade (candidate.c)
+ [147] WL_FID_MAIN_C1091 (candidate.c) [199] WL_FID_U32_POW (candidate.c) [118] spare_free (candidate.c)
+ [148] WL_FID_MAIN_C1119 (candidate.c) [113] WL_FID_U32_POW_K674 (candidate.c) [6] spin_102 (candidate.c)
+  [51] WL_FID_MAIN_C1120 (candidate.c) [63] WL_FID_U32_READ (candidate.c) [5] spin_105 (candidate.c)
+ [149] WL_FID_MAIN_C1122 (candidate.c) [125] WL_FID_U32_READ_GO (candidate.c) [4] spin_144 (candidate.c)
+ [150] WL_FID_MAIN_C1123 (candidate.c) [200] WL_FID_WINDOW_CLOSE (candidate.c) [12] spin_164 (candidate.c)
+ [151] WL_FID_MAIN_C1124 (candidate.c) [109] WL_FID_WINDOW_FRAME (candidate.c) [3] spin_184 (candidate.c)
+ [152] WL_FID_MAIN_C1125 (candidate.c) [201] WL_FID_WINDOW_OPEN (candidate.c) [24] spin_185 (candidate.c)
+ [153] WL_FID_MAIN_C1126 (candidate.c) [202] WL_FID____ATELIER_ASSEMBLIES (candidate.c) [32] spin_221 (candidate.c)
+ [154] WL_FID_MAIN_C1131 (candidate.c) [116] WL_FID____ATELIER_ASSEMBLIES_K542 (candidate.c) [45] spin_223 (candidate.c)
+ [155] WL_FID_MAIN_C1132 (candidate.c) [203] WL_FID____ATELIER_BODY (candidate.c) [47] spin_224 (candidate.c)
+ [156] WL_FID_MAIN_C1169 (candidate.c) [204] WL_FID____ATELIER_BODY_K695 (candidate.c) [40] spin_225 (candidate.c)
+ [157] WL_FID_MAIN_C1170 (candidate.c) [205] WL_FID____ATELIER_BODY_K696 (candidate.c) [72] spin_226 (candidate.c)
+ [158] WL_FID_MAIN_C1172 (candidate.c) [117] WL_FID____ATELIER_CUBOIDS (candidate.c) [71] spin_227 (candidate.c)
+ [159] WL_FID_MAIN_C1173 (candidate.c) [54] WL_FID____ATELIER_CUBOIDS_K362 (candidate.c) [66] spin_228 (candidate.c)
+ [160] WL_FID_MAIN_C1174 (candidate.c) [44] WL_FID____ATELIER_GENERATE (candidate.c) [70] spin_238 (candidate.c)
+ [161] WL_FID_MAIN_C1175 (candidate.c) [46] WL_FID____ATELIER_GENERATE_K538 (candidate.c) [211] spin_251 (candidate.c)
+ [162] WL_FID_MAIN_C1177 (candidate.c) [39] WL_FID____ATELIER_GENERATE_K539 (candidate.c) [95] spin_5 (candidate.c)
+ [163] WL_FID_MAIN_C1178 (candidate.c) [61] WL_FID____ATELIER_GENERATE_K540 (candidate.c) [7] spin_63 (candidate.c)
+ [164] WL_FID_MAIN_C1179 (candidate.c) [126] WL_FID____ATELIER_TRANSLATE (candidate.c) [119] spin_76 (candidate.c)
+  [68] WL_FID_MAIN_C1180 (candidate.c) [55] WL_FID____ATELIER_TRANSLATE_K357 (candidate.c) [120] spin_84 (candidate.c)
+ [165] WL_FID_MAIN_C1181 (candidate.c) [110] WL_FID____DDA_FRAME_FORK (candidate.c) [96] spin_85 (candidate.c)
+ [166] WL_FID_MAIN_C1182 (candidate.c) [2] WL_FID____DDA_FRAME_SEQ (candidate.c) [85] spin_87 (candidate.c)
+  [75] WL_FID_MAIN_K1078 (candidate.c) [16] WL_FID____DDA_FRAME_SEQ_K431 (candidate.c) [83] task_deal (candidate.c)
+  [52] WL_FID_MAIN_K1079 (candidate.c) [25] WL_FID____DDA_FRAME_SEQ_K432 (candidate.c) [11] term_drop (candidate.c)
+ [167] WL_FID_MAIN_K1080 (candidate.c) [26] WL_FID____DDA_FRAME_SEQ_K433 (candidate.c) [212] window_close_run
+ [168] WL_FID_MAIN_K1081 (candidate.c) [29] WL_FID____DDA_FRAME_SEQ_K434 (candidate.c) [18] window_frame (candidate.c)
+ [169] WL_FID_MAIN_K1082 (candidate.c) [206] WL_FID____DDA_GRID_BUILD (candidate.c) [19] window_frame_run
+  [53] WL_FID_MAIN_K1083 (candidate.c) [35] WL_FID____DDA_GRID_BUILD_K837 (candidate.c) [213] window_open_run
+ [170] WL_FID_MAIN_K1084 (candidate.c) [207] WL_FID____DDA_GRID_BUILD_K838 (candidate.c) [20] window_sq (candidate.c)
+ [171] WL_FID_MAIN_K1085 (candidate.c) [36] WL_FID____DDA_GRID_PAINT (candidate.c) [8] work_loop (candidate.c)
+ [172] WL_FID_MAIN_K1088 (candidate.c) [84] WL_FID____DDA_GRID_PAINT_K672 (candidate.c)

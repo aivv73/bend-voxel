@@ -1,0 +1,12 @@
+--- PROOF.bend
++++ PROOF.bend
+@@ -240,6 +240,9 @@
+ def Laws.dda_zero_plane_events_are_accepted(positive,origin,delta,cell,time):
+ 	{==}
+ 
++def Laws.dda_zero_plane_events_preserve_advancement(positive,origin,delta,cell,time):
++	{==}
++
+ def Laws.dda_count_down_stops_at_accepted_plane(fuel,at_limit,positive,origin,delta,cell,time,count,limit):
+ 	{==}
+ 

@@ -1,0 +1,31 @@
+renderer=dda init_ms=340
+frames=4 elapsed_ms=3428
+
+renderer=dda init_ms=297
+frames=4 elapsed_ms=4100
+
+renderer=dda init_ms=302
+frames=4 elapsed_ms=3747
+
+renderer=dda init_ms=309
+frames=4 elapsed_ms=3117
+
+renderer=dda init_ms=305
+frames=4 elapsed_ms=3063
+
+renderer=dda init_ms=326
+frames=4 elapsed_ms=3806
+
+renderer=dda init_ms=303
+frames=4 elapsed_ms=3760
+
+renderer=dda init_ms=326
+frames=4 elapsed_ms=3123
+
+renderer=dda init_ms=332
+frames=4 elapsed_ms=3351
+
+renderer=dda init_ms=297
+frames=4 elapsed_ms=4135
+
+Saved .audit/dda-cursor/cpu1-2.tsv

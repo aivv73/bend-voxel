@@ -1,0 +1,5 @@
+dda.bend: OK
+LAWS.bend: OK
+PROOF.bend: OK
+build/dda-compare: OK
+build/dda-compare.gpu: OK

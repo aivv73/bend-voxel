@@ -1,0 +1,31 @@
+renderer=dda init_ms=256
+frames=64 elapsed_ms=6748
+
+renderer=dda init_ms=1292
+frames=64 elapsed_ms=26074
+
+renderer=dda init_ms=1295
+frames=64 elapsed_ms=25531
+
+renderer=dda init_ms=256
+frames=64 elapsed_ms=6680
+
+renderer=dda init_ms=258
+frames=64 elapsed_ms=6686
+
+renderer=dda init_ms=1301
+frames=64 elapsed_ms=25777
+
+renderer=dda init_ms=1387
+frames=64 elapsed_ms=26184
+
+renderer=dda init_ms=257
+frames=64 elapsed_ms=6617
+
+renderer=dda init_ms=256
+frames=64 elapsed_ms=6594
+
+renderer=dda init_ms=1291
+frames=64 elapsed_ms=25793
+
+Saved .audit/dda-indexed/carved-cpu12.tsv

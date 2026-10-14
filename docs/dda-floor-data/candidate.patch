@@ -1,0 +1,11 @@
+--- .audit/dda-floor/baseline-dda.bend	2026-10-07 18:32:44.225930115 +0400
++++ .audit/dda-floor/work/dda.bend	2026-10-07 18:37:07.464840214 +0400
+@@ -287,7 +287,7 @@
+ def Axis.count(+positive: Bool, +origin: F32, +delta: F32, +cell: U32, +time: F32, +limit: U32) -> U32:
+ 	+point = (origin + time * delta : F32)
+ 	+events = Bool.pick(F32,positive,(point - U32.to_f32(cell) : F32),(U32.to_f32(cell) + 1.0 - point : F32))
+-	+estimate = U32.min(limit,F32.to_u32(F32.floor(F32.clamp(events,0.0,U32.to_f32(limit)))))
++	+estimate = U32.min(limit,F32.to_u32(F32.clamp(events,0.0,U32.to_f32(limit))))
+ 	+before = Axis.before(positive,origin,delta,cell,time,estimate)
+ 	Axis.correct(Nat.add(1n,U32.to_nat(limit)),before,before,U32.is_eq(estimate,limit),positive,origin,delta,cell,time,estimate,limit)
+ 

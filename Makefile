@@ -39,11 +39,14 @@ build/benchmark: scripts/benchmark.bend scripts/benchmark_host.bend scripts/benc
 build/frame-profile: scripts/frame_profile.bend $(SOURCES) | build
 	$(BEND) scripts/frame_profile.bend -o $@
 
-build/dda-compare: scripts/dda_compare.bend dda.bend $(SOURCES) | build
+build/dda-compare: scripts/dda_compare.bend scripts/dda_config.bend dda.bend scripts/benchmark.bend scripts/benchmark_number.bend scripts/benchmark_host.bend scripts/sha256.bend $(SOURCES) | build
 	$(BEND) scripts/dda_compare.bend -o $@
 
-build/dda-benchmark: scripts/dda_benchmark.bend scripts/dda_compare.bend dda.bend scripts/benchmark.bend scripts/benchmark_number.bend scripts/benchmark_host.bend scripts/sha256.bend $(SOURCES) | build
+build/dda-benchmark: scripts/dda_benchmark.bend scripts/dda_compare.bend scripts/dda_config.bend dda.bend scripts/benchmark.bend scripts/benchmark_number.bend scripts/benchmark_host.bend scripts/sha256.bend $(SOURCES) | build
 	$(BEND) scripts/dda_benchmark.bend -o $@
+
+build/dda-sweep: scripts/dda_sweep.bend scripts/dda_config.bend scripts/dda_compare.bend dda.bend scripts/benchmark.bend scripts/benchmark_number.bend scripts/benchmark_host.bend scripts/sha256.bend $(SOURCES) | build
+	$(BEND) scripts/dda_sweep.bend -o $@
 
 build/dda-profile: scripts/dda_profile.bend dump.bend | build
 	$(BEND) scripts/dda_profile.bend -o $@

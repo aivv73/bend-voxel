@@ -1,0 +1,11 @@
+Boundary-count property imports ../baseline/dda.bend and calls actual Axis.next and Axis.count
+Eligibility moving && low<=cell<high<=16777216 && F32.is_eq(time,boundary); no finite arithmetic guard
+Every Axis.count call has valid bounds and limit 1..16; both modes use the same sequential Scan
+dispatch=Scan CPU
+checks=2247951 count_calls=1998591 reuses=487852 raw_boundary_equal=687865 unsafe_boundary_count_disagreements=13183 known_limit_mismatches=0 rejected_generation=0 positive_reuses=213853 negative_reuses=273999 nonfinite_origin_reuses=120 nonfinite_delta_reuses=74112 nonfinite_time_reuses=11252
+small=346800 coordinate_edges=673200 huge=224400 origin_exponents=307200 delta_exponents=307200 time_exponents=81920 mixed_exponents=307200 special=31
+coverage_mask=536870911 required=536870911 time_modes=524287 required=524287
+first_unsafe family=7 time_kind=0 low=16777217 cell=16777217 high=16777218 origin=0 origin_bits=0 delta=1 delta_bits=1065353216 time=16777216 time_bits=1266679808 boundary=16777216 boundary_bits=1266679808 moving=True positive=True limit=1 actual_count=0
+first_guarded none
+first_rejected none
+PASS finite declared samples; no universal proof or performance verdict

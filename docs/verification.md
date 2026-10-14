@@ -1,6 +1,14 @@
 # Slice verification
 
-`make test` reruns both formal gates, the real geometry reference, and actual renderer CPU/GPU comparisons. First-party validation includes no traditional test suites. `make ui UI_BEND='bun ../bend/bend2/main.ts'` verifies real native input and screenshots with the fork's owned-window APIs. `make benchmark` measures native displayed frames.
+`make test` reruns both formal gates, the real geometry reference, and actual renderer CPU/GPU comparisons. First-party validation includes no traditional test suites. `make ui` verifies real native input and screenshots with upstream Bend 2.0.37 and pinned window packages. `make benchmark` measures native displayed frames.
+
+## Bend 2.0.37 compatibility
+
+The UI checks import window references from `0x8cc463a65f479c5af6b3080035eb0836/winref.bend` and capture from `0xfdc8da256837fef81553ec8530fb7431/capture.bend`. The `bend-ui-test` submodule pins commit `38f058e`, which uses the same reference package. Bend verifies the content hashes when resolving these imports.
+
+Completion channels handle `Chan.send` as `Result<Bool, Unit>`. The SHA-256 helper names its active context constructor `SHA256Ready` to avoid Base's `Poll.Ready` constructor. These changes preserve the renderer and geometry algorithms. The fork revisions described below are historical validation records.
+
+Validation on Bend 2.0.37 passed `make -B test`, including both proof gates, geometry, material and lighting properties, and all sixteen full/cut CPU/GPU image exports against the existing goldens. Ordinary UI, flight, and brush checks passed on both lanes under Xvfb. Ordinary and brush screenshots matched exactly between lanes. Build logs are in `.audit/bend-2.0.37`, and native captures are in `.audit/screenshots/bend-2.0.37`.
 
 ## Formal scope
 
@@ -109,7 +117,7 @@ The harness owns its window in the test process and imports the slice's shared v
 
 The `Window.capture` migration was validated with fork commit `de38700481244494b56a2f947df6fba25f798887`, which contains the capture API merged in `ecde8700807c5b7a5e5da49eaede0c5749d6e435`. Four serialized native runs covered CPU and strict GPU execution with both Escape and the window close request. All seven PPM files from each run matched the pre-migration C-capture baseline byte-for-byte, for 28 comparisons. Both proof gates also passed with the installed compiler and the fork. These checks preserve the existing UI contract; they do not formally prove native readback.
 
-The bend-ui-test integration pins library commit `90f8aa78802ea39d895c4c2bf8a9b4628cd3e98c` and was validated with the same fork revision. Four fresh pre-migration runs recorded the local adapter's seven native screenshots per run. Four post-migration runs covered CPU and strict GPU execution with both close methods. All existing assertions passed, and all 28 PPM comparisons were byte-identical. Both project proof gates passed with the installed compiler and the fork. The library's three event-plan laws also passed both proof gates with the fork. Those laws prove the pure event plans, not native delivery or window lifetime. Make dry runs confirmed that changing any of the library's four source files rebuilds the UI checker.
+The earlier bend-ui-test integration pinned library commit `90f8aa78802ea39d895c4c2bf8a9b4628cd3e98c` and was validated with the same fork revision. Four fresh pre-migration runs recorded the local adapter's seven native screenshots per run. Four post-migration runs covered CPU and strict GPU execution with both close methods. All existing assertions passed, and all 28 PPM comparisons were byte-identical. Both project proof gates passed with the installed compiler and the fork. The library's three event-plan laws also passed both proof gates with the fork. Those laws prove the pure event plans, not native delivery or window lifetime. Make dry runs confirmed that changing any of the library's four source files rebuilds the UI checker.
 
 A clean recursive clone fetched the pinned library and built the UI checker. Its CPU window-close scenario passed, and all seven screenshots matched the corresponding pre-migration baseline.
 

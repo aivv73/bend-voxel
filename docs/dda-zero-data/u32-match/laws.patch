@@ -1,0 +1,17 @@
+--- LAWS.bend
++++ LAWS.bend
+@@ -272,6 +272,14 @@
+ 	for time: F32
+ 	{X.Axis.before(positive,origin,delta,cell,time,0) == True{} : Bool}
+ 
++law dda_zero_plane_events_preserve_advancement:
++	for positive: Bool
++	for origin: F32
++	for delta: F32
++	for +cell: U32
++	for time: F32
++	{X.Axis.advanced(positive,origin,delta,cell,time,0) == X.Advance{cell,cell,False{}} : X.Advance}
++
+ law dda_count_down_stops_at_accepted_plane:
+ 	for fuel: Nat
+ 	for at_limit: Bool

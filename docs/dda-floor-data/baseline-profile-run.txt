@@ -1,0 +1,2 @@
+renderer=dda init_ms=470
+frames=8 elapsed_ms=7738

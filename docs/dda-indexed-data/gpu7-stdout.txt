@@ -1,0 +1,31 @@
+renderer=dda init_ms=288
+frames=8 elapsed_ms=4051
+
+renderer=dda init_ms=1428
+frames=8 elapsed_ms=30323
+
+renderer=dda init_ms=1464
+frames=8 elapsed_ms=31592
+
+renderer=dda init_ms=292
+frames=8 elapsed_ms=4015
+
+renderer=dda init_ms=290
+frames=8 elapsed_ms=4028
+
+renderer=dda init_ms=1426
+frames=8 elapsed_ms=31192
+
+renderer=dda init_ms=1428
+frames=8 elapsed_ms=31506
+
+renderer=dda init_ms=290
+frames=8 elapsed_ms=4056
+
+renderer=dda init_ms=291
+frames=8 elapsed_ms=4118
+
+renderer=dda init_ms=1429
+frames=8 elapsed_ms=31050
+
+Saved .audit/dda-indexed/gpu7.tsv

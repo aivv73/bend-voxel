@@ -1,0 +1,31 @@
+renderer=dda init_ms=259
+frames=32 elapsed_ms=3369
+
+renderer=dda init_ms=257
+frames=32 elapsed_ms=3328
+
+renderer=dda init_ms=259
+frames=32 elapsed_ms=3339
+
+renderer=dda init_ms=260
+frames=32 elapsed_ms=3266
+
+renderer=dda init_ms=258
+frames=32 elapsed_ms=3308
+
+renderer=dda init_ms=256
+frames=32 elapsed_ms=3361
+
+renderer=dda init_ms=260
+frames=32 elapsed_ms=3312
+
+renderer=dda init_ms=263
+frames=32 elapsed_ms=3279
+
+renderer=dda init_ms=257
+frames=32 elapsed_ms=3305
+
+renderer=dda init_ms=258
+frames=32 elapsed_ms=3306
+
+Saved .audit/dda-indexed/aa-control.tsv

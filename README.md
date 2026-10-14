@@ -6,7 +6,7 @@ Run the editable Light Atelier sculpture court in a native window. The default s
 
 ## Run the slice
 
-Use Bend 2.0.34 or newer. Native GPU builds require the compiler and SDK for the available Bend execution lane. On Linux, install `libx11-dev` for the window.
+Use upstream Bend 2.0.37. Run `bend update` to install the latest release. Native GPU builds require the compiler and SDK for the available Bend execution lane. On Linux, install `libx11-dev` for the window.
 
 ```sh
 	make
@@ -85,11 +85,11 @@ The checker resolves the repository from its executable path, so absolute or rel
 
 The parser accepts the renderer's unsigned ASCII P3 format with literal `P3 512 512 255` header tokens and exactly 786,432 channels in 0..255. ASCII whitespace and leading zeros in channels are accepted. PPM comments, signed values, digit underscores, and Unicode digits are rejected.
 
-The native window check uses `Window.export_ref` and `Window.capture` from [the aivv73 Bend fork](https://github.com/aivv73/bend). Input and lifecycle checks use [bend-ui-test](https://github.com/aivv73/bend-ui-test), pinned as the `deps/bend-ui-test` submodule. The tested compiler revision is `de38700481244494b56a2f947df6fba25f798887`. With the fork checked out beside this project, initialize the pinned dependency and run:
+The native window checks use upstream Bend 2.0.37 and pinned BendHub packages for [window references](https://hub.bend-lang.com/0x8cc463a65f479c5af6b3080035eb0836) and [window capture](https://hub.bend-lang.com/0xfdc8da256837fef81553ec8530fb7431). Input and lifecycle checks use [bend-ui-test](https://github.com/aivv73/bend-ui-test), pinned as the `deps/bend-ui-test` submodule. Initialize the dependency and run:
 
 ```sh
 	git submodule update --init --recursive
-	make ui UI_BEND='bun ../bend/bend2/main.ts'
+	make ui
 	./build/ui-check --gpu off -- --output .audit/screenshots/cpu
 	./build/ui-check --gpu on -- --close-method window --output .audit/screenshots/window-close
 ```
@@ -98,9 +98,9 @@ The GPU target saves native PPM screenshots in `.audit/screenshots/ui`. The CPU 
 
 The native check uses the slice's `Interactive.step`, which handles pointer capture and delegates the real view and event reducer to `App.step`. `Window.capture` reads the owned window's client pixels after earlier output completes. Keep the client fully on-screen and unobscured during the test. `scripts/ui_capture.bend` converts its RGB array to an `Image`; Bend checks the pixels and exports screenshots. The checker passes `WindowRef` directly to `UITest.key`, `UITest.click`, `UITest.request_close`, and `UITest.alive`. The library owns native event delivery and expiry checks. A close request goes through the app reducer, which closes the owned window. The check requires Linux/X11 and `libX11`. Unsupported backends report an error.
 
-To verify actual held flight keys and captured mouse motion, put `xdotool` on `PATH` and run `make flight-ui UI_BEND='bun ../bend/bend2/main.ts'`. This separate Bend check uses the same `Interactive.step` and saves native captures in `.audit/screenshots/flight-ui`. `make brush-ui` with the same compiler checks actual mouse hover, background clearing, complete removal sets for free and captured clicks, and same-hover resets. It saves captures in `.audit/screenshots/brush-ui`. Run native tests sequentially.
+To verify actual held flight keys and captured mouse motion, put `xdotool` on `PATH` and run `make flight-ui`. This separate Bend check uses the same `Interactive.step` and saves native captures in `.audit/screenshots/flight-ui`. `make brush-ui` checks actual mouse hover, background clearing, complete removal sets for free and captured clicks, and same-hover resets. It saves captures in `.audit/screenshots/brush-ui`. Run native tests sequentially.
 
-The library's native effects use Bend runtime internals. To rebuild with a different compiler, run `make -B ui UI_BEND='bun ../bend/bend2/main.ts'`. After checking out a different project revision, run `git submodule update --init --recursive` to select its pinned library version. Read [the verification notes](docs/verification.md) for the tested revisions and the scope of formal proofs and runtime checks.
+The packages' native effects use Bend runtime internals. After updating Bend, run `make -B test` and `make -B ui` to rebuild and validate the engine and window bridges. After checking out a different project revision, run `git submodule update --init --recursive` to select its pinned library version. Read [the verification notes](docs/verification.md) for the scope of formal proofs and runtime checks.
 
 ## Export an image
 
@@ -167,3 +167,15 @@ Build the independent voxel-traversal renderer and compare every image ray with 
 ```
 
 The comparison includes the production renderer and a version of the existing face renderer with shadows omitted to match minimal DDA shading. Read [the DDA comparison](docs/dda-comparison.md) for scope, validation, images, and measurements. The default DDA crosses compressed uniform regions. [DDA region traversal](docs/dda-optimization.md) compares the upstream world representations and explains the optimization. [The region DDA profile](docs/dda-profile.md) records cumulative CPU costs, actual work counters, and one rejected search optimization. [Corrected event counting](docs/dda-estimate.md) replaces that baseline's binary search with a bounded estimate and exact plane correction, with repeated CPU12 gains and separate GPU measurements. Add `--steps` to the benchmark to include the unit-step reference.
+
+[Per-ray subtree caching](docs/dda-cursor.md) records a rejected optimization, its Bend prototype, exact correctness checks, and complete-frame measurements. Fewer tree visits did not offset the added ownership work; the retained DDA is unchanged.
+
+[Explicit zero-event guards](docs/dda-zero.md) records four checked short-circuiting prototypes. Broader guards regress on GPU; the smallest avoids advancement plane calculations but adds a repeated CPU cost. The retained DDA is unchanged.
+
+[Redundant floor removal](docs/dda-floor.md) simplifies the retained event estimate. Exact surfaces and image bytes are preserved. GPU fork-seven measurements improve in two batches; parallel CPU samples favor the baseline.
+
+[Boundary event counts](docs/dda-boundary.md) reuse the known integer limit for axes leaving a region. Exact surfaces and image bytes are preserved. CPU1, CPU6, and CPU12 improve in repeated complete-window measurements. GPU gains remain inconclusive.
+
+[Indexed compressed-tree storage](docs/dda-indexed.md) records a checked paged-index prototype and its rejected complete-frame measurements. The accepted DDA remains installed.
+
+[GPU decomposition and pixel assignment](docs/dda-gpu.md) adds a typed Bend sweep and an opt-in interleaved layout. It improves the measured large-scene GPU workload in two batches. CPU and carved-cube results retain contiguous fork six as the default.

@@ -1,0 +1,53 @@
+empty queries=15 material_or_bounds_mismatches=0
+empty outside queries=7 material_or_bounds_mismatches=0
+empty all cells queries=512 material_or_bounds_mismatches=0
+uniform full-width material queries=15 material_or_bounds_mismatches=0
+uniform full-width material outside queries=7 material_or_bounds_mismatches=0
+uniform full-width material all cells queries=512 material_or_bounds_mismatches=0
+dense arbitrary U32 materials queries=7680 material_or_bounds_mismatches=0
+dense arbitrary U32 materials outside queries=7 material_or_bounds_mismatches=0
+dense arbitrary U32 materials all cells queries=512 material_or_bounds_mismatches=0
+overlapping cuboids queries=2175 material_or_bounds_mismatches=0
+overlapping cuboids outside queries=7 material_or_bounds_mismatches=0
+overlapping cuboids all cells queries=512 material_or_bounds_mismatches=0
+dyadic terminal depth 0 queries=15 material_or_bounds_mismatches=0
+dyadic terminal depth 0 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 0 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 1 queries=30 material_or_bounds_mismatches=0
+dyadic terminal depth 1 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 1 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 2 queries=45 material_or_bounds_mismatches=0
+dyadic terminal depth 2 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 2 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 3 queries=60 material_or_bounds_mismatches=0
+dyadic terminal depth 3 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 3 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 4 queries=75 material_or_bounds_mismatches=0
+dyadic terminal depth 4 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 4 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 5 queries=90 material_or_bounds_mismatches=0
+dyadic terminal depth 5 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 5 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 6 queries=105 material_or_bounds_mismatches=0
+dyadic terminal depth 6 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 6 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 7 queries=120 material_or_bounds_mismatches=0
+dyadic terminal depth 7 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 7 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 8 queries=135 material_or_bounds_mismatches=0
+dyadic terminal depth 8 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 8 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 9 queries=150 material_or_bounds_mismatches=0
+dyadic terminal depth 9 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 9 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 10 queries=165 material_or_bounds_mismatches=0
+dyadic terminal depth 10 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 10 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 11 queries=180 material_or_bounds_mismatches=0
+dyadic terminal depth 11 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 11 all cells queries=4096 material_or_bounds_mismatches=0
+dyadic terminal depth 12 queries=195 material_or_bounds_mismatches=0
+dyadic terminal depth 12 outside queries=7 material_or_bounds_mismatches=0
+dyadic terminal depth 12 all cells queries=4096 material_or_bounds_mismatches=0
+Atelier queries=10478145 material_or_bounds_mismatches=0
+Atelier outside queries=7 material_or_bounds_mismatches=0

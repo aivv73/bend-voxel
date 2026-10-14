@@ -1,0 +1,31 @@
+renderer=dda init_ms=393
+frames=2 elapsed_ms=1493
+
+renderer=dda init_ms=346
+frames=2 elapsed_ms=2147
+
+renderer=dda init_ms=343
+frames=2 elapsed_ms=1846
+
+renderer=dda init_ms=400
+frames=2 elapsed_ms=1311
+
+renderer=dda init_ms=329
+frames=2 elapsed_ms=1427
+
+renderer=dda init_ms=353
+frames=2 elapsed_ms=2200
+
+renderer=dda init_ms=361
+frames=2 elapsed_ms=2361
+
+renderer=dda init_ms=364
+frames=2 elapsed_ms=1288
+
+renderer=dda init_ms=394
+frames=2 elapsed_ms=1266
+
+renderer=dda init_ms=304
+frames=2 elapsed_ms=1381
+
+Saved .audit/dda-cursor/gpu7-2.tsv

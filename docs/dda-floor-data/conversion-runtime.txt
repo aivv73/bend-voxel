@@ -1,0 +1,4 @@
+INLINE u64 f32_to_u32(u64 a) {
+  f32 v = f32_unbox(a);
+  return v >= 0.0f && v < 4294967296.0f ? (u32)v : 0;
+}

@@ -4,6 +4,8 @@ import ./voxel.bend as V
 import ./material.bend as M
 import ./lighting.bend as L
 import ./render.bend as R
+import ./scripts/dda_compare.bend as C
+import ./scripts/dda_config.bend as K
 
 law material_foundation_id:
 	{M.Material.id(M.Foundation{}) == 1 : U32}
@@ -250,9 +252,50 @@ law dda_stationary_region_axis_preserved:
 	for delta: F32
 	for +cell: U32
 	for time: F32
+	for boundary_time: F32
 	for low: U32
 	for high: U32
-	{X.Axis.advance(False{},positive,origin,delta,cell,time,low,high) == X.Advance{cell,cell,False{}} : X.Advance}
+	{X.Axis.advance(False{},positive,origin,delta,cell,time,boundary_time,low,high) == X.Advance{cell,cell,False{}} : X.Advance}
+
+law dda_boundary_reuse_returns_limit:
+	for positive: Bool
+	for origin: F32
+	for delta: F32
+	for cell: U32
+	for time: F32
+	for +limit: U32
+	{X.Axis.advance.count(True{},positive,origin,delta,cell,time,limit) == limit : U32}
+
+law dda_boundary_fallback_uses_actual_count:
+	for +positive: Bool
+	for +origin: F32
+	for +delta: F32
+	for +cell: U32
+	for +time: F32
+	for +limit: U32
+	{X.Axis.advance.count(False{},positive,origin,delta,cell,time,limit) == X.Axis.count(positive,origin,delta,cell,time,limit) : U32}
+
+law dda_boundary_reuse_preserves_reconstruction_given_count_equality:
+	for +positive: Bool
+	for +origin: F32
+	for +delta: F32
+	for +cell: U32
+	for +time: F32
+	for +limit: U32
+	for count_equality: {X.Axis.count(positive,origin,delta,cell,time,limit) == limit : U32}
+	{X.Axis.advanced(positive,origin,delta,cell,time,X.Axis.advance.count(True{},positive,origin,delta,cell,time,limit)) == X.Axis.advanced(positive,origin,delta,cell,time,X.Axis.count(positive,origin,delta,cell,time,limit)) : X.Advance}
+
+law dda_boundary_rejected_domain_uses_actual_count:
+	for +positive: Bool
+	for +origin: F32
+	for +delta: F32
+	for +cell: U32
+	for +time: F32
+	for +boundary_time: F32
+	for +low: U32
+	for +high: U32
+	for rejected: {((low <= cell) && (cell < high) && (high <= 16777216) : U32) == False{} : Bool}
+	{X.Axis.advance(True{},positive,origin,delta,cell,time,boundary_time,low,high) == X.Axis.advanced(positive,origin,delta,cell,time,X.Axis.count(positive,origin,delta,cell,time,Bool.pick(U32,positive,(high - cell : U32),(cell - low + 1 : U32)))) : X.Advance}
 
 law dda_region_traversal_is_bounded:
 	for inside: Bool
@@ -305,3 +348,144 @@ law dda_count_up_stops_at_accepted_limit:
 	for time: F32
 	for +limit: U32
 	{X.Axis.correct(1n+fuel,True{},True{},True{},positive,origin,delta,cell,time,limit,limit) == limit : U32}
+
+law dda_fork_depth_bounded:
+	for depth: X.ForkDepth
+	{Nat.is_le(X.ForkDepth.nat(depth),9n) == True{} : Bool}
+
+law dda_schedule_dimensions_valid:
+	for depth: X.ForkDepth
+	for assignment: X.Assignment
+	{X.Schedule.valid(X.Schedule{depth,assignment}) == True{} : Bool}
+
+law dda_schedule_depth_partition:
+	for +depth: X.ForkDepth
+	{Nat.add(X.ForkDepth.nat(depth),Nat.sub(9n,X.ForkDepth.nat(depth))) == 9n : Nat}
+
+law dda_schedule_dimensions_do_not_wrap:
+	for +depth: X.ForkDepth
+	{Nat.mul(U32.to_nat((1 << X.ForkDepth.nat(depth) : U32)),U32.to_nat((1 << Nat.sub(9n,X.ForkDepth.nat(depth)) : U32))) == 512n : Nat}
+
+law dda_native_open_quadrants:
+	for a: Image
+	for b: Image
+	for c: Image
+	for d: Image
+	{X.Native.open(Qua{a,b,c,d}) == X.Four{a,b,c,d} : X.Four}
+
+law dda_weave_zero_left_inverse:
+	for a: Image
+	for b: Image
+	for c: Image
+	for d: Image
+	{X.Native.unweave(0n,X.Native.weave(0n,X.Four{a,b,c,d})) == X.Four{a,b,c,d} : X.Four}
+
+law dda_weave_zero_right_inverse:
+	for a: Image
+	for b: Image
+	for c: Image
+	for d: Image
+	{X.Native.weave(0n,X.Native.unweave(0n,Qua{a,b,c,d})) == Qua{a,b,c,d} : Image}
+
+law dda_weave_opened_recurrence:
+	for +local: Nat
+	for aa: Image
+	for ab: Image
+	for ac: Image
+	for ad: Image
+	for ba: Image
+	for bb: Image
+	for bc: Image
+	for bd: Image
+	for ca: Image
+	for cb: Image
+	for cc: Image
+	for cd: Image
+	for da: Image
+	for db: Image
+	for dc: Image
+	for dd: Image
+	{X.Native.weave.opened(local,X.Four{aa,ab,ac,ad},X.Four{ba,bb,bc,bd},X.Four{ca,cb,cc,cd},X.Four{da,db,dc,dd}) ==
+	 Qua{X.Native.weave(local,X.Four{aa,ba,ca,da}),X.Native.weave(local,X.Four{ab,bb,cb,db}),X.Native.weave(local,X.Four{ac,bc,cc,dc}),X.Native.weave(local,X.Four{ad,bd,cd,dd})} : Image}
+
+law dda_contiguous_frame_is_reference:
+	for +depth: X.ForkDepth
+	for +skip: Bool
+	for +grid: X.Grid
+	for +basis: R.Basis
+	for +palette: X.Palette
+	for +ground: R.GroundLighting
+	{X.Frame.selected(X.Schedule{depth,X.Contiguous{}},skip,grid,basis,palette,ground) == X.Frame.fork(X.ForkDepth.nat(depth),skip,grid,basis,palette,ground,0,0,512) : Image}
+
+law dda_hit_image_is_pix:
+	for hit: R.Hit
+	{X.Native.is_pixel(R.Pixel.image(hit)) == True{} : Bool}
+
+law dda_original_pixel_is_pix:
+	for skip: Bool
+	for grid: X.Grid
+	for +basis: R.Basis
+	for palette: X.Palette
+	for ground: R.GroundLighting
+	for +x: U32
+	for +y: U32
+	{X.Native.is_pixel(X.Frame.seq(0n,skip,grid,basis,palette,ground,x,y,1)) == True{} : Bool}
+
+law dda_draw_retains_scene:
+	for +scene: C.Scene
+	{C.Scene.returned(C.Scene.draw(scene)) == scene : C.Scene}
+
+law dda_step_scan_does_not_invoke_assignment:
+	for draw: K.DrawSpec
+	{K.Action.assignment(K.Action.invoked(K.VerifySteps{}),draw) == "not_invoked" : String}
+
+law dda_face_scan_does_not_invoke_assignment:
+	for draw: K.DrawSpec
+	for tile: X.ForkDepth
+	{K.Action.assignment(K.Action.invoked(K.VerifyFaces{tile}),draw) == "not_invoked" : String}
+
+law dda_measured_count_is_positive:
+	for predecessor: Nat
+	{Nat.is_gt(K.Frames.count(K.MeasuredFrames{predecessor}),0n) == True{} : Bool}
+
+law dda_carved_cube_arguments_keep_both_flags:
+	for +view: K.View
+	{K.SceneSpec.argv(K.CubeScene{K.Carved{},view}) == ["--cube","--view",K.View.name(view),"--cut"] : List<&2,String>}
+
+law dda_report_admission_rejects_missing:
+	for prefix: String
+	for expected: String
+	for valid: Bool
+	{K.Report.scan(Nil{},prefix,expected,0n,valid) == Fail{"Expected exactly one matching effective-option report"} : Result<&2,&2,String,Unit>}
+
+law dda_report_admission_rejects_multiple:
+	for prefix: String
+	for expected: String
+	for extra: Nat
+	for valid: Bool
+	{K.Report.scan(Nil{},prefix,expected,1n+1n+extra,valid) == Fail{"Expected exactly one matching effective-option report"} : Result<&2,&2,String,Unit>}
+
+law dda_weave_left_inverse_open:
+	for +local: Nat
+	for +remaining: Nat
+	for +a: Image
+	for +b: Image
+	for +c: Image
+	for +d: Image
+	for complete: {(X.Native.full(Nat.add(local,remaining),a) && X.Native.full(Nat.add(local,remaining),b) && X.Native.full(Nat.add(local,remaining),c) && X.Native.full(Nat.add(local,remaining),d)) == True{} : Bool}
+	{X.Native.unweave(local,X.Native.weave(local,X.Four{a,b,c,d})) == X.Four{a,b,c,d} : X.Four}
+
+law dda_weave_transpose_recurrence:
+	for +local: Nat
+	for +a: X.Four
+	for +b: X.Four
+	for +c: X.Four
+	for +d: X.Four
+	{X.Native.weave(1n+local,X.Native.transpose(a,b,c,d)) == Qua{X.Native.weave(local,a),X.Native.weave(local,b),X.Native.weave(local,c),X.Native.weave(local,d)} : Image}
+
+law dda_weave_right_inverse_open:
+	for +local: Nat
+	for remaining: Nat
+	for +image: Image
+	for complete: {X.Native.full(Nat.add(local,1n+remaining),image) == True{} : Bool}
+	{X.Native.weave(local,X.Native.unweave(local,image)) == image : Image}

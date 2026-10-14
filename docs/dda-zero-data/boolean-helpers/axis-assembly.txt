@@ -1,0 +1,225 @@
+
+.audit/dda-zero/boolean-gate-renderer:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000120f10 <spin_64>:
+  120f10:	85 f6                	test   %esi,%esi
+  120f12:	0f 84 93 02 00 00    	je     1211ab <spin_64+0x29b>
+  120f18:	55                   	push   %rbp
+  120f19:	41 57                	push   %r15
+  120f1b:	41 56                	push   %r14
+  120f1d:	41 54                	push   %r12
+  120f1f:	53                   	push   %rbx
+  120f20:	48 83 ec 10          	sub    $0x10,%rsp
+  120f24:	8b 44 24 50          	mov    0x50(%rsp),%eax
+  120f28:	44 29 c8             	sub    %r9d,%eax
+  120f2b:	45 8d 71 01          	lea    0x1(%r9),%r14d
+  120f2f:	44 89 f3             	mov    %r14d,%ebx
+  120f32:	2b 5c 24 48          	sub    0x48(%rsp),%ebx
+  120f36:	66 0f 6e e1          	movd   %ecx,%xmm4
+  120f3a:	f3 0f 10 5c 24 40    	movss  0x40(%rsp),%xmm3
+  120f40:	66 41 0f 6e e8       	movd   %r8d,%xmm5
+  120f45:	66 0f 6f c5          	movdqa %xmm5,%xmm0
+  120f49:	f3 0f 59 c3          	mulss  %xmm3,%xmm0
+  120f4d:	44 89 c9             	mov    %r9d,%ecx
+  120f50:	f3 48 0f 2a d1       	cvtsi2ss %rcx,%xmm2
+  120f55:	f3 0f 58 c4          	addss  %xmm4,%xmm0
+  120f59:	85 d2                	test   %edx,%edx
+  120f5b:	0f 45 d8             	cmovne %eax,%ebx
+  120f5e:	74 09                	je     120f69 <spin_64+0x59>
+  120f60:	f3 0f 5c c2          	subss  %xmm2,%xmm0
+  120f64:	0f 28 d0             	movaps %xmm0,%xmm2
+  120f67:	eb 0c                	jmp    120f75 <spin_64+0x65>
+  120f69:	f3 0f 58 15 9f a0 00 	addss  0xa09f(%rip),%xmm2        # 12b010 <_IO_stdin_used+0x10>
+  120f70:	00 
+  120f71:	f3 0f 5c d0          	subss  %xmm0,%xmm2
+  120f75:	0f 57 c0             	xorps  %xmm0,%xmm0
+  120f78:	f3 48 0f 2a c3       	cvtsi2ss %rbx,%xmm0
+  120f7d:	0f 57 f6             	xorps  %xmm6,%xmm6
+  120f80:	0f 57 c9             	xorps  %xmm1,%xmm1
+  120f83:	f3 0f 5f ca          	maxss  %xmm2,%xmm1
+  120f87:	0f 2e c1             	ucomiss %xmm1,%xmm0
+  120f8a:	76 39                	jbe    120fc5 <spin_64+0xb5>
+  120f8c:	0f 28 c1             	movaps %xmm1,%xmm0
+  120f8f:	49 89 ff             	mov    %rdi,%r15
+  120f92:	4d 89 cc             	mov    %r9,%r12
+  120f95:	89 d5                	mov    %edx,%ebp
+  120f97:	f3 0f 11 64 24 0c    	movss  %xmm4,0xc(%rsp)
+  120f9d:	66 0f 7e 6c 24 08    	movd   %xmm5,0x8(%rsp)
+  120fa3:	e8 d8 42 ee ff       	call   5280 <floorf@plt>
+  120fa8:	0f 57 f6             	xorps  %xmm6,%xmm6
+  120fab:	66 0f 6e 6c 24 08    	movd   0x8(%rsp),%xmm5
+  120fb1:	f3 0f 10 64 24 0c    	movss  0xc(%rsp),%xmm4
+  120fb7:	f3 0f 10 5c 24 40    	movss  0x40(%rsp),%xmm3
+  120fbd:	89 ea                	mov    %ebp,%edx
+  120fbf:	4d 89 e1             	mov    %r12,%r9
+  120fc2:	4c 89 ff             	mov    %r15,%rdi
+  120fc5:	f3 48 0f 2c c0       	cvttss2si %xmm0,%rax
+  120fca:	39 c3                	cmp    %eax,%ebx
+  120fcc:	0f 42 c3             	cmovb  %ebx,%eax
+  120fcf:	31 c9                	xor    %ecx,%ecx
+  120fd1:	f3 0f 10 0d 33 a0 00 	movss  0xa033(%rip),%xmm1        # 12b00c <_IO_stdin_used+0xc>
+  120fd8:	00 
+  120fd9:	0f 2e c8             	ucomiss %xmm0,%xmm1
+  120fdc:	0f 46 c1             	cmovbe %ecx,%eax
+  120fdf:	0f 2e c6             	ucomiss %xmm6,%xmm0
+  120fe2:	0f 42 c1             	cmovb  %ecx,%eax
+  120fe5:	85 c0                	test   %eax,%eax
+  120fe7:	74 29                	je     121012 <spin_64+0x102>
+  120fe9:	42 8d 0c 08          	lea    (%rax,%r9,1),%ecx
+  120fed:	41 29 c6             	sub    %eax,%r14d
+  120ff0:	85 d2                	test   %edx,%edx
+  120ff2:	44 0f 45 f1          	cmovne %ecx,%r14d
+  120ff6:	0f 57 c0             	xorps  %xmm0,%xmm0
+  120ff9:	f3 49 0f 2a c6       	cvtsi2ss %r14,%xmm0
+  120ffe:	f3 0f 5c c4          	subss  %xmm4,%xmm0
+  121002:	f3 0f 5e c5          	divss  %xmm5,%xmm0
+  121006:	45 31 c0             	xor    %r8d,%r8d
+  121009:	0f 2e d8             	ucomiss %xmm0,%xmm3
+  12100c:	41 0f 93 c0          	setae  %r8b
+  121010:	eb 06                	jmp    121018 <spin_64+0x108>
+  121012:	41 b8 01 00 00 00    	mov    $0x1,%r8d
+  121018:	89 d9                	mov    %ebx,%ecx
+  12101a:	48 ff c1             	inc    %rcx
+  12101d:	39 c3                	cmp    %eax,%ebx
+  12101f:	41 0f 95 c3          	setne  %r11b
+  121023:	85 d2                	test   %edx,%edx
+  121025:	0f 84 7c 00 00 00    	je     1210a7 <spin_64+0x197>
+  12102b:	44 89 c6             	mov    %r8d,%esi
+  12102e:	eb 31                	jmp    121061 <spin_64+0x151>
+  121030:	46 8d 04 08          	lea    (%rax,%r9,1),%r8d
+  121034:	0f 57 c0             	xorps  %xmm0,%xmm0
+  121037:	f3 49 0f 2a c0       	cvtsi2ss %r8,%xmm0
+  12103c:	f3 0f 5c c4          	subss  %xmm4,%xmm0
+  121040:	f3 0f 5e c5          	divss  %xmm5,%xmm0
+  121044:	0f 2e d8             	ucomiss %xmm0,%xmm3
+  121047:	41 0f 93 c0          	setae  %r8b
+  12104b:	48 ff c9             	dec    %rcx
+  12104e:	45 0f b6 c0          	movzbl %r8b,%r8d
+  121052:	39 d8                	cmp    %ebx,%eax
+  121054:	41 0f 95 c3          	setne  %r11b
+  121058:	48 85 c9             	test   %rcx,%rcx
+  12105b:	0f 84 e0 00 00 00    	je     121141 <spin_64+0x231>
+  121061:	85 f6                	test   %esi,%esi
+  121063:	74 2b                	je     121090 <spin_64+0x180>
+  121065:	45 85 c0             	test   %r8d,%r8d
+  121068:	0f 84 c7 00 00 00    	je     121135 <spin_64+0x225>
+  12106e:	41 f6 c3 01          	test   $0x1,%r11b
+  121072:	0f 84 c9 00 00 00    	je     121141 <spin_64+0x231>
+  121078:	be 01 00 00 00       	mov    $0x1,%esi
+  12107d:	ff c0                	inc    %eax
+  12107f:	75 af                	jne    121030 <spin_64+0x120>
+  121081:	31 c0                	xor    %eax,%eax
+  121083:	41 b0 01             	mov    $0x1,%r8b
+  121086:	eb c3                	jmp    12104b <spin_64+0x13b>
+  121088:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+  12108f:	00 
+  121090:	41 83 f8 01          	cmp    $0x1,%r8d
+  121094:	0f 84 a7 00 00 00    	je     121141 <spin_64+0x231>
+  12109a:	31 f6                	xor    %esi,%esi
+  12109c:	ff c8                	dec    %eax
+  12109e:	75 90                	jne    121030 <spin_64+0x120>
+  1210a0:	41 b0 01             	mov    $0x1,%r8b
+  1210a3:	31 c0                	xor    %eax,%eax
+  1210a5:	eb a4                	jmp    12104b <spin_64+0x13b>
+  1210a7:	41 8d 71 02          	lea    0x2(%r9),%esi
+  1210ab:	89 c5                	mov    %eax,%ebp
+  1210ad:	45 89 c2             	mov    %r8d,%r10d
+  1210b0:	eb 27                	jmp    1210d9 <spin_64+0x1c9>
+  1210b2:	66 66 66 66 66 2e 0f 	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  1210b9:	1f 84 00 00 00 00 00 
+  1210c0:	31 c0                	xor    %eax,%eax
+  1210c2:	41 b0 01             	mov    $0x1,%r8b
+  1210c5:	48 ff c9             	dec    %rcx
+  1210c8:	45 0f b6 c0          	movzbl %r8b,%r8d
+  1210cc:	39 d8                	cmp    %ebx,%eax
+  1210ce:	41 0f 95 c3          	setne  %r11b
+  1210d2:	89 c5                	mov    %eax,%ebp
+  1210d4:	48 85 c9             	test   %rcx,%rcx
+  1210d7:	74 68                	je     121141 <spin_64+0x231>
+  1210d9:	45 85 d2             	test   %r10d,%r10d
+  1210dc:	74 22                	je     121100 <spin_64+0x1f0>
+  1210de:	45 85 c0             	test   %r8d,%r8d
+  1210e1:	74 5a                	je     12113d <spin_64+0x22d>
+  1210e3:	41 f6 c3 01          	test   $0x1,%r11b
+  1210e7:	74 50                	je     121139 <spin_64+0x229>
+  1210e9:	89 e8                	mov    %ebp,%eax
+  1210eb:	41 ba 01 00 00 00    	mov    $0x1,%r10d
+  1210f1:	ff c0                	inc    %eax
+  1210f3:	74 cb                	je     1210c0 <spin_64+0x1b0>
+  1210f5:	45 89 c8             	mov    %r9d,%r8d
+  1210f8:	eb 18                	jmp    121112 <spin_64+0x202>
+  1210fa:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  121100:	41 83 f8 01          	cmp    $0x1,%r8d
+  121104:	74 33                	je     121139 <spin_64+0x229>
+  121106:	45 31 d2             	xor    %r10d,%r10d
+  121109:	89 e8                	mov    %ebp,%eax
+  12110b:	ff c8                	dec    %eax
+  12110d:	74 1f                	je     12112e <spin_64+0x21e>
+  12110f:	41 89 f0             	mov    %esi,%r8d
+  121112:	41 29 e8             	sub    %ebp,%r8d
+  121115:	0f 57 c0             	xorps  %xmm0,%xmm0
+  121118:	f3 49 0f 2a c0       	cvtsi2ss %r8,%xmm0
+  12111d:	f3 0f 5c c4          	subss  %xmm4,%xmm0
+  121121:	f3 0f 5e c5          	divss  %xmm5,%xmm0
+  121125:	0f 2e d8             	ucomiss %xmm0,%xmm3
+  121128:	41 0f 93 c0          	setae  %r8b
+  12112c:	eb 97                	jmp    1210c5 <spin_64+0x1b5>
+  12112e:	41 b0 01             	mov    $0x1,%r8b
+  121131:	31 c0                	xor    %eax,%eax
+  121133:	eb 90                	jmp    1210c5 <spin_64+0x1b5>
+  121135:	ff c8                	dec    %eax
+  121137:	eb 08                	jmp    121141 <spin_64+0x231>
+  121139:	89 e8                	mov    %ebp,%eax
+  12113b:	eb 04                	jmp    121141 <spin_64+0x231>
+  12113d:	89 e8                	mov    %ebp,%eax
+  12113f:	ff c8                	dec    %eax
+  121141:	85 c0                	test   %eax,%eax
+  121143:	48 8d 64 24 10       	lea    0x10(%rsp),%rsp
+  121148:	5b                   	pop    %rbx
+  121149:	41 5c                	pop    %r12
+  12114b:	41 5e                	pop    %r14
+  12114d:	41 5f                	pop    %r15
+  12114f:	5d                   	pop    %rbp
+  121150:	74 59                	je     1211ab <spin_64+0x29b>
+  121152:	42 8d 34 08          	lea    (%rax,%r9,1),%esi
+  121156:	45 89 c8             	mov    %r9d,%r8d
+  121159:	41 29 c1             	sub    %eax,%r9d
+  12115c:	45 8d 51 01          	lea    0x1(%r9),%r10d
+  121160:	85 d2                	test   %edx,%edx
+  121162:	44 89 c9             	mov    %r9d,%ecx
+  121165:	46 8d 44 00 ff       	lea    -0x1(%rax,%r8,1),%r8d
+  12116a:	0f 45 ce             	cmovne %esi,%ecx
+  12116d:	45 0f 44 c2          	cmove  %r10d,%r8d
+  121171:	0f 57 c0             	xorps  %xmm0,%xmm0
+  121174:	f3 49 0f 2a c0       	cvtsi2ss %r8,%xmm0
+  121179:	0f 57 c9             	xorps  %xmm1,%xmm1
+  12117c:	f3 0f 2a ca          	cvtsi2ss %edx,%xmm1
+  121180:	f3 0f 58 c8          	addss  %xmm0,%xmm1
+  121184:	f3 0f 5c cc          	subss  %xmm4,%xmm1
+  121188:	f3 0f 5e cd          	divss  %xmm5,%xmm1
+  12118c:	0f 28 c1             	movaps %xmm1,%xmm0
+  12118f:	f3 0f c2 c3 00       	cmpeqss %xmm3,%xmm0
+  121194:	66 0f 7e c0          	movd   %xmm0,%eax
+  121198:	83 e0 01             	and    $0x1,%eax
+  12119b:	0f 2e cb             	ucomiss %xmm3,%xmm1
+  12119e:	44 0f 45 c1          	cmovne %ecx,%r8d
+  1211a2:	44 0f 4a c1          	cmovp  %ecx,%r8d
+  1211a6:	45 89 c1             	mov    %r8d,%r9d
+  1211a9:	eb 05                	jmp    1211b0 <spin_64+0x2a0>
+  1211ab:	31 c0                	xor    %eax,%eax
+  1211ad:	44 89 c9             	mov    %r9d,%ecx
+  1211b0:	89 c9                	mov    %ecx,%ecx
+  1211b2:	48 89 0f             	mov    %rcx,(%rdi)
+  1211b5:	44 89 c9             	mov    %r9d,%ecx
+  1211b8:	48 89 4f 08          	mov    %rcx,0x8(%rdi)
+  1211bc:	48 89 47 10          	mov    %rax,0x10(%rdi)
+  1211c0:	c3                   	ret
+
+Disassembly of section .fini:

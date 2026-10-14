@@ -1,0 +1,31 @@
+renderer=dda init_ms=408
+frames=4 elapsed_ms=3591
+
+renderer=dda init_ms=404
+frames=4 elapsed_ms=3379
+
+renderer=dda init_ms=455
+frames=4 elapsed_ms=3586
+
+renderer=dda init_ms=401
+frames=4 elapsed_ms=3600
+
+renderer=dda init_ms=392
+frames=4 elapsed_ms=3480
+
+renderer=dda init_ms=378
+frames=4 elapsed_ms=3344
+
+renderer=dda init_ms=384
+frames=4 elapsed_ms=3293
+
+renderer=dda init_ms=382
+frames=4 elapsed_ms=3672
+
+renderer=dda init_ms=388
+frames=4 elapsed_ms=3636
+
+renderer=dda init_ms=427
+frames=4 elapsed_ms=3373
+
+Saved .audit/dda-floor/gpu7.tsv

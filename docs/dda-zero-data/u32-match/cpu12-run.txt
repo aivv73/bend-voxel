@@ -1,0 +1,31 @@
+renderer=dda init_ms=272
+frames=64 elapsed_ms=7269
+
+renderer=dda init_ms=266
+frames=64 elapsed_ms=7113
+
+renderer=dda init_ms=264
+frames=64 elapsed_ms=7095
+
+renderer=dda init_ms=263
+frames=64 elapsed_ms=7211
+
+renderer=dda init_ms=265
+frames=64 elapsed_ms=7290
+
+renderer=dda init_ms=271
+frames=64 elapsed_ms=7019
+
+renderer=dda init_ms=263
+frames=64 elapsed_ms=7144
+
+renderer=dda init_ms=265
+frames=64 elapsed_ms=7243
+
+renderer=dda init_ms=264
+frames=64 elapsed_ms=7211
+
+renderer=dda init_ms=267
+frames=64 elapsed_ms=7079
+
+Saved .audit/dda-zero/combined-cpu12.tsv

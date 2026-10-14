@@ -1,0 +1,31 @@
+renderer=dda init_ms=260
+frames=8 elapsed_ms=5748
+
+renderer=dda init_ms=257
+frames=8 elapsed_ms=5794
+
+renderer=dda init_ms=257
+frames=8 elapsed_ms=5780
+
+renderer=dda init_ms=261
+frames=8 elapsed_ms=5731
+
+renderer=dda init_ms=261
+frames=8 elapsed_ms=5720
+
+renderer=dda init_ms=263
+frames=8 elapsed_ms=5770
+
+renderer=dda init_ms=263
+frames=8 elapsed_ms=5759
+
+renderer=dda init_ms=261
+frames=8 elapsed_ms=5767
+
+renderer=dda init_ms=263
+frames=8 elapsed_ms=5711
+
+renderer=dda init_ms=258
+frames=8 elapsed_ms=5790
+
+Saved .audit/dda-zero/next-guard-cpu1-repeat.tsv

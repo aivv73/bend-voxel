@@ -1,0 +1,18 @@
+2026-10-07T14:59:00Z
+ 18:59:00 up  1:03,  1 user,  load average: 14.94, 12.63, 8.66
+    PID %CPU COMMAND
+  11362  413 dota2
+   8967 27.8 vesktop
+   6423 19.8 helium
+   6386 18.6 steam
+   8723 14.0 vesktop
+   4220 13.2 niri
+   6389  9.9 helium
+   5038  9.8 t3code
+   6898  7.9 steamwebhelper
+   4383  7.8 ThroneCore
+   4967  6.8 t3code
+name, utilization.gpu [%], memory.used [MiB]
+NVIDIA GeForce GTX 1660, 35 %, 3082 MiB
+2026-10-07T15:00:10Z
+ 19:00:10 up  1:04,  1 user,  load average: 10.74, 11.79, 8.65

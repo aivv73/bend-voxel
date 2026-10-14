@@ -1,0 +1,13 @@
+variant	symbol	Bend definition	emitted C location
+baseline	spin_104	Grid.region including Tree.region	.audit/dda-cursor/baseline.c:9856
+baseline	spin_62	Axis.advance	.audit/dda-cursor/baseline.c:6067
+baseline	spin_101	Crossing.region	.audit/dda-cursor/baseline.c:9555
+baseline	spin_143	Trace.regions	.audit/dda-cursor/baseline.c:19136
+baseline	spin_183	Trace.mode	.audit/dda-cursor/baseline.c:32079
+candidate	spin_47	Tree.region	.audit/dda-cursor/candidate2.c:4888
+candidate	spin_67	Cache.seed	.audit/dda-cursor/candidate2.c:6395
+candidate	spin_69	Axis.advance	.audit/dda-cursor/candidate2.c:6965
+candidate	spin_107	Crossing.region	.audit/dda-cursor/candidate2.c:10237
+candidate	spin_110	Cache.query	.audit/dda-cursor/candidate2.c:10503
+candidate	spin_149	Trace.cached	.audit/dda-cursor/candidate2.c:20050
+candidate	spin_189	Trace.mode	.audit/dda-cursor/candidate2.c:35644

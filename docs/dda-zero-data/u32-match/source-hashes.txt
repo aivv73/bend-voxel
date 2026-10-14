@@ -1,0 +1,5 @@
+0a20e959d87eec22b4c182e2eca7cb520d586c157c1366fa4a399d7bbf6f00d8  docs/dda-zero-data/u32-match/baseline-dda.bend
+6202eacc8b4924ec0dca06e2726ac92490aaa6a2902c4f8fed16ec2f229d88ad  docs/dda-zero-data/u32-match/predicate-dda.bend
+2610923ddf39506d5481a3b6ea2ced5f660f321b7cc889f6486cb2cdbac481b8  docs/dda-zero-data/u32-match/candidate-dda.bend
+7e11742d656fcecd4da536fb6e3bb5fce6ec0ffc1ebdc36815f1b98062301f19  docs/dda-zero-data/u32-match/candidate-laws.bend
+3dfd9fad1c39efe25a453617d34e48950133f624c780914978bb04f15a834bd7  docs/dda-zero-data/u32-match/candidate-proof.bend

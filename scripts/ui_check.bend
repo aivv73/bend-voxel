@@ -1,4 +1,6 @@
 import Base
+import 0xfdc8da256837fef81553ec8530fb7431/capture.bend as NativeCapture
+import 0x8cc463a65f479c5af6b3080035eb0836/winref.bend as W
 import ../main.bend as Slice
 import ../dump.bend as D
 import ../deps/bend-ui-test/uitest.bend as UITest
@@ -15,7 +17,7 @@ type Stage is Data:
 	ClickReset{}
 
 type Session is Data:
-	Session{output: String, ref: WindowRef, before: Image, cut: Image, close_window: Bool, completed: Chan(Bool)}
+	Session{output: String, ref: W.WindowRef, before: Image, cut: Image, close_window: Bool, completed: Chan(Bool)}
 
 type Progress is Type:
 	Progress{window: Window, model: Slice.Model, session: Session, stage: Stage, wait: Nat}
@@ -26,6 +28,13 @@ def Check.require(ok: Bool, message: String) -> IO(Unit):
 			IO.pure(Unit, Unit{})
 		case False{}:
 			IO.die(Unit, 1, message)
+
+def Check.sent(result: Result<&1, &1, Bool, Unit>) -> Bool:
+	match result:
+		case Done{value}:
+			True{}
+		case Fail{value}:
+			False{}
 
 def Pixels.delta(+depth: Nat, a: Image, b: Image) -> U32:
 	match depth a b:
@@ -54,29 +63,29 @@ def Pixels.at(fuel: Nat, +x: U32, +y: U32, +size: U32, image: Image) -> U32:
 			+half = (size / 2 : U32)
 			Pixels.at(rest, (x % half : U32), (y % half : U32), half, Bool.pick(Image, (y < half : U32), Bool.pick(Image, (x < half : U32), tl, tr), Bool.pick(Image, (x < half : U32), bl, br)))
 
-def Reference.same(a: WindowRef, b: WindowRef) -> Bool:
-	X11WindowRef{ad, ai} = a
-	X11WindowRef{bd, bi} = b
+def Reference.same(a: W.WindowRef, b: W.WindowRef) -> Bool:
+	W.X11WindowRef{ad, ai} = a
+	W.X11WindowRef{bd, bi} = b
 	String.eq(ad, bd) && U32.is_eq(ai, bi)
 
-def Reference.unwrapped(exported: Window & Result<&1, &1, U32 & String, WindowRef>) -> IO(Window & WindowRef):
+def Reference.unwrapped(exported: Window & Result<&1, &1, U32 & String, W.WindowRef>) -> IO(Window & W.WindowRef):
 	(window, result) = exported
-	do IO<Window & WindowRef>:
-		ref : WindowRef <- IO.try(WindowRef, IO.pure(Result<&1, &1, U32 & String, WindowRef>, result))
+	do IO<Window & W.WindowRef>:
+		ref : W.WindowRef <- IO.try(W.WindowRef, IO.pure(Result<&1, &1, U32 & String, W.WindowRef>, result))
 		return (window, ref)
 
-def Reference.export(window: Window) -> IO(Window & WindowRef):
-	IO.bind(Window & Result<&1, &1, U32 & String, WindowRef>, Window & WindowRef, Window.export_ref(window), Reference.unwrapped)
+def Reference.export(window: Window) -> IO(Window & W.WindowRef):
+	IO.bind(Window & Result<&1, &1, U32 & String, W.WindowRef>, Window & W.WindowRef, W.WinRef.export(window), Reference.unwrapped)
 
-def Reference.close(ref: WindowRef, button: Bool) -> IO(Unit):
+def Reference.close(ref: W.WindowRef, button: Bool) -> IO(Unit):
 	match button:
 		case False{}:
 			IO.try(Unit, UITest.key(ref, 27))
 		case True{}:
 			IO.try(Unit, UITest.request_close(ref))
 
-def Reference.report(ref: WindowRef) -> IO(Unit):
-	X11WindowRef{display, id} = ref
+def Reference.report(ref: W.WindowRef) -> IO(Unit):
+	W.X11WindowRef{display, id} = ref
 	IO.print("DISPLAY=" ++ display ++ " XID=" ++ U32.show(id))
 
 def Check.frames(fuel: Nat, window: Window, model: Slice.Model, next: Window -> Slice.Model -> IO(Unit)) -> IO(Unit):
@@ -91,14 +100,14 @@ def Check.unclosed(window: Window, model: Slice.Model) -> IO(Unit):
 		Window.close(window)
 		IO.die(Unit, 1, "Native close did not stop the real app reducer")
 
-def Check.finish(+ref: WindowRef, close_window: Bool, completed: Chan(Bool), window: Window, model: Slice.Model) -> IO(Unit):
+def Check.finish(+ref: W.WindowRef, close_window: Bool, completed: Chan(Bool), window: Window, model: Slice.Model) -> IO(Unit):
 	do IO<Unit>:
 		Reference.close(ref, close_window)
 		Slice.Interactive.step(window, model, Check.unclosed)
 		alive : Bool <- IO.try(Bool, UITest.alive(ref))
 		Check.require(Bool.not(alive), "Exported window is still alive after app close")
-		sent : Bool <- Chan.send(Bool, completed, True{})
-		Check.require(sent, "Native check completion channel closed early")
+		sent : Result<&1, &1, Bool, Unit> <- Chan.send(Bool, completed, True{})
+		Check.require(Check.sent(sent), "Native check completion channel closed early")
 		IO.print("PASS exported-window identity, native pixels, Space, repeated cut, primary click, background no-op, exact resets, and native close")
 
 def Check.image(stage: Stage, session: Session, window: Window, model: Slice.Model, +image: Image) -> IO(Maybe<Progress>):
@@ -160,7 +169,7 @@ def Check.converted(stage: Stage, session: Session, window: Window, model: Slice
 		case Done{image}:
 			Check.image(stage, session, window, model, image)
 
-def Check.captured(stage: Stage, session: Session, model: Slice.Model, captured: Window & Result<&1, &1, U32 & String, Capture>) -> IO(Maybe<Progress>):
+def Check.captured(stage: Stage, session: Session, model: Slice.Model, captured: Window & Result<&1, &1, U32 & String, NativeCapture.Capture>) -> IO(Maybe<Progress>):
 	match captured:
 		case (window, Fail{(code, message)}):
 			do IO<Maybe<Progress>>:
@@ -169,16 +178,16 @@ def Check.captured(stage: Stage, session: Session, model: Slice.Model, captured:
 		case (window, Done{capture}):
 			Check.converted(stage, session, window, model, C.Capture.image(capture))
 
-def Check.verified(stage: Stage, +session: Session, model: Slice.Model, exported: Window & WindowRef) -> IO(Maybe<Progress>):
+def Check.verified(stage: Stage, +session: Session, model: Slice.Model, exported: Window & W.WindowRef) -> IO(Maybe<Progress>):
 	Session{output, expected, before, cut, close_window, completed} = session
 	(window, +ref) = exported
 	do IO<Maybe<Progress>>:
 		Check.require(Reference.same(ref, expected), "Owned window reference changed")
-		captured : Window & Result<&1, &1, U32 & String, Capture> <- Window.capture(window)
+		captured : Window & Result<&1, &1, U32 & String, NativeCapture.Capture> <- NativeCapture.Window.capture(window)
 		Check.captured(stage, session, model, captured)
 
 def Check.run(stage: Stage, session: Session, window: Window, model: Slice.Model) -> IO(Maybe<Progress>):
-	IO.bind(Window & WindowRef, Maybe<Progress>, Reference.export(window), exported => Check.verified(stage, session, model, exported))
+	IO.bind(Window & W.WindowRef, Maybe<Progress>, Reference.export(window), exported => Check.verified(stage, session, model, exported))
 
 def Check.wait(wait: Nat, stage: Stage, session: Session, window: Window, model: Slice.Model) -> IO(Maybe<Progress>):
 	match wait:
@@ -206,7 +215,7 @@ def Check.loop(fuel: Nat, progress: Progress) -> IO(Unit):
 			Slice.Interactive.step(window, model,
 				w => m => IO.bind(Maybe<Progress>, Unit, Check.wait(wait, stage, session, w, m), result => Check.advance(p => Check.loop(rest, p), result)))
 
-def Check.ready(output: String, close_window: Bool, completed: Chan(Bool), model: Slice.Model, exported: Window & WindowRef) -> IO(Unit):
+def Check.ready(output: String, close_window: Bool, completed: Chan(Bool), model: Slice.Model, exported: Window & W.WindowRef) -> IO(Unit):
 	(window, +ref) = exported
 	do IO<Unit>:
 		Reference.report(ref)
@@ -215,7 +224,7 @@ def Check.ready(output: String, close_window: Bool, completed: Chan(Bool), model
 		Check.loop(32n, Progress{renamed, model, Session{output, ref, Pix{0}, Pix{0}, close_window, completed}, First{}, 1n})
 
 def Check.begin(output: String, close_window: Bool, completed: Chan(Bool), window: Window, model: Slice.Model) -> IO(Unit):
-	IO.bind(Window & WindowRef, Unit, Reference.export(window), exported => Check.ready(output, close_window, completed, model, exported))
+	IO.bind(Window & W.WindowRef, Unit, Reference.export(window), exported => Check.ready(output, close_window, completed, model, exported))
 
 def Check.mkdir_result(result: U32 & (String & String)) -> IO(Unit):
 	(status, streams) = result

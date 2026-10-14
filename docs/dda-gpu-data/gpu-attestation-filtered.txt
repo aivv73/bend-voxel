@@ -1,0 +1,11 @@
+2026/10/08 16:23:37.322, 9 %, 13 %, 300 MHz, 453 MiB
+96995, .audit/dda-gpu/candidate-renderer, 92 MiB
+2026/10/08 16:23:38.383, 21 %, 14 %, 1995 MHz, 813 MiB
+96995, .audit/dda-gpu/candidate-renderer, 96 MiB
+2026/10/08 16:23:39.439, 98 %, 16 %, 1995 MHz, 804 MiB
+96995, .audit/dda-gpu/candidate-renderer, 96 MiB
+2026/10/08 16:23:40.493, 100 %, 8 %, 1995 MHz, 800 MiB
+96995, .audit/dda-gpu/candidate-renderer, 96 MiB
+2026/10/08 16:23:41.545, 100 %, 9 %, 1980 MHz, 800 MiB
+96995, .audit/dda-gpu/candidate-renderer, 96 MiB
+2026/10/08 16:23:42.596, 100 %, 8 %, 1980 MHz, 798 MiB

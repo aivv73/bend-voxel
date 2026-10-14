@@ -1,0 +1,16 @@
+opening winner f6 off exact bytes
+opening winner f6 on exact bytes
+cut winner f6 off exact bytes
+cut winner f6 on exact bytes
+cube winner f6 off exact bytes
+cube winner f6 on exact bytes
+carved winner f6 off exact bytes
+carved winner f6 on exact bytes
+inside winner f6 off exact bytes
+inside winner f6 on exact bytes
+axis winner f6 off exact bytes
+axis winner f6 on exact bytes
+opposite winner f6 off exact bytes
+opposite winner f6 on exact bytes
+opening winner f6 CPU1 exact bytes
+opening winner f6 CPU6 exact bytes

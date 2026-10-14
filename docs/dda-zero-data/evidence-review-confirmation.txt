@@ -1,0 +1,13 @@
+Approved. Both findings are resolved.
+
+- [Report line 56](/home/aivv/Документы/projects/bend-voxel-main/docs/dda-zero.md:56) scopes frame counts to the last prototype and states earlier batch counts separately.
+- [Trail rows 35–36](/home/aivv/Документы/projects/bend-voxel-main/.audit/dda-zero/decisions.tsv:35) supersede the stale pointer while preserving history. The captured computed-match patch agrees with the archived checker rejection.
+- Canonical and archived decision logs are byte-identical.
+
+Prove It Works guided direct artifact reads and comparison. No heavy jobs, writes, or delegation occurred.
+
+**Attention.**
+
+reviewed by gpt-6.1-sol, xhigh, independent same-model review
+
+No unresolved flags. Disclosed limitations remain desktop timing variation, no GPU instruction-cost attribution, and Boolean-expression proof rather than full trace equivalence.

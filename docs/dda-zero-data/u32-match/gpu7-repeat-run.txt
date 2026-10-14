@@ -1,0 +1,31 @@
+renderer=dda init_ms=295
+frames=8 elapsed_ms=4078
+
+renderer=dda init_ms=300
+frames=8 elapsed_ms=4254
+
+renderer=dda init_ms=296
+frames=8 elapsed_ms=4308
+
+renderer=dda init_ms=293
+frames=8 elapsed_ms=3997
+
+renderer=dda init_ms=292
+frames=8 elapsed_ms=3981
+
+renderer=dda init_ms=293
+frames=8 elapsed_ms=4324
+
+renderer=dda init_ms=294
+frames=8 elapsed_ms=4375
+
+renderer=dda init_ms=295
+frames=8 elapsed_ms=4075
+
+renderer=dda init_ms=292
+frames=8 elapsed_ms=4106
+
+renderer=dda init_ms=299
+frames=8 elapsed_ms=4344
+
+Saved .audit/dda-zero/gpu7-repeat.tsv

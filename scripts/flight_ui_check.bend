@@ -1,4 +1,6 @@
 import Base
+import 0xfdc8da256837fef81553ec8530fb7431/capture.bend as NativeCapture
+import 0x8cc463a65f479c5af6b3080035eb0836/winref.bend as W
 import ../main.bend as App
 import ../render.bend as R
 import ../dump.bend as D
@@ -14,26 +16,26 @@ def Native.result(result: U32 & (String & String)) -> IO(Unit):
 def Native.display(display: String, args: List<String>) -> IO(Unit):
 	IO.bind(U32 & (String & String), Unit, IO.try(U32 & (String & String), Process.run("env", List.append(&1, String, ["DISPLAY=" ++ display, "xdotool"], args), "", 4096, 3000)), Native.result)
 
-def Native.send(ref: WindowRef, args: List<String>) -> IO(Unit):
-	X11WindowRef{display, id} = ref
+def Native.send(ref: W.WindowRef, args: List<String>) -> IO(Unit):
+	W.X11WindowRef{display, id} = ref
 	Native.display(display, args)
 
-def Native.key(ref: WindowRef, down: Bool, code: U32) -> IO(Unit):
-	X11WindowRef{display, id} = ref
+def Native.key(ref: W.WindowRef, down: Bool, code: U32) -> IO(Unit):
+	W.X11WindowRef{display, id} = ref
 	Native.display(display, [Bool.pick(String, down, "keydown", "keyup"), "--window", U32.show(id), SCon{Chr{code}, SNil{}}])
 
-def Native.focus(ref: WindowRef) -> IO(Unit):
-	X11WindowRef{+display, +id} = ref
+def Native.focus(ref: W.WindowRef) -> IO(Unit):
+	W.X11WindowRef{+display, +id} = ref
 	do IO<Unit>:
 		Native.display(display, ["windowraise", U32.show(id)])
 		Native.display(display, ["windowfocus", "--sync", U32.show(id)])
 		Native.display(display, ["mousemove", "--window", U32.show(id), "256", "256"])
 
-def Native.button(ref: WindowRef, down: Bool) -> IO(Unit):
-	X11WindowRef{display, id} = ref
+def Native.button(ref: W.WindowRef, down: Bool) -> IO(Unit):
+	W.X11WindowRef{display, id} = ref
 	Native.display(display, [Bool.pick(String, down, "mousedown", "mouseup"), "--window", U32.show(id), "3"])
 
-def Native.motion(ref: WindowRef) -> IO(Unit):
+def Native.motion(ref: W.WindowRef) -> IO(Unit):
 	Native.send(ref, ["mousemove_relative", "--", "40", "20"])
 
 def Flight.snapshot(model: App.Model) -> App.Model & R.Camera:
@@ -79,7 +81,7 @@ def Flight.converted(+output: String, name: String, window: Window, converted: R
 				D.Dump.ppm(output ++ "/" ++ name ++ ".ppm", image)
 				return (window, image)
 
-def Flight.captured(+output: String, name: String, captured: Window & Result<&1, &1, U32 & String, Capture>) -> IO(Window & Image):
+def Flight.captured(+output: String, name: String, captured: Window & Result<&1, &1, U32 & String, NativeCapture.Capture>) -> IO(Window & Image):
 	match captured:
 		case (window, Done{capture}):
 			Flight.converted(output, name, window, C.Capture.image(capture))
@@ -89,16 +91,16 @@ def Flight.captured(+output: String, name: String, captured: Window & Result<&1,
 				IO.die(Window & Image, code, message)
 
 def Flight.capture(+output: String, name: String, window: Window) -> IO(Window & Image):
-	IO.bind(Window & Result<&1, &1, U32 & String, Capture>, Window & Image, Window.capture(window), c => Flight.captured(output, name, c))
+	IO.bind(Window & Result<&1, &1, U32 & String, NativeCapture.Capture>, Window & Image, NativeCapture.Window.capture(window), c => Flight.captured(output, name, c))
 
-def Flight.close(+ref: WindowRef, completed: Chan(Bool), window: Window, model: App.Model) -> IO(Unit):
+def Flight.close(+ref: W.WindowRef, completed: Chan(Bool), window: Window, model: App.Model) -> IO(Unit):
 	do IO<Unit>:
 		IO.try(Unit, UITest.key(ref, 27))
 		App.Interactive.step(window, model, UI.Check.unclosed)
 		alive : Bool <- IO.try(Bool, UITest.alive(ref))
 		UI.Check.require(Bool.not(alive), "Native flight window survived Escape")
-		sent : Bool <- Chan.send(Bool, completed, True{})
-		UI.Check.require(sent, "Native flight completion channel closed early")
+		sent : Result<&1, &1, Bool, Unit> <- Chan.send(Bool, completed, True{})
+		UI.Check.require(UI.Check.sent(sent), "Native flight completion channel closed early")
 		IO.print("PASS native WASDQE holds/releases, RMB relative look, released motion, flight carve, reset pose and Escape")
 
 def Flight.closed_image(before: Image, model: App.Model, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
@@ -113,32 +115,32 @@ def Flight.reset_checked(+output: String, expected: R.Camera, before: Image, win
 		UI.Check.require(R.Camera.equal(expected, camera), "Native R reset changed flight camera")
 		IO.bind(Window & Image, Unit, Flight.capture(output, "reset-after-flight", window), shown => Flight.closed_image(before, model, shown, finish))
 
-def Flight.carved(+output: String, ref: WindowRef, expected: R.Camera, +before: Image, model: App.Model, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.carved(+output: String, ref: W.WindowRef, expected: R.Camera, +before: Image, model: App.Model, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	(window, image) = shown
 	do IO<Unit>:
 		UI.Check.require((UI.Pixels.delta(9n, before, image) > 100 : U32), "Native primary click after flight did not carve")
 		IO.try(Unit, UITest.key(ref, 114))
 		UI.Check.frames(3n, window, model, w => m => Flight.reset_checked(output, expected, before, w, Flight.snapshot(m), finish))
 
-def Flight.carve(+output: String, +ref: WindowRef, expected: R.Camera, model: App.Model, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.carve(+output: String, +ref: W.WindowRef, expected: R.Camera, model: App.Model, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	(window, image) = shown
 	do IO<Unit>:
 		IO.try(Unit, UITest.click(ref, 256, 256))
 		UI.Check.frames(3n, window, model, w => m => IO.bind(Window & Image, Unit, Flight.capture(output, "carved-after-flight", w), shown => Flight.carved(output, ref, expected, image, m, shown, finish)))
 
-def Flight.released_look(+output: String, +ref: WindowRef, +expected: R.Camera, window: Window, snapshot: App.Model & R.Camera, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.released_look(+output: String, +ref: W.WindowRef, +expected: R.Camera, window: Window, snapshot: App.Model & R.Camera, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	(model, camera) = snapshot
 	do IO<Unit>:
 		UI.Check.require(R.Camera.equal(expected, camera), "Uncaptured native mouse motion changed view")
 		Native.focus(ref)
 		UI.Check.frames(2n, window, model, w => m => IO.bind(Window & Image, Unit, Flight.capture(output, "released-look", w), shown => Flight.carve(output, ref, expected, m, shown, finish)))
 
-def Flight.look_released(+output: String, +ref: WindowRef, expected: R.Camera, window: Window, model: App.Model, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.look_released(+output: String, +ref: W.WindowRef, expected: R.Camera, window: Window, model: App.Model, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	do IO<Unit>:
 		Native.motion(ref)
 		UI.Check.frames(3n, window, model, w => m => Flight.released_look(output, ref, expected, w, Flight.snapshot(m), finish))
 
-def Flight.looked_image(+output: String, +ref: WindowRef, expected: R.Camera, model: App.Model, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.looked_image(+output: String, +ref: W.WindowRef, expected: R.Camera, model: App.Model, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	(window, image) = shown
 	do IO<Unit>:
 		Native.button(ref, False{})
@@ -149,20 +151,20 @@ def Flight.look_delta(previous: R.Camera, current: R.Camera) -> Bool:
 	R.Camera{eye, yaw, pitch} = current
 	((F32.abs((yaw - old_yaw + 0.12 : F32)) < 0.00002) && (F32.abs((pitch - old_pitch + 0.06 : F32)) < 0.00002) : F32)
 
-def Flight.looked(+output: String, ref: WindowRef, previous: R.Camera, window: Window, snapshot: App.Model & R.Camera, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.looked(+output: String, ref: W.WindowRef, previous: R.Camera, window: Window, snapshot: App.Model & R.Camera, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	(model, +camera) = snapshot
 	do IO<Unit>:
 		UI.Check.require(Flight.look_delta(previous, camera), "Captured native 40,20 mouse motion did not apply its relative look")
 		IO.bind(Window & Image, Unit, Flight.capture(output, "captured-look", window), shown => Flight.looked_image(output, ref, camera, model, shown, finish))
 
-def Flight.look_motion(+output: String, +ref: WindowRef, previous: R.Camera, window: Window, model: App.Model, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.look_motion(+output: String, +ref: W.WindowRef, previous: R.Camera, window: Window, model: App.Model, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	App.Model{body, surface, scene, camera, +controls, pointer, time, dirty, tile_depth, fork_depth} = model
 	do IO<Unit>:
 		UI.Check.require(App.Controls.capture(controls), "Native RMB press did not reach the app reducer")
 		Native.motion(ref)
 		UI.Check.frames(3n, window, App.Model{body, surface, scene, camera, controls, pointer, time, dirty, tile_depth, fork_depth}, w => m => Flight.looked(output, ref, previous, w, Flight.snapshot(m), finish))
 
-def Flight.look_ready(+output: String, +ref: WindowRef, snapshot: App.Model & R.Camera, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.look_ready(+output: String, +ref: W.WindowRef, snapshot: App.Model & R.Camera, shown: Window & Image, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	(model, camera) = snapshot
 	(window, image) = shown
 	do IO<Unit>:
@@ -171,7 +173,7 @@ def Flight.look_ready(+output: String, +ref: WindowRef, snapshot: App.Model & R.
 		Native.button(ref, True{})
 		UI.Check.frames(2n, window, model, w => m => Flight.look_motion(output, ref, camera, w, m, finish))
 
-def Flight.look(+output: String, ref: WindowRef, window: Window, snapshot: App.Model & R.Camera, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.look(+output: String, ref: W.WindowRef, window: Window, snapshot: App.Model & R.Camera, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	IO.bind(Window & Image, Unit, Flight.capture(output, "before-look", window), shown => Flight.look_ready(output, ref, snapshot, shown, finish))
 
 def Flight.idle(expected: R.Camera, before: Image, snapshot: App.Model & R.Camera, shown: Window & Image, next_stage: Window -> App.Model -> IO(Unit)) -> IO(Unit):
@@ -191,14 +193,14 @@ def Flight.released(+output: String, +expected: R.Camera, window: Window, snapsh
 		UI.Check.require(R.Camera.equal(expected, camera), "Native keyup did not stop movement")
 		IO.bind(Window & Image, Unit, Flight.capture(output, "released", window), shown => Flight.release_image(output, expected, model, shown, next_stage))
 
-def Flight.held(+code: U32, +output: String, ref: WindowRef, previous: R.Camera, window: Window, snapshot: App.Model & R.Camera, next_stage: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.held(+code: U32, +output: String, ref: W.WindowRef, previous: R.Camera, window: Window, snapshot: App.Model & R.Camera, next_stage: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	(model, +camera) = snapshot
 	do IO<Unit>:
 		UI.Check.require(Flight.moved(previous, camera, code), "Native held key did not fly in its expected direction " ++ U32.show(code))
 		Native.key(ref, False{}, code)
 		UI.Check.frames(3n, window, model, w => m => Flight.released(output, camera, w, Flight.snapshot(m), next_stage))
 
-def Flight.key(+code: U32, +output: String, +ref: WindowRef, window: Window, snapshot: App.Model & R.Camera, next_stage: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.key(+code: U32, +output: String, +ref: W.WindowRef, window: Window, snapshot: App.Model & R.Camera, next_stage: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	(model, camera) = snapshot
 	+directory = output ++ "/key-" ++ U32.show(code)
 	do IO<Unit>:
@@ -206,14 +208,14 @@ def Flight.key(+code: U32, +output: String, +ref: WindowRef, window: Window, sna
 		Native.key(ref, True{}, code)
 		UI.Check.frames(4n, window, model, w => m => Flight.held(code, directory, ref, camera, w, Flight.snapshot(m), next_stage))
 
-def Flight.keys(keys: List<&2, U32>, +output: String, +ref: WindowRef, window: Window, model: App.Model, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
+def Flight.keys(keys: List<&2, U32>, +output: String, +ref: W.WindowRef, window: Window, model: App.Model, finish: Window -> App.Model -> IO(Unit)) -> IO(Unit):
 	match keys:
 		case Nil{}:
 			Flight.look(output, ref, window, Flight.snapshot(model), finish)
 		case Con{code, rest}:
 			Flight.key(code, output, ref, window, Flight.snapshot(model), w => m => Flight.keys(rest, output, ref, w, m, finish))
 
-def Flight.ready(output: String, completed: Chan(Bool), model: App.Model, exported: Window & WindowRef) -> IO(Unit):
+def Flight.ready(output: String, completed: Chan(Bool), model: App.Model, exported: Window & W.WindowRef) -> IO(Unit):
 	(window, +ref) = exported
 	do IO<Unit>:
 		Native.send(ref, ["mouseup", "3"])
@@ -225,7 +227,7 @@ def Flight.start(+output: String) -> IO(Unit):
 		UI.Check.mkdir(output)
 		+completed : Chan(Bool) <- Chan.new(Bool, 1)
 		window : Window <- IO.try(Window, Window.open("Bend Voxel Rewrite | native flight input check", 512, 512))
-		UI.Check.frames(2n, window, App.Model.cube(5n, 5n), w => m => IO.bind(Window & WindowRef, Unit, UI.Reference.export(w), exported => Flight.ready(output, completed, m, exported)))
+		UI.Check.frames(2n, window, App.Model.cube(5n, 5n), w => m => IO.bind(Window & W.WindowRef, Unit, UI.Reference.export(w), exported => Flight.ready(output, completed, m, exported)))
 		Chan.close(Bool, completed)
 		finished : Maybe<Bool> <- Chan.recv(Bool, completed)
 		UI.Check.require(Maybe.default(&1, Bool, finished, False{}), "Native flight check did not complete")

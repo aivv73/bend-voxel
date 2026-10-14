@@ -1,0 +1,31 @@
+renderer=dda init_ms=286
+frames=32 elapsed_ms=6246
+
+renderer=dda init_ms=405
+frames=32 elapsed_ms=6639
+
+renderer=dda init_ms=345
+frames=32 elapsed_ms=6575
+
+renderer=dda init_ms=352
+frames=32 elapsed_ms=6547
+
+renderer=dda init_ms=317
+frames=32 elapsed_ms=6641
+
+renderer=dda init_ms=364
+frames=32 elapsed_ms=6669
+
+renderer=dda init_ms=332
+frames=32 elapsed_ms=6394
+
+renderer=dda init_ms=328
+frames=32 elapsed_ms=6683
+
+renderer=dda init_ms=329
+frames=32 elapsed_ms=6509
+
+renderer=dda init_ms=336
+frames=32 elapsed_ms=6512
+
+Saved .audit/dda-floor/cpu6.tsv

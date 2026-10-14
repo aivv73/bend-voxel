@@ -1,0 +1,31 @@
+renderer=dda init_ms=295
+frames=2 elapsed_ms=1052
+
+renderer=dda init_ms=293
+frames=2 elapsed_ms=1071
+
+renderer=dda init_ms=295
+frames=2 elapsed_ms=1056
+
+renderer=dda init_ms=302
+frames=2 elapsed_ms=1028
+
+renderer=dda init_ms=294
+frames=2 elapsed_ms=980
+
+renderer=dda init_ms=294
+frames=2 elapsed_ms=1125
+
+renderer=dda init_ms=299
+frames=2 elapsed_ms=1035
+
+renderer=dda init_ms=297
+frames=2 elapsed_ms=1079
+
+renderer=dda init_ms=290
+frames=2 elapsed_ms=1015
+
+renderer=dda init_ms=297
+frames=2 elapsed_ms=1087
+
+Saved .audit/dda-zero/gpu6.tsv

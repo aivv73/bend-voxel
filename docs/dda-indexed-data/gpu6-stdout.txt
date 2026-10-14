@@ -1,0 +1,31 @@
+renderer=dda init_ms=289
+frames=8 elapsed_ms=4011
+
+renderer=dda init_ms=1436
+frames=8 elapsed_ms=31853
+
+renderer=dda init_ms=1497
+frames=8 elapsed_ms=31553
+
+renderer=dda init_ms=295
+frames=8 elapsed_ms=4282
+
+renderer=dda init_ms=299
+frames=8 elapsed_ms=4348
+
+renderer=dda init_ms=1460
+frames=8 elapsed_ms=33590
+
+renderer=dda init_ms=1452
+frames=8 elapsed_ms=32955
+
+renderer=dda init_ms=301
+frames=8 elapsed_ms=4229
+
+renderer=dda init_ms=294
+frames=8 elapsed_ms=4227
+
+renderer=dda init_ms=1451
+frames=8 elapsed_ms=32519
+
+Saved .audit/dda-indexed/gpu6.tsv

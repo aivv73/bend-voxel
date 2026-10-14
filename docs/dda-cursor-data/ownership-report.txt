@@ -1,0 +1,21 @@
+Candidate 2 ownership repair
+
+The selected bounded-subtree design remains unchanged: one Seed with a retained subtree, cyclic split axis, absolute low coordinate, span, and exact leaf Region. Cache.depth remains 6n. A new private Cursor carries Seed first and immutable Grid last. Cache.query returns the complete Cursor, so a cache hit transfers the existing root to the next iteration. Trace.cached constructs Region directly from its matched fields instead of retaining Seed and calling Seed.region. Public Grid, Trace.mode, Trace.ray and Frame interfaces, Trace.walk, geometry, crossing arithmetic and frame scheduling are unchanged.
+
+The initial Seed & Grid helper-result probe was rejected because Bend cannot destructure a computed value inside this recursive match. Cursor is Data and can be matched as a parameter; no unsafe recursion or foreign engine code was added. Its generated representation is 17 flattened output words, with no Cursor heap allocation.
+
+Actual correct-entry native input is ../candidate2.c, captured from /tmp/bend-I4Bb8g/candidate2-renderer.c while native clang compiled it. SHA256 19a09a0402f697e564e82d993f64810125c9a39abb4a42c48b9326c03bd7d237. Input was not patched.
+
+Emitted ownership gate:
+- Cache.query is spin_110, candidate2.c:10501. Its inside-contained and outside branches return the unchanged root in result words 15/16. They contain no root term_keep or term_sink.
+- Trace.cached is spin_149, candidate2.c:20050. It contains no term_keep calls. Root/anchor term_sink calls occur only when returning or terminating; continuing cached lookups transfer both handles.
+- Cached Tree.region is spin_47, candidate2.c:4888, and descends with term_peek, at 4920.
+- Refresh retains the root once, at candidate2.c:10624, and drops the old anchor. Cache.seed spin_67, candidate2.c:6395, still consumes/copies each prefix branch through ctr_take, at 6495. This remaining refresh cost is unchanged; no claim that all ownership overhead is removed.
+
+Build uses the captured C with clang -DBEND_CUDA=1 -I/opt/cuda/include -L/opt/cuda/lib64 -std=c11 -O3, linking -lpthread -lm -ldl -lX11 -lcuda -lnvrtc. CUDA is the existing runtime boundary, not new core architecture. Default bend -o lacked CUDA_HOME in this delegate environment and produced a CPU-only binary, which was superseded by this CUDA-enabled build. The explicit -ldl rebuild produced the same native hash as the preceding CUDA-enabled build. GPU sidecar built through candidate2-renderer --gpu-build.
+
+Validation artifacts are ../candidate2-proof.txt, ../candidate2-verdict.txt, ../candidate2-verify-opening.txt, ../candidate2-export-cpu.txt, ../candidate2-export-gpu.txt, and ../candidate2-build-hashes.txt. No release benchmarks were run by this delegate. Cross-cell equivalence remains runtime evidence, not a newly claimed full formal trace theorem. Existing formal Seed/Region laws and proofs are unchanged.
+
+Principles applied: Laziness Protocol limited the edit to private ownership flow and direct Region reconstruction. Model the Domain made Grid and Seed one private ray state so ownership travels together. Prove It Works required inspecting actual generated C, checking existing proofs, scanning exact real rays, and comparing exported bytes.
+
+Final results: bend PROOF.bend passed with ALL PROOFS CHECK; bend PROOF.bend --verdict passed with ALL PROOFS CHECK. Opening scan checked 262144 rays and found zero exact surface mismatches. Native CPU1/fork0 and GPU/fork6 opening exports matched frozen opening-baseline.ppm byte-for-byte, SHA256 c6a3a915ebfc7b8707b622aeab5f175939a9eff6cb3912716270db01b18e6de9. Final CPU hash 05072b6cb174d5a8d935c532c2f9d9f88291944e3916c623ccc5bd6a30e598ab; GPU buddy hash acecfab8993f915cea31b63f809716787dda3e8b63293e36194d7c0d654f5e6d. All delegate build, checker, capture monitor and renderer processes drained. Source ownership returned to parent.
