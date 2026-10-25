@@ -353,7 +353,7 @@ def Check.process(result: U32 & (String & String)) -> IO(Unit):
 
 def Check.binary(path: String) -> IO(Unit):
 	IO.bind(U32 & (String & String), Unit, IO.try(U32 & (String & String),
-		Process.run(path, ["--gpu", "off"], "", 1048576, 30000)), Check.process)
+		Process.run(path, ["+RTS", "--gpu", "off", "-RTS"], "", 1048576, 30000)), Check.process)
 
 def Check.file.read(read: File & Result<&1, &1, U32 & String, String>) -> IO(Unit):
 	(file, result) = read

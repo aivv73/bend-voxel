@@ -106,7 +106,7 @@ def Run(accepted: String, candidate: String, +threads: String, +gpu: String, +fo
 		+denominator : U32 <- IO.pure(U32,Maybe.default(&2,U32,U32.read(frames),0))
 		H.Host.require((denominator >= 1 : U32),"Measured frames must be positive")
 		samples : Samples <- Repeats(5n,False{},accepted,candidate,List.append(&2,String,
-			["--gpu",gpu,"--threads",threads,"--","--renderer","dda","--fork-depth",fork,"--bench",frames],Args.shared(extra)),frames,denominator,Samples{Nil{},Nil{}})
+			["+RTS","--gpu",gpu,"--threads",threads,"-RTS","--renderer","dda","--fork-depth",fork,"--bench",frames],Args.shared(extra)),frames,denominator,Samples{Nil{},Nil{}})
 		Report(output,samples)
 
 def Args(args: List<String>) -> IO(Unit):

@@ -6,7 +6,7 @@ Run the editable Light Atelier sculpture court in a native window. The default s
 
 ## Run the slice
 
-Use upstream Bend 2.0.37. Run `bend update` to install the latest release. Native GPU builds require the compiler and SDK for the available Bend execution lane. On Linux, install `libx11-dev` for the window.
+Use upstream [Bend 2.0.39](https://github.com/bendlang/bend/releases/tag/v2.0.39). Run `bend update` to install the latest release and `bend version` to check the installed version. Native GPU builds require the compiler and SDK for the available Bend execution lane. On Linux, install `libx11-dev` for the window.
 
 ```sh
 	make
@@ -16,9 +16,11 @@ Use upstream Bend 2.0.37. Run `bend update` to install the latest release. Nativ
 `make run` uses CPU rendering with Bend's default worker count, the logical CPU count. The native Atelier workload ran faster on CPU than GPU on the development machine. Override the execution lane and worker count through `RUN_ARGS`:
 
 ```sh
-	make run RUN_ARGS='--gpu on'
-	make run RUN_ARGS='--gpu off --threads 4'
+	make run RUN_ARGS='+RTS --gpu on -RTS'
+	make run RUN_ARGS='+RTS --gpu off --threads 4 -RTS'
 ```
+
+Bend 2.0.39 reads runtime options between `+RTS` and `-RTS`. Put application options such as `--cube` and `--dump` outside that block.
 
 Use these controls:
 
@@ -47,13 +49,13 @@ Engine callers can fill or paint the existing body with named materials:
 To run on the CPU, disable GPU dispatch through Bend's runtime option:
 
 ```sh
-	./build/bend-voxel-rewrite --gpu off
+	./build/bend-voxel-rewrite +RTS --gpu off -RTS
 ```
 
 To require the available GPU lane, force GPU execution:
 
 ```sh
-	./build/bend-voxel-rewrite --gpu on
+	./build/bend-voxel-rewrite +RTS --gpu on -RTS
 ```
 
 Keep `build/bend-voxel-rewrite.gpu` beside the executable. On the development Linux machine, the CUDA SDK is at `/opt/cuda`. The Makefile detects that path at the build boundary. To use a different SDK path, set `CUDA_HOME`:
@@ -70,13 +72,13 @@ Run the formal laws, geometry reference cases, and complete CPU/GPU image compar
 	make test
 ```
 
-Validation uses formal laws, actual engine geometry, real renderer exports, and native UI evidence. First-party validation includes no traditional test suites. The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. `make lighting` compares every sun-depth texel against an occupied-cell ray reference, checks daylight ramps and self-shadow prevention, validates every compressed illumination sample, verifies camera cache reuse, and compares opposite-view CPU/GPU exports. `make materials` checks the palette's runtime properties and exports all four materials on CPU and GPU under `build/materials`. `make images` forces both `--gpu off` and `--gpu on` across four tile and fork configurations. Native UI checks cover flight, brush targeting, capture, and lifecycle behavior.
+Validation uses formal laws, actual engine geometry, real renderer exports, and native UI evidence. First-party validation includes no traditional test suites. The geometry reference check is written in Bend and compares complete cell and face sets, including materials. Run it separately with `make geometry`. `make lighting` compares every sun-depth texel against an occupied-cell ray reference, checks daylight ramps and self-shadow prevention, validates every compressed illumination sample, verifies camera cache reuse, and compares opposite-view CPU/GPU exports. `make materials` checks the palette's runtime properties and exports all four materials on CPU and GPU under `build/materials`. `make images` forces both `+RTS --gpu off -RTS` and `+RTS --gpu on -RTS` across four tile and fork configurations. Native UI checks cover flight, brush targeting, capture, and lifecycle behavior.
 
 To compare images on a machine without a GPU, run the CPU cases:
 
 ```sh
 	make build/image-checker
-	./build/image-checker --gpu off -- --cpu-only
+	./build/image-checker +RTS --gpu off -RTS --cpu-only
 ```
 
 The checker reserves a fresh directory under `build/image-check` for each renderer dispatch and reads its new `render.ppm`. A zero-exit renderer that writes no file fails. Every complete 512x512 export must match the fixed full-scene or cut-scene RGB SHA-256 golden. Exact CPU variant and CPU/GPU comparisons run separately from the golden check. The sample pixels and 9,779-pixel destruction delta remain required. Read [the golden update procedure](docs/verification.md#update-the-image-goldens) before changing expected hashes.
@@ -85,13 +87,13 @@ The checker resolves the repository from its executable path, so absolute or rel
 
 The parser accepts the renderer's unsigned ASCII P3 format with literal `P3 512 512 255` header tokens and exactly 786,432 channels in 0..255. ASCII whitespace and leading zeros in channels are accepted. PPM comments, signed values, digit underscores, and Unicode digits are rejected.
 
-The native window checks use upstream Bend 2.0.37 and pinned BendHub packages for [window references](https://hub.bend-lang.com/0x8cc463a65f479c5af6b3080035eb0836) and [window capture](https://hub.bend-lang.com/0xfdc8da256837fef81553ec8530fb7431). Input and lifecycle checks use [bend-ui-test](https://github.com/aivv73/bend-ui-test), pinned as the `deps/bend-ui-test` submodule. Initialize the dependency and run:
+The native window checks use upstream Bend 2.0.39 and pinned BendHub packages for [window references](https://hub.bend-lang.com/0x3d4f2512cce00e5099d03d9e1b3b9ae1) and [window capture](https://hub.bend-lang.com/0x493e83fed22415cb35e84da752fefdef). Input and lifecycle checks use [bend-ui-test](https://github.com/aivv73/bend-ui-test), pinned as the `deps/bend-ui-test` submodule. Initialize the dependency and run:
 
 ```sh
 	git submodule update --init --recursive
 	make ui
-	./build/ui-check --gpu off -- --output .audit/screenshots/cpu
-	./build/ui-check --gpu on -- --close-method window --output .audit/screenshots/window-close
+	./build/ui-check +RTS --gpu off -RTS --output .audit/screenshots/cpu
+	./build/ui-check +RTS --gpu on -RTS --close-method window --output .audit/screenshots/window-close
 ```
 
 The GPU target saves native PPM screenshots in `.audit/screenshots/ui`. The CPU command saves them in `.audit/screenshots/cpu`.
@@ -107,8 +109,8 @@ The packages' native effects use Bend runtime internals. After updating Bend, ru
 Write the geometry view to a deterministic PPM file. These exports omit the interactive hover preview:
 
 ```sh
-	./build/bend-voxel-rewrite --gpu on --dump build/full.ppm
-	./build/bend-voxel-rewrite --gpu on --cut --dump build/destroyed.ppm
+	./build/bend-voxel-rewrite +RTS --gpu on -RTS --dump build/full.ppm
+	./build/bend-voxel-rewrite +RTS --gpu on -RTS --cut --dump build/destroyed.ppm
 ```
 
 ## Measure native frames
@@ -122,7 +124,7 @@ Measure displayed frames with cached scenes and scripted destruction and reset:
 The Bend command records sequential CPU and GPU measurements in `build/benchmark.json`. Each child opens a native window and excludes eight warm-up frames. CPU thread counts and GPU work decomposition are measured separately. The default CPU counts are one, half the logical system processors, and all logical system processors, with duplicate defaults removed. Override the workload and CPU counts through the built benchmark:
 
 ```sh
-	./build/benchmark --gpu off -- --frames 120 --repeats 3 --cpu-threads 1 4 8
+	./build/benchmark +RTS --gpu off -RTS --frames 120 --repeats 3 --cpu-threads 1 4 8
 ```
 
 Samples measure elapsed integer milliseconds divided by measured frames, in ms/frame, with 53-bit binary precision. The median selects the middle sample for an odd count and averages the two middle samples for an even count. Progress rounds the stored sample to exactly three fractional digits with ties to even. Report numbers retain the full stored precision. Repeated thread entries run repeated measurements and share one report row. Each alternate repeat reverses the complete configuration list.
@@ -134,7 +136,7 @@ The benchmark resolves its repository from the canonical executable or script pa
 To choose a work decomposition, set both depths:
 
 ```sh
-	./build/bend-voxel-rewrite --gpu on --tile-depth 6 --fork-depth 6 --bench 120
+	./build/bend-voxel-rewrite +RTS --gpu on -RTS --tile-depth 6 --fork-depth 6 --bench 120
 ```
 
 The default tile and fork depths are both six. Native daylight measurements selected that configuration for the available CPU and GPU lanes.
@@ -145,8 +147,8 @@ For native frame attribution and steady cached FPS, build the phase driver:
 
 ```sh
 	make build/frame-profile
-	./build/frame-profile --gpu off -- --frames 12
-	./build/frame-profile --gpu off -- --bench 24
+	./build/frame-profile +RTS --gpu off -RTS --frames 12
+	./build/frame-profile +RTS --gpu off -RTS --bench 24
 ```
 
 `--frames` reports initialization stages, cached rendering, hover preview, flight, cut, and reset. It separates model updates, rendering, presentation, and image disposal. Initialization is reconstructed for attribution, so use its stage times as diagnostics. `--bench` measures cached frames in a native window after eight warm-up frames, with initialization excluded. It keeps the camera fixed and performs no edits. The production renderer's `--bench` includes cut and reset. Both consume and dispose of every rendered image.
@@ -159,11 +161,11 @@ Build the independent voxel-traversal renderer and compare every image ray with 
 
 ```sh
 	make dda
-	./build/dda-compare --gpu off --threads 1 -- --verify
-	./build/dda-compare --gpu off --threads 1 -- --verify-steps
-	./build/dda-compare --gpu off -- --renderer dda --dump build/dda.ppm
+	./build/dda-compare +RTS --gpu off --threads 1 -RTS --verify
+	./build/dda-compare +RTS --gpu off --threads 1 -RTS --verify-steps
+	./build/dda-compare +RTS --gpu off -RTS --renderer dda --dump build/dda.ppm
 	make build/dda-benchmark
-	./build/dda-benchmark --gpu off --threads 12 -- --frames 12 --repeats 5 --label cpu-12 --output build/dda-comparison.tsv
+	./build/dda-benchmark +RTS --gpu off --threads 12 -RTS --frames 12 --repeats 5 --label cpu-12 --output build/dda-comparison.tsv
 ```
 
 The comparison includes the production renderer and a version of the existing face renderer with shadows omitted to match minimal DDA shading. Read [the DDA comparison](docs/dda-comparison.md) for scope, validation, images, and measurements. The default DDA crosses compressed uniform regions. [DDA region traversal](docs/dda-optimization.md) compares the upstream world representations and explains the optimization. [The region DDA profile](docs/dda-profile.md) records cumulative CPU costs, actual work counters, and one rejected search optimization. [Corrected event counting](docs/dda-estimate.md) replaces that baseline's binary search with a bounded estimate and exact plane correction, with repeated CPU12 gains and separate GPU measurements. Add `--steps` to the benchmark to include the unit-step reference.
