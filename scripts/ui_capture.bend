@@ -1,5 +1,5 @@
 import Base
-import 0xfdc8da256837fef81553ec8530fb7431/capture.bend as NativeCapture
+import 0x493e83fed22415cb35e84da752fefdef/capture.bend as NativeCapture
 
 def Capture.pixel(read: Array<U32> & U32) -> Array<U32> & Image:
 	(pixels, color) = read

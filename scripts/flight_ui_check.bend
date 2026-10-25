@@ -1,6 +1,6 @@
 import Base
-import 0xfdc8da256837fef81553ec8530fb7431/capture.bend as NativeCapture
-import 0x8cc463a65f479c5af6b3080035eb0836/winref.bend as W
+import 0x493e83fed22415cb35e84da752fefdef/capture.bend as NativeCapture
+import 0x3d4f2512cce00e5099d03d9e1b3b9ae1/winref.bend as W
 import ../main.bend as App
 import ../render.bend as R
 import ../dump.bend as D

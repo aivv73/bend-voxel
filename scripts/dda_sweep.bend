@@ -35,8 +35,8 @@ def Execution.read(text: String, threads: U32) -> Result<&2,&2,String,Execution>
 
 def Execution.argv(execution: Execution) -> List<&2,String>:
 	match execution:
-		case Cpu{threads}: ["--gpu","off","--threads",U32.show(threads),"--"]
-		case GpuRequested{threads}: ["--gpu","on","--threads",U32.show(threads),"--"]
+		case Cpu{threads}: ["+RTS","--gpu","off","--threads",U32.show(threads),"-RTS"]
+		case GpuRequested{threads}: ["+RTS","--gpu","on","--threads",U32.show(threads),"-RTS"]
 
 def Execution.name(execution: Execution) -> String:
 	match execution:

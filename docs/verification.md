@@ -1,8 +1,22 @@
 # Slice verification
 
-`make test` reruns both formal gates, the real geometry reference, and actual renderer CPU/GPU comparisons. First-party validation includes no traditional test suites. `make ui` verifies real native input and screenshots with upstream Bend 2.0.37 and pinned window packages. `make benchmark` measures native displayed frames.
+`make test` reruns both formal gates, the real geometry reference, and actual renderer CPU/GPU comparisons. First-party validation includes no traditional test suites. `make ui` verifies real native input and screenshots with upstream Bend 2.0.39 and pinned window packages. `make benchmark` measures native displayed frames.
 
-## Bend 2.0.37 compatibility
+## Bend 2.0.39 compatibility
+
+The project targets upstream [Bend 2.0.39](https://github.com/bendlang/bend/releases/tag/v2.0.39). Run `bend update` and confirm the installation with `bend version`.
+
+The UI checks pin window references 0.1.0.1 at `0x3d4f2512cce00e5099d03d9e1b3b9ae1/winref.bend` and capture 0.1.0.1 at `0x493e83fed22415cb35e84da752fefdef/capture.bend`. The `bend-ui-test` submodule pins commit `e69912c`, which imports the same reference package. Initialize it with `git submodule update --init --recursive`.
+
+The capture update replaces the removed native `term_buf` call with Bend 2.0.39's `term_blk` array representation. The previous capture package fails native compilation on this compiler. Rebuild the bridges after upgrading with `make -B test` and `make -B ui`.
+
+Runtime options now belong between `+RTS` and `-RTS`, for example `./build/bend-voxel-rewrite +RTS --gpu off --threads 4 -RTS --cube`. The Makefile and Bend subprocess drivers use this form so lane and thread selections reach the runtime rather than the application parser.
+
+Validation on Bend 2.0.39 passed `make -B test`, including both proof gates, exact geometry, material and lighting properties, and all sixteen CPU/GPU renderer exports against the existing goldens. No golden images changed.
+
+Native UI, flight, and brush checks passed on both CPU and GPU under Xvfb. Both UI close methods passed, and ordinary UI and brush screenshots matched exactly between lanes. Logs are in `.audit/bend-2.0.39`, with captures in `.audit/screenshots/bend-2.0.39`. The isolated display avoids visibility and focus interference from the shared desktop.
+
+## Bend 2.0.37 compatibility history
 
 The UI checks import window references from `0x8cc463a65f479c5af6b3080035eb0836/winref.bend` and capture from `0xfdc8da256837fef81553ec8530fb7431/capture.bend`. The `bend-ui-test` submodule pins commit `38f058e`, which uses the same reference package. Bend verifies the content hashes when resolving these imports.
 
@@ -44,7 +58,7 @@ After selecting depth six, two more ordinary UI runs verified the new defaults o
 
 `make geometry` compiles and runs both Bend programs. The check compares every occupied coordinate and material, every face direction and material, and the reported and emitted face counts. It also checks known surface counts, that the cut is a proper subset, and that repeating the cut preserves geometry. The parser rejects duplicate cells or cases, malformed records, missing counts, and unterminated cases; emitted face counts expose duplicate faces.
 
-To check a saved candidate dump, run `./build/reference-check --gpu off -- --input path/to/dump.txt`. To select a candidate executable, use `--binary path/to/geometry-dump`. The default executable path is relative to the project root. Candidate runs have a 30-second timeout and a 1 MiB output limit. These geometry checks are runtime assertions, not formal proofs.
+To check a saved candidate dump, run `./build/reference-check +RTS --gpu off -RTS --input path/to/dump.txt`. To select a candidate executable, use `--binary path/to/geometry-dump`. The default executable path is relative to the project root. Candidate runs have a 30-second timeout and a 1 MiB output limit. These geometry checks are runtime assertions, not formal proofs.
 
 The checker passed all twelve cases on native CPU and Bun JavaScript execution, using the same native candidate executable. A tail-recursive line splitter handles the complete dump on both targets. Native execution also rejected twenty negative probes, covering changed materials, missing or duplicate faces, incorrect counts, malformed input, duplicate or missing cases, incomplete output, and a failed candidate process.
 
@@ -124,7 +138,7 @@ A clean recursive clone fetched the pinned library and built the UI checker. Its
 `make ui` checks Escape. To check the window close event, run the built test:
 
 ```sh
-	./build/ui-check --gpu on -- --close-method window --output .audit/screenshots/window-close
+	./build/ui-check +RTS --gpu on -RTS --close-method window --output .audit/screenshots/window-close
 ```
 
 The development machine exercised the current Linux GPU lane. Metal and future WebGPU lanes have not been tested in this slice. Core code uses Bend types and parallel calls rather than backend-specific operations.

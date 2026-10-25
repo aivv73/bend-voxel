@@ -237,7 +237,7 @@ def Config.order(reverse: Bool, +configs: List<&2, Config>) -> List<&2, Config>:
 
 def Config.args(config: Config, frames: U32) -> List<String>:
 	Config{gpu, threads, tile, fork} = config
-	["--gpu", gpu, "--threads", U32.show(threads), "--tile-depth", U32.show(tile), "--fork-depth", U32.show(fork), "--bench", U32.show(frames)]
+	["+RTS", "--gpu", gpu, "--threads", U32.show(threads), "-RTS", "--tile-depth", U32.show(tile), "--fork-depth", U32.show(fork), "--bench", U32.show(frames)]
 
 def Rows.contains_tail(rows: List<&2, Row>, +config: Config, found: Bool) -> Bool:
 	match rows found:
