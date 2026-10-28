@@ -116,3 +116,18 @@ test: proof geometry materials lighting images
 
 clean:
 	rm -rf build
+
+.PHONY: vulkan vulkan-run vulkan-proof vulkan-verify
+
+vulkan:
+	mkdir -p vulkan/build
+	cd vulkan && $(BEND) examples/voxel_interactive.bend -o build/voxel-interactive
+
+vulkan-run: vulkan
+	cd vulkan && ./build/voxel-interactive $(RUN_ARGS)
+
+vulkan-proof:
+	$(BEND) vulkan/PROOF.bend
+
+vulkan-verify:
+	python3 vulkan/tools/verify.py

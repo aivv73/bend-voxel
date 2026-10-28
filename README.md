@@ -4,6 +4,21 @@ Run the editable Light Atelier sculpture court in a native window. The default s
 
 ![Light Atelier sculpture court](docs/atelier.png)
 
+## Vulkan renderer
+
+The native Vulkan renderer lives in [vulkan/](vulkan/README.md), alongside the
+existing Bend-native renderer. It uses the same voxel world and reference modules.
+
+```sh
+git submodule update --init --recursive deps/bend-vulkan
+make vulkan
+make vulkan-run
+```
+
+Use `make vulkan-proof` for its laws and `make vulkan-verify` for its real-runtime
+acceptance suite. Vulkan rendering needs Bend 2.0.39, Clang, Vulkan headers/driver,
+and X11 for the interactive window; it does not require CUDA.
+
 ## Run the slice
 
 Use upstream [Bend 2.0.39](https://github.com/bendlang/bend/releases/tag/v2.0.39). Run `bend update` to install the latest release and `bend version` to check the installed version. Native GPU builds require the compiler and SDK for the available Bend execution lane. On Linux, install `libx11-dev` for the window.

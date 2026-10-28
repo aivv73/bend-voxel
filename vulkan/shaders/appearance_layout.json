@@ -1,0 +1,90 @@
+{
+  "bytes": 2336,
+  "words": 584,
+  "fields": [
+    {
+      "name": "camera_clip",
+      "kind": "mat4",
+      "count": 1,
+      "offset": 0,
+      "size": 64
+    },
+    {
+      "name": "light_clip",
+      "kind": "mat4",
+      "count": 1,
+      "offset": 64,
+      "size": 64
+    },
+    {
+      "name": "eye_near",
+      "kind": "vec4",
+      "count": 1,
+      "offset": 128,
+      "size": 16
+    },
+    {
+      "name": "camera_right",
+      "kind": "vec4",
+      "count": 1,
+      "offset": 144,
+      "size": 16
+    },
+    {
+      "name": "camera_up",
+      "kind": "vec4",
+      "count": 1,
+      "offset": 160,
+      "size": 16
+    },
+    {
+      "name": "camera_forward_focal",
+      "kind": "vec4",
+      "count": 1,
+      "offset": 176,
+      "size": 16
+    },
+    {
+      "name": "viewport",
+      "kind": "vec4",
+      "count": 1,
+      "offset": 192,
+      "size": 16
+    },
+    {
+      "name": "brush_cm",
+      "kind": "vec4",
+      "count": 1,
+      "offset": 208,
+      "size": 16
+    },
+    {
+      "name": "flags",
+      "kind": "uvec4",
+      "count": 1,
+      "offset": 224,
+      "size": 16
+    },
+    {
+      "name": "palette",
+      "kind": "vec4",
+      "count": 5,
+      "offset": 240,
+      "size": 80
+    },
+    {
+      "name": "shadow_params",
+      "kind": "vec4",
+      "count": 1,
+      "offset": 320,
+      "size": 16
+    },
+    {
+      "name": "selected",
+      "kind": "uvec4",
+      "count": 125,
+      "offset": 336,
+      "size": 2000
+    }
+  ]
+}
