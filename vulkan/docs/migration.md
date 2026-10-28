@@ -9,7 +9,7 @@ unchanged. Vulkan-specific laws and proofs remain in `vulkan/LAWS.bend` and
 `vulkan/PROOF.bend`; `make vulkan-proof` checks them separately.
 
 The Vulkan library is a submodule at `deps/bend-vulkan`, pinned to
-`341c79110343187189a1cd8b6693323625562b5d`. That commit removes the library's reverse
+`753f8f49549b6eb17c6e609346fed5a580bdc8a1`. That commit removes the library's reverse
 bend-voxel dependency. Its nested bend-collections pin supplies the same U64
 implementation to both the API and this renderer. Publish the library commit
 before publishing a consumer commit that references it.
